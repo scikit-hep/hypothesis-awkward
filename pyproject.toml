@@ -3,22 +3,48 @@ name = "hypothesis-awkward"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "Tai Sakuma", email = "tai.sakuma@gmail.com" }
-]
+authors = [{ name = "Tai Sakuma", email = "tai.sakuma@gmail.com" }]
 requires-python = ">=3.10"
-dependencies = [
-    "awkward>=2.8.9",
-    "hypothesis>=6.142.1",
-]
+dependencies = ["awkward>=2.8.9", "hypothesis>=6.142.1"]
 
 [build-system]
 requires = ["uv_build>=0.9.3,<0.10.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
-dev = [
-    "mypy>=1.18.2",
-    "pytest>=8.4.2",
-    "ruff>=0.14.1",
+dev = ["mypy>=1.18.2", "pytest>=8.4.2", "pytest-cov>=7.0.0", "ruff>=0.14.1"]
+
+[tool.pytest.ini_options]
+addopts = """
+--doctest-modules
+--doctest-glob='*.md'
+"""
+doctest_optionflags = ["ELLIPSIS"]
+filterwarnings = ["ignore::hypothesis.errors.NonInteractiveExampleWarning"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "I", # isort
 ]
+ignore = [
+    "E501", # line too long
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["awkward"]
+
+[tool.ruff.format]
+quote-style = "preserve"
+indent-style = "space"
+
+
+[[tool.mypy.overrides]]
+module = ["awkward.*"]
+ignore_missing_imports = true
