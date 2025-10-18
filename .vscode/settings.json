@@ -1,0 +1,15 @@
+{
+  "[markdown]": {
+    "editor.rulers": [80]
+  },
+  "[python]": {
+    "editor.rulers": [89],
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "markdownlint.config": {
+    "MD033": false,
+    "MD036": false,
+    "MD041": false
+  }
+}
