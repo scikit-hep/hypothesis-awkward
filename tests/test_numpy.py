@@ -113,7 +113,6 @@ def test_numpy_arrays(data: st.DataObject) -> None:
             a.to_numpy()
 
 
-# @pytest.mark.skip
 @given(data=st.data())
 def test_from_numpy(data: st.DataObject) -> None:
     # Draw options
