@@ -1,13 +1,11 @@
 from functools import partial
-from typing import TypeVar
+from typing import Any, TypeAlias
 
 import numpy as np
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
 import awkward as ak
-
-T = TypeVar('T', bound=np.generic)
 
 # NOTE: `datetime64[us]` isn't entirely safe. For example, a value with the year zero is
 # coerced to `int`: `np.datetime64('0000-12-31').item() = -719163`.
@@ -46,8 +44,8 @@ def builtin_safe_dtypes() -> st.SearchStrategy[np.dtype]:
 
 
 def items_from_dtype(
-    dtype: np.dtype[T], allow_nan: bool = False
-) -> st.SearchStrategy[T]:
+    dtype: np.dtype, allow_nan: bool = False
+) -> st.SearchStrategy[Any]:
     '''Strategy for Python built-in type values for a given NumPy dtype.
 
     Parameters
@@ -72,10 +70,13 @@ def items_from_dtype(
     # This could happen for `datetime64` and `timedelta64` dtypes.
 
 
+NestedList: TypeAlias = 'list[Any | NestedList]'
+
+
 @st.composite
 def lists(
     draw: st.DrawFn, allow_nan: bool = False, max_size: int = 5, max_depth: int = 5
-) -> list:
+) -> NestedList:
     '''Strategy for nested Python lists for which Awkward Arrays can be created.
 
     Parameters
