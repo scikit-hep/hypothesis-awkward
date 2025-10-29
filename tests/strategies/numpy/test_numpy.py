@@ -7,7 +7,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
-from hypothesis_awkward.util import _dtype_kinds
+from hypothesis_awkward.util import simple_dtype_kinds_in
 
 
 class NumpyArraysKwargs(TypedDict, total=False):
@@ -68,7 +68,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
                 return False
 
     if dtype is not None and not isinstance(dtype, st.SearchStrategy):
-        kinds = _dtype_kinds(n.dtype)
+        kinds = simple_dtype_kinds_in(n.dtype)
         assert len(kinds) == 1
         assert dtype.kind in kinds
 

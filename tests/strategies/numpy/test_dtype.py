@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
-from hypothesis_awkward.util import _dtype_kinds
+from hypothesis_awkward.util import simple_dtype_kinds_in
 
 
 @given(name=st_ak.supported_dtype_names())
@@ -46,8 +46,6 @@ def numpy_dtypes_kwargs(draw: st.DrawFn) -> NumpyDtypesKwargs:
     return kwargs
 
 
-
-
 @given(data=st.data())
 def test_numpy_dtypes(data: st.DataObject) -> None:
     # Draw options
@@ -61,7 +59,7 @@ def test_numpy_dtypes(data: st.DataObject) -> None:
     allow_array = kwargs.get('allow_array', True)
 
     if dtype is not None and not isinstance(dtype, st.SearchStrategy):
-        kinds = _dtype_kinds(result)
+        kinds = simple_dtype_kinds_in(result)
         assert len(kinds) == 1
         assert dtype.kind in kinds
     if not allow_array:
