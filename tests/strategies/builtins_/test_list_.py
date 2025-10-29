@@ -9,24 +9,6 @@ import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 
 
-@given(data=st.data())
-def test_items_from_dtype(data: st.DataObject) -> None:
-    dtype = data.draw(st_ak.builtin_safe_dtypes(), label='dtype')
-    item = data.draw(st_ak.items_from_dtype(dtype), label='item')
-
-    def _to_dtype_to_item(dtype: np.dtype, item: Any) -> Any:
-        if dtype.kind == 'M':  # datetime64
-            # datetime64 requires the unit.
-            unit, _ = np.datetime_data(dtype)
-            n = dtype.type(item, unit)
-            assert not isinstance(item, int)
-        else:
-            n = dtype.type(item)
-        return n.item()
-
-    assert _to_dtype_to_item(dtype, item) == item
-
-
 class ListsKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
