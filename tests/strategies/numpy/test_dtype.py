@@ -6,8 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
-
-from .util import _dtype_kinds
+from hypothesis_awkward.util import _dtype_kinds
 
 
 @given(name=st_ak.supported_dtype_names())
