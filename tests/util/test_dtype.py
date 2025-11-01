@@ -1,9 +1,10 @@
 import numpy as np
-from hypothesis import given
+from hypothesis import given, note
 
 import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util import (
     SUPPORTED_DTYPES,
+    n_scalars_in,
     simple_dtype_kinds_in,
     simple_dtypes_in,
 )
@@ -48,3 +49,25 @@ def test_simple_dtype_kinds_in(d: np.dtype) -> None:
         assert _is_kind_in(k, d)
     for k in ALL_SIMPLE_DTYPE_KINDS - kinds:
         assert not _is_kind_in(k, d)
+
+
+@given(dtype=st_ak.numpy_dtypes())
+def test_n_scalars_in(dtype: np.dtype) -> None:
+    num = n_scalars_in(dtype)
+    note(f'{num=}')
+
+    zeros = np.zeros((), dtype=dtype)
+    note(f'{zeros=}')
+
+    def _flatten(x: np.ndarray) -> list:
+        kind = x.dtype.kind
+        match kind:
+            case 'V':
+                return [i for n in x.dtype.names for i in _flatten(x[n])]
+            case _:
+                return x.flatten().tolist()
+
+    flat = _flatten(zeros)
+    note(f'{flat=}')
+
+    assert len(flat) == num
