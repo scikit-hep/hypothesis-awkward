@@ -1,3 +1,4 @@
+import math
 from typing import TypedDict, cast
 
 import numpy as np
@@ -16,6 +17,7 @@ class NumpyArraysKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_structured: bool
     allow_nan: bool
+    max_size: int
 
 
 def numpy_arrays_kwargs() -> st.SearchStrategy[NumpyArraysKwargs]:
@@ -30,6 +32,7 @@ def numpy_arrays_kwargs() -> st.SearchStrategy[NumpyArraysKwargs]:
             ),
             'allow_structured': st.booleans(),
             'allow_nan': st.booleans(),
+            'max_size': st.integers(min_value=0, max_value=100),
         },
     ).map(lambda d: cast(NumpyArraysKwargs, d))
 
@@ -47,11 +50,15 @@ def test_numpy_arrays(data: st.DataObject) -> None:
     dtype = kwargs.get('dtype', None)
     allow_structured = kwargs.get('allow_structured', True)
     allow_nan = kwargs.get('allow_nan', False)
+    max_size = kwargs.get('max_size', 10)
 
     if dtype is not None and not isinstance(dtype, st.SearchStrategy):
         kinds = simple_dtype_kinds_in(n.dtype)
         assert len(kinds) == 1
         assert dtype.kind in kinds
+
+    size = math.prod(n.shape)
+    assert size <= max_size
 
     structured = n.dtype.names is not None
     has_nan = any_nan_nat_in_numpy_array(n)
