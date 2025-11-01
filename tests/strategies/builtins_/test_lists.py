@@ -2,7 +2,7 @@ import math
 from typing import Any, TypedDict
 
 import numpy as np
-from hypothesis import given, note
+from hypothesis import given, note, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -13,7 +13,6 @@ class ListsKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
     max_size: int
-    max_depth: int
 
 
 @st.composite
@@ -33,14 +32,12 @@ def lists_kwargs(draw: st.DrawFn) -> ListsKwargs:
         kwargs['allow_nan'] = draw(st.booleans())
 
     if draw(st.booleans()):
-        kwargs['max_size'] = draw(st.integers(min_value=0, max_value=5))
-
-    if draw(st.booleans()):
-        kwargs['max_depth'] = draw(st.integers(min_value=1, max_value=5))
+        kwargs['max_size'] = draw(st.integers(min_value=1, max_value=25))
 
     return kwargs
 
 
+@settings(max_examples=200)
 @given(data=st.data())
 def test_lists(data: st.DataObject) -> None:
     # Draw options
@@ -52,8 +49,7 @@ def test_lists(data: st.DataObject) -> None:
     # Assert the options were effective
     dtype = kwargs.get('dtype', None)
     allow_nan = kwargs.get('allow_nan', False)
-    max_size = kwargs.get('max_size', 5)
-    max_depth = kwargs.get('max_depth', 5)
+    max_size = kwargs.get('max_size', 10)
 
     def _is_nan(x: Any) -> bool:
         if x is None:
@@ -65,26 +61,18 @@ def test_lists(data: st.DataObject) -> None:
             return math.isnan(x)
         return False
 
-    def _examine(l: list) -> tuple[bool, int, int, set[type]]:
-        '''Return (has_nan, max_size, depth, types) of the list `l`.'''
-        if not isinstance(l, list):
-            is_nan = _is_nan(l)
-            type_l = {type(l)} if not is_nan else set()
-            return (is_nan, 0, 0, type_l)
-        has_nan = False
-        size = len(l)  # max length of lists
-        depth = 1
-        types = set()
-        for item in l:
-            h, s, d, t = _examine(item)
-            has_nan = has_nan or h
-            size = max(size, s)
-            depth = max(depth, d + 1)
-            types.update(t)
-        return (has_nan, size, depth, types)
+    def _flatten(l: list) -> Any:
+        for i in l:
+            if isinstance(i, list):
+                yield from _flatten(i)
+            else:
+                yield i
 
-    has_nan, size, depth, types = _examine(l)
-    note(f'{has_nan=}, {size=}, {depth=}, {types=}')
+    flat = list(_flatten(l))
+    has_nan = any(_is_nan(x) for x in flat)
+    size = len(flat)
+    types = {type(x) for x in flat if not _is_nan(x)}
+    note(f'{has_nan=}, {max_size=}, {types=}')
 
     assert len(types) <= 1  # All same type unless empty
 
@@ -96,7 +84,6 @@ def test_lists(data: st.DataObject) -> None:
     if not allow_nan:
         assert not has_nan
     assert size <= max_size
-    assert depth <= max_depth
 
     # Assert an Awkward Array can be created.
     a = ak.Array(l)

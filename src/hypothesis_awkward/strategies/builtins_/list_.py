@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Any, TypeAlias
 
 import numpy as np
@@ -16,8 +15,7 @@ def lists(
     draw: st.DrawFn,
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
     allow_nan: bool = False,
-    max_size: int = 5,
-    max_depth: int = 5,
+    max_size: int = 10,
 ) -> NestedList:
     '''Strategy for nested Python lists for which Awkward Arrays can be created.
 
@@ -29,9 +27,7 @@ def lists(
     allow_nan
         Generate potentially `NaN` for relevant dtypes if `True`.
     max_size
-        Maximum length of any list at any level of nesting.
-    max_depth
-        Maximum depth of nested lists.
+        Maximum total number of items (non-lists) in the entire nested list.
 
     Examples
     --------
@@ -46,18 +42,19 @@ def lists(
     if isinstance(dtype, st.SearchStrategy):
         dtype = draw(dtype)
     items = items_from_dtype(dtype, allow_nan=allow_nan)
-    extend = partial(st.lists, max_size=max_size)
-    max_leaves = max_depth - 1  # `-1` for the outermost `extend`
-    if max_leaves <= 0:
-        return draw(extend(items))
-    return draw(extend(st.recursive(base=items, extend=extend, max_leaves=max_leaves)))
+    if max_size <= 0:
+        return draw(st.just([]))
+    return draw(
+        st.recursive(base=items, extend=st.lists, max_leaves=max_size).map(
+            lambda x: [x] if not isinstance(x, list) else x
+        )
+    )
 
 
 def from_list(
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
     allow_nan: bool = False,
-    max_size: int = 5,
-    max_depth: int = 5,
+    max_size: int = 10,
 ) -> st.SearchStrategy[ak.Array]:
     '''Strategy for Awkward Arrays created from Python lists.
 
@@ -69,9 +66,7 @@ def from_list(
     allow_nan
         Generate potentially `NaN` for relevant dtypes if `True`.
     max_size
-        Maximum length of any list at any level of nesting.
-    max_depth
-        Maximum depth of nested lists.
+        Maximum total number of items (non-lists) in the entire nested list.
 
     Examples
     --------
@@ -80,6 +75,5 @@ def from_list(
 
     '''
     return st.builds(
-        ak.Array,
-        lists(dtype=dtype, allow_nan=allow_nan, max_size=max_size, max_depth=max_depth),
+        ak.Array, lists(dtype=dtype, allow_nan=allow_nan, max_size=max_size)
     )

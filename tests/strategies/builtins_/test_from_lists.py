@@ -1,18 +1,18 @@
 from typing import TypedDict
 
 import numpy as np
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward.util import any_nan_nat_in_numpy_array
 
 
 class FromListsKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
     max_size: int
-    max_depth: int
 
 
 @st.composite
@@ -32,14 +32,12 @@ def from_lists_kwargs(draw: st.DrawFn) -> FromListsKwargs:
         kwargs['allow_nan'] = draw(st.booleans())
 
     if draw(st.booleans()):
-        kwargs['max_size'] = draw(st.integers(min_value=0, max_value=5))
-
-    if draw(st.booleans()):
-        kwargs['max_depth'] = draw(st.integers(min_value=1, max_value=5))
+        kwargs['max_size'] = draw(st.integers(min_value=0, max_value=25))
 
     return kwargs
 
 
+@settings(max_examples=200)
 @given(data=st.data())
 def test_from_list(data: st.DataObject) -> None:
     # Draw options
@@ -48,3 +46,21 @@ def test_from_list(data: st.DataObject) -> None:
     # Call the test subject
     a = data.draw(st_ak.from_list(**kwargs), label='a')
     assert isinstance(a, ak.Array)
+
+    # Assert the options were effective
+    dtype = kwargs.get('dtype', None)
+    allow_nan = kwargs.get('allow_nan', False)
+    max_size = kwargs.get('max_size', 10)
+
+    n_flat = ak.flatten(a, axis=None).to_numpy()
+
+    types = {type(x) for x in n_flat}
+    assert len(types) <= 1  # All same type unless empty
+    if isinstance(dtype, np.dtype) and types:
+        assert dtype.type in types
+
+    has_nan = any_nan_nat_in_numpy_array(n_flat)
+    if not allow_nan:
+        assert not has_nan
+
+    assert len(n_flat) <= max_size
