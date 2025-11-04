@@ -1,6 +1,6 @@
 import sys
 from functools import partial
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, cast
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -59,31 +59,32 @@ class RangesKwargs(TypedDict, Generic[T], total=False):
 def ranges_kwargs(
     draw: st.DrawFn, st_: StMinMaxValuesFactory[T] | None = None
 ) -> RangesKwargs[T]:
-    st_ = st_ or st.integers  # type: ignore
-    kwargs = RangesKwargs[T]()
+    if st_ is None:
+        st_ = st.integers  # type: ignore
 
     min_start, max_start = draw(min_max_starts(st_=st_))  # type: ignore
-    if min_start is not None:
-        kwargs['min_start'] = min_start
-    if max_start is not None:
-        kwargs['max_start'] = max_start
-
     min_end, max_end = draw(min_max_ends(st_=st_, min_start=min_start))  # type: ignore
-    if min_end is not None:
-        kwargs['min_end'] = min_end
-    if max_end is not None:
-        kwargs['max_end'] = max_end
 
-    if draw(st.booleans()):
-        kwargs['allow_start_none'] = draw(st.booleans())
-    if draw(st.booleans()):
-        kwargs['allow_end_none'] = draw(st.booleans())
-    if draw(st.booleans()):
-        kwargs['allow_equal'] = draw(st.booleans())
-    if draw(st.booleans()):
-        kwargs['let_end_none_if_start_none'] = draw(st.booleans())
+    drawn = (
+        ('min_start', min_start),
+        ('max_start', max_start),
+        ('min_end', min_end),
+        ('max_end', max_end),
+    )
 
-    return kwargs
+    kwargs = draw(
+        st.fixed_dictionaries(
+            {k: st.just(v) for k, v in drawn if v is not None},
+            optional={
+                'allow_start_none': st.booleans(),
+                'allow_end_none': st.booleans(),
+                'let_end_none_if_start_none': st.booleans(),
+                'allow_equal': st.booleans(),
+            },
+        )
+    )
+
+    return cast(RangesKwargs[T], kwargs)
 
 
 st_floats = partial(st.floats, allow_nan=False, allow_infinity=False)
