@@ -13,6 +13,7 @@ class DictsForDataFrameKwargs(TypedDict, total=False):
     '''Options for `dicts_for_dataframe()` strategy.'''
 
     max_columns: int
+    min_rows: int
     max_rows: int
     allow_none: bool
     allow_list: bool
@@ -20,19 +21,28 @@ class DictsForDataFrameKwargs(TypedDict, total=False):
     allow_empty: bool
 
 
-def dicts_for_dataframe_kwargs() -> st.SearchStrategy[DictsForDataFrameKwargs]:
+@st.composite
+def dicts_for_dataframe_kwargs(draw: st.DrawFn) -> DictsForDataFrameKwargs:
     '''Strategy for options for `dicts_for_dataframe()` strategy.'''
-    return st.fixed_dictionaries(
-        {},
-        optional={
-            'max_columns': st.integers(min_value=1, max_value=6),
-            'max_rows': st.integers(min_value=0, max_value=6),
-            'allow_none': st.booleans(),
-            'allow_list': st.booleans(),
-            'allow_nested': st.booleans(),
-            'allow_empty': st.booleans(),
-        },
-    ).map(lambda d: cast(DictsForDataFrameKwargs, d))
+
+    min_rows, max_rows = draw(st_ak.ranges(min_start=0, max_end=6))
+
+    drawn = (('min_rows', min_rows), ('max_rows', max_rows))
+
+    kwargs = draw(
+        st.fixed_dictionaries(
+            {k: st.just(v) for k, v in drawn if v is not None},
+            optional={
+                'max_columns': st.integers(min_value=1, max_value=6),
+                'allow_none': st.booleans(),
+                'allow_list': st.booleans(),
+                'allow_nested': st.booleans(),
+                'allow_empty': st.booleans(),
+            },
+        )
+    )
+
+    return cast(DictsForDataFrameKwargs, kwargs)
 
 
 @given(data=st.data())
@@ -45,7 +55,8 @@ def test_dicts_for_dataframe(data: st.DataObject) -> None:
 
     # Assert the options were effective
     max_columns = kwargs.get('max_columns', 4)
-    max_rows = kwargs.get('max_rows', 5)
+    min_rows = kwargs.get('min_rows', 0)
+    max_rows = kwargs.get('max_rows', min_rows + 5)
     allow_none = kwargs.get('allow_none', True)
     allow_list = kwargs.get('allow_list', True)
     allow_nested = kwargs.get('allow_nested', True)
@@ -77,7 +88,7 @@ def test_dicts_for_dataframe(data: st.DataObject) -> None:
     n_rows = {len(r) for r in dict_.values()}
     assert len(n_rows) <= 1
     if n_rows:
-        assert n_rows.pop() <= max_rows
+        assert min_rows <= n_rows.pop() <= max_rows
 
     if not allow_none:
         assert not _has_none(dict_.values())

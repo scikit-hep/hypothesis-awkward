@@ -10,7 +10,8 @@ import hypothesis_awkward.strategies as st_ak
 def dicts_for_dataframe(
     draw: st.DrawFn,
     max_columns: int = 4,
-    max_rows: int = 5,
+    min_rows: int = 0,
+    max_rows: int | None = None,
     allow_none: bool = True,
     allow_list: bool = True,
     allow_nested: bool = True,
@@ -22,6 +23,9 @@ def dicts_for_dataframe(
     ----------
     max_columns
         Maximum number of keys in the dict.
+    min_rows
+        Minimum size of each list, a value of the dict. All values are lists of the same
+        size.
     max_rows
         Maximum size of each list, a value of the dict. All values are lists of the same
         size.
@@ -35,6 +39,9 @@ def dicts_for_dataframe(
         When list elements are lists, those lists may be empty if `True`.
 
     '''
+    if max_rows is None:
+        max_rows = max(5, min_rows + 5)
+
     st_column_names = st.text(alphabet=string.ascii_letters, max_size=3)
     column_names = draw(
         st.lists(st_column_names, min_size=1, max_size=max_columns, unique=True)
@@ -60,7 +67,7 @@ def dicts_for_dataframe(
             max_leaves=20,
         )
 
-    n_rows = draw(st.integers(min_value=0, max_value=max_rows))
+    n_rows = draw(st.integers(min_value=min_rows, max_value=max_rows))
     st_rows = partial(st.lists, min_size=n_rows, max_size=n_rows)
     mapping = {n: st_rows(draw(st_row_items)) for n in column_names}
     return draw(st.fixed_dictionaries(mapping))
