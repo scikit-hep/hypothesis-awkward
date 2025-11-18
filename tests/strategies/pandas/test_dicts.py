@@ -1,12 +1,20 @@
 from collections.abc import Iterable
-from typing import Any, TypedDict, cast
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
-import pandas as pd
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
+
+if TYPE_CHECKING:
+    import pandas
+else:
+    from types import ModuleType as pandas
+
+
+pd = cast(pandas, pytest.importorskip("pandas"))
 
 
 class DictsForDataFrameKwargs(TypedDict, total=False):
