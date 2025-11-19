@@ -29,9 +29,11 @@ dependencies = ["awkward>=2.8", "hypothesis>=6.147"]
 [project.optional-dependencies]
 pandas = ["pandas>=2.3"]
 arrow = ["pyarrow>=22.0"]
+all = ["hypothesis-awkward[pandas,arrow]"]
 
 [dependency-groups]
 dev = ["mypy>=1.18", "pytest>=9.0", "pytest-cov>=7.0", "ruff>=0.14.1"]
+print = ["rich>=14.2", "icecream>=2.1"]
 
 [tool.hatch.version]
 source = "regex_commit"
