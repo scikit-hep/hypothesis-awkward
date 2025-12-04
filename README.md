@@ -5,6 +5,9 @@ _Hypothesis strategies for Awkward Arrays._
 [![PyPI - Version](https://img.shields.io/pypi/v/hypothesis-awkward.svg)](https://pypi.org/project/hypothesis-awkward)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hypothesis-awkward.svg)](https://pypi.org/project/hypothesis-awkward)
 
+[![Test Status](https://github.com/TaiSakuma/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg)](https://github.com/nextline-dev/apluggy/actions/workflows/unit-test.yml)
+[![codecov](https://codecov.io/gh/TaiSakuma/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3)](https://codecov.io/gh/TaiSakuma/hypothesis-awkward)
+
 [Hypothesis](https://hypothesis.works/) is a _property-based testing_ library.
 Its
 [_strategies_](https://hypothesis.readthedocs.io/en/latest/reference/strategies.html)
