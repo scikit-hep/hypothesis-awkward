@@ -106,6 +106,6 @@ of layouts. It is probably possible to build strategies that generate fully
 general Awkward Arrays with the [_array
 builder_](https://awkward-array.org/doc/2.8/user-guide/how-to-create-arraybuilder.html)
 and [_direct
-constructions_](https://awkward-array.org/doc/2.8/user-guide/how-to-create-constructors.html),
-which would be useful for closing all edge cases in developing tools that use
+constructors_](https://awkward-array.org/doc/2.8/user-guide/how-to-create-constructors.html),
+which would be useful for closing rare edge cases in developing tools that use
 Awkward Array and even Awkward Array itself.
