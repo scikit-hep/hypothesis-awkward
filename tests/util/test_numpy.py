@@ -57,7 +57,7 @@ def test_any_nan_nat_in_numpy_array(data: st.DataObject) -> None:
 def test_draw_nan() -> None:
     '''Assert that arrays with NaN can be drawn by default.'''
     find(
-        st_np.arrays(dtype=st_np.array_dtypes(), shape=st_np.array_shapes()),
+        st_np.arrays(dtype=st_np.nested_dtypes(), shape=st_np.array_shapes()),
         lambda a: _has_nan_nat_via_iteration(a),
         settings=settings(phases=[Phase.generate]),
     )
