@@ -9,7 +9,7 @@ from hypothesis_awkward.util import any_nan_nat_in_numpy_array
 
 
 def _is_nan(val: object) -> bool:
-    '''Check if a single value is NaN.'''
+    '''Check if val contains any NaN.'''
     stack: list[object] = [val]
     while stack:
         v = stack.pop()
@@ -28,7 +28,7 @@ def _is_nan(val: object) -> bool:
 
 
 def _is_nat(val: object) -> bool:
-    '''Check if a single value is NaT.'''
+    '''Check if val contains any NaT.'''
     stack: list[object] = [val]
     while stack:
         v = stack.pop()
