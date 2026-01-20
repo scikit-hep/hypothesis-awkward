@@ -77,3 +77,4 @@ doctest support for examples in docstrings and markdown files.
 ## Code Style
 
 - Use single quotes (`'''`) for docstrings.
+- Prefer single quotes (`'`) for strings.
