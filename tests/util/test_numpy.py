@@ -21,9 +21,10 @@ def _is_nan_nat(val: object) -> bool:
             if _is_nan_nat(item):
                 return True
     elif isinstance(val, np.void):
-        for field in val.dtype.names:
-            if _is_nan_nat(val[field]):
-                return True
+        if val.dtype.names is not None:
+            for field in val.dtype.names:
+                if _is_nan_nat(val[field]):
+                    return True
     return False
 
 
@@ -36,7 +37,8 @@ def _is_nan(val: object) -> bool:
     elif isinstance(val, np.ndarray):
         return any(_is_nan(item) for item in val.flat)
     elif isinstance(val, np.void):
-        return any(_is_nan(val[field]) for field in val.dtype.names)
+        if val.dtype.names is not None:
+            return any(_is_nan(val[field]) for field in val.dtype.names)
     return False
 
 
@@ -47,7 +49,8 @@ def _is_nat(val: object) -> bool:
     elif isinstance(val, np.ndarray):
         return any(_is_nat(item) for item in val.flat)
     elif isinstance(val, np.void):
-        return any(_is_nat(val[field]) for field in val.dtype.names)
+        if val.dtype.names is not None:
+            return any(_is_nat(val[field]) for field in val.dtype.names)
     return False
 
 
