@@ -16,6 +16,10 @@ def _is_nan_nat(val: object) -> bool:
         return math.isnan(val)
     elif isinstance(val, (np.datetime64, np.timedelta64)):
         return np.isnat(val)
+    elif isinstance(val, np.ndarray):
+        for item in val.flat:
+            if _is_nan_nat(item):
+                return True
     elif isinstance(val, np.void):
         for field in val.dtype.names:
             if _is_nan_nat(val[field]):
@@ -37,7 +41,7 @@ def test_any_nan_nat_in_numpy_array(data: st.DataObject) -> None:
     allow_nan = data.draw(st.booleans())
     n = data.draw(
         st_np.arrays(
-            dtype=st_np.scalar_dtypes(),
+            dtype=st_np.nested_dtypes(),
             shape=st_np.array_shapes(),
             elements={'allow_nan': allow_nan},
         )
