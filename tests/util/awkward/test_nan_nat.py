@@ -61,16 +61,13 @@ def _has_nan_nat_via_iteration(a: ak.Array) -> bool:
 def _has_nan_via_iteration(a: ak.Array) -> bool:
     '''Check for NaN by iterating over underlying numpy arrays.'''
     for arr in _iter_numpy_arrays(a.layout):
-        if arr.dtype.kind not in {'f', 'c'}:
-            continue
-        for val in arr.flat:
-            match val:
-                case complex() | np.complexfloating():
-                    if math.isnan(val.real) or math.isnan(val.imag):
-                        return True
-                case float() | np.floating():
-                    if math.isnan(val):
-                        return True
+        match arr.dtype.kind:
+            case 'c':
+                if any(math.isnan(val.real) or math.isnan(val.imag) for val in arr.flat):
+                    return True
+            case 'f':
+                if any(math.isnan(val) for val in arr.flat):
+                    return True
     return False
 
 
