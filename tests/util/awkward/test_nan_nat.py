@@ -22,7 +22,7 @@ def st_arrays(
     '''Tentative strategy for Awkward Arrays (combines from_numpy and from_list).'''
     return st.one_of(
         st_ak.from_numpy(dtype=dtype, allow_nan=allow_nan, max_size=max_size),
-        # st_ak.from_list(dtype=dtype, allow_nan=allow_nan, max_size=max_size),
+        st_ak.from_list(dtype=dtype, allow_nan=allow_nan, max_size=max_size),
     )
 
 
@@ -124,5 +124,15 @@ def _iter_numpy_arrays(
             case ak.contents.RecordArray():
                 for field in content.fields:
                     stack.append(content[field])
+            case ak.contents.EmptyArray():
+                pass
+            case (
+                ak.contents.IndexedOptionArray()
+                | ak.contents.ListOffsetArray()
+                | ak.contents.UnmaskedArray()
+            ):
+                stack.append(content.content)
+            case ak.contents.UnionArray():
+                stack.extend(content.contents)
             case _:
                 raise TypeError(f'Unexpected content type: {type(content)}')
