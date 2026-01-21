@@ -7,7 +7,11 @@ from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
-from hypothesis_awkward.util import any_nan_nat_in_awkward_array
+from hypothesis_awkward.util import (
+    any_nan_in_awkward_array,
+    any_nan_nat_in_awkward_array,
+    any_nat_in_awkward_array,
+)
 
 
 def st_arrays(
@@ -30,6 +34,32 @@ def test_any_nan_nat_in_awkward_array(data: st.DataObject) -> None:
     actual = any_nan_nat_in_awkward_array(a)
     if allow_nan:
         expected = _has_nan_nat_via_iteration(a)
+    else:
+        expected = False
+    assert actual == expected
+
+
+@given(data=st.data())
+def test_any_nan_in_awkward_array(data: st.DataObject) -> None:
+    '''Verify result matches element-by-element iteration.'''
+    allow_nan = data.draw(st.booleans())
+    a = data.draw(st_arrays(allow_nan=allow_nan))
+    actual = any_nan_in_awkward_array(a)
+    if allow_nan:
+        expected = _has_nan_via_iteration(a)
+    else:
+        expected = False
+    assert actual == expected
+
+
+@given(data=st.data())
+def test_any_nat_in_awkward_array(data: st.DataObject) -> None:
+    '''Verify result matches element-by-element iteration.'''
+    allow_nan = data.draw(st.booleans())
+    a = data.draw(st_arrays(allow_nan=allow_nan))
+    actual = any_nat_in_awkward_array(a)
+    if allow_nan:
+        expected = _has_nat_via_iteration(a)
     else:
         expected = False
     assert actual == expected

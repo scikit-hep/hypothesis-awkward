@@ -1,5 +1,7 @@
 __all__ = [
+    'any_nan_in_awkward_array',
     'any_nan_nat_in_awkward_array',
+    'any_nat_in_awkward_array',
     'SUPPORTED_DTYPES',
     'SUPPORTED_DTYPE_NAMES',
     'n_scalars_in',
@@ -13,7 +15,11 @@ __all__ = [
     'safe_min',
 ]
 
-from .awkward import any_nan_nat_in_awkward_array
+from .awkward import (
+    any_nan_in_awkward_array,
+    any_nan_nat_in_awkward_array,
+    any_nat_in_awkward_array,
+)
 from .dtype import (
     SUPPORTED_DTYPE_NAMES,
     SUPPORTED_DTYPES,
