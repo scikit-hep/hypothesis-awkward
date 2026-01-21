@@ -29,7 +29,7 @@ def test_any_nan_nat_in_numpy_array(data: st.DataObject) -> None:
     )
     actual = any_nan_nat_in_numpy_array(n)
     if allow_nan:
-        expected = _has_nan_nat_via_iteration(n)
+        expected = _expected_any_nan_nat(n)
     else:
         expected = False
     assert actual == expected
@@ -47,7 +47,7 @@ def test_any_nan_in_numpy_array(data: st.DataObject) -> None:
         )
     )
     actual = any_nan_in_numpy_array(n)
-    expected = _has_nan_via_iteration(n) if allow_nan else False
+    expected = _expected_any_nan(n) if allow_nan else False
     assert actual == expected
 
 
@@ -63,7 +63,7 @@ def test_any_nat_in_numpy_array(data: st.DataObject) -> None:
         )
     )
     actual = any_nat_in_numpy_array(n)
-    expected = _has_nat_via_iteration(n) if allow_nan else False
+    expected = _expected_any_nat(n) if allow_nan else False
     assert actual == expected
 
 
@@ -71,7 +71,7 @@ def test_draw_nan() -> None:
     '''Assert that arrays with NaN can be drawn by default.'''
     find(
         st_np.arrays(dtype=st_np.nested_dtypes(), shape=st_np.array_shapes()),
-        lambda a: _has_nan_via_iteration(a),
+        _expected_any_nan,
         settings=settings(phases=[Phase.generate]),
     )
 
@@ -80,18 +80,18 @@ def test_draw_nat() -> None:
     '''Assert that arrays with NaT can be drawn by default.'''
     find(
         st_np.arrays(dtype=st_np.nested_dtypes(), shape=st_np.array_shapes()),
-        lambda a: _has_nat_via_iteration(a),
+        _expected_any_nat,
         settings=settings(phases=[Phase.generate]),
     )
 
 
-def _has_nan_nat_via_iteration(n: np.ndarray) -> bool:
+def _expected_any_nan_nat(n: np.ndarray) -> bool:
     '''Check if array contains any NaN or NaT.'''
-    return _has_nan_via_iteration(n) or _has_nat_via_iteration(n)
+    return _expected_any_nan(n) or _expected_any_nat(n)
 
 
-def _has_nan_via_iteration(n: np.ndarray) -> bool:
-    '''Check for NaN by iterating over flattened array.'''
+def _expected_any_nan(n: np.ndarray) -> bool:
+    '''Check if array contains any NaN.'''
     for val in n.flat:
         assert isinstance(val, (float, complex, np.generic, np.ndarray))
         if _is_nan(val):
@@ -99,8 +99,8 @@ def _has_nan_via_iteration(n: np.ndarray) -> bool:
     return False
 
 
-def _has_nat_via_iteration(n: np.ndarray) -> bool:
-    '''Check for NaT by iterating over flattened array.'''
+def _expected_any_nat(n: np.ndarray) -> bool:
+    '''Check if array contains any NaT.'''
     for val in n.flat:
         assert isinstance(val, (float, complex, np.generic, np.ndarray))
         if _is_nat(val):

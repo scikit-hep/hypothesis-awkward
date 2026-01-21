@@ -21,7 +21,7 @@ def test_any_nan_nat_in_awkward_array(data: st.DataObject) -> None:
     a = data.draw(st_arrays(allow_nan=allow_nan))
     actual = any_nan_nat_in_awkward_array(a)
     if allow_nan:
-        expected = _has_nan_nat_via_iteration(a)
+        expected = _expected_any_nan_nat(a)
     else:
         expected = False
     assert actual == expected
@@ -34,7 +34,7 @@ def test_any_nan_in_awkward_array(data: st.DataObject) -> None:
     a = data.draw(st_arrays(allow_nan=allow_nan))
     actual = any_nan_in_awkward_array(a)
     if allow_nan:
-        expected = _has_nan_via_iteration(a)
+        expected = _expected_any_nan(a)
     else:
         expected = False
     assert actual == expected
@@ -47,7 +47,7 @@ def test_any_nat_in_awkward_array(data: st.DataObject) -> None:
     a = data.draw(st_arrays(allow_nan=allow_nan))
     actual = any_nat_in_awkward_array(a)
     if allow_nan:
-        expected = _has_nat_via_iteration(a)
+        expected = _expected_any_nat(a)
     else:
         expected = False
     assert actual == expected
@@ -57,7 +57,7 @@ def test_draw_nan() -> None:
     '''Assert that arrays with NaN can be drawn.'''
     find(
         st_arrays(),
-        _has_nan_via_iteration,
+        _expected_any_nan,
         settings=settings(max_examples=10000, phases=[Phase.generate]),
     )
 
@@ -66,22 +66,24 @@ def test_draw_nat() -> None:
     '''Assert that arrays with NaT can be drawn.'''
     find(
         st_arrays(),
-        _has_nat_via_iteration,
+        _expected_any_nat,
         settings=settings(max_examples=10000, phases=[Phase.generate]),
     )
 
 
-def _has_nan_nat_via_iteration(a: ak.Array) -> bool:
+def _expected_any_nan_nat(a: ak.Array) -> bool:
     '''Check if array contains any NaN or NaT.'''
-    return _has_nan_via_iteration(a) or _has_nat_via_iteration(a)
+    return _expected_any_nan(a) or _expected_any_nat(a)
 
 
-def _has_nan_via_iteration(a: ak.Array) -> bool:
-    '''Check for NaN by iterating over underlying numpy arrays.'''
+def _expected_any_nan(a: ak.Array) -> bool:
+    '''Check if array contains any NaN.'''
     for arr in iter_numpy_arrays(a):
         match arr.dtype.kind:
             case 'c':
-                if any(math.isnan(val.real) or math.isnan(val.imag) for val in arr.flat):
+                if any(
+                    math.isnan(val.real) or math.isnan(val.imag) for val in arr.flat
+                ):
                     return True
             case 'f':
                 if any(math.isnan(val) for val in arr.flat):
@@ -89,8 +91,8 @@ def _has_nan_via_iteration(a: ak.Array) -> bool:
     return False
 
 
-def _has_nat_via_iteration(a: ak.Array) -> bool:
-    '''Check for NaT by iterating over underlying numpy arrays.'''
+def _expected_any_nat(a: ak.Array) -> bool:
+    '''Check if array contains any NaT.'''
     for arr in iter_numpy_arrays(a):
         if arr.dtype.kind not in {'m', 'M'}:
             continue
