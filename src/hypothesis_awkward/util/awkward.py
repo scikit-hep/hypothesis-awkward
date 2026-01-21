@@ -83,6 +83,16 @@ def any_nan_in_awkward_array(
                 arr = item.data
                 if arr.dtype.kind in {'f', 'c'} and np.any(np.isnan(arr)):
                     return True
+            case ak.contents.EmptyArray():
+                pass
+            case (
+                ak.contents.IndexedOptionArray()
+                | ak.contents.ListOffsetArray()
+                | ak.contents.UnmaskedArray()
+            ):
+                stack.append(item.content)
+            case ak.contents.UnionArray():
+                stack.extend(item.contents)
             case _:
                 raise TypeError(f'Unexpected type: {type(item)}')
     return False
@@ -129,6 +139,16 @@ def any_nat_in_awkward_array(
                 arr = item.data
                 if arr.dtype.kind in {'m', 'M'} and np.any(np.isnat(arr)):
                     return True
+            case ak.contents.EmptyArray():
+                pass
+            case (
+                ak.contents.IndexedOptionArray()
+                | ak.contents.ListOffsetArray()
+                | ak.contents.UnmaskedArray()
+            ):
+                stack.append(item.content)
+            case ak.contents.UnionArray():
+                stack.extend(item.contents)
             case _:
                 raise TypeError(f'Unexpected type: {type(item)}')
     return False
