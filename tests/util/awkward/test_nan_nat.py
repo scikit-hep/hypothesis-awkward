@@ -75,10 +75,10 @@ def _has_nan_via_iteration(a: ak.Array) -> bool:
 def _has_nat_via_iteration(a: ak.Array) -> bool:
     '''Check for NaT by iterating over underlying numpy arrays.'''
     for arr in _iter_numpy_arrays(a.layout):
-        if arr.dtype.kind in {'m', 'M'}:
-            for val in arr.flat:
-                if np.isnat(val):
-                    return True
+        if arr.dtype.kind not in {'m', 'M'}:
+            continue
+        if any(np.isnat(val) for val in arr.flat):
+            return True
     return False
 
 
