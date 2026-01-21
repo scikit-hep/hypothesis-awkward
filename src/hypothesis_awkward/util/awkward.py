@@ -140,19 +140,39 @@ def iter_numpy_arrays(
     [dtype('float64'), dtype('int64')]
 
     '''
+    for content in iter_leaf_contents(a):
+        if isinstance(content, ak.contents.NumpyArray):
+            yield content.data
+
+
+def iter_leaf_contents(
+    a: ak.Array | ak.contents.Content,
+    /,
+) -> Iterator[ak.contents.EmptyArray | ak.contents.NumpyArray]:
+    '''Iterate over all leaf contents in an Awkward Array layout.
+
+    Parameters
+    ----------
+    a
+        An Awkward Array or Content.
+
+    Yields
+    ------
+    ak.contents.EmptyArray | ak.contents.NumpyArray
+        Each leaf content in the layout.
+
+    '''
     stack: list[ak.Array | ak.contents.Content] = [a]
     while stack:
         item = stack.pop()
         match item:
             case ak.Array():
                 stack.append(item.layout)
-            case ak.contents.NumpyArray():
-                yield item.data
+            case ak.contents.NumpyArray() | ak.contents.EmptyArray():
+                yield item
             case ak.contents.RecordArray():
                 for field in item.fields:
                     stack.append(item[field])
-            case ak.contents.EmptyArray():
-                pass
             case (
                 ak.contents.IndexedOptionArray()
                 | ak.contents.ListOffsetArray()
