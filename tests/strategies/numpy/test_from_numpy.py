@@ -8,6 +8,8 @@ import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util import any_nan_nat_in_awkward_array
 
+DEFAULT_MAX_SIZE = 10
+
 
 class FromNumpyKwargs(TypedDict, total=False):
     '''Options for `from_numpy()` strategy.'''
@@ -49,7 +51,7 @@ def test_from_numpy(data: st.DataObject) -> None:
     dtype = kwargs.get('dtype', None)
     allow_structured = kwargs.get('allow_structured', True)
     allow_nan = kwargs.get('allow_nan', False)
-    max_size = kwargs.get('max_size', 10)
+    max_size = kwargs.get('max_size', DEFAULT_MAX_SIZE)
 
     def _leaf_dtypes(a: ak.Array) -> set[np.dtype]:
         '''Dtypes of leaf NumPy arrays contained in `a`.'''
