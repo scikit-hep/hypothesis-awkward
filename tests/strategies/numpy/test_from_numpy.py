@@ -10,6 +10,7 @@ from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
+    iter_numpy_arrays,
 )
 
 DEFAULT_MAX_SIZE = 10
@@ -17,20 +18,7 @@ DEFAULT_MAX_SIZE = 10
 
 def _leaf_dtypes(a: ak.Array) -> set[np.dtype]:
     '''Dtypes of leaf NumPy arrays contained in `a`.'''
-    dtypes: set[np.dtype] = set()
-
-    def _visitor(layout):
-        match layout:
-            case ak.contents.NumpyArray():
-                dtypes.add(layout.data.dtype)
-            case ak.contents.RecordArray():
-                for c in layout.contents:
-                    _visitor(c)
-            case _:
-                raise TypeError(f'Unexpected type: {type(layout)}')
-
-    _visitor(a.layout)
-    return dtypes
+    return {arr.dtype for arr in iter_numpy_arrays(a)}
 
 
 def _is_structured(a: ak.Array) -> bool:
@@ -44,21 +32,7 @@ def _is_structured(a: ak.Array) -> bool:
 
 def _size(a: ak.Array) -> int:
     '''Total size of all leaf NumPy arrays contained in `a`.'''
-    ret = 0
-
-    def _visitor(layout):
-        nonlocal ret
-        match layout:
-            case ak.contents.NumpyArray():
-                ret += layout.data.size
-            case ak.contents.RecordArray():
-                for c in layout.contents:
-                    _visitor(c)
-            case _:
-                raise TypeError(f'Unexpected type: {type(layout)}')
-
-    _visitor(a.layout)
-    return ret
+    return sum(arr.size for arr in iter_numpy_arrays(a))
 
 
 class FromNumpyKwargs(TypedDict, total=False):
