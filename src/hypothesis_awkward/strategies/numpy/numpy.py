@@ -49,10 +49,17 @@ def numpy_arrays(
     )
     dtype_size = n_scalars_in(dtype)
     max_size = max_size // dtype_size
+    average_size = max_size // 2
+
+    # Empty arrays must be generated separately because st_np.array_shapes() requires
+    # min_side >= 1 by default. The probability of generating an empty array is set to
+    # P(empty) = 1 / (1 + average_size), matching Hypothesis st.lists() behavior. For
+    # max_size=10: average_size=5, P(empty) = 1/6 ≈ 16.7%
+    empty = max_size <= 0 or draw(st.integers(min_value=0, max_value=average_size)) == 0
 
     shape: tuple[int, ...]
-    if max_size <= 0:
-        shape = draw(st.just((0,)))
+    if empty:
+        shape = (0,)
     else:
         max_side = draw(st.integers(min_value=1, max_value=max_size))
         if max_side == 1:
