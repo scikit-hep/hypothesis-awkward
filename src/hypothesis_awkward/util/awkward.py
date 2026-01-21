@@ -1,3 +1,5 @@
+from collections.abc import Iterator
+
 import numpy as np
 
 import awkward as ak
@@ -70,31 +72,9 @@ def any_nan_in_awkward_array(
     True
 
     '''
-    stack: list[ak.Array | ak.contents.Content] = [a]
-    while stack:
-        item = stack.pop()
-        match item:
-            case ak.Array():
-                stack.append(item.layout)
-            case ak.contents.RecordArray():
-                for field in item.fields:
-                    stack.append(item[field])
-            case ak.contents.NumpyArray():
-                arr = item.data
-                if arr.dtype.kind in {'f', 'c'} and np.any(np.isnan(arr)):
-                    return True
-            case ak.contents.EmptyArray():
-                pass
-            case (
-                ak.contents.IndexedOptionArray()
-                | ak.contents.ListOffsetArray()
-                | ak.contents.UnmaskedArray()
-            ):
-                stack.append(item.content)
-            case ak.contents.UnionArray():
-                stack.extend(item.contents)
-            case _:
-                raise TypeError(f'Unexpected type: {type(item)}')
+    for arr in iter_numpy_arrays(a):
+        if arr.dtype.kind in {'f', 'c'} and np.any(np.isnan(arr)):
+            return True
     return False
 
 
@@ -126,19 +106,51 @@ def any_nat_in_awkward_array(
     False
 
     '''
+    for arr in iter_numpy_arrays(a):
+        if arr.dtype.kind in {'m', 'M'} and np.any(np.isnat(arr)):
+            return True
+    return False
+
+
+def iter_numpy_arrays(
+    a: ak.Array | ak.contents.Content,
+    /,
+) -> Iterator[np.ndarray]:
+    '''Iterate over all NumPy arrays in an Awkward Array layout.
+
+    Parameters
+    ----------
+    a
+        An Awkward Array or Content.
+
+    Yields
+    ------
+    np.ndarray
+        Each underlying NumPy array in the layout.
+
+    Examples
+    --------
+
+    >>> a = ak.Array([[1.0, 2.0], [3.0]])
+    >>> list(iter_numpy_arrays(a))
+    [array([1., 2., 3.])]
+
+    >>> a = ak.Array([{'x': 1, 'y': 2.0}, {'x': 3, 'y': 4.0}])
+    >>> sorted([arr.dtype for arr in iter_numpy_arrays(a)], key=str)
+    [dtype('float64'), dtype('int64')]
+
+    '''
     stack: list[ak.Array | ak.contents.Content] = [a]
     while stack:
         item = stack.pop()
         match item:
             case ak.Array():
                 stack.append(item.layout)
+            case ak.contents.NumpyArray():
+                yield item.data
             case ak.contents.RecordArray():
                 for field in item.fields:
                     stack.append(item[field])
-            case ak.contents.NumpyArray():
-                arr = item.data
-                if arr.dtype.kind in {'m', 'M'} and np.any(np.isnat(arr)):
-                    return True
             case ak.contents.EmptyArray():
                 pass
             case (
@@ -150,5 +162,4 @@ def any_nat_in_awkward_array(
             case ak.contents.UnionArray():
                 stack.extend(item.contents)
             case _:
-                raise TypeError(f'Unexpected type: {type(item)}')
-    return False
+                raise TypeError(f'Unexpected content type: {type(item)}')

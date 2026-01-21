@@ -2,6 +2,7 @@ __all__ = [
     'any_nan_in_awkward_array',
     'any_nan_nat_in_awkward_array',
     'any_nat_in_awkward_array',
+    'iter_numpy_arrays',
     'SUPPORTED_DTYPES',
     'SUPPORTED_DTYPE_NAMES',
     'n_scalars_in',
@@ -19,6 +20,7 @@ from .awkward import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
+    iter_numpy_arrays,
 )
 from .dtype import (
     SUPPORTED_DTYPE_NAMES,

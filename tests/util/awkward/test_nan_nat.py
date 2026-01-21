@@ -1,29 +1,17 @@
 import math
-from collections.abc import Iterator
 
 import numpy as np
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
+    iter_numpy_arrays,
 )
-
-
-def st_arrays(
-    dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
-    allow_nan: bool = True,
-    max_size: int = 10,
-) -> st.SearchStrategy[ak.Array]:
-    '''Tentative strategy for Awkward Arrays (combines from_numpy and from_list).'''
-    return st.one_of(
-        st_ak.from_numpy(dtype=dtype, allow_nan=allow_nan, max_size=max_size),
-        st_ak.from_list(dtype=dtype, allow_nan=allow_nan, max_size=max_size),
-    )
+from tests.util.awkward.conftest import st_arrays
 
 
 @given(data=st.data())
@@ -90,7 +78,7 @@ def _has_nan_nat_via_iteration(a: ak.Array) -> bool:
 
 def _has_nan_via_iteration(a: ak.Array) -> bool:
     '''Check for NaN by iterating over underlying numpy arrays.'''
-    for arr in _iter_numpy_arrays(a.layout):
+    for arr in iter_numpy_arrays(a):
         match arr.dtype.kind:
             case 'c':
                 if any(math.isnan(val.real) or math.isnan(val.imag) for val in arr.flat):
@@ -103,36 +91,9 @@ def _has_nan_via_iteration(a: ak.Array) -> bool:
 
 def _has_nat_via_iteration(a: ak.Array) -> bool:
     '''Check for NaT by iterating over underlying numpy arrays.'''
-    for arr in _iter_numpy_arrays(a.layout):
+    for arr in iter_numpy_arrays(a):
         if arr.dtype.kind not in {'m', 'M'}:
             continue
         if any(np.isnat(val) for val in arr.flat):
             return True
     return False
-
-
-def _iter_numpy_arrays(
-    layout: ak.contents.Content,
-) -> Iterator[np.ndarray]:
-    '''Iterate over all numpy arrays in an awkward layout.'''
-    stack: list[ak.contents.Content] = [layout]
-    while stack:
-        content = stack.pop()
-        match content:
-            case ak.contents.NumpyArray():
-                yield content.data
-            case ak.contents.RecordArray():
-                for field in content.fields:
-                    stack.append(content[field])
-            case ak.contents.EmptyArray():
-                pass
-            case (
-                ak.contents.IndexedOptionArray()
-                | ak.contents.ListOffsetArray()
-                | ak.contents.UnmaskedArray()
-            ):
-                stack.append(content.content)
-            case ak.contents.UnionArray():
-                stack.extend(content.contents)
-            case _:
-                raise TypeError(f'Unexpected content type: {type(content)}')
