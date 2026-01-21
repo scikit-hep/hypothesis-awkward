@@ -16,6 +16,8 @@ from hypothesis_awkward.util import (
     simple_dtype_kinds_in,
 )
 
+DEFAULT_MAX_SIZE = 10
+
 
 class NumpyArraysKwargs(TypedDict, total=False):
     '''Options for `numpy_arrays()` strategy.'''
@@ -56,7 +58,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
     dtype = kwargs.get('dtype', None)
     allow_structured = kwargs.get('allow_structured', True)
     allow_nan = kwargs.get('allow_nan', False)
-    max_size = kwargs.get('max_size', 10)
+    max_size = kwargs.get('max_size', DEFAULT_MAX_SIZE)
 
     if dtype is not None and not isinstance(dtype, st.SearchStrategy):
         kinds = simple_dtype_kinds_in(n.dtype)
@@ -174,6 +176,6 @@ def test_draw_max_size() -> None:
     '''Assert that arrays with max_size elements can be drawn by default.'''
     find(
         st_ak.numpy_arrays(allow_structured=False),
-        lambda a: math.prod(a.shape) == 10,  # default max_size is 10
+        lambda a: math.prod(a.shape) == DEFAULT_MAX_SIZE,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
