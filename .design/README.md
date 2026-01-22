@@ -9,7 +9,8 @@ hypothesis-awkward.
 .design/
 ├── README.md          # This file
 ├── research/          # UX research interviews and findings
-└── api/               # API design proposals and decisions
+├── api/               # API design proposals and decisions
+└── impl/              # Implementation decisions (directory structure, internals)
 ```
 
 ## Purpose
@@ -20,7 +21,11 @@ hypothesis-awkward.
 - **api/**: Store API design proposals, alternatives considered, and final
   decisions with rationale.
 
+- **impl/**: Store implementation decisions that don't affect the user-facing API,
+  such as directory structure, module organization, and internal architecture.
+
 ## Naming Convention
 
 - Research files: `YYYY-MM-DD-ux-interview-NN.md`
 - API design files: `YYYY-MM-DD-<feature>-api.md`
+- Implementation files: `YYYY-MM-DD-<topic>.md`
