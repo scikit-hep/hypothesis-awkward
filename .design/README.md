@@ -5,7 +5,7 @@ hypothesis-awkward.
 
 ## Directory Structure
 
-```
+```text
 .design/
 ├── README.md          # This file
 ├── research/          # UX research interviews and findings

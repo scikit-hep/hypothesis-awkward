@@ -7,7 +7,7 @@
 
 Awkward Array has 10 type classes in `ak.types`:
 
-```
+```text
 Type (base class)
 ├── ArrayType      - Outermost wrapper with length (e.g., "5 * int64")
 ├── ScalarType     - Single element extracted from array
@@ -81,7 +81,7 @@ Datetime/timedelta support units: `datetime64[ns]`, `timedelta64[15us]`, etc.
 
 Types compose recursively. Common patterns in HEP:
 
-```
+```text
 # Simple array of integers
 int64
 
@@ -135,13 +135,13 @@ Example: `ListType` can be implemented by:
 
 Typical muon array type:
 
-```
+```text
 var * {pt: float64, eta: float64, phi: float64, mass: float64}
 ```
 
 With vector package registration:
 
-```
+```text
 var * Momentum4D[pt: float64, eta: float64, phi: float64, mass: float64]
 ```
 
