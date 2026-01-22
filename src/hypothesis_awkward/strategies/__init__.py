@@ -12,6 +12,7 @@ __all__ = [
     'supported_dtype_names',
     'supported_dtypes',
     'dicts_for_dataframe',
+    'numpy_types',
 ]
 
 from .builtins_ import (
@@ -29,3 +30,4 @@ from .numpy import (
     supported_dtypes,
 )
 from .pandas import dicts_for_dataframe
+from .types import numpy_types
