@@ -233,6 +233,36 @@ def types(max_depth: int = 3, ...):
     return st.one_of(*strategies)
 ```
 
+## Parameters
+
+`_parameters` is a `JSONMapping` (open-ended dict). None of the Layout, Form, or
+Type classes create parameters themselves -- they are always received at
+initialization and passed through. Parameters originate in builder logic (e.g.,
+the C++ `String` builder in `LayoutBuilder.h`).
+
+### Recognized keys
+
+| Key               | Purpose                                                                                     | Where it matters                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `__array__`       | Array kind: `"string"`, `"bytestring"`, `"char"`, `"byte"`, `"categorical"`, `"sorted_map"` | Layout validation, serialization, Arrow conversion, broadcasting |
+| `__record__`      | Custom record class name for behavior dispatch                                              | `RecordArray`, `_behavior.py`                                    |
+| `__list__`        | Custom list class name for behavior dispatch                                                | List types, `_behavior.py`                                       |
+| `__categorical__` | Marks indexed arrays as categorical                                                         | `IndexedArray`, `IndexedOptionArray`                             |
+| `__unit__`        | Datetime/timedelta unit string (e.g., `"ns"`)                                               | `NumpyType._str` display only                                    |
+
+### Where parameters matter
+
+- **Layout level**: drives validation, serialization, type conversion, behavior
+  dispatch, Arrow conversion
+- **Form level**: passed through to layouts (via `ak.from_buffers`) and to types
+  (via `.type` property)
+- **Type level**: display and equality comparison only
+
+### NumpyType-specific parameters
+
+Only `__array__` (values `"char"` or `"byte"`), `__unit__`, and `__categorical__`
+are relevant for `NumpyType`.
+
 ## Special Considerations
 
 ### String Types
