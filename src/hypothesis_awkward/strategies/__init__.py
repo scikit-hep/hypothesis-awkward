@@ -13,6 +13,7 @@ __all__ = [
     'supported_dtypes',
     'dicts_for_dataframe',
     'numpy_types',
+    'numpy_forms',
 ]
 
 from .builtins_ import (
@@ -21,6 +22,7 @@ from .builtins_ import (
     items_from_dtype,
     lists,
 )
+from .forms import numpy_forms
 from .misc import StMinMaxValuesFactory, none_or, ranges
 from .numpy import (
     from_numpy,
