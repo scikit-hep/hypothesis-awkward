@@ -12,7 +12,7 @@ T = TypeVar('T')
 
 
 class RecordDraws(st.SearchStrategy[T]):
-    '''Wrap a strategy to store a set of all drawn values.'''
+    '''Wrap a strategy to store all drawn values.'''
 
     def __init__(self, base: st.SearchStrategy[T]) -> None:
         super().__init__()
