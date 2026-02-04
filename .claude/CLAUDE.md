@@ -45,8 +45,12 @@ uv run ruff format src tests
     `numpy_arrays`, `numpy_dtypes`, `supported_dtypes`
   - `builtins_/` - Strategies for Awkward Arrays from Python lists: `from_list`,
     `lists`, `items_from_dtype`, `builtin_safe_dtypes`
+  - `constructors/` - Strategies via direct Content constructors: `arrays`
   - `pandas/` - Strategies related to pandas DataFrames: `dicts_for_dataframe`
-  - `misc/` - Utility strategies: `ranges`, `none_or`, `StMinMaxValuesFactory`
+  - `forms/` - (experimental) Strategies for Awkward Forms: `numpy_forms`
+  - `types/` - (experimental) Strategies for Awkward Types: `numpy_types`
+  - `misc/` - Utility strategies: `ranges`, `none_or`, `StMinMaxValuesFactory`,
+    `Opts`, `RecordDraws`
 
 - **`util/`** - Internal utilities for dtype handling, safe comparisons, and
   array introspection
