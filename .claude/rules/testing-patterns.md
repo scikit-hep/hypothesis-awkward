@@ -105,23 +105,14 @@ recorder as a value:
 ),
 ```
 
-Wrap kwargs in an `Opts` class with `reset()` to clear recorders between draws:
+Wrap kwargs in `st_ak.Opts[K]` with `reset()` to clear recorders between draws:
 
 ```python
-class NumpyFormsOpts:
-    '''Drawn options with resettable recorders.'''
-
-    def __init__(self, kwargs: NumpyFormsKwargs) -> None:
-        self._kwargs = kwargs
-
-    @property
-    def kwargs(self) -> NumpyFormsKwargs:
-        return self._kwargs
-
-    def reset(self) -> None:
-        for v in self._kwargs.values():
-            if isinstance(v, st_ak.RecordDraws):
-                v.drawn.clear()
+def numpy_forms_kwargs() -> st.SearchStrategy[st_ak.Opts[NumpyFormsKwargs]]:
+    return (
+        st.one_of(type_mode(), dtypes_mode())
+        .map(st_ak.Opts)
+    )
 ```
 
 In the test, call `reset()` before drawing and use `match` for assertions:
@@ -144,7 +135,8 @@ Key techniques:
 - `st_ak.RecordDraws` records values drawn from a wrapped strategy
 - `st.just(st_ak.RecordDraws(...))` passes the recorder itself as the kwarg
   value
-- `Opts.reset()` clears recorded values before each draw (avoids stale state)
+- `st_ak.Opts[K]` is a generic wrapper; `reset()` clears recorded values before
+  each draw (avoids stale state)
 - `match` / `case` distinguishes concrete values from `st_ak.RecordDraws` in
   assertions
 

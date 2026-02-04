@@ -1,8 +1,9 @@
-from typing import Protocol, TypeVar
+from typing import Any, Generic, Mapping, Protocol, TypeVar
 
 from hypothesis import strategies as st
 
 T = TypeVar('T')
+K = TypeVar('K', bound=Mapping[str, Any])
 
 
 class _DrawableData(Protocol):
@@ -31,3 +32,38 @@ class RecordDraws(st.SearchStrategy[T]):
         value = data.draw(self._base)
         self.drawn.append(value)
         return value
+
+
+class Opts(Generic[K]):
+    '''Drawn options with resettable recorders.
+
+    Wraps a kwargs dict that may contain ``RecordDraws`` values.
+    Call ``reset()`` before each draw of the strategy under test to
+    clear stale recorded values from previous Hypothesis attempts.
+    Within a single ``@given`` run, Hypothesis reuses the same
+    ``RecordDraws`` instances across attempts, so without ``reset()``
+    the ``drawn`` lists would accumulate values from earlier attempts.
+
+    Examples
+    --------
+    >>> recorder = RecordDraws(st.integers())
+    >>> opts = Opts({'values': recorder})
+    >>> _ = recorder.example()
+    >>> len(recorder.drawn) > 0
+    True
+    >>> opts.reset()
+    >>> recorder.drawn
+    []
+    '''
+
+    def __init__(self, kwargs: K) -> None:
+        self._kwargs = kwargs
+
+    @property
+    def kwargs(self) -> K:
+        return self._kwargs
+
+    def reset(self) -> None:
+        for v in self._kwargs.values():
+            if isinstance(v, RecordDraws):
+                v.drawn.clear()

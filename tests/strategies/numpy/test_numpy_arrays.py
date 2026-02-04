@@ -29,23 +29,7 @@ class NumpyArraysKwargs(TypedDict, total=False):
     max_size: int
 
 
-class NumpyArraysOpts:
-    '''Drawn options for `numpy_arrays()` with resettable recorders.'''
-
-    def __init__(self, kwargs: NumpyArraysKwargs) -> None:
-        self._kwargs = kwargs
-
-    @property
-    def kwargs(self) -> NumpyArraysKwargs:
-        return self._kwargs
-
-    def reset(self) -> None:
-        for v in self._kwargs.values():
-            if isinstance(v, st_ak.RecordDraws):
-                v.drawn.clear()
-
-
-def numpy_arrays_kwargs() -> st.SearchStrategy[NumpyArraysOpts]:
+def numpy_arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[NumpyArraysKwargs]]:
     '''Strategy for options for `numpy_arrays()` strategy.'''
     return (
         st.fixed_dictionaries(
@@ -63,7 +47,7 @@ def numpy_arrays_kwargs() -> st.SearchStrategy[NumpyArraysOpts]:
             },
         )
         .map(lambda d: cast(NumpyArraysKwargs, d))
-        .map(NumpyArraysOpts)
+        .map(st_ak.Opts[NumpyArraysKwargs])
     )
 
 

@@ -3,6 +3,7 @@ __all__ = [
     'from_list',
     'items_from_dtype',
     'lists',
+    'Opts',
     'RecordDraws',
     'StMinMaxValuesFactory',
     'none_or',
@@ -24,7 +25,7 @@ from .builtins_ import (
     lists,
 )
 from .forms import numpy_forms
-from .misc import RecordDraws, StMinMaxValuesFactory, none_or, ranges
+from .misc import Opts, RecordDraws, StMinMaxValuesFactory, none_or, ranges
 from .numpy import (
     from_numpy,
     numpy_arrays,

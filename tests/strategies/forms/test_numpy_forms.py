@@ -19,22 +19,6 @@ class NumpyFormsKwargs(TypedDict, total=False):
     allow_inner_shape: bool
 
 
-class NumpyFormsOpts:
-    '''Drawn options for `numpy_forms()` with resettable recorders.'''
-
-    def __init__(self, kwargs: NumpyFormsKwargs) -> None:
-        self._kwargs = kwargs
-
-    @property
-    def kwargs(self) -> NumpyFormsKwargs:
-        return self._kwargs
-
-    def reset(self) -> None:
-        for v in self._kwargs.values():
-            if isinstance(v, st_ak.RecordDraws):
-                v.drawn.clear()
-
-
 def _inner_shape_strategies() -> st.SearchStrategy[tuple[int, ...]]:
     '''Strategy for generating small inner_shape tuples.'''
     return st.lists(
@@ -44,7 +28,7 @@ def _inner_shape_strategies() -> st.SearchStrategy[tuple[int, ...]]:
     ).map(tuple)
 
 
-def numpy_forms_kwargs() -> st.SearchStrategy[NumpyFormsOpts]:
+def numpy_forms_kwargs() -> st.SearchStrategy[st_ak.Opts[NumpyFormsKwargs]]:
     '''Strategy for options for `numpy_forms()` strategy.
 
     Two modes:
@@ -84,7 +68,7 @@ def numpy_forms_kwargs() -> st.SearchStrategy[NumpyFormsOpts]:
             },
         ).map(lambda d: cast(NumpyFormsKwargs, d))
 
-    return st.one_of(type_mode(), dtypes_mode()).map(NumpyFormsOpts)
+    return st.one_of(type_mode(), dtypes_mode()).map(st_ak.Opts[NumpyFormsKwargs])
 
 
 DATETIME_PRIMITIVES = frozenset(
