@@ -25,6 +25,7 @@ class NumpyArraysKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_structured: bool
     allow_nan: bool
+    allow_inner_shape: bool
     max_size: int
 
 
@@ -40,6 +41,7 @@ def numpy_arrays_kwargs() -> st.SearchStrategy[NumpyArraysKwargs]:
             ),
             'allow_structured': st.booleans(),
             'allow_nan': st.booleans(),
+            'allow_inner_shape': st.booleans(),
             'max_size': st.integers(min_value=0, max_value=100),
         },
     ).map(lambda d: cast(NumpyArraysKwargs, d))
@@ -58,6 +60,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
     dtype = kwargs.get('dtype', None)
     allow_structured = kwargs.get('allow_structured', True)
     allow_nan = kwargs.get('allow_nan', False)
+    allow_inner_shape = kwargs.get('allow_inner_shape', True)
     max_size = kwargs.get('max_size', DEFAULT_MAX_SIZE)
 
     if dtype is not None and not isinstance(dtype, st.SearchStrategy):
@@ -76,6 +79,9 @@ def test_numpy_arrays(data: st.DataObject) -> None:
 
     if not allow_nan:
         assert not has_nan
+
+    if not allow_inner_shape:
+        assert len(n.shape) == 1
 
     # Assert an Awkward Array can be created.
     a = ak.from_numpy(n)
@@ -177,5 +183,14 @@ def test_draw_max_size() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False),
         lambda a: math.prod(a.shape) == DEFAULT_MAX_SIZE,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_inner_shape() -> None:
+    '''Assert that multi-dimensional arrays can be drawn by default.'''
+    find(
+        st_ak.numpy_arrays(allow_structured=False),
+        lambda a: len(a.shape) > 1,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
