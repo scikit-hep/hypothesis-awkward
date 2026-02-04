@@ -12,7 +12,15 @@ class _DrawableData(Protocol):
 
 
 class RecordDraws(st.SearchStrategy[T]):
-    '''Wrap a strategy to store all drawn values.'''
+    '''Wrap a strategy to store all drawn values.
+
+    Examples
+    --------
+    >>> recorder = RecordDraws(st.integers())
+    >>> value = recorder.example()
+    >>> value in recorder.drawn
+    True
+    '''
 
     def __init__(self, base: st.SearchStrategy[T]) -> None:
         super().__init__()
