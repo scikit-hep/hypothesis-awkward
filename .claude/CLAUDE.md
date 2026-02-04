@@ -6,8 +6,7 @@ code in this repository.
 ## Project Overview
 
 hypothesis-awkward is a Python library providing
-[Hypothesis](https://hypothesis.works/) strategies for generating [Awkward
-Array](https://awkward-array.org/) test data. It enables property-based testing
+[Hypothesis](https://hypothesis.works/) strategies for generating [Awkward Array](https://awkward-array.org/) test data. It enables property-based testing
 for code that uses Awkward Arrays.
 
 ## Build and Development Commands
@@ -78,5 +77,6 @@ doctest support for examples in docstrings and markdown files.
 
 - Use single quotes (`'''`) for docstrings.
 - Prefer single quotes (`'`) for strings.
+- Use absolute imports for parent packages (e.g., `from hypothesis_awkward.strategies.numpy import numpy_arrays`, not `from ..numpy import numpy_arrays`). Same-package relative imports (e.g., `from .arrays_ import arrays`) are fine.
 - Sort imports with `uv run ruff check --select I --fix src tests`.
 - Run `uv run mypy src tests` after making changes to verify type correctness.
