@@ -223,17 +223,13 @@ The initial implementation is straightforward:
 ```python
 @st.composite
 def arrays(draw, dtypes=None, allow_nan=False, max_length=5, **_future) -> ak.Array:
-    if dtypes is None:
-        dtypes = supported_dtypes()
-
-    dtype = draw(dtypes)
-    length = draw(st.integers(min_value=0, max_value=max_length))
-
     data = draw(
-        st_np.arrays(
-            dtype=dtype,
-            shape=(length,),
-            elements={'allow_nan': allow_nan},
+        numpy_arrays(
+            dtype=dtypes,
+            allow_structured=False,
+            allow_nan=allow_nan,
+            allow_inner_shape=False,
+            max_size=max_length,
         )
     )
 
@@ -241,12 +237,11 @@ def arrays(draw, dtypes=None, allow_nan=False, max_length=5, **_future) -> ak.Ar
     return ak.Array(layout)
 ```
 
-Key differences from `numpy_arrays()`:
+Delegates to `numpy_arrays()` with restricted options:
 
-- Generates only 1-D arrays (no multi-dimensional shapes)
+- `allow_structured=False` and `allow_inner_shape=False` ensure 1-D simple arrays
+- `max_size=max_length` maps directly since the array is 1-D
 - Wraps in `NumpyArray` layout explicitly (not via `ak.from_numpy`)
-- Uses `max_length` for the single dimension length
-- Does not support structured dtypes (those become `RecordArray` later)
 
 ### Future Version Sketch (After Adding More Node Types)
 
@@ -326,20 +321,20 @@ Existing:
                        -->  numpy_forms()
 
 New:
-  supported_dtypes()  -->  arrays()  --> ak.Array
-                                        (via Content constructors)
+  supported_dtypes()  -->  numpy_arrays()  -->  arrays()  --> ak.Array
+                                                              (via Content constructors)
 ```
 
-`arrays()` does not wrap or delegate to `numpy_arrays()` or `from_numpy()`.
-It generates data independently using `hypothesis.extra.numpy.arrays()` and
-wraps it in `ak.contents.NumpyArray` directly. This avoids multi-dimensional
-shapes and structured dtypes that `numpy_arrays()` produces, which are not
-appropriate for the leaf nodes of a recursive content tree.
+`arrays()` delegates to `numpy_arrays()` with `allow_structured=False` and
+`allow_inner_shape=False` to obtain a 1-D simple NumPy array, then wraps it in
+`ak.contents.NumpyArray` directly. This reuses the existing dtype handling and
+empty-array generation logic in `numpy_arrays()`.
 
-The existing `from_numpy()` and `numpy_arrays()` remain as-is. They serve a
-different purpose: generating arrays specifically via the `ak.from_numpy()`
-path, which includes structured arrays (RecordArray) and multi-dimensional
-arrays. The `arrays()` strategy exercises the direct constructor path.
+The existing `from_numpy()` and `numpy_arrays()` remain as-is. `from_numpy()`
+serves a different purpose: generating arrays specifically via the
+`ak.from_numpy()` path, which includes structured arrays (RecordArray) and
+multi-dimensional arrays. The `arrays()` strategy exercises the direct
+constructor path.
 
 ## Module Location
 
