@@ -94,7 +94,7 @@ def test_draw_max_length() -> None:
     find(
         st_ak.constructors.arrays(),
         lambda a: len(a) == DEFAULT_MAX_LENGTH,
-        settings=settings(phases=[Phase.generate]),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
