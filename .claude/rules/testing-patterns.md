@@ -87,36 +87,21 @@ Key techniques:
 - `flatmap` chains dependent strategies (e.g., max depends on min)
 - Mix required and optional in `st.fixed_dictionaries`
 
-### Strategy-valued kwargs with `RecordDraws`
+### Strategy-valued kwargs with `st_ak.RecordDraws`
 
 See `tests/strategies/forms/test_numpy_forms.py` for a full example.
 
 When a parameter accepts both a concrete value and a strategy (e.g.,
-`NumpyType | SearchStrategy[NumpyType] | None`), use `RecordDraws` to wrap
-strategies so drawn values can be tracked in assertions:
+`NumpyType | SearchStrategy[NumpyType] | None`), use `st_ak.RecordDraws` to
+wrap strategies so drawn values can be tracked in assertions.
 
-```python
-class RecordDraws(st.SearchStrategy[T]):
-    '''Wrap a strategy to store all drawn values.'''
-
-    def __init__(self, base: st.SearchStrategy[T]) -> None:
-        super().__init__()
-        self.drawn: list[T] = []
-        self._base = base
-
-    def do_draw(self, data: Any) -> T:
-        value = data.draw(self._base)
-        self.drawn.append(value)
-        return value
-```
-
-In the kwargs strategy, use `st.just(RecordDraws(...))` to pass the recorder as
-a value:
+In the kwargs strategy, use `st.just(st_ak.RecordDraws(...))` to pass the
+recorder as a value:
 
 ```python
 'type_': st.one_of(
-    st_ak.numpy_types(),                        # concrete value
-    st.just(RecordDraws(st_ak.numpy_types())),  # strategy (tracked)
+    st_ak.numpy_types(),                                 # concrete value
+    st.just(st_ak.RecordDraws(st_ak.numpy_types())),    # strategy (tracked)
 ),
 ```
 
@@ -135,7 +120,7 @@ class NumpyFormsOpts:
 
     def reset(self) -> None:
         for v in self._kwargs.values():
-            if isinstance(v, RecordDraws):
+            if isinstance(v, st_ak.RecordDraws):
                 v.drawn.clear()
 ```
 
@@ -149,17 +134,18 @@ result = data.draw(st_ak.numpy_forms(**opts.kwargs), label='result')
 match type_:
     case ak.types.NumpyType():
         assert result.primitive == type_.primitive
-    case RecordDraws():
+    case st_ak.RecordDraws():
         drawn_primitives = {t.primitive for t in type_.drawn}
         assert result.primitive in drawn_primitives
 ```
 
 Key techniques:
 
-- `RecordDraws` records values drawn from a wrapped strategy
-- `st.just(RecordDraws(...))` passes the recorder itself as the kwarg value
+- `st_ak.RecordDraws` records values drawn from a wrapped strategy
+- `st.just(st_ak.RecordDraws(...))` passes the recorder itself as the kwarg
+  value
 - `Opts.reset()` clears recorded values before each draw (avoids stale state)
-- `match` / `case` distinguishes concrete values from `RecordDraws` in
+- `match` / `case` distinguishes concrete values from `st_ak.RecordDraws` in
   assertions
 
 ## 3. Main property-based test
