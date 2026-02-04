@@ -1,8 +1,14 @@
-from typing import Any, TypeVar
+from typing import Protocol, TypeVar
 
 from hypothesis import strategies as st
 
 T = TypeVar('T')
+
+
+class _DrawableData(Protocol):
+    '''Protocol for the ``data`` argument of ``do_draw``.'''
+
+    def draw(self, strategy: st.SearchStrategy[T]) -> T: ...
 
 
 class RecordDraws(st.SearchStrategy[T]):
@@ -13,7 +19,7 @@ class RecordDraws(st.SearchStrategy[T]):
         self.drawn: list[T] = []
         self._base = base
 
-    def do_draw(self, data: Any) -> T:
+    def do_draw(self, data: _DrawableData) -> T:
         value = data.draw(self._base)
         self.drawn.append(value)
         return value
