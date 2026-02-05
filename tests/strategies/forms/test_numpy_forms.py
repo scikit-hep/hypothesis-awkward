@@ -1,7 +1,7 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, note, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -93,9 +93,6 @@ def test_numpy_forms(data: st.DataObject) -> None:
     # Assert parameters and form_key are always None
     assert result._parameters is None
     assert result._form_key is None
-
-    note(f'{result.primitive=}')
-    note(f'{result.inner_shape=}')
 
     # Assert the options were effective
     type_ = opts.kwargs.get('type_', None)

@@ -3,7 +3,7 @@ from typing import TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, note, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
@@ -95,14 +95,12 @@ def test_numpy_arrays(data: st.DataObject) -> None:
 
     # Assert an Awkward Array can be created.
     a = ak.from_numpy(n)
-    note(f'{a=}')
     assert isinstance(a, ak.Array)
 
     # Test if the NumPy array and Awkward Array are converted to the same list.
     # Compare only when `NaN` isn't allowed.
     # Structured arrays are known to result in a different list sometimes.
     to_list = a.to_list()
-    note(f'{to_list=}')
 
     if not allow_nan:
         if not structured:  # simple array
@@ -131,7 +129,6 @@ def test_numpy_arrays(data: st.DataObject) -> None:
 
     if _is_numpy_convertible(a):
         to_numpy = a.to_numpy()
-        note(f'{to_numpy=}')
         if not has_nan:
             if not structured:
                 np.testing.assert_array_equal(to_numpy, n)

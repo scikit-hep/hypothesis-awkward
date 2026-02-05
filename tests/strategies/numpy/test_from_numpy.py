@@ -1,7 +1,7 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, note, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -67,10 +67,6 @@ def test_from_numpy(data: st.DataObject) -> None:
     structured = _is_structured(a)
     has_nan = any_nan_nat_in_awkward_array(a)
     size = _size(a)
-    note(f'{dtypes=}')
-    note(f'{structured=}')
-    note(f'{has_nan=}')
-    note(f'{size=}')
 
     match dtype:
         case None:

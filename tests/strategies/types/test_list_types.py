@@ -1,7 +1,7 @@
 from typing import TypedDict, cast
 
 import pytest
-from hypothesis import Phase, find, given, note, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -44,9 +44,6 @@ def test_list_types(data: st.DataObject) -> None:
 
     # Assert the options were effective
     content = kwargs.get('content', None)
-
-    note(f'{result=}')
-    note(f'{result.content=}')
 
     # The content should be a valid Type
     assert isinstance(result.content, ak.types.Type)

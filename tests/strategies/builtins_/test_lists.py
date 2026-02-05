@@ -2,7 +2,7 @@ import math
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import given, note, settings
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -68,14 +68,11 @@ def test_lists(data: st.DataObject) -> None:
     has_nan = any(_is_nan(x) for x in flat)
     size = len(flat)
     types = {type(x) for x in flat if not _is_nan(x)}
-    note(f'{has_nan=}, {max_size=}, {types=}')
-
     assert len(types) <= 1  # All same type unless empty
 
     if isinstance(dtype, np.dtype) and types:
-        type_ = next(iter(types))
-        note(f'{type_=})')
         # TODO: Assert `dtype` matches `type_`
+        pass
 
     if not allow_nan:
         assert not has_nan
@@ -83,11 +80,9 @@ def test_lists(data: st.DataObject) -> None:
 
     # Assert an Awkward Array can be created.
     a = ak.Array(l)
-    note(f'{a=}')
     assert isinstance(a, ak.Array)
 
     to_list = a.to_list()
-    note(f'{to_list=}')
 
     if not has_nan:
         assert to_list == l

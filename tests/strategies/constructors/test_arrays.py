@@ -1,7 +1,7 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, note, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -63,9 +63,6 @@ def test_arrays(data: st.DataObject) -> None:
     dtypes = opts.kwargs.get('dtypes', None)
     allow_nan = opts.kwargs.get('allow_nan', False)
     max_length = opts.kwargs.get('max_length', DEFAULT_MAX_LENGTH)
-
-    note(f'{a=}')
-    note(f'{a.layout.dtype=}')
 
     assert len(a) <= max_length
 
