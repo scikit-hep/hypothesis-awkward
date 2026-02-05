@@ -87,6 +87,7 @@ def from_numpy(
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
     allow_structured: bool = True,
     allow_nan: bool = False,
+    regulararray: bool | None = None,
     max_size: int = 10,
 ) -> st.SearchStrategy[ak.Array]:
     '''Strategy for Awkward Arrays created from NumPy arrays.
@@ -101,6 +102,9 @@ def from_numpy(
         arrays as well.
     allow_nan
         Generate potentially `NaN` for relevant dtypes if `True`.
+    regulararray
+        Passed to `ak.from_numpy`. If `None` (default), randomly generates
+        `True` or `False`.
     max_size
         Maximum number of items in the array.
 
@@ -111,6 +115,8 @@ def from_numpy(
 
     '''
 
+    reg_array = st.booleans() if regulararray is None else st.just(regulararray)
+
     return st.builds(
         ak.from_numpy,
         numpy_arrays(
@@ -119,4 +125,5 @@ def from_numpy(
             allow_nan=allow_nan,
             max_size=max_size,
         ),
+        regulararray=reg_array,
     )
