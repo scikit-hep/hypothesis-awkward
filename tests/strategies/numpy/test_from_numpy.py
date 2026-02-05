@@ -156,7 +156,7 @@ def _leaf_dtypes(a: ak.Array) -> set[np.dtype]:
 def _is_structured(a: ak.Array) -> bool:
     '''Check if `a` is a structured array.'''
     layout = a.layout
-    if isinstance(layout, ak.contents.NumpyArray):  # simple array
+    if isinstance(layout, (ak.contents.NumpyArray, ak.contents.RegularArray)):
         return False
     assert isinstance(layout, ak.contents.RecordArray)  # structured array
     return True
