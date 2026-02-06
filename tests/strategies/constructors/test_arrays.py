@@ -12,7 +12,7 @@ from hypothesis_awkward.util import (
     iter_numpy_arrays,
 )
 
-DEFAULT_MAX_LENGTH = 5
+DEFAULT_MAX_SIZE = 10
 DEFAULT_MAX_DEPTH = 3
 
 
@@ -22,7 +22,7 @@ class ArraysKwargs(TypedDict, total=False):
     dtypes: st.SearchStrategy[np.dtype] | None
     allow_nan: bool
     allow_regular: bool
-    max_length: int
+    max_size: int
     max_depth: int
 
 
@@ -38,7 +38,7 @@ def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
                 ),
                 'allow_nan': st.booleans(),
                 'allow_regular': st.booleans(),
-                'max_length': st.integers(min_value=0, max_value=50),
+                'max_size': st.integers(min_value=0, max_value=50),
                 'max_depth': st.integers(min_value=0, max_value=3),
             },
         )
@@ -65,7 +65,7 @@ def test_arrays(data: st.DataObject) -> None:
     dtypes = opts.kwargs.get('dtypes', None)
     allow_nan = opts.kwargs.get('allow_nan', False)
     allow_regular = opts.kwargs.get('allow_regular', True)
-    max_length = opts.kwargs.get('max_length', DEFAULT_MAX_LENGTH)
+    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
     # When RegularArray is disallowed or depth is zero, layout must be NumpyArray
@@ -84,7 +84,7 @@ def test_arrays(data: st.DataObject) -> None:
     if not allow_nan:
         assert not any_nan_nat_in_awkward_array(a)
 
-    assert len(a) <= max_length
+    assert _total_scalars(a) <= max_size
 
     assert _regular_depth(a) <= max_depth
 
@@ -98,11 +98,12 @@ def test_draw_empty() -> None:
     )
 
 
-def test_draw_max_length() -> None:
-    '''Assert that arrays with max_length elements can be drawn.'''
+def test_draw_max_size() -> None:
+    '''Assert that arrays with max_size scalars can be drawn.'''
+    max_size = 20
     find(
-        st_ak.constructors.arrays(),
-        lambda a: len(a) == DEFAULT_MAX_LENGTH,
+        st_ak.constructors.arrays(max_size=max_size),
+        lambda a: _total_scalars(a) == max_size,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
@@ -155,6 +156,11 @@ def test_draw_regular_size_zero() -> None:
         _has_regular_size_zero,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
+
+
+def _total_scalars(a: ak.Array) -> int:
+    '''Total number of scalar values across all leaf NumPy arrays.'''
+    return sum(arr.size for arr in iter_numpy_arrays(a))
 
 
 def _leaf_dtypes(a: ak.Array) -> set[np.dtype]:

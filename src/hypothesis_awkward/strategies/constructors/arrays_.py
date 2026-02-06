@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from hypothesis import strategies as st
 
@@ -13,7 +15,7 @@ def arrays(
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     allow_nan: bool = False,
     allow_regular: bool = True,
-    max_length: int = 5,
+    max_size: int = 10,
     max_depth: int = 3,
 ) -> ak.Array:
     '''Strategy for Awkward Arrays built from direct Content constructors.
@@ -29,9 +31,10 @@ def arrays(
     allow_regular
         Allow wrapping the leaf ``NumpyArray`` in one or more
         ``RegularArray`` layers if ``True``.
-    max_length
-        Maximum number of elements in the outermost array dimension
-        (i.e., ``len(result)``).
+    max_size
+        Maximum total number of leaf scalars in the generated array
+        (i.e., the sum of ``arr.size`` across all leaf ``NumpyArray``
+        nodes).
     max_depth
         Maximum number of nested ``RegularArray`` layers wrapping the
         leaf ``NumpyArray``.  Only effective when *allow_regular* is
@@ -53,7 +56,7 @@ def arrays(
                 allow_structured=False,
                 allow_nan=allow_nan,
                 max_dims=1,
-                max_size=max_length,
+                max_size=max_size,
             )
         )
         layout: ak.contents.Content = ak.contents.NumpyArray(data)
@@ -65,7 +68,12 @@ def arrays(
                 max_size=depth,
             )
         )
-        outer_len = draw(st.integers(min_value=0, max_value=max_length))
+        size_product = math.prod(sizes)
+        if size_product == 0:
+            max_outer = max_size
+        else:
+            max_outer = max_size // size_product
+        outer_len = draw(st.integers(min_value=0, max_value=max_outer))
 
         # Compute layer lengths top-down
         layer_len = [0] * depth
