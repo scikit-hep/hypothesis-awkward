@@ -66,15 +66,9 @@ def numpy_arrays(
     dtype_size = n_scalars_in(dtype)
     min_items = -(-min_size // dtype_size)  # n items of dtype, rounded up
     max_items = max_size // dtype_size  # n items of dtype, rounded down
-    average_size = max_items // 2
 
-    # Empty arrays must be generated separately because st_np.array_shapes() requires
-    # min_side >= 1 by default. The probability of generating an empty array is set to
-    # P(empty) = 1 / (1 + average_size), matching Hypothesis st.lists() behavior. For
-    # max_size=10: average_size=5, P(empty) = 1/6 ≈ 16.7%
-    empty = min_items <= 0 and (
-        max_items <= 0 or draw(st.integers(min_value=0, max_value=average_size)) == 0
-    )
+    # Generate empty shape manually as `st_np.array_shapes()` doesn't.
+    empty = draw(_st_empty(min_items, max_items))
 
     shape: tuple[int, ...]
     if empty:
@@ -124,6 +118,20 @@ def numpy_arrays(
     return draw(
         st_np.arrays(dtype=dtype, shape=shape, elements={'allow_nan': allow_nan})
     )
+
+
+def _st_empty(min_items: int, max_items: int) -> st.SearchStrategy[bool]:
+    '''Strategy for whether to generate an empty array.
+
+    P(empty) = 1 / (1 + average_size), matching Hypothesis st.lists() behavior.
+    For max_size=10: average_size=5, P(empty) = 1/6 ≈ 16.7%
+    '''
+    if min_items > 0:
+        return st.just(False)
+    if max_items <= 0:
+        return st.just(True)
+    average_size = max_items // 2
+    return st.integers(min_value=0, max_value=average_size).map(lambda x: x == 0)
 
 
 def from_numpy(
