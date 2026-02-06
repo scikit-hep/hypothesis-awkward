@@ -103,43 +103,61 @@ def _st_shape(
     min_dims: int,
     max_dims: int | None,
 ) -> tuple[int, ...]:
-    '''Strategy for a non-empty array shape.'''
-    min_side_lower = (
-        max(1, math.ceil(min_items ** (1 / min_dims))) if min_items > 0 else 1
-    )
-    max_side_upper = math.floor(max_items ** (1 / min_dims))
-    max_side_upper = max(1, max_side_upper)
+    '''Strategy for a non-empty array shape.
 
-    if min_side_lower <= max_side_upper:
-        max_side = draw(st.integers(min_value=min_side_lower, max_value=max_side_upper))
-        if max_side == 1:
-            max_dims_upper = min(NDIM_MAX, max_items)
-        else:
-            max_dims_upper = min(
-                NDIM_MAX, math.floor(math.log(max_items) / math.log(max_side))
-            )
-        if max_dims is not None:
-            max_dims_upper = min(max_dims_upper, max_dims)
-        n_dims = draw(
-            st.integers(min_value=min_dims, max_value=max(min_dims, max_dims_upper))
-        )
-        min_side = max(1, math.ceil(min_items ** (1 / n_dims))) if min_items > 0 else 1
-        min_dims_shape = n_dims if min_items > 0 else min_dims
-        return draw(
-            st_np.array_shapes(
-                min_dims=min_dims_shape,
-                max_dims=n_dims,
-                min_side=min_side,
-                max_side=max_side,
-            )
-        )
-    else:
-        # Edge case: min_items close to max_items with min_dims > 1
+    A shape is a tuple of positive integers, e.g., ``(3, 5, 2)``, where each
+    value is the length of a dimension (called a "side").
+
+    Parameters
+    ----------
+    min_items
+        Minimum number of elements, i.e., ``prod(shape) >= min_items``.
+    max_items
+        Maximum number of elements, i.e., ``prod(shape) <= max_items``.
+    min_dims
+        Minimum number of dimensions, i.e., ``len(shape) >= min_dims``.
+    max_dims
+        Maximum number of dimensions. If ``None``, derived from ``max_items``.
+    '''
+
+    # Bounds of the largest integer in the shape (the "max side")
+    root = 1 / min_dims
+    min_max_side = max(1, math.ceil(min_items**root)) if min_items > 0 else 1
+    max_max_side = max(1, math.floor(max_items**root))
+
+    if not min_max_side <= max_max_side:
+        # This can happen typically when `max_max_side` is 1, i.e., `min_dims > 1` and
+        # `max_items` is small. We return a shape in which the first dimension holds all
+        # items to satisfy the min_items and max_items, and the rest of the dimensions
+        # are 1 to satisfy the min_dims and max_dims, e.g., (9, 1, 1).
         size = draw(st.integers(min_value=min_items, max_value=max_items))
         extra_dims = 0
         if max_dims is not None and max_dims > min_dims:
             extra_dims = draw(st.integers(0, max_dims - min_dims))
         return (size,) + (1,) * (min_dims - 1 + extra_dims)
+
+    max_side = draw(st.integers(min_value=min_max_side, max_value=max_max_side))
+    if max_side == 1:
+        max_max_dims = min(NDIM_MAX, max_items)
+    else:
+        max_max_dims = min(
+            NDIM_MAX, math.floor(math.log(max_items) / math.log(max_side))
+        )
+    if max_dims is not None:
+        max_max_dims = min(max_max_dims, max_dims)
+    max_len = draw(
+        st.integers(min_value=min_dims, max_value=max(min_dims, max_max_dims))
+    )
+    min_side = max(1, math.ceil(min_items ** (1 / max_len))) if min_items > 0 else 1
+    min_len = max_len if min_items > 0 else min_dims
+    return draw(
+        st_np.array_shapes(
+            min_dims=min_len,
+            max_dims=max_len,
+            min_side=min_side,
+            max_side=max_side,
+        )
+    )
 
 
 def from_numpy(
