@@ -27,6 +27,7 @@ class NumpyArraysKwargs(TypedDict, total=False):
     allow_nan: bool
     min_dims: int
     max_dims: int
+    min_size: int
     max_size: int
 
 
@@ -35,8 +36,16 @@ def numpy_arrays_kwargs(draw: st.DrawFn) -> st_ak.Opts[NumpyArraysKwargs]:
     '''Strategy for options for `numpy_arrays()` strategy.'''
 
     min_dims, max_dims = draw(st_ak.ranges(min_start=1, max_end=5))
+    min_size, max_size = draw(
+        st_ak.ranges(min_start=0, max_end=100, max_start=DEFAULT_MAX_SIZE)
+    )
 
-    drawn = (('min_dims', min_dims), ('max_dims', max_dims))
+    drawn = (
+        ('min_dims', min_dims),
+        ('max_dims', max_dims),
+        ('min_size', min_size),
+        ('max_size', max_size),
+    )
 
     kwargs = draw(
         st.fixed_dictionaries(
@@ -49,7 +58,6 @@ def numpy_arrays_kwargs(draw: st.DrawFn) -> st_ak.Opts[NumpyArraysKwargs]:
                 ),
                 'allow_structured': st.booleans(),
                 'allow_nan': st.booleans(),
-                'max_size': st.integers(min_value=0, max_value=100),
             },
         )
     )
@@ -73,6 +81,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
     allow_nan = opts.kwargs.get('allow_nan', False)
     min_dims = opts.kwargs.get('min_dims', 1)
     max_dims = opts.kwargs.get('max_dims', None)
+    min_size = opts.kwargs.get('min_size', 0)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
 
     match dtype:
@@ -86,7 +95,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
             assert result_kinds <= drawn_kinds
 
     size = math.prod(n.shape)
-    assert size <= max_size
+    assert min_size <= size <= max_size
 
     structured = n.dtype.names is not None
     has_nan = any_nan_nat_in_numpy_array(n)
@@ -199,6 +208,15 @@ def test_draw_max_size() -> None:
         st_ak.numpy_arrays(allow_structured=False),
         lambda a: math.prod(a.shape) == DEFAULT_MAX_SIZE,
         settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_min_size() -> None:
+    '''Assert that arrays with at least min_size elements can be drawn.'''
+    find(
+        st_ak.numpy_arrays(allow_structured=False, min_size=5),
+        lambda a: math.prod(a.shape) >= 5,
+        settings=settings(phases=[Phase.generate]),
     )
 
 
