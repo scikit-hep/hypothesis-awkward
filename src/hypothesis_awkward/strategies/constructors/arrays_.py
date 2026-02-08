@@ -26,33 +26,29 @@ def arrays(
     max_size: int = 10,
     max_depth: int = 3,
 ) -> ak.Array:
-    '''Strategy for Awkward Arrays built from direct Content constructors.
+    '''Strategy for Awkward Arrays.
+
+    The current implementation generates arrays with NumpyArray as leaf contents that can
+    be nested multiple levels deep in RegularArray, ListOffsetArray, and ListArray lists.
 
     Parameters
     ----------
     dtypes
-        A strategy for NumPy dtypes used in leaf ``NumpyArray`` nodes.
-        If ``None``, uses ``supported_dtypes()``.
+        A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
+        default strategy that generates any scalar dtype supported by Awkward Array is
+        used.
     allow_nan
-        Generate potentially ``NaN``/``NaT`` values for relevant dtypes
-        if ``True``.
+        No ``NaN``/``NaT`` values are generated if ``False``.
     allow_regular
-        Allow wrapping the leaf ``NumpyArray`` in one or more
-        ``RegularArray`` layers if ``True``.
+        No ``RegularArray`` is generated if ``False``.
     allow_list_offset
-        Allow wrapping the leaf ``NumpyArray`` in one or more
-        ``ListOffsetArray`` layers if ``True``.
+        No ``ListOffsetArray`` is generated if ``False``.
     allow_list
-        Allow wrapping the leaf ``NumpyArray`` in one or more
-        ``ListArray`` layers if ``True``.
+        No ``ListArray`` is generated if ``False``.
     max_size
-        Maximum total number of leaf scalars in the generated array
-        (i.e., the sum of ``arr.size`` across all leaf ``NumpyArray``
-        nodes).
+        Maximum total number of scalar values in the generated array.
     max_depth
-        Maximum number of nested structural layers (``RegularArray``,
-        ``ListOffsetArray``, ``ListArray``) wrapping the leaf ``NumpyArray``.  Only
-        effective when at least one structural type is enabled.
+        Maximum depth of nested arrays.
 
     Examples
     --------
