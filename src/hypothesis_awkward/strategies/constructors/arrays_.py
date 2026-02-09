@@ -8,6 +8,7 @@ import hypothesis_awkward.strategies as st_ak
 
 MAX_REGULAR_SIZE = 5
 MAX_LIST_LENGTH = 5
+MAX_NESTING_DEPTH = 5
 
 ExtendFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
@@ -61,19 +62,36 @@ def arrays(
     if allow_list:
         wrappers.append(_wrap_list)
 
+    layout: ak.contents.Content
     if not wrappers or max_size == 0:
         layout = draw(_numpy_leaf(dtypes, allow_nan, max_size))
     else:
-        max_numpy_array_size = draw(st.integers(min_value=1, max_value=max_size))
-        max_leaves = max_size // max_numpy_array_size
+        remaining = max_size
 
-        def extend(
-            children: st.SearchStrategy[ak.contents.Content],
-        ) -> st.SearchStrategy[ak.contents.Content]:
-            return st.one_of(*[w(children) for w in wrappers])
+        def draw_leaf() -> ak.contents.NumpyArray:
+            nonlocal remaining
+            if remaining == 0:
+                raise _BudgetExhausted
+            arr = draw(st_ak.numpy_arrays(
+                dtype=dtypes,
+                allow_structured=False,
+                allow_nan=allow_nan,
+                max_dims=1,
+                max_size=remaining,
+            ))
+            remaining -= arr.size
+            return ak.contents.NumpyArray(arr)
 
-        leaf = _numpy_leaf(dtypes, allow_nan, max_numpy_array_size)
-        layout = draw(st.recursive(leaf, extend, max_leaves=max_leaves))
+        # Draw nesting depth, then choose a wrapper for each level.
+        depth = draw(st.integers(min_value=0, max_value=MAX_NESTING_DEPTH))
+        chosen_wrappers: list[ExtendFn] = [
+            draw(st.sampled_from(wrappers)) for _ in range(depth)
+        ]
+
+        layout = draw_leaf()
+        for wrapper in reversed(chosen_wrappers):
+            layout = draw(wrapper(st.just(layout)))
+
     return ak.Array(layout)
 
 
@@ -90,6 +108,10 @@ def _numpy_leaf(
         max_dims=1,
         max_size=max_size,
     ).map(ak.contents.NumpyArray)
+
+
+class _BudgetExhausted(Exception):
+    pass
 
 
 @st.composite
