@@ -111,15 +111,9 @@ def _make_draw_leaf(
         nonlocal remaining
         if remaining == 0:
             raise _BudgetExhausted
-        arr = draw(st_ak.numpy_arrays(
-            dtype=dtypes,
-            allow_structured=False,
-            allow_nan=allow_nan,
-            max_dims=1,
-            max_size=remaining,
-        ))
-        remaining -= arr.size
-        return ak.contents.NumpyArray(arr)
+        leaf = draw(_numpy_leaf(dtypes, allow_nan, remaining))
+        remaining -= len(leaf)
+        return leaf
 
     return draw_leaf
 
