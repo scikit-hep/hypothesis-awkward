@@ -4,10 +4,10 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 
 from .list_array import list_array_contents
 from .list_offset_array import list_offset_array_contents
+from .numpy_array import BudgetedNumpyArrayContents, numpy_array_contents
 from .regular_array import regular_array_contents
 
 _ContentsFn = Callable[
@@ -67,9 +67,9 @@ def arrays(
 
     layout: ak.contents.Content
     if not content_fns or max_size == 0:
-        layout = draw(_numpy_array_contents(dtypes, allow_nan, max_size))
+        layout = draw(numpy_array_contents(dtypes, allow_nan, max_size))
     else:
-        leaf_st = _BudgetedNumpyArrayContents(dtypes, allow_nan, max_size)
+        leaf_st = BudgetedNumpyArrayContents(dtypes, allow_nan, max_size)
 
         # Draw nesting depth, then choose a content function for each level.
         depth = draw(st.integers(min_value=0, max_value=max_depth))
@@ -82,42 +82,3 @@ def arrays(
             layout = draw(fn(st.just(layout)))
 
     return ak.Array(layout)
-
-
-def _numpy_array_contents(
-    dtypes: st.SearchStrategy[np.dtype] | None,
-    allow_nan: bool,
-    max_size: int,
-) -> st.SearchStrategy[ak.contents.NumpyArray]:
-    '''Base strategy: leaf NumpyArray Content.'''
-    return st_ak.numpy_arrays(
-        dtype=dtypes,
-        allow_structured=False,
-        allow_nan=allow_nan,
-        max_dims=1,
-        max_size=max_size,
-    ).map(ak.contents.NumpyArray)
-
-
-def _BudgetedNumpyArrayContents(
-    dtypes: st.SearchStrategy[np.dtype] | None,
-    allow_nan: bool,
-    max_size: int,
-) -> st.SearchStrategy[ak.contents.NumpyArray]:
-    '''Leaf strategy with a scalar budget.'''
-    remaining = max_size
-
-    @st.composite
-    def _contents(draw: st.DrawFn) -> ak.contents.NumpyArray:
-        nonlocal remaining
-        if remaining == 0:
-            raise _BudgetExhausted
-        result = draw(_numpy_array_contents(dtypes, allow_nan, remaining))
-        remaining -= len(result)
-        return result
-
-    return _contents()
-
-
-class _BudgetExhausted(Exception):
-    pass
