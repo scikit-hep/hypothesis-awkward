@@ -119,6 +119,7 @@ def arrays(
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
+    max_depth: int = 5,
 ):
 ```
 
@@ -130,6 +131,7 @@ def arrays(
 | `allow_regular` | No `RegularArray` is generated if `False`. |
 | `allow_list_offset` | No `ListOffsetArray` is generated if `False`. |
 | `allow_list` | No `ListArray` is generated if `False`. |
+| `max_depth` | Maximum depth of nested arrays. |
 
 ## Other strategies
 

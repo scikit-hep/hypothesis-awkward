@@ -1,4 +1,3 @@
-import inspect
 from typing import TypedDict, cast
 
 import numpy as np
@@ -14,6 +13,7 @@ from hypothesis_awkward.util import (
 )
 
 DEFAULT_MAX_SIZE = 10
+DEFAULT_MAX_DEPTH = 5
 
 
 class ArraysKwargs(TypedDict, total=False):
@@ -25,6 +25,7 @@ class ArraysKwargs(TypedDict, total=False):
     allow_regular: bool
     allow_list_offset: bool
     allow_list: bool
+    max_depth: int
 
 
 def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
@@ -42,6 +43,7 @@ def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
+                'max_depth': st.integers(min_value=0, max_value=5),
             },
         )
         .map(lambda d: cast(ArraysKwargs, d))
@@ -70,6 +72,7 @@ def test_arrays(data: st.DataObject) -> None:
     allow_regular = opts.kwargs.get('allow_regular', True)
     allow_list_offset = opts.kwargs.get('allow_list_offset', True)
     allow_list = opts.kwargs.get('allow_list', True)
+    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
     # Flat NumpyArray when all structural types disabled
     if not allow_regular and not allow_list_offset and not allow_list:
@@ -96,6 +99,8 @@ def test_arrays(data: st.DataObject) -> None:
 
     if not allow_nan:
         assert not any_nan_nat_in_awkward_array(a)
+
+    assert _nesting_depth(a) <= max_depth
 
 
 def test_draw_empty() -> None:
@@ -137,10 +142,14 @@ def test_draw_integer_dtype() -> None:
     )
 
 
-def test_arrays_no_max_depth_parameter() -> None:
-    '''Assert that arrays() does not accept a max_depth parameter.'''
-    sig = inspect.signature(st_ak.constructors.arrays)
-    assert 'max_depth' not in sig.parameters
+def test_draw_max_depth() -> None:
+    '''Assert that arrays at exactly max_depth can be drawn.'''
+    max_depth = 8
+    find(
+        st_ak.constructors.arrays(max_size=20, max_depth=max_depth),
+        lambda a: _nesting_depth(a) == max_depth,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
 
 
 def test_draw_nested() -> None:

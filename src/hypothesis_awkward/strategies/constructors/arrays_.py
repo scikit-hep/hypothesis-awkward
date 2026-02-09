@@ -8,7 +8,6 @@ import hypothesis_awkward.strategies as st_ak
 
 MAX_REGULAR_SIZE = 5
 MAX_LIST_LENGTH = 5
-MAX_NESTING_DEPTH = 5
 
 ExtendFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
@@ -25,6 +24,7 @@ def arrays(
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
+    max_depth: int = 5,
 ) -> ak.Array:
     '''Strategy for Awkward Arrays.
 
@@ -47,6 +47,8 @@ def arrays(
         No ``ListOffsetArray`` is generated if ``False``.
     allow_list
         No ``ListArray`` is generated if ``False``.
+    max_depth
+        Maximum depth of nested arrays.
 
     Examples
     --------
@@ -83,7 +85,7 @@ def arrays(
             return ak.contents.NumpyArray(arr)
 
         # Draw nesting depth, then choose a wrapper for each level.
-        depth = draw(st.integers(min_value=0, max_value=MAX_NESTING_DEPTH))
+        depth = draw(st.integers(min_value=0, max_value=max_depth))
         chosen_wrappers: list[ExtendFn] = [
             draw(st.sampled_from(wrappers)) for _ in range(depth)
         ]
