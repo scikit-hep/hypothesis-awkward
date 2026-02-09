@@ -1,4 +1,5 @@
 __all__ = [
+    'contents',
     'constructors',
     'builtin_safe_dtypes',
     'from_list',
@@ -19,7 +20,7 @@ __all__ = [
     'numpy_forms',
 ]
 
-from . import constructors
+from . import constructors, contents
 from .builtins_ import (
     builtin_safe_dtypes,
     from_list,

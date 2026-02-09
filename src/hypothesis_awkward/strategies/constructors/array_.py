@@ -4,11 +4,17 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-
-from .list_array import list_array_contents
-from .list_offset_array import list_offset_array_contents
-from .numpy_array import BudgetedNumpyArrayContents, numpy_array_contents
-from .regular_array import regular_array_contents
+from hypothesis_awkward.strategies.contents.list_array import list_array_contents
+from hypothesis_awkward.strategies.contents.list_offset_array import (
+    list_offset_array_contents,
+)
+from hypothesis_awkward.strategies.contents.numpy_array import (
+    BudgetedNumpyArrayContents,
+    numpy_array_contents,
+)
+from hypothesis_awkward.strategies.contents.regular_array import (
+    regular_array_contents,
+)
 
 _ContentsFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
