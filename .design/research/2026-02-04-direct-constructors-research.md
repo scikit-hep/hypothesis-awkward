@@ -413,6 +413,25 @@ This can be modeled by passing an `allowed` set or exclusion flags when recursin
 3. Nesting constraints must be tracked during recursive generation
 4. Combinatorial explosion -- 12 classes with recursive composition
 
+### Implementation Note (2026-02-09)
+
+The actual `arrays()` implementation (in `strategies/constructors/arrays_.py`)
+diverged from the recursive `_contents()` sketch above. Instead, it uses a
+**wrappers pattern**:
+
+1. A leaf strategy generates a `NumpyArray` with a scalar budget
+2. A random depth (0 to `max_depth`) is drawn
+3. Wrapper functions (`_wrap_regular`, `_wrap_list_offset`, `_wrap_list`) are
+   chosen randomly for each depth level
+4. Wrappers are applied from innermost to outermost
+
+This approach was simpler to implement for the current scope (only list-type
+wrappers, no nesting constraints needed). Content nesting constraints from the
+table above are **not yet enforced** -- they will become relevant when option,
+indexed, and union types are added. At that point, the implementation may evolve
+toward the recursive `_contents()` approach or add constraint tracking to the
+wrappers pattern.
+
 ## Sources
 
 - [How to create arrays -- Awkward Array documentation](https://awkward-array.org/doc/main/user-guide/how-to-create-constructors.html)

@@ -9,9 +9,17 @@
 This document proposes the directory structure for implementing the `types()`
 strategy and its supporting strategies.
 
-## Proposed Structure
+## Current Structure
 
 ### Source (`src/hypothesis_awkward/strategies/types/`)
+
+```text
+src/hypothesis_awkward/strategies/types/
+├── __init__.py      # Re-exports all public strategies
+└── numpy_.py        # numpy_types()
+```
+
+Future files (not implemented now):
 
 ```text
 src/hypothesis_awkward/strategies/types/
@@ -27,6 +35,14 @@ src/hypothesis_awkward/strategies/types/
 ```
 
 ### Tests (`tests/strategies/types/`)
+
+```text
+tests/strategies/types/
+├── __init__.py
+└── test_numpy_types.py   # numpy_types() tests
+```
+
+Future files (not implemented now):
 
 ```text
 tests/strategies/types/
@@ -136,7 +152,7 @@ src/hypothesis_awkward/strategies/
 
 For TDD, implement in this order (simplest to most complex):
 
-1. **`numpy_.py`** - Leaf type, no recursion, foundation for others
+1. ~~**`numpy_.py`** - Leaf type, no recursion, foundation for others~~ ✓
 2. **`string.py`** - Simple, deterministic output
 3. **`list_.py`** - First container type, takes content strategy
 4. **`regular.py`** - Similar to list, adds size parameter
@@ -149,7 +165,17 @@ Each step: write tests first, then implement to pass tests.
 
 ## Public API Exports
 
-The `__init__.py` should export:
+### Current `__init__.py`
+
+```python
+__all__ = [
+    'numpy_types',
+]
+
+from .numpy_ import numpy_types
+```
+
+### Future `__init__.py` (when all strategies are implemented)
 
 ```python
 from hypothesis_awkward.strategies.types.list_ import list_types

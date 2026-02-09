@@ -1,48 +1,37 @@
 # Types Strategy Tests Progress
 
 **Date:** 2026-01-22
-**Status:** In progress
+**Updated:** 2026-02-09
+**Status:** Paused (focus shifted to constructors/arrays)
 
 ## Completed
 
-- [tests/strategies/types/test_numpy_types.py](../../tests/strategies/types/test_numpy_types.py) - Done and staged
+- [tests/strategies/types/test_numpy_types.py](../../tests/strategies/types/test_numpy_types.py) - Done
 - `numpy_types()` strategy implemented and tests pass
 
-## In Progress
+## Resolved: Testing `content` Strategy Parameter
 
-- [tests/strategies/types/test_list_types.py](../../tests/strategies/types/test_list_types.py) - Draft, not staged
+The open question about testing strategy-valued parameters (like
+`list_types(content=...)`) was resolved in later work. The `st_ak.RecordDraws`
+pattern was adopted:
 
-### Open Question: Testing `content` parameter
+- Wrap the strategy in `st_ak.RecordDraws(...)` to record drawn values
+- Use `st_ak.Opts` with `reset()` to clear recorders between draws
+- Use `match` / `case` in assertions to distinguish concrete values from
+  `RecordDraws` instances
 
-The `list_types(content=...)` parameter accepts a `SearchStrategy[ak.types.Type]`.
-This creates a testing challenge:
+This pattern is now documented in
+[testing-patterns.md](./../../.claude/rules/testing-patterns.md) and used in:
 
-- We can't verify that the result came from a specific strategy
-- Unlike boolean flags (`allow_nan=False` → no NaN in result), a strategy
-  parameter doesn't have an easily testable constraint
-
-**Current approach:**
-
-- `list_types_kwargs()` generates `content` as either `None` or
-  `st.just(st_ak.numpy_types())`
-- Main test only verifies: if `content=None`, result.content is `NumpyType`
-- `find()` tests cover custom content case
-
-**Possible alternatives:**
-
-1. Remove `content` from kwargs strategy entirely (only test default)
-2. Generate a concrete `Type` and wrap it in `st.just()` for testing
-3. Accept that strategy parameters aren't fully testable in main property test
-
-This same issue will apply to: `regular_types()`, `option_types()`,
-`record_types()`, `union_types()` - all have `content` strategy parameters.
+- `tests/strategies/forms/test_numpy_forms.py`
+- `tests/strategies/constructors/test_arrays.py`
 
 ## Remaining Tests to Write
 
 Per the API design doc order:
 
 1. ~~`numpy_types()`~~ ✓
-2. `list_types()` ← current (draft exists)
+2. `list_types()` (draft was removed in commit 7681f31)
 3. `regular_types()`
 4. `option_types()`
 5. `record_types()`
@@ -50,13 +39,11 @@ Per the API design doc order:
 7. `string_types()` / `bytestring_types()`
 8. `types()` (main recursive strategy)
 
-## Next Session Prompt
+## Notes
 
-```text
-Continue tests for types strategies.
-
-See .design/notes/2026-01-22-types-tests-progress.md for status.
-
-Open question: how to test `content` strategy parameter in list_types().
-Current draft: tests/strategies/types/test_list_types.py (not staged)
-```
+- The `list_types()` draft test file was removed (commit 7681f31) along with
+  `pragma: no cover` cleanup. The corresponding `list_types()` strategy was
+  never implemented.
+- Development focus shifted to the `constructors/arrays()` strategy, which
+  generates actual arrays via direct Content constructors rather than going
+  through the Type -> Form -> buffer pipeline.

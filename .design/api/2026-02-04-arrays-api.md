@@ -1,16 +1,16 @@
 # API Design: `arrays()` Strategy
 
 **Date:** 2026-02-04
-**Status:** Draft
+**Status:** Implemented (initial version)
 **Author:** Claude (with developer collaboration)
 
 ## Overview
 
-This document proposes an API for the `arrays()` strategy, which generates
-`ak.Array` objects via direct Content constructors. The initial version supports
-only `NumpyArray` as the layout node type. The design anticipates progressive
-addition of `ListOffsetArray`, `RecordArray`, option types, unions, and more in
-later iterations.
+This document describes the API for the `arrays()` strategy, which generates
+`ak.Array` objects via direct Content constructors. The current implementation
+generates arrays with `NumpyArray` leaf contents nested in `RegularArray`,
+`ListOffsetArray`, and `ListArray` wrappers. The design anticipates progressive
+addition of `RecordArray`, option types, unions, and more in later iterations.
 
 ## Background
 
@@ -63,7 +63,7 @@ paths than the canonical representations produced by `from_type()`.
 5. **Composition with types/forms (future)**: The API should accommodate `type`
    and `form` parameters when those pipelines are connected
 
-## Proposed API
+## API
 
 ### Main Strategy: `arrays()`
 
@@ -77,17 +77,15 @@ def arrays(
     allow_nan: bool = False,
 
     # --- Size control ---
-    max_length: int = 5,
+    max_size: int = 10,
 
-    # --- Node type control (future expansion point) ---
-    allow_list: bool = False,
-    allow_record: bool = False,
-    allow_option: bool = False,
-    allow_union: bool = False,
-    allow_string: bool = False,
+    # --- Node type control ---
+    allow_regular: bool = True,
+    allow_list_offset: bool = True,
+    allow_list: bool = True,
 
-    # --- Nesting control (future expansion point) ---
-    max_depth: int = 3,
+    # --- Nesting control ---
+    max_depth: int = 5,
 ) -> ak.Array:
 ```
 
@@ -116,45 +114,39 @@ Generate potentially `NaN`/`NaT` values for relevant dtypes.
 - `True`: `NaN`/`NaT` values may appear.
 - Same semantics as `numpy_arrays(allow_nan=...)`.
 
-#### `max_length`
+#### `max_size`
 
-Maximum number of elements in the outermost array dimension (i.e., `len(result)`).
+Maximum total number of scalar values in the generated array.
 
-- Default: `5`.
-- This controls the top-level length, not the total number of scalars.
-- Name is `max_length` rather than `max_size` to distinguish it from
-  `numpy_arrays(max_size=...)`, which limits the total number of elements across
-  all dimensions.
+- Default: `10`.
+- Controls the total scalar budget across all leaf `NumpyArray` nodes, not just
+  the outermost dimension length.
+- Uses a "budgeted leaf" approach: each leaf draws up to the remaining budget,
+  preventing compound arrays from growing unboundedly.
 
-Why `5` and not `10`? As more node types are added, compound arrays multiply the
-amount of generated data. A smaller default avoids slow tests while still
-providing meaningful coverage. This is the outermost dimension only; nested
-structures can grow in depth.
+#### `allow_regular`, `allow_list_offset`, `allow_list`
 
-#### `allow_list`, `allow_record`, `allow_option`, `allow_union`, `allow_string`
+Control which structural Content node types are enabled.
 
-Control which Content node types are enabled.
+- All default to `True`.
+- `allow_regular`: Generate `RegularArray` wrappers (fixed-size lists).
+- `allow_list_offset`: Generate `ListOffsetArray` wrappers (variable-length lists
+  via offsets).
+- `allow_list`: Generate `ListArray` wrappers (variable-length lists via
+  starts/stops).
+- When all three are `False`, only flat `NumpyArray`-backed arrays are generated.
 
-- All default to `False` in the initial version.
-- This means `arrays()` with no arguments generates flat `NumpyArray`-backed
-  arrays -- the simplest case.
-- As each node type is implemented, its default switches to `True`.
-- Boolean flags follow the convention established in the `types()` API design.
-
-When all flags are `False` (initial version), only `NumpyArray` is used: a 1-D
-NumPy array wrapped in `ak.contents.NumpyArray` and then `ak.Array`.
+Future node type flags (not yet implemented): `allow_record`, `allow_option`,
+`allow_union`, `allow_string`.
 
 #### `max_depth`
 
-Maximum nesting depth for recursive node types.
+Maximum nesting depth for structural wrappers.
 
-- Default: `3`.
-- `max_depth=0` forces leaf-only arrays (same as all `allow_*` flags being
-  `False`).
-- In the initial (NumpyArray-only) version, this parameter has no effect because
-  there are no recursive node types.
-- Included from the start so the interface is stable when list/record/option
-  types are added.
+- Default: `5`.
+- `max_depth=0` forces leaf-only arrays (flat `NumpyArray`).
+- The strategy draws a random depth between 0 and `max_depth`, then applies that
+  many randomly chosen wrappers (`RegularArray`, `ListOffsetArray`, `ListArray`).
 
 ### Return Type
 
@@ -214,103 +206,83 @@ st_ak.constructors.arrays(dtypes=non_datetime)
 This keeps the `arrays()` parameter list focused on structural concerns. The
 `dtypes` parameter already provides this control.
 
-## Implementation Strategy
+## Implementation
 
-### Initial Version (NumpyArray Only)
+### Wrappers Pattern
 
-The initial implementation is straightforward:
+The actual implementation uses a "wrappers" pattern rather than a recursive
+`_contents()` strategy. The approach:
+
+1. **Leaf strategy**: `_numpy_leaf()` generates a 1-D `NumpyArray` Content via
+   `numpy_arrays()` with `allow_structured=False` and `max_dims=1`.
+2. **Budgeted leaf**: `_budgeted_leaf()` wraps the leaf strategy with a scalar
+   budget (closure over `remaining` counter) so the total number of scalars
+   across all leaves stays within `max_size`.
+3. **Wrapper functions**: `_wrap_regular()`, `_wrap_list_offset()`, and
+   `_wrap_list()` each take a child Content strategy and wrap the drawn child in
+   the corresponding structural node.
+4. **Composition**: The main `arrays()` draws a random depth (0 to `max_depth`),
+   chooses a wrapper for each level, draws a leaf, then applies wrappers from
+   innermost to outermost.
 
 ```python
 @st.composite
-def arrays(draw, dtypes=None, allow_nan=False, max_length=5, **_future) -> ak.Array:
-    data = draw(
-        numpy_arrays(
-            dtype=dtypes,
-            allow_structured=False,
-            allow_nan=allow_nan,
-            allow_inner_shape=False,
-            max_size=max_length,
-        )
-    )
+def arrays(draw, dtypes=None, max_size=10, allow_nan=False,
+           allow_regular=True, allow_list_offset=True,
+           allow_list=True, max_depth=5) -> ak.Array:
+    wrappers = []
+    if allow_regular:
+        wrappers.append(_wrap_regular)
+    if allow_list_offset:
+        wrappers.append(_wrap_list_offset)
+    if allow_list:
+        wrappers.append(_wrap_list)
 
-    layout = ak.contents.NumpyArray(data)
+    if not wrappers or max_size == 0:
+        layout = draw(_numpy_leaf(dtypes, allow_nan, max_size))
+    else:
+        leaf_st = _budgeted_leaf(dtypes, allow_nan, max_size)
+        depth = draw(st.integers(min_value=0, max_value=max_depth))
+        chosen_wrappers = [draw(st.sampled_from(wrappers)) for _ in range(depth)]
+        layout = draw(leaf_st)
+        for wrapper in reversed(chosen_wrappers):
+            layout = draw(wrapper(st.just(layout)))
+
     return ak.Array(layout)
 ```
 
-Delegates to `numpy_arrays()` with restricted options:
+### Future Expansion
 
-- `allow_structured=False` and `allow_inner_shape=False` ensure 1-D simple arrays
-- `max_size=max_length` maps directly since the array is 1-D
-- Wraps in `NumpyArray` layout explicitly (not via `ak.from_numpy`)
+When adding `RecordArray`, option types, and unions, the wrappers pattern will
+need to evolve to handle content nesting constraints (e.g., option nodes cannot
+wrap other option nodes). This may require switching to the `_contents()`
+recursive strategy sketched in the original design, or adding a `_forbidden`
+parameter to wrappers.
 
-### Future Version Sketch (After Adding More Node Types)
+## Internal Strategies
 
-```python
-@st.composite
-def arrays(draw, ..., max_depth=3) -> ak.Array:
-    layout = draw(_contents(
-        dtypes=dtypes,
-        allow_nan=allow_nan,
-        max_length=max_length,
-        allow_list=allow_list,
-        allow_record=allow_record,
-        allow_option=allow_option,
-        allow_union=allow_union,
-        allow_string=allow_string,
-        max_depth=max_depth,
-    ))
-    return ak.Array(layout)
-```
+### `_numpy_leaf()`
 
-Where `_contents()` is an internal recursive strategy that generates `Content`
-layouts. The recursion pattern mirrors the `types()` implementation strategy:
+Generates a 1-D `NumpyArray` Content via `numpy_arrays()`:
 
 ```python
-@st.composite
-def _contents(draw, ..., max_depth, _forbidden=frozenset()):
-    if max_depth <= 0:
-        return draw(_numpy_arrays(...))
-
-    strategies = [_numpy_arrays(...)]
-
-    if allow_list and 'list' not in _forbidden:
-        strategies.append(_list_offset_arrays(..., max_depth=max_depth - 1))
-
-    if allow_option and 'option' not in _forbidden:
-        strategies.append(_option_arrays(
-            ..., max_depth=max_depth - 1,
-            _forbidden=_forbidden | {'option', 'indexed', 'union'},
-        ))
-
-    # etc.
-
-    return draw(st.one_of(*strategies))
+def _numpy_leaf(dtypes, allow_nan, max_size) -> st.SearchStrategy[ak.contents.NumpyArray]:
+    return st_ak.numpy_arrays(
+        dtype=dtypes, allow_structured=False,
+        allow_nan=allow_nan, max_dims=1, max_size=max_size,
+    ).map(ak.contents.NumpyArray)
 ```
 
-The `_forbidden` set enforces the Content nesting constraints documented in the
-direct constructors research (e.g., option nodes cannot wrap other option nodes).
+### `_budgeted_leaf()`
 
-## Supporting Strategies
+Wraps `_numpy_leaf()` with a scalar budget via a closure. Each draw decrements
+`remaining`; when the budget is exhausted, raises `_BudgetExhausted`.
 
-### `numpy_array_contents()`
+### `_wrap_regular()`, `_wrap_list_offset()`, `_wrap_list()`
 
-An internal strategy for generating `NumpyArray` Content nodes:
-
-```python
-@st.composite
-def _numpy_array_contents(
-    draw: st.DrawFn,
-    dtypes: st.SearchStrategy[np.dtype] | None = None,
-    allow_nan: bool = False,
-    length: int | st.SearchStrategy[int] | None = None,
-    max_length: int = 5,
-) -> ak.contents.NumpyArray:
-```
-
-This is internal (not exported) because users interact with `arrays()`. The
-`length` parameter is needed for recursive generation where parent nodes
-determine child lengths (e.g., `RegularArray` needs content of length
-`n * size`).
+Each takes a child Content strategy, draws the child, and wraps it in the
+corresponding structural node with randomly generated parameters (offsets, size,
+etc.).
 
 ### Relationship to Existing Strategies
 
@@ -326,15 +298,9 @@ New:
 ```
 
 `arrays()` delegates to `numpy_arrays()` with `allow_structured=False` and
-`allow_inner_shape=False` to obtain a 1-D simple NumPy array, then wraps it in
+`max_dims=1` to obtain a 1-D simple NumPy array, then wraps it in
 `ak.contents.NumpyArray` directly. This reuses the existing dtype handling and
 empty-array generation logic in `numpy_arrays()`.
-
-The existing `from_numpy()` and `numpy_arrays()` remain as-is. `from_numpy()`
-serves a different purpose: generating arrays specifically via the
-`ak.from_numpy()` path, which includes structured arrays (RecordArray) and
-multi-dimensional arrays. The `arrays()` strategy exercises the direct
-constructor path.
 
 ## Module Location
 
@@ -344,25 +310,24 @@ constructor path.
 src/hypothesis_awkward/strategies/
 +-- constructors/
 |   +-- __init__.py           # Re-exports arrays()
-|   +-- arrays.py             # Main arrays() strategy
-|   +-- numpy_.py             # _numpy_array_contents() internal helper
+|   +-- arrays_.py            # arrays() strategy and internal helpers
 +-- builtins_/
 +-- forms/
 +-- misc/
 +-- numpy/
 +-- pandas/
 +-- types/
-+-- __init__.py               # Add arrays to public API
++-- __init__.py               # Re-exports arrays via constructors namespace
 ```
 
-As more node types are added, the `constructors/` directory grows:
+All internal helpers (`_numpy_leaf`, `_budgeted_leaf`, `_wrap_regular`,
+`_wrap_list_offset`, `_wrap_list`) live in `arrays_.py`. As more node types are
+added, they may be split into separate files:
 
 ```text
 src/hypothesis_awkward/strategies/constructors/
 +-- __init__.py
-+-- arrays.py                 # Main arrays() strategy
-+-- numpy_.py                 # _numpy_array_contents()
-+-- list_.py                  # _list_offset_array_contents(), etc. (future)
++-- arrays_.py                # Main arrays() strategy + current helpers
 +-- record.py                 # _record_array_contents() (future)
 +-- option.py                 # _option_array_contents() (future)
 +-- union.py                  # _union_array_contents() (future)
@@ -379,44 +344,38 @@ import hypothesis_awkward.strategies as st_ak
 st_ak.constructors.arrays()
 ```
 
-Not re-exported at the `st_ak` top level. This keeps `constructors` as a
-distinct namespace, leaving room for alternative approaches (e.g.,
-`st_ak.builders.arrays()`) without name collisions.
+Not re-exported at the `st_ak` top level. The `constructors` module is imported
+as a namespace (`from . import constructors`), so it is accessed as
+`st_ak.constructors.arrays()`.
 
 ## Design Decisions
 
-### 1. `allow_*` Flags Default to `False` Initially
+### 1. Implemented `allow_*` Flags Default to `True`
 
-**Decision:** All `allow_*` flags for unimplemented node types default to
-`False`. As each node type is implemented, its default changes to `True`.
-
-**Rationale:**
-
-- Prevents users from passing `allow_list=True` and getting an error because
-  lists are not yet implemented.
-- The initial `arrays()` generates only flat arrays, which is explicit and
-  predictable.
-- Each new node type is a non-breaking additive change: the default becomes
-  `True`, expanding what `arrays()` generates.
-
-**Trade-off:** Users upgrading to a version where `allow_list` defaults to
-`True` will start seeing list arrays where they previously saw only flat arrays.
-This is acceptable because property-based testing should be robust to expanded
-input space. Users who need stable behavior can pin `allow_list=False`.
-
-### 2. `max_length` Instead of `max_size`
-
-**Decision:** Use `max_length` to control the outermost dimension length.
+**Decision:** `allow_regular`, `allow_list_offset`, and `allow_list` default to
+`True`. Future flags for unimplemented node types will be added when those node
+types are implemented.
 
 **Rationale:**
 
-- `max_size` in `numpy_arrays()` controls the total number of elements across
-  all dimensions. This makes sense for multi-dimensional NumPy arrays.
-- In `arrays()`, the outermost dimension length is the natural control point.
-  Inner structure (list lengths, record field counts) will have separate
-  controls.
-- `max_length` is clearer: it is `len(result)`.
-- Avoids confusion with `numpy_arrays(max_size=...)`.
+- Maximizes coverage by default -- `arrays()` with no arguments generates a
+  variety of structural layouts.
+- Users who want flat arrays can set all flags to `False`.
+- New `allow_*` flags will be added (defaulting to `True`) as new node types are
+  implemented.
+
+### 2. `max_size` (Total Scalar Budget)
+
+**Decision:** Use `max_size` to control the total number of scalar values across
+all leaf `NumpyArray` nodes.
+
+**Rationale:**
+
+- In nested structures, controlling the outermost dimension length alone does
+  not bound total array size.
+- A scalar budget provides a natural cap that works regardless of nesting depth.
+- The "budgeted leaf" approach (closure with `remaining` counter) ensures the
+  budget is respected across multiple leaf draws.
 
 ### 3. Return `ak.Array`, Not `Content`
 
@@ -476,26 +435,21 @@ interface strict and revisit based on user feedback.
 - Follows the pattern of `types/`, `forms/`, etc.
 - `strategies/numpy/` is for the NumPy-specific path (`ak.from_numpy`).
 
-### 7. Include `allow_*` Flags for Unimplemented Types from the Start
+### 7. Add `allow_*` Flags Only When Implemented
 
-**Decision:** Include `allow_list`, `allow_record`, etc. in the initial
-signature even though they are not yet implemented.
+**Decision:** Only include `allow_*` flags for node types that are actually
+implemented. Currently: `allow_regular`, `allow_list_offset`, `allow_list`.
 
 **Rationale:**
 
-- Documents the intended scope of the strategy.
-- Users can see what will be supported.
-- The flags raise no errors (they just have no effect when `False`).
-- Adding new parameters later would change the function signature, which could
-  surprise users who rely on positional arguments (though keyword-only is
-  preferred).
-
-**Alternative considered:** Adding flags only when implemented. Rejected because
-it makes the API surface unstable across versions.
+- Avoids dead parameters that have no effect.
+- The signature grows as features are added, which is natural for an
+  experimental strategy.
+- Keyword-only arguments make this a non-breaking change.
 
 ## Usage Examples
 
-### Basic Usage (Initial Version)
+### Basic Usage
 
 ```python
 import hypothesis_awkward.strategies as st_ak
@@ -503,9 +457,8 @@ from hypothesis import given
 
 @given(a=st_ak.constructors.arrays())
 def test_something(a):
-    # a is a flat ak.Array backed by NumpyArray
+    # a is an ak.Array, possibly nested with RegularArray/ListOffsetArray/ListArray
     assert isinstance(a, ak.Array)
-    assert isinstance(a.layout, ak.contents.NumpyArray)
 ```
 
 ### Specific Dtype
@@ -513,10 +466,12 @@ def test_something(a):
 ```python
 import numpy as np
 from hypothesis import strategies as st
+from hypothesis_awkward.util import iter_numpy_arrays
 
 @given(a=st_ak.constructors.arrays(dtypes=st.just(np.dtype('float64'))))
 def test_float_arrays(a):
-    assert a.layout.dtype == np.dtype('float64')
+    for leaf in iter_numpy_arrays(a):
+        assert leaf.dtype == np.dtype('float64')
 ```
 
 ### Integer Dtypes Only
@@ -526,7 +481,8 @@ int_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'i')
 
 @given(a=st_ak.constructors.arrays(dtypes=int_dtypes))
 def test_integer_arrays(a):
-    assert a.layout.dtype.kind == 'i'
+    for leaf in iter_numpy_arrays(a):
+        assert leaf.dtype.kind == 'i'
 ```
 
 ### Allow NaN
@@ -540,22 +496,23 @@ def test_nan_handling(a):
     ...
 ```
 
-### Control Length
+### Control Size
 
 ```python
-@given(a=st_ak.constructors.arrays(max_length=100))
+@given(a=st_ak.constructors.arrays(max_size=100))
 def test_larger_arrays(a):
-    assert len(a) <= 100
+    # Total scalar count across all leaves is at most 100
+    ...
 ```
 
-### Future: With Lists and Records
+### Flat Arrays Only
 
 ```python
-# Once allow_list and allow_record are implemented:
-@given(a=st_ak.constructors.arrays(allow_list=True, allow_record=True, max_depth=2))
-def test_nested_arrays(a):
-    # a could be flat, a list of lists, a record, etc.
-    assert isinstance(a, ak.Array)
+@given(a=st_ak.constructors.arrays(
+    allow_regular=False, allow_list_offset=False, allow_list=False,
+))
+def test_flat_arrays(a):
+    assert isinstance(a.layout, ak.contents.NumpyArray)
 ```
 
 ### Future: With Type Constraint
@@ -572,14 +529,20 @@ def test_typed_arrays(a):
 Following the patterns in
 [testing-patterns.md](./../../.claude/rules/testing-patterns.md):
 
+Tests are implemented in `tests/strategies/constructors/test_arrays.py`.
+
 ### 1. TypedDict for kwargs
 
 ```python
 class ArraysKwargs(TypedDict, total=False):
     '''Options for `arrays()` strategy.'''
     dtypes: st.SearchStrategy[np.dtype] | None
+    max_size: int
     allow_nan: bool
-    max_length: int
+    allow_regular: bool
+    allow_list_offset: bool
+    allow_list: bool
+    max_depth: int
 ```
 
 ### 2. Strategy for kwargs with `st_ak.RecordDraws` and `st_ak.Opts`
@@ -595,8 +558,12 @@ def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
                     st.none(),
                     st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
                 ),
+                'max_size': st.integers(min_value=0, max_value=50),
                 'allow_nan': st.booleans(),
-                'max_length': st.integers(min_value=0, max_value=50),
+                'allow_regular': st.booleans(),
+                'allow_list_offset': st.booleans(),
+                'allow_list': st.booleans(),
+                'max_depth': st.integers(min_value=0, max_value=5),
             },
         )
         .map(lambda d: cast(ArraysKwargs, d))
@@ -606,86 +573,24 @@ def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
 
 ### 3. Main property-based test
 
-```python
-@settings(max_examples=200)
-@given(data=st.data())
-def test_arrays(data: st.DataObject) -> None:
-    '''Test that `arrays()` respects all its options.'''
-    # Draw options
-    opts = data.draw(arrays_kwargs(), label='opts')
-    opts.reset()
-
-    # Call the test subject
-    a = data.draw(st_ak.constructors.arrays(**opts.kwargs), label='a')
-
-    # Assert the result is always an ak.Array backed by NumpyArray
-    assert isinstance(a, ak.Array)
-    assert isinstance(a.layout, ak.contents.NumpyArray)
-
-    # Assert the layout data is 1-D
-    assert len(a.layout.data.shape) == 1
-
-    # Assert the options were effective
-    dtypes = opts.kwargs.get('dtypes', None)
-    allow_nan = opts.kwargs.get('allow_nan', False)
-    max_length = opts.kwargs.get('max_length', DEFAULT_MAX_LENGTH)
-
-    note(f'{a=}')
-    note(f'{a.layout.dtype=}')
-
-    assert len(a) <= max_length
-
-    match dtypes:
-        case None:
-            pass
-        case st_ak.RecordDraws():
-            drawn_dtype_names = {d.name for d in dtypes.drawn}
-            assert a.layout.dtype.name in drawn_dtype_names
-
-    if not allow_nan:
-        assert not any_nan_nat_in_awkward_array(a)
-```
+Verifies all options are respected: `max_size` (total scalars), per-type gating
+(`allow_regular`, `allow_list_offset`, `allow_list`), dtypes via leaf arrays,
+`allow_nan`, and `max_depth`.
 
 ### 4. Edge case reachability tests
 
-```python
-def test_draw_empty() -> None:
-    '''Assert that empty arrays can be drawn by default.'''
-    find(
-        st_ak.constructors.arrays(),
-        lambda a: len(a) == 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+Tests use `find()` to verify that the strategy can produce:
 
-
-def test_draw_max_length() -> None:
-    '''Assert that arrays with max_length elements can be drawn.'''
-    find(
-        st_ak.constructors.arrays(),
-        lambda a: len(a) == DEFAULT_MAX_LENGTH,
-        settings=settings(phases=[Phase.generate]),
-    )
-
-
-def test_draw_nan() -> None:
-    '''Assert that arrays with NaN can be drawn when allowed.'''
-    float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
-    find(
-        st_ak.constructors.arrays(dtypes=float_dtypes, allow_nan=True),
-        any_nan_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_integer_dtype() -> None:
-    '''Assert that integer dtype arrays can be drawn.'''
-    int_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'i')
-    find(
-        st_ak.constructors.arrays(dtypes=int_dtypes),
-        lambda a: a.layout.dtype.kind == 'i',
-        settings=settings(phases=[Phase.generate]),
-    )
-```
+- Empty arrays
+- Arrays using the full scalar budget
+- Arrays with NaN (when allowed)
+- Integer dtype arrays
+- Arrays at exactly `max_depth`
+- Nested arrays (depth >= 2)
+- `RegularArray` with size=0
+- `ListOffsetArray` and `ListArray`
+- Variable-length sublists
+- Empty sublists
 
 ### 5. File structure for tests
 
@@ -730,17 +635,15 @@ Generate `Type` objects, convert to `Form`, then to arrays.
 - One type maps to multiple forms; need to resolve ambiguity.
 - Can be added later via the `type` parameter.
 
-### Alternative D: `max_size` Instead of `max_length`
+### Alternative D: `max_length` Instead of `max_size`
 
-Use `max_size` as in `numpy_arrays()`.
+Control the outermost dimension length rather than total scalars.
 
 **Rejected because:**
 
-- In nested structures, "total size" is ambiguous (total scalars? total
-  elements at each level?).
-- `max_length` is unambiguous: it is `len(result)`.
-- Inner structure sizes will be controlled separately when those node types are
-  added.
+- In nested structures, outermost length alone does not bound total array size.
+- A scalar budget (`max_size`) provides a natural cap regardless of nesting depth.
+- The "budgeted leaf" approach made `max_size` straightforward to implement.
 
 ### Alternative E: Accept Plain `np.dtype` for `dtypes`
 
@@ -771,17 +674,21 @@ Accept `np.dtype | st.SearchStrategy[np.dtype] | None` as in `numpy_arrays()`.
    determines the structure and `allow_*` flags are ignored (similar to how
    `numpy_forms(type_=...)` ignores other parameters).
 
-4. **Default `max_length` value?** `5` is proposed. The existing
-   `numpy_arrays()` uses `max_size=10`. A smaller default is appropriate because
-   compound arrays amplify size. However, for the initial flat-only version,
-   `10` might be equally reasonable. The value should be a module-level constant
-   (`DEFAULT_MAX_LENGTH = 5`) for easy adjustment.
+## Completed
+
+1. ~~Implement `arrays()` with NumpyArray-only support~~ ✓
+2. ~~Add `RegularArray`, `ListOffsetArray`, `ListArray` support~~ ✓
+3. ~~Add scalar budget approach (`max_size`)~~ ✓
+4. ~~Add `max_depth` parameter~~ ✓
+5. ~~Add tests following the testing plan~~ ✓
+6. ~~Export from `strategies/__init__.py`~~ ✓
 
 ## Next Steps
 
-1. Implement `arrays()` with NumpyArray-only support
-2. Add tests following the testing plan above
-3. Export from `strategies/__init__.py`
-4. Validate that the interface feels natural for the NumpyArray case
-5. Design internal `_contents()` recursive strategy for adding
-   `ListOffsetArray` in the next iteration
+1. Add `RecordArray` support (`allow_record`)
+2. Add option type support (`allow_option`) -- `IndexedOptionArray`,
+   `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`
+3. Add `UnionArray` support (`allow_union`)
+4. Add string/bytestring support (`allow_string`)
+5. Implement content nesting constraint enforcement
+6. Consider connecting `type`/`form` parameters
