@@ -119,7 +119,6 @@ def arrays(
     allow_list_offset: bool = True,
     allow_list: bool = True,
     max_size: int = 10,
-    max_depth: int = 3,
 ):
 ```
 
@@ -131,7 +130,6 @@ def arrays(
 | `allow_list_offset` | No `ListOffsetArray` is generated if `False`. |
 | `allow_list` | No `ListArray` is generated if `False`. |
 | `max_size` | Maximum total number of scalar values in the generated array. |
-| `max_depth` | Maximum depth of nested arrays. |
 
 ## Other strategies
 

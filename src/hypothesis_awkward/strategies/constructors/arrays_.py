@@ -24,7 +24,6 @@ def arrays(
     allow_list_offset: bool = True,
     allow_list: bool = True,
     max_size: int = 10,
-    max_depth: int = 3,
 ) -> ak.Array:
     '''Strategy for Awkward Arrays.
 
@@ -47,8 +46,6 @@ def arrays(
         No ``ListArray`` is generated if ``False``.
     max_size
         Maximum total number of scalar values in the generated array.
-    max_depth
-        Maximum depth of nested arrays.
 
     Examples
     --------
@@ -64,19 +61,19 @@ def arrays(
     if allow_list:
         wrappers.append(_wrap_list)
 
-    effective_max_depth = max_depth if wrappers else 0
-    base = _numpy_leaf(dtypes, allow_nan, max_size)
-    if effective_max_depth == 0:
-        layout = draw(base)
+    if not wrappers or max_size == 0:
+        layout = draw(_numpy_leaf(dtypes, allow_nan, max_size))
     else:
-        max_leaves = 2 ** (effective_max_depth - 1)
+        max_numpy_array_size = draw(st.integers(min_value=1, max_value=max_size))
+        max_leaves = max_size // max_numpy_array_size
 
         def extend(
             children: st.SearchStrategy[ak.contents.Content],
         ) -> st.SearchStrategy[ak.contents.Content]:
             return st.one_of(*[w(children) for w in wrappers])
 
-        layout = draw(st.recursive(base, extend, max_leaves=max_leaves))
+        leaf = _numpy_leaf(dtypes, allow_nan, max_numpy_array_size)
+        layout = draw(st.recursive(leaf, extend, max_leaves=max_leaves))
     return ak.Array(layout)
 
 
@@ -106,12 +103,8 @@ def _wrap_regular(
     if child_len == 0:
         size = draw(st.integers(min_value=0, max_value=MAX_REGULAR_SIZE))
         if size == 0:
-            zeros_length = draw(
-                st.integers(min_value=0, max_value=MAX_REGULAR_SIZE)
-            )
-            return ak.contents.RegularArray(
-                child, size=0, zeros_length=zeros_length
-            )
+            zeros_length = draw(st.integers(min_value=0, max_value=MAX_REGULAR_SIZE))
+            return ak.contents.RegularArray(child, size=0, zeros_length=zeros_length)
         return ak.contents.RegularArray(child, size=size)
     divisors = [
         d

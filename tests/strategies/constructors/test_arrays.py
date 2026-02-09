@@ -1,3 +1,4 @@
+import inspect
 from typing import TypedDict, cast
 
 import numpy as np
@@ -13,7 +14,6 @@ from hypothesis_awkward.util import (
 )
 
 DEFAULT_MAX_SIZE = 10
-DEFAULT_MAX_DEPTH = 3
 
 
 class ArraysKwargs(TypedDict, total=False):
@@ -25,7 +25,6 @@ class ArraysKwargs(TypedDict, total=False):
     allow_list_offset: bool
     allow_list: bool
     max_size: int
-    max_depth: int
 
 
 def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
@@ -43,7 +42,6 @@ def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
                 'max_size': st.integers(min_value=0, max_value=50),
-                'max_depth': st.integers(min_value=0, max_value=3),
             },
         )
         .map(lambda d: cast(ArraysKwargs, d))
@@ -72,10 +70,9 @@ def test_arrays(data: st.DataObject) -> None:
     allow_list_offset = opts.kwargs.get('allow_list_offset', True)
     allow_list = opts.kwargs.get('allow_list', True)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
-    # Flat NumpyArray when all structural types disabled or depth is zero
-    if (not allow_regular and not allow_list_offset and not allow_list) or max_depth == 0:
+    # Flat NumpyArray when all structural types disabled
+    if not allow_regular and not allow_list_offset and not allow_list:
         assert isinstance(a.layout, ak.contents.NumpyArray)
 
     # Per-type gating
@@ -100,8 +97,6 @@ def test_arrays(data: st.DataObject) -> None:
 
     assert _total_scalars(a) <= max_size
 
-    assert _nesting_depth(a) <= max_depth
-
 
 def test_draw_empty() -> None:
     '''Assert that empty arrays can be drawn by default.'''
@@ -114,11 +109,11 @@ def test_draw_empty() -> None:
 
 def test_draw_max_size() -> None:
     '''Assert that arrays with max_size scalars can be drawn.'''
-    max_size = 20
+    max_size = 8
     find(
         st_ak.constructors.arrays(max_size=max_size),
         lambda a: _total_scalars(a) == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=settings(phases=[Phase.generate], max_examples=10000),
     )
 
 
@@ -142,12 +137,17 @@ def test_draw_integer_dtype() -> None:
     )
 
 
-def test_draw_max_depth() -> None:
-    '''Assert that arrays at exactly max_depth levels of nesting can be drawn.'''
-    max_depth = 4
+def test_arrays_no_max_depth_parameter() -> None:
+    '''Assert that arrays() does not accept a max_depth parameter.'''
+    sig = inspect.signature(st_ak.constructors.arrays)
+    assert 'max_depth' not in sig.parameters
+
+
+def test_draw_nested() -> None:
+    '''Assert that nested arrays (depth >= 2) can be drawn.'''
     find(
-        st_ak.constructors.arrays(max_depth=max_depth),
-        lambda a: _nesting_depth(a) == max_depth,
+        st_ak.constructors.arrays(max_size=20),
+        lambda a: _nesting_depth(a) >= 2,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
@@ -284,7 +284,10 @@ def _nesting_depth(a: ak.Array) -> int:
     '''Count total structural wrapping layers (RegularArray and ListOffsetArray).'''
     depth = 0
     node: ak.contents.Content = a.layout
-    while isinstance(node, (ak.contents.RegularArray, ak.contents.ListOffsetArray, ak.contents.ListArray)):
+    while isinstance(
+        node,
+        (ak.contents.RegularArray, ak.contents.ListOffsetArray, ak.contents.ListArray),
+    ):
         depth += 1
         node = node.content
     return depth
