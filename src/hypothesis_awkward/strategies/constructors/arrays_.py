@@ -4,7 +4,7 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-from hypothesis_awkward.strategies.numpy import numpy_arrays
+import hypothesis_awkward.strategies as st_ak
 
 MAX_REGULAR_SIZE = 5
 MAX_LIST_LENGTH = 5
@@ -83,7 +83,7 @@ def _numpy_leaf(
     max_size: int,
 ) -> st.SearchStrategy[ak.contents.NumpyArray]:
     '''Base strategy: leaf NumpyArray Content.'''
-    return numpy_arrays(
+    return st_ak.numpy_arrays(
         dtype=dtypes,
         allow_structured=False,
         allow_nan=allow_nan,
