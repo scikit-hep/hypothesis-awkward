@@ -6,8 +6,9 @@ from hypothesis import strategies as st
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 
-MAX_REGULAR_SIZE = 5
-MAX_LIST_LENGTH = 5
+from .list_array import list_array_contents
+from .list_offset_array import list_offset_array_contents
+from .regular_array import regular_array_contents
 
 _ContentsFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
@@ -58,11 +59,11 @@ def arrays(
     '''
     content_fns: list[_ContentsFn] = []
     if allow_regular:
-        content_fns.append(_regular_array_contents)
+        content_fns.append(regular_array_contents)
     if allow_list_offset:
-        content_fns.append(_list_offset_array_contents)
+        content_fns.append(list_offset_array_contents)
     if allow_list:
-        content_fns.append(_list_array_contents)
+        content_fns.append(list_array_contents)
 
     layout: ak.contents.Content
     if not content_fns or max_size == 0:
@@ -120,84 +121,3 @@ def _BudgetedNumpyArrayContents(
 
 class _BudgetExhausted(Exception):
     pass
-
-
-@st.composite
-def _regular_array_contents(
-    draw: st.DrawFn,
-    contents: st.SearchStrategy[ak.contents.Content],
-) -> ak.contents.Content:
-    '''Strategy for RegularArray Content wrapping child Content.'''
-    content = draw(contents)
-    content_len = len(content)
-    if content_len == 0:
-        size = draw(st.integers(min_value=0, max_value=MAX_REGULAR_SIZE))
-        if size == 0:
-            zeros_length = draw(st.integers(min_value=0, max_value=MAX_REGULAR_SIZE))
-            return ak.contents.RegularArray(content, size=0, zeros_length=zeros_length)
-        return ak.contents.RegularArray(content, size=size)
-    divisors = [
-        d
-        for d in range(1, min(content_len + 1, MAX_REGULAR_SIZE + 1))
-        if content_len % d == 0
-    ]
-    size = draw(st.sampled_from(divisors))
-    return ak.contents.RegularArray(content, size=size)
-
-
-@st.composite
-def _list_offset_array_contents(
-    draw: st.DrawFn,
-    contents: st.SearchStrategy[ak.contents.Content],
-) -> ak.contents.Content:
-    '''Strategy for ListOffsetArray Content wrapping child Content.'''
-    content = draw(contents)
-    content_len = len(content)
-    n = draw(st.integers(min_value=0, max_value=MAX_LIST_LENGTH))
-    if n == 0:
-        offsets_list = [0]
-    elif content_len == 0:
-        offsets_list = [0] * (n + 1)
-    else:
-        splits = sorted(
-            draw(
-                st.lists(
-                    st.integers(min_value=0, max_value=content_len),
-                    min_size=n - 1,
-                    max_size=n - 1,
-                )
-            )
-        )
-        offsets_list = [0, *splits, content_len]
-    offsets = np.array(offsets_list, dtype=np.int64)
-    return ak.contents.ListOffsetArray(ak.index.Index64(offsets), content)
-
-
-@st.composite
-def _list_array_contents(
-    draw: st.DrawFn,
-    contents: st.SearchStrategy[ak.contents.Content],
-) -> ak.contents.Content:
-    '''Strategy for ListArray Content wrapping child Content.'''
-    content = draw(contents)
-    content_len = len(content)
-    n = draw(st.integers(min_value=0, max_value=MAX_LIST_LENGTH))
-    if n == 0:
-        offsets_list = [0]
-    elif content_len == 0:
-        offsets_list = [0] * (n + 1)
-    else:
-        splits = sorted(
-            draw(
-                st.lists(
-                    st.integers(min_value=0, max_value=content_len),
-                    min_size=n - 1,
-                    max_size=n - 1,
-                )
-            )
-        )
-        offsets_list = [0, *splits, content_len]
-    offsets = np.array(offsets_list, dtype=np.int64)
-    starts = ak.index.Index64(offsets[:-1])
-    stops = ak.index.Index64(offsets[1:])
-    return ak.contents.ListArray(starts, stops, content)
