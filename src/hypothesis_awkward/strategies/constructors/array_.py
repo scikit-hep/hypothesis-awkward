@@ -9,7 +9,7 @@ from hypothesis_awkward.strategies.contents.list_offset_array import (
     list_offset_array_contents,
 )
 from hypothesis_awkward.strategies.contents.numpy_array import (
-    BudgetedNumpyArrayContents,
+    CountedNumpyArrayContents,
     numpy_array_contents,
 )
 from hypothesis_awkward.strategies.contents.regular_array import (
@@ -75,7 +75,7 @@ def arrays(
     if not content_fns or max_size == 0:
         layout = draw(numpy_array_contents(dtypes, allow_nan, max_size))
     else:
-        leaf_st = BudgetedNumpyArrayContents(dtypes, allow_nan, max_size)
+        leaf_st = CountedNumpyArrayContents(dtypes, allow_nan, max_size)
 
         # Draw nesting depth, then choose a content function for each level.
         depth = draw(st.integers(min_value=0, max_value=max_depth))

@@ -20,19 +20,19 @@ def numpy_array_contents(
     ).map(ak.contents.NumpyArray)
 
 
-def BudgetedNumpyArrayContents(
+def CountedNumpyArrayContents(
     dtypes: st.SearchStrategy[np.dtype] | None,
     allow_nan: bool,
     max_size: int,
 ) -> st.SearchStrategy[ak.contents.NumpyArray]:
-    '''Leaf strategy with a scalar budget.'''
+    '''Leaf strategy with a scalar count limit.'''
     remaining = max_size
 
     @st.composite
     def _contents(draw: st.DrawFn) -> ak.contents.NumpyArray:
         nonlocal remaining
         if remaining == 0:
-            raise BudgetExhausted
+            raise NumpyArrayContentCountExhausted
         result = draw(numpy_array_contents(dtypes, allow_nan, remaining))
         remaining -= len(result)
         return result
@@ -40,5 +40,5 @@ def BudgetedNumpyArrayContents(
     return _contents()
 
 
-class BudgetExhausted(Exception):
+class NumpyArrayContentCountExhausted(Exception):
     pass
