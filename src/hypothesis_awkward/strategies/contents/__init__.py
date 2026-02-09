@@ -1,5 +1,5 @@
 __all__ = [
-    'CountedNumpyArrayContents',
+    'counted_numpy_array_contents',
     'NumpyArrayContentCountExhausted',
     'list_array_contents',
     'list_offset_array_contents',
@@ -10,7 +10,7 @@ __all__ = [
 from .list_array import list_array_contents
 from .list_offset_array import list_offset_array_contents
 from .numpy_array import (
-    CountedNumpyArrayContents,
+    counted_numpy_array_contents,
     NumpyArrayContentCountExhausted,
     numpy_array_contents,
 )

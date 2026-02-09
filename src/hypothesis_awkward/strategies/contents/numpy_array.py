@@ -10,7 +10,7 @@ def numpy_array_contents(
     allow_nan: bool,
     max_size: int,
 ) -> st.SearchStrategy[ak.contents.NumpyArray]:
-    '''Base strategy: leaf NumpyArray Content.'''
+    '''Strategy for NumpyArray content.'''
     return st_ak.numpy_arrays(
         dtype=dtypes,
         allow_structured=False,
@@ -20,12 +20,17 @@ def numpy_array_contents(
     ).map(ak.contents.NumpyArray)
 
 
-def CountedNumpyArrayContents(
+def counted_numpy_array_contents(
     dtypes: st.SearchStrategy[np.dtype] | None,
     allow_nan: bool,
     max_size: int,
 ) -> st.SearchStrategy[ak.contents.NumpyArray]:
-    '''Leaf strategy with a scalar count limit.'''
+    '''Strategy for NumpyArray content with a depleting element count.
+
+    Each draw reduces the remaining element count by the length of
+    the drawn content. Raises ``NumpyArrayContentCountExhausted``
+    when the count reaches zero.
+    '''
     remaining = max_size
 
     @st.composite
