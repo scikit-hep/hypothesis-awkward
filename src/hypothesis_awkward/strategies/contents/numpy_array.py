@@ -20,5 +20,3 @@ def numpy_array_contents(
         min_size=min_size,
         max_size=max_size,
     ).map(ak.contents.NumpyArray)
-
-
