@@ -23,10 +23,10 @@ def CountdownDrawer(
     max_size_total: int = 10,
     max_draws: int = 100,
 ) -> Callable[[], _T | None]:
-    '''Create a draw function that counts down from ``max_size_total``.
+    '''Create a draw function with a shared element budget.
 
-    Each call draws from ``st_`` and subtracts the length of the result
-    from the remaining count. Returns ``None`` once the budget is exhausted,
+    Each call draws from ``st_`` and adds the length of the result
+    to a running total. Returns ``None`` once the budget is exhausted,
     too small to satisfy ``min_size_each``, or the draw limit is reached.
 
     Parameters
@@ -49,17 +49,21 @@ def CountdownDrawer(
 
     max_size_total = draw(st.integers(min_value=0, max_value=max_size_total))
 
+    size_total = 0
+    n_draws = 0
+
     def _draw_content() -> _T | None:
-        nonlocal max_size_total, max_draws
-        if max_draws == 0:
+        nonlocal size_total, n_draws
+        remaining = max_size_total - size_total
+        if n_draws >= max_draws:
             return None
-        if max_size_total == 0 or max_size_total < min_size_each:
+        if remaining <= 0 or remaining < min_size_each:
             return None
-        max_size = safe_min((max_size_each, max_size_total))
+        max_size = safe_min((max_size_each, remaining))
         assert max_size is not None
         result = draw(st_(min_size=min_size_each, max_size=max_size))
-        max_size_total -= len(result)
-        max_draws -= 1
+        size_total += len(result)
+        n_draws += 1
         return result
 
     return _draw_content
