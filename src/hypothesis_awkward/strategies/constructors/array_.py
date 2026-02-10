@@ -5,14 +5,7 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-from hypothesis_awkward.strategies.contents.list_array import list_array_contents
-from hypothesis_awkward.strategies.contents.list_offset_array import (
-    list_offset_array_contents,
-)
-from hypothesis_awkward.strategies.contents.numpy_array import numpy_array_contents
-from hypothesis_awkward.strategies.contents.regular_array import (
-    regular_array_contents,
-)
+import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util.draw import CountdownDrawer
 
 _ContentsFn = Callable[
@@ -64,13 +57,13 @@ def arrays(
     '''
     content_fns: list[_ContentsFn] = []
     if allow_regular:
-        content_fns.append(regular_array_contents)
+        content_fns.append(st_ak.contents.regular_array_contents)
     if allow_list_offset:
-        content_fns.append(list_offset_array_contents)
+        content_fns.append(st_ak.contents.list_offset_array_contents)
     if allow_list:
-        content_fns.append(list_array_contents)
+        content_fns.append(st_ak.contents.list_array_contents)
 
-    st_ = functools.partial(numpy_array_contents, dtypes, allow_nan)
+    st_ = functools.partial(st_ak.contents.numpy_array_contents, dtypes, allow_nan)
 
     layout: ak.contents.Content
     if not content_fns or max_size == 0:
