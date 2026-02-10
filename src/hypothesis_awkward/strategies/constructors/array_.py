@@ -84,8 +84,12 @@ def arrays(
             draw(st.sampled_from(content_fns)) for _ in range(depth)
         ]
 
-        layout = draw_content()
-        for fn in reversed(chosen):
-            layout = draw(fn(st.just(layout)))
+        content = draw_content()
+        if content is None:
+            layout = draw(st_(max_size=0))
+        else:
+            layout = content
+            for fn in reversed(chosen):
+                layout = draw(fn(st.just(layout)))
 
     return ak.Array(layout)

@@ -33,14 +33,15 @@ def CountdownDrawer(
     max_size
         Total element budget shared across all draws.
     '''
-    remaining = max_size
+
+    max_size = draw(st.integers(min_value=0, max_value=max_size))
 
     def _draw_content() -> _T | None:
-        nonlocal remaining
-        if remaining == 0:
+        nonlocal max_size
+        if max_size == 0:
             return None
-        result = draw(st_(max_size=remaining))
-        remaining -= len(result)
+        result = draw(st_(max_size=max_size))
+        max_size -= len(result)
         return result
 
     return _draw_content

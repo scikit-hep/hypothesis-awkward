@@ -54,8 +54,8 @@ def test_countdown_drawer(data: st.DataObject) -> None:
     kwargs = data.draw(countdown_drawer_kwargs(), label='kwargs')
     total, _ = data.draw(_exhaust(kwargs), label='result')
 
-    # Total length of all returned lists equals max_size
-    assert total == kwargs['max_size']
+    # Total length of all returned lists is at most max_size
+    assert total <= kwargs['max_size']
 
 
 def test_draw_none_at_zero() -> None:
@@ -69,6 +69,28 @@ def test_draw_none_at_zero() -> None:
     find(
         _scenario(),
         lambda _: True,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_draw_max_size() -> None:
+    '''Assert that the total can reach max_size.'''
+    max_size = 10
+
+    @st.composite
+    def _scenario(draw: st.DrawFn) -> int:
+        draw_content = CountdownDrawer(draw, _sized_lists, max_size=max_size)
+        total = 0
+        while True:
+            result = draw_content()
+            if result is None:
+                break
+            total += len(result)
+        return total
+
+    find(
+        _scenario(),
+        lambda total: total == max_size,
         settings=settings(phases=[Phase.generate]),
     )
 
