@@ -1,5 +1,6 @@
 import functools
-from collections.abc import Callable
+from collections.abc import Callable, Sized
+from typing import Protocol, TypeVar
 
 import numpy as np
 from hypothesis import strategies as st
@@ -13,6 +14,16 @@ from hypothesis_awkward.strategies.contents.numpy_array import numpy_array_conte
 from hypothesis_awkward.strategies.contents.regular_array import (
     regular_array_contents,
 )
+
+_C_co = TypeVar('_C_co', covariant=True)
+_T = TypeVar('_T', bound=Sized)
+
+
+class _StWithMaxSize(Protocol[_C_co]):
+    '''A callable that takes a ``max_size`` keyword and returns a content strategy.'''
+
+    def __call__(self, *, max_size: int) -> st.SearchStrategy[_C_co]: ...
+
 
 _ContentsFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
@@ -69,13 +80,13 @@ def arrays(
     if allow_list:
         content_fns.append(list_array_contents)
 
-    contents_st = functools.partial(numpy_array_contents, dtypes, allow_nan)
+    st_ = functools.partial(numpy_array_contents, dtypes, allow_nan)
 
     layout: ak.contents.Content
     if not content_fns or max_size == 0:
-        layout = draw(contents_st(max_size=max_size))
+        layout = draw(st_(max_size=max_size))
     else:
-        draw_content = DrawContent(draw, contents_st, max_size)
+        draw_content = CountdownDrawer(draw, st_, max_size)
 
         # Draw nesting depth, then choose a content function for each level.
         depth = draw(st.integers(min_value=0, max_value=max_depth))
@@ -90,35 +101,33 @@ def arrays(
     return ak.Array(layout)
 
 
-def DrawContent(
+def CountdownDrawer(
     draw: st.DrawFn,
-    contents_st: Callable[..., st.SearchStrategy[ak.contents.NumpyArray]],
+    st_: _StWithMaxSize[_T],
     max_size: int,
-) -> Callable[[], ak.contents.NumpyArray | None]:
-    '''Callable that draws NumpyArray content with a depleting element count.
+) -> Callable[[], _T | None]:
+    '''Create a draw function that counts down from ``max_size``.
 
-    Returns a function that, when called, draws a ``NumpyArray`` using the
-    provided ``draw`` function and reduces the remaining element count by
-    the length of the drawn content. Returns ``None`` when the count
-    reaches zero.
+    Each call draws from ``st_`` and subtracts the length of the result
+    from the remaining count. Returns ``None`` once the count reaches zero.
 
     Parameters
     ----------
     draw
         The Hypothesis draw function.
-    contents_st
+    st_
         A callable that accepts a ``max_size`` keyword argument and returns
-        a strategy for ``NumpyArray``.
+        a strategy.
     max_size
-        Maximum total number of scalar values across all draws.
+        Total element budget shared across all draws.
     '''
     remaining = max_size
 
-    def _draw_content() -> ak.contents.NumpyArray | None:
+    def _draw_content() -> _T | None:
         nonlocal remaining
         if remaining == 0:
             return None
-        result = draw(contents_st(max_size=remaining))
+        result = draw(st_(max_size=remaining))
         remaining -= len(result)
         return result
 
