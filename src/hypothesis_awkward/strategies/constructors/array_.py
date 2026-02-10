@@ -1,6 +1,5 @@
 import functools
-from collections.abc import Callable, Sized
-from typing import Protocol, TypeVar
+from collections.abc import Callable
 
 import numpy as np
 from hypothesis import strategies as st
@@ -14,16 +13,7 @@ from hypothesis_awkward.strategies.contents.numpy_array import numpy_array_conte
 from hypothesis_awkward.strategies.contents.regular_array import (
     regular_array_contents,
 )
-
-_C_co = TypeVar('_C_co', covariant=True)
-_T = TypeVar('_T', bound=Sized)
-
-
-class _StWithMaxSize(Protocol[_C_co]):
-    '''A callable that takes a ``max_size`` keyword and returns a content strategy.'''
-
-    def __call__(self, *, max_size: int) -> st.SearchStrategy[_C_co]: ...
-
+from hypothesis_awkward.util.draw import CountdownDrawer
 
 _ContentsFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
@@ -99,36 +89,3 @@ def arrays(
             layout = draw(fn(st.just(layout)))
 
     return ak.Array(layout)
-
-
-def CountdownDrawer(
-    draw: st.DrawFn,
-    st_: _StWithMaxSize[_T],
-    max_size: int,
-) -> Callable[[], _T | None]:
-    '''Create a draw function that counts down from ``max_size``.
-
-    Each call draws from ``st_`` and subtracts the length of the result
-    from the remaining count. Returns ``None`` once the count reaches zero.
-
-    Parameters
-    ----------
-    draw
-        The Hypothesis draw function.
-    st_
-        A callable that accepts a ``max_size`` keyword argument and returns
-        a strategy.
-    max_size
-        Total element budget shared across all draws.
-    '''
-    remaining = max_size
-
-    def _draw_content() -> _T | None:
-        nonlocal remaining
-        if remaining == 0:
-            return None
-        result = draw(st_(max_size=remaining))
-        remaining -= len(result)
-        return result
-
-    return _draw_content
