@@ -1,3 +1,4 @@
+import functools
 from collections.abc import Callable
 
 import numpy as np
@@ -68,11 +69,13 @@ def arrays(
     if allow_list:
         content_fns.append(list_array_contents)
 
+    contents_st = functools.partial(numpy_array_contents, dtypes, allow_nan)
+
     layout: ak.contents.Content
     if not content_fns or max_size == 0:
-        layout = draw(numpy_array_contents(dtypes, allow_nan, max_size))
+        layout = draw(contents_st(max_size=max_size))
     else:
-        draw_content = DrawContent(draw, dtypes, allow_nan, max_size)
+        draw_content = DrawContent(draw, contents_st, max_size)
 
         # Draw nesting depth, then choose a content function for each level.
         depth = draw(st.integers(min_value=0, max_value=max_depth))
@@ -89,8 +92,7 @@ def arrays(
 
 def DrawContent(
     draw: st.DrawFn,
-    dtypes: st.SearchStrategy[np.dtype] | None,
-    allow_nan: bool,
+    contents_st: Callable[..., st.SearchStrategy[ak.contents.NumpyArray]],
     max_size: int,
 ) -> Callable[[], ak.contents.NumpyArray | None]:
     '''Callable that draws NumpyArray content with a depleting element count.
@@ -99,6 +101,16 @@ def DrawContent(
     provided ``draw`` function and reduces the remaining element count by
     the length of the drawn content. Returns ``None`` when the count
     reaches zero.
+
+    Parameters
+    ----------
+    draw
+        The Hypothesis draw function.
+    contents_st
+        A callable that accepts a ``max_size`` keyword argument and returns
+        a strategy for ``NumpyArray``.
+    max_size
+        Maximum total number of scalar values across all draws.
     '''
     remaining = max_size
 
@@ -106,7 +118,7 @@ def DrawContent(
         nonlocal remaining
         if remaining == 0:
             return None
-        result = draw(numpy_array_contents(dtypes, allow_nan, remaining))
+        result = draw(contents_st(max_size=remaining))
         remaining -= len(result)
         return result
 
