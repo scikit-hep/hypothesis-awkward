@@ -14,9 +14,13 @@ def list_offset_array_contents(
     content: st.SearchStrategy[Content] | Content | None = None,
 ) -> Content:
     '''Strategy for ListOffsetArray Content wrapping child Content.'''
-    if content is None:
-        content = st_ak.contents.contents()
-    content = draw(content)
+    match content:
+        case None:
+            content = draw(st_ak.contents.contents())
+        case st.SearchStrategy():
+            content = draw(content)
+        case Content():
+            pass
     assert isinstance(content, Content)
     content_len = len(content)
     n = draw(st.integers(min_value=0, max_value=MAX_LIST_LENGTH))
