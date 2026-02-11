@@ -55,6 +55,61 @@ def arrays(
     <Array ... type='...'>
 
     '''
+    layout = draw(
+        contents(
+            dtypes=dtypes,
+            max_size=max_size,
+            allow_nan=allow_nan,
+            allow_regular=allow_regular,
+            allow_list_offset=allow_list_offset,
+            allow_list=allow_list,
+            max_depth=max_depth,
+        )
+    )
+    return ak.Array(layout)
+
+
+@st.composite
+def contents(
+    draw: st.DrawFn,
+    dtypes: st.SearchStrategy[np.dtype] | None = None,
+    max_size: int = 10,
+    allow_nan: bool = False,
+    allow_regular: bool = True,
+    allow_list_offset: bool = True,
+    allow_list: bool = True,
+    max_depth: int = 5,
+) -> ak.contents.Content:
+    '''Strategy for Awkward Array content layouts.
+
+    The current implementation generates layouts with NumpyArray as leaf contents that can
+    be nested multiple levels deep in RegularArray, ListOffsetArray, and ListArray lists.
+
+    Parameters
+    ----------
+    dtypes
+        A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
+        default strategy that generates any scalar dtype supported by Awkward Array is
+        used.
+    max_size
+        Maximum total number of scalar values in the generated array.
+    allow_nan
+        No ``NaN``/``NaT`` values are generated if ``False``.
+    allow_regular
+        No ``RegularArray`` is generated if ``False``.
+    allow_list_offset
+        No ``ListOffsetArray`` is generated if ``False``.
+    allow_list
+        No ``ListArray`` is generated if ``False``.
+    max_depth
+        Maximum depth of nested arrays.
+
+    Examples
+    --------
+    >>> contents().example()
+    <NumpyArray ...>
+
+    '''
     content_fns: list[_ContentsFn] = []
     if allow_regular:
         content_fns.append(st_ak.contents.regular_array_contents)
@@ -85,4 +140,4 @@ def arrays(
             for fn in reversed(chosen):
                 layout = draw(fn(st.just(layout)))
 
-    return ak.Array(layout)
+    return layout

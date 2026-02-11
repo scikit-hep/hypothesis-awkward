@@ -1,3 +1,3 @@
-__all__ = ['arrays']
+__all__ = ['arrays', 'contents']
 
-from .array_ import arrays
+from .array_ import arrays, contents
