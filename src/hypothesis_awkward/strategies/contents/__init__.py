@@ -1,5 +1,6 @@
 __all__ = [
     'contents',
+    'empty_array_contents',
     'list_array_contents',
     'list_offset_array_contents',
     'numpy_array_contents',
@@ -7,6 +8,7 @@ __all__ = [
 ]
 
 from .content import contents
+from .empty_array import empty_array_contents
 from .list_array import list_array_contents
 from .list_offset_array import list_offset_array_contents
 from .numpy_array import numpy_array_contents
