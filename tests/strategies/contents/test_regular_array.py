@@ -3,8 +3,8 @@ from typing import TypedDict, cast
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-import awkward as ak
 import hypothesis_awkward.strategies as st_ak
+from awkward.contents import Content, RegularArray
 
 MAX_REGULAR_SIZE = 5
 
@@ -12,7 +12,7 @@ MAX_REGULAR_SIZE = 5
 class RegularArrayContentsKwargs(TypedDict, total=False):
     '''Options for `regular_array_contents()` strategy.'''
 
-    content: st.SearchStrategy[ak.contents.Content]
+    content: st.SearchStrategy[Content]
 
 
 def regular_array_contents_kwargs() -> st.SearchStrategy[
@@ -44,7 +44,7 @@ def test_regular_array_contents(data: st.DataObject) -> None:
     )
 
     # Assert the result is always a RegularArray content
-    assert isinstance(result, ak.contents.RegularArray)
+    assert isinstance(result, RegularArray)
 
     # Assert size is within bounds
     assert 0 <= result.size <= MAX_REGULAR_SIZE
