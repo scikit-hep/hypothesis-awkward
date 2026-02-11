@@ -12,7 +12,7 @@ MAX_REGULAR_SIZE = 5
 class RegularArrayContentsKwargs(TypedDict, total=False):
     '''Options for `regular_array_contents()` strategy.'''
 
-    content: st.SearchStrategy[Content]
+    content: st.SearchStrategy[Content] | Content
 
 
 def regular_array_contents_kwargs() -> st.SearchStrategy[
@@ -23,8 +23,11 @@ def regular_array_contents_kwargs() -> st.SearchStrategy[
         st.fixed_dictionaries(
             {},
             optional={
-                'content': st.just(
-                    st_ak.RecordDraws(st_ak.contents.numpy_array_contents())
+                'content': st.one_of(
+                    st_ak.contents.contents(),
+                    st.just(
+                        st_ak.RecordDraws(st_ak.contents.contents())
+                    ),
                 ),
             },
         )
@@ -57,6 +60,8 @@ def test_regular_array_contents(data: st.DataObject) -> None:
     # Assert content
     content = opts.kwargs.get('content', None)
     match content:
+        case Content():
+            assert result.content is content
         case st_ak.RecordDraws():
             assert len(content.drawn) == 1
             assert result.content is content.drawn[0]
