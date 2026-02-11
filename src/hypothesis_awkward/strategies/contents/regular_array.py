@@ -11,12 +11,13 @@ MAX_REGULAR_SIZE = 5
 @st.composite
 def regular_array_contents(
     draw: st.DrawFn,
-    contents: st.SearchStrategy[ak.contents.Content] | None = None,
+    content: st.SearchStrategy[ak.contents.Content] | ak.contents.Content | None = None,
 ) -> ak.contents.Content:
     '''Strategy for RegularArray Content wrapping child Content.'''
-    if contents is None:
-        contents = st_ak.contents.contents()
-    content = draw(contents)
+    if content is None:
+        content = st_ak.contents.contents()
+    content = draw(content)
+    assert isinstance(content, ak.contents.Content)
     content_len = len(content)
     if content_len == 0:
         size = draw(st.integers(min_value=0, max_value=MAX_REGULAR_SIZE))
