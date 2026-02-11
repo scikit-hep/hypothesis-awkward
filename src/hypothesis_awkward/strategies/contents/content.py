@@ -3,14 +3,11 @@ from collections.abc import Callable
 import numpy as np
 from hypothesis import strategies as st
 
-import awkward as ak
 import hypothesis_awkward.strategies as st_ak
+from awkward.contents import Content
 from hypothesis_awkward.util.draw import CountdownDrawer
 
-_NestingFn = Callable[
-    [st.SearchStrategy[ak.contents.Content]],
-    st.SearchStrategy[ak.contents.Content],
-]
+_NestingFn = Callable[[st.SearchStrategy[Content]], st.SearchStrategy[Content]]
 
 
 @st.composite
@@ -25,7 +22,7 @@ def contents(
     allow_list_offset: bool = True,
     allow_list: bool = True,
     max_depth: int = 5,
-) -> ak.contents.Content:
+) -> Content:
     '''Strategy for Awkward Array content layouts.
 
     The current implementation generates layouts with NumpyArray as leaf contents that can
@@ -59,7 +56,7 @@ def contents(
     Examples
     --------
     >>> c = contents().example()
-    >>> isinstance(c, ak.contents.Content)
+    >>> isinstance(c, Content)
     True
 
     '''
@@ -74,8 +71,8 @@ def contents(
     if allow_list:
         nesting_fns.append(st_ak.contents.list_array_contents)
 
-    def st_leaf(*, min_size: int, max_size: int) -> st.SearchStrategy[ak.contents.Content]:
-        options: list[st.SearchStrategy[ak.contents.Content]] = []
+    def st_leaf(*, min_size: int, max_size: int) -> st.SearchStrategy[Content]:
+        options: list[st.SearchStrategy[Content]] = []
         if allow_numpy:
             options.append(
                 st_ak.contents.numpy_array_contents(
