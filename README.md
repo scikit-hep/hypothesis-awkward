@@ -90,24 +90,24 @@ For example, this might print:
 
 ```python
 array=<Array [] type='0 * bool'>
-array=<Array [] type='0 * var * bool'>
+array=<Array [0] type='1 * int16'>
+array=<Array [-9223372036854724544 milliseconds] type='1 * timedelta64[ms]'>
+array=<Array [[9.01e+15+infj], [-6.1e-05+1.23e+176j]] type='2 * 1 * complex128'>
 array=<Array [[], [], [], []] type='4 * var * 2 * timedelta64[W]'>
-array=<Array [] type='0 * var * bool'>
-array=<Array [] type='0 * var * timedelta64[us]'>
-array=<Array [] type='0 * var * bool'>
-array=<Array [[[52, 51113, 30]], []] type='2 * var * var * uint64'>
-array=<Array [] type='0 * timedelta64[ns]'>
-array=<Array [] type='0 * 0 * bool'>
-array=<Array [[[-9223372036854773716], ...]] type='1 * 3 * 1 * datetime64[Y]'>
-array=<Array [] type='0 * int32'>
-array=<Array [9223372036854775807 seconds, ...] type='3 * timedelta64[s]'>
-array=<Array [-9223372036854775590 seconds, ...] type='3 * timedelta64[s]'>
-array=<Array [-9223372036854775590 seconds] type='1 * timedelta64[s]'>
+array=<Array [[[-30660], []]] type='1 * 2 * var * int16'>
+array=<Array [[[], [[], []], [], []]] type='1 * 4 * var * var * 1 * var * uint32'>
+array=<Array [[[], []], [[]], [], []] type='5 * var * var * 4 * unknown'>
+array=<Array [] type='0 * unknown'>
+array=<Array [[], [], [], [], []] type='5 * var * unknown'>
+array=<Array [[[]], [[]], [[]]] type='3 * 1 * 0 * unknown'>
+array=<Array [[]] type='1 * var * 5 * unknown'>
+array=<Array [[[], []]] type='1 * var * var * var * timedelta64[ms]'>
+array=<Array [[[[[[]]]]], [[[[[]]]]]] type='2 * 1 * 1 * 1 * 1 * var * unknown'>
 ```
 
-The current version generates arrays with `NumpyArray` as leaf contents
-that can be nested multiple levels deep in `RegularArray`, `ListOffsetArray`,
-and `ListArray` lists.
+The current version generates arrays with `NumpyArray` or `EmptyArray` as leaf
+contents that can be nested multiple levels deep in `RegularArray`,
+`ListOffsetArray`, and `ListArray` lists.
 
 ### The API of `arrays()`
 
@@ -116,6 +116,8 @@ def arrays(
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     max_size: int = 10,
     allow_nan: bool = False,
+    allow_numpy: bool = True,
+    allow_empty: bool = True,
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
@@ -128,6 +130,8 @@ def arrays(
 | `dtypes` | A strategy for NumPy scalar dtypes used in `NumpyArray`. If `None`, the default strategy that generates any scalar dtype supported by Awkward Array is used. |
 | `max_size` | Maximum total number of scalar values in the generated array. |
 | `allow_nan` | No `NaN`/`NaT` values are generated if `False`. |
+| `allow_numpy` | No `NumpyArray` is generated if `False`. |
+| `allow_empty` | No `EmptyArray` is generated if `False`. |
 | `allow_regular` | No `RegularArray` is generated if `False`. |
 | `allow_list_offset` | No `ListOffsetArray` is generated if `False`. |
 | `allow_list` | No `ListArray` is generated if `False`. |
