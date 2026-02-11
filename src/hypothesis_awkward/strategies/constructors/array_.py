@@ -8,7 +8,7 @@ import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util.draw import CountdownDrawer
 
-_ContentsFn = Callable[
+_NestingFn = Callable[
     [st.SearchStrategy[ak.contents.Content]],
     st.SearchStrategy[ak.contents.Content],
 ]
@@ -110,32 +110,32 @@ def contents(
     <NumpyArray ...>
 
     '''
-    content_fns: list[_ContentsFn] = []
+    nesting_fns: list[_NestingFn] = []
     if allow_regular:
-        content_fns.append(st_ak.contents.regular_array_contents)
+        nesting_fns.append(st_ak.contents.regular_array_contents)
     if allow_list_offset:
-        content_fns.append(st_ak.contents.list_offset_array_contents)
+        nesting_fns.append(st_ak.contents.list_offset_array_contents)
     if allow_list:
-        content_fns.append(st_ak.contents.list_array_contents)
+        nesting_fns.append(st_ak.contents.list_array_contents)
 
-    st_ = functools.partial(st_ak.contents.numpy_array_contents, dtypes, allow_nan)
+    st_leaf = functools.partial(st_ak.contents.numpy_array_contents, dtypes, allow_nan)
 
-    if not content_fns or max_size == 0:
-        return draw(st_(min_size=0, max_size=max_size))
+    if not nesting_fns or max_size == 0:
+        return draw(st_leaf(min_size=0, max_size=max_size))
 
-    draw_content = CountdownDrawer(draw, st_, max_size_total=max_size)
+    draw_leaf = CountdownDrawer(draw, st_leaf, max_size_total=max_size)
 
-    # Draw nesting depth, then choose a content function for each level.
+    # Draw nesting depth, then choose a nesting function for each level.
     depth = draw(st.integers(min_value=0, max_value=max_depth))
-    chosen: list[_ContentsFn] = [
-        draw(st.sampled_from(content_fns)) for _ in range(depth)
+    nesting: list[_NestingFn] = [
+        draw(st.sampled_from(nesting_fns)) for _ in range(depth)
     ]
 
-    content = draw_content()
+    content = draw_leaf()
     if content is None:
-        return draw(st_(min_size=0, max_size=0))
+        return draw(st_leaf(min_size=0, max_size=0))
 
-    for fn in reversed(chosen):
+    for fn in reversed(nesting):
         content = draw(fn(st.just(content)))
 
     return content
