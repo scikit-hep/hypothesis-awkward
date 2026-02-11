@@ -103,8 +103,17 @@ def test_contents(data: st.DataObject) -> None:
     assert _nesting_depth(c) <= max_depth
 
 
-def test_draw_empty() -> None:
-    '''Assert that empty content can be drawn by default.'''
+def test_draw_numpy_array() -> None:
+    '''Assert that NumpyArray can be drawn by default.'''
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, ak.contents.NumpyArray),
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_draw_numpy_array_length_zero() -> None:
+    '''Assert that NumpyArray with length 0 can be drawn by default.'''
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, ak.contents.NumpyArray) and len(c) == 0,
@@ -161,7 +170,7 @@ def test_draw_nested() -> None:
     )
 
 
-def test_draw_regular_size_zero() -> None:
+def test_draw_regular_array_size_zero() -> None:
     '''Assert that RegularArray with size=0 can be drawn.'''
 
     def _has_regular_size_zero(c: ak.contents.Content) -> bool:
@@ -181,7 +190,7 @@ def test_draw_regular_size_zero() -> None:
     )
 
 
-def test_draw_list_offset() -> None:
+def test_draw_list_offset_array() -> None:
     '''Assert that ListOffsetArray can be drawn by default.'''
     find(
         st_ak.contents.contents(),
@@ -190,7 +199,7 @@ def test_draw_list_offset() -> None:
     )
 
 
-def test_draw_variable_length_lists() -> None:
+def test_draw_list_offset_array_variable_length() -> None:
     '''Assert that variable-length sublists can be drawn.'''
 
     def _has_variable_length(c: ak.contents.Content) -> bool:
@@ -210,7 +219,7 @@ def test_draw_variable_length_lists() -> None:
     )
 
 
-def test_draw_empty_sublist() -> None:
+def test_draw_list_offset_array_empty_sublist() -> None:
     '''Assert that empty sublists can be drawn.'''
 
     def _has_empty_sublist(c: ak.contents.Content) -> bool:
@@ -230,7 +239,7 @@ def test_draw_empty_sublist() -> None:
     )
 
 
-def test_draw_list() -> None:
+def test_draw_list_array() -> None:
     '''Assert that ListArray can be drawn by default.'''
     find(
         st_ak.contents.contents(),
@@ -239,7 +248,7 @@ def test_draw_list() -> None:
     )
 
 
-def test_draw_list_variable_length() -> None:
+def test_draw_list_array_variable_length() -> None:
     '''Assert that ListArray with variable-length sublists can be drawn.'''
 
     def _has_variable_length(c: ak.contents.Content) -> bool:
@@ -259,7 +268,7 @@ def test_draw_list_variable_length() -> None:
     )
 
 
-def test_draw_list_empty_sublist() -> None:
+def test_draw_list_array_empty_sublist() -> None:
     '''Assert that ListArray with empty sublists can be drawn.'''
 
     def _has_empty_sublist(c: ak.contents.Content) -> bool:
