@@ -120,24 +120,22 @@ def contents(
 
     st_ = functools.partial(st_ak.contents.numpy_array_contents, dtypes, allow_nan)
 
-    layout: ak.contents.Content
     if not content_fns or max_size == 0:
-        layout = draw(st_(min_size=0, max_size=max_size))
-    else:
-        draw_content = CountdownDrawer(draw, st_, max_size_total=max_size)
+        return draw(st_(min_size=0, max_size=max_size))
 
-        # Draw nesting depth, then choose a content function for each level.
-        depth = draw(st.integers(min_value=0, max_value=max_depth))
-        chosen: list[_ContentsFn] = [
-            draw(st.sampled_from(content_fns)) for _ in range(depth)
-        ]
+    draw_content = CountdownDrawer(draw, st_, max_size_total=max_size)
 
-        content = draw_content()
-        if content is None:
-            layout = draw(st_(min_size=0, max_size=0))
-        else:
-            layout = content
-            for fn in reversed(chosen):
-                layout = draw(fn(st.just(layout)))
+    # Draw nesting depth, then choose a content function for each level.
+    depth = draw(st.integers(min_value=0, max_value=max_depth))
+    chosen: list[_ContentsFn] = [
+        draw(st.sampled_from(content_fns)) for _ in range(depth)
+    ]
 
-    return layout
+    content = draw_content()
+    if content is None:
+        return draw(st_(min_size=0, max_size=0))
+
+    for fn in reversed(chosen):
+        content = draw(fn(st.just(content)))
+
+    return content
