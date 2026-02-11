@@ -20,6 +20,7 @@ def contents(
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     max_size: int = 10,
     allow_nan: bool = False,
+    allow_numpy: bool = True,
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
@@ -40,6 +41,8 @@ def contents(
         Maximum total number of scalar values in the generated array.
     allow_nan
         No ``NaN``/``NaT`` values are generated if ``False``.
+    allow_numpy
+        No ``NumpyArray`` is generated if ``False``.
     allow_regular
         No ``RegularArray`` is generated if ``False``.
     allow_list_offset
@@ -56,6 +59,9 @@ def contents(
     True
 
     '''
+    if not allow_numpy:
+        raise ValueError('at least one leaf content type must be allowed')
+
     nesting_fns: list[_NestingFn] = []
     if allow_regular:
         nesting_fns.append(st_ak.contents.regular_array_contents)

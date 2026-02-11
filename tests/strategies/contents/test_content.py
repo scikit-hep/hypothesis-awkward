@@ -1,6 +1,7 @@
 from typing import TypedDict, cast
 
 import numpy as np
+import pytest
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
@@ -22,6 +23,7 @@ class ContentsKwargs(TypedDict, total=False):
     dtypes: st.SearchStrategy[np.dtype] | None
     max_size: int
     allow_nan: bool
+    allow_numpy: bool
     allow_regular: bool
     allow_list_offset: bool
     allow_list: bool
@@ -40,6 +42,7 @@ def contents_kwargs() -> st.SearchStrategy[st_ak.Opts[ContentsKwargs]]:
                 ),
                 'max_size': st.integers(min_value=0, max_value=50),
                 'allow_nan': st.booleans(),
+                'allow_numpy': st.booleans(),
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
@@ -58,6 +61,13 @@ def test_contents(data: st.DataObject) -> None:
     # Draw options
     opts = data.draw(contents_kwargs(), label='opts')
     opts.reset()
+
+    # Assert that disabling all leaf types raises an error
+    allow_numpy = opts.kwargs.get('allow_numpy', True)
+    if not allow_numpy:
+        with pytest.raises(ValueError, match='at least one leaf'):
+            data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
+        return
 
     # Call the test subject
     c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
