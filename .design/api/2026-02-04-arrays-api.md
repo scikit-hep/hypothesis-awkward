@@ -208,46 +208,35 @@ This keeps the `arrays()` parameter list focused on structural concerns. The
 
 ## Implementation
 
-### Wrappers Pattern
+### Two-layer Architecture
 
-The actual implementation uses a "wrappers" pattern rather than a recursive
-`_contents()` strategy. The approach:
+The implementation is split across two packages:
 
-1. **Leaf strategy**: `_numpy_leaf()` generates a 1-D `NumpyArray` Content via
-   `numpy_arrays()` with `allow_structured=False` and `max_dims=1`.
-2. **Budgeted leaf**: `_budgeted_leaf()` wraps the leaf strategy with a scalar
-   budget (closure over `remaining` counter) so the total number of scalars
-   across all leaves stays within `max_size`.
-3. **Wrapper functions**: `_wrap_regular()`, `_wrap_list_offset()`, and
-   `_wrap_list()` each take a child Content strategy and wrap the drawn child in
-   the corresponding structural node.
-4. **Composition**: The main `arrays()` draws a random depth (0 to `max_depth`),
-   chooses a wrapper for each level, draws a leaf, then applies wrappers from
-   innermost to outermost.
+- **`contents/content.py`**: `contents()` strategy generates `ak.contents.Content`
+  layouts using a wrappers pattern
+- **`constructors/array_.py`**: `arrays()` is a thin wrapper that calls
+  `contents()` and wraps the result in `ak.Array`
+
+### `contents()` Strategy
+
+The `contents()` strategy in `contents/content.py` uses a wrappers pattern:
+
+1. **Leaf strategy**: `numpy_array_contents()` generates a `NumpyArray` Content
+   with a scalar budget managed by `CountdownDrawer`
+2. A random depth (0 to `max_depth`) is drawn
+3. Nesting functions (`regular_array_contents`, `list_offset_array_contents`,
+   `list_array_contents`) are chosen randomly for each depth level
+4. Nesting functions are applied from innermost to outermost
+
+### `arrays()` Strategy
+
+`arrays()` in `constructors/array_.py` simply forwards all parameters to
+`contents()` and wraps the result:
 
 ```python
 @st.composite
-def arrays(draw, dtypes=None, max_size=10, allow_nan=False,
-           allow_regular=True, allow_list_offset=True,
-           allow_list=True, max_depth=5) -> ak.Array:
-    wrappers = []
-    if allow_regular:
-        wrappers.append(_wrap_regular)
-    if allow_list_offset:
-        wrappers.append(_wrap_list_offset)
-    if allow_list:
-        wrappers.append(_wrap_list)
-
-    if not wrappers or max_size == 0:
-        layout = draw(_numpy_leaf(dtypes, allow_nan, max_size))
-    else:
-        leaf_st = _budgeted_leaf(dtypes, allow_nan, max_size)
-        depth = draw(st.integers(min_value=0, max_value=max_depth))
-        chosen_wrappers = [draw(st.sampled_from(wrappers)) for _ in range(depth)]
-        layout = draw(leaf_st)
-        for wrapper in reversed(chosen_wrappers):
-            layout = draw(wrapper(st.just(layout)))
-
+def arrays(draw, ...) -> ak.Array:
+    layout = draw(st_ak.contents.contents(...))
     return ak.Array(layout)
 ```
 
@@ -255,34 +244,8 @@ def arrays(draw, dtypes=None, max_size=10, allow_nan=False,
 
 When adding `RecordArray`, option types, and unions, the wrappers pattern will
 need to evolve to handle content nesting constraints (e.g., option nodes cannot
-wrap other option nodes). This may require switching to the `_contents()`
-recursive strategy sketched in the original design, or adding a `_forbidden`
-parameter to wrappers.
-
-## Internal Strategies
-
-### `_numpy_leaf()`
-
-Generates a 1-D `NumpyArray` Content via `numpy_arrays()`:
-
-```python
-def _numpy_leaf(dtypes, allow_nan, max_size) -> st.SearchStrategy[ak.contents.NumpyArray]:
-    return st_ak.numpy_arrays(
-        dtype=dtypes, allow_structured=False,
-        allow_nan=allow_nan, max_dims=1, max_size=max_size,
-    ).map(ak.contents.NumpyArray)
-```
-
-### `_budgeted_leaf()`
-
-Wraps `_numpy_leaf()` with a scalar budget via a closure. Each draw decrements
-`remaining`; when the budget is exhausted, raises `_BudgetExhausted`.
-
-### `_wrap_regular()`, `_wrap_list_offset()`, `_wrap_list()`
-
-Each takes a child Content strategy, draws the child, and wraps it in the
-corresponding structural node with randomly generated parameters (offsets, size,
-etc.).
+wrap other option nodes). This may require adding constraint tracking to the
+wrappers pattern.
 
 ### Relationship to Existing Strategies
 
@@ -293,14 +256,9 @@ Existing:
                        -->  numpy_forms()
 
 New:
-  supported_dtypes()  -->  numpy_arrays()  -->  arrays()  --> ak.Array
-                                                              (via Content constructors)
+  supported_dtypes()  -->  numpy_array_contents()  -->  contents()  --> Content
+                                                        arrays()    --> ak.Array
 ```
-
-`arrays()` delegates to `numpy_arrays()` with `allow_structured=False` and
-`max_dims=1` to obtain a 1-D simple NumPy array, then wraps it in
-`ak.contents.NumpyArray` directly. This reuses the existing dtype handling and
-empty-array generation logic in `numpy_arrays()`.
 
 ## Module Location
 
@@ -308,9 +266,16 @@ empty-array generation logic in `numpy_arrays()`.
 
 ```text
 src/hypothesis_awkward/strategies/
++-- contents/
+|   +-- __init__.py           # Re-exports contents() and individual content strategies
+|   +-- content.py            # contents() — top-level content layout strategy
+|   +-- numpy_array.py        # numpy_array_contents()
+|   +-- regular_array.py      # regular_array_contents()
+|   +-- list_offset_array.py  # list_offset_array_contents()
+|   +-- list_array.py         # list_array_contents()
 +-- constructors/
 |   +-- __init__.py           # Re-exports arrays()
-|   +-- arrays_.py            # arrays() strategy and internal helpers
+|   +-- array_.py             # arrays() — delegates to contents.contents()
 +-- builtins_/
 +-- forms/
 +-- misc/
@@ -320,18 +285,23 @@ src/hypothesis_awkward/strategies/
 +-- __init__.py               # Re-exports arrays via constructors namespace
 ```
 
-All internal helpers (`_numpy_leaf`, `_budgeted_leaf`, `_wrap_regular`,
-`_wrap_list_offset`, `_wrap_list`) live in `arrays_.py`. As more node types are
-added, they may be split into separate files:
+`arrays()` in `constructors/array_.py` is a thin wrapper that forwards all
+arguments to `contents.contents()` and wraps the result in `ak.Array`. The
+`contents/` package contains the layout generation logic. As more node types are
+added, new content strategies will be added to `contents/`:
 
 ```text
-src/hypothesis_awkward/strategies/constructors/
+src/hypothesis_awkward/strategies/contents/
 +-- __init__.py
-+-- arrays_.py                # Main arrays() strategy + current helpers
-+-- record.py                 # _record_array_contents() (future)
-+-- option.py                 # _option_array_contents() (future)
-+-- union.py                  # _union_array_contents() (future)
-+-- string.py                 # _string_array_contents() (future)
++-- content.py                # Main contents() strategy (recursive composition)
++-- numpy_array.py            # numpy_array_contents()
++-- regular_array.py          # regular_array_contents()
++-- list_offset_array.py      # list_offset_array_contents()
++-- list_array.py             # list_array_contents()
++-- record_array.py           # record_array_contents() (future)
++-- option.py                 # option content strategies (future)
++-- union_array.py            # union_array_contents() (future)
++-- string.py                 # string content strategies (future)
 ```
 
 ### Public API
@@ -529,75 +499,36 @@ def test_typed_arrays(a):
 Following the patterns in
 [testing-patterns.md](./../../.claude/rules/testing-patterns.md):
 
-Tests are implemented in `tests/strategies/constructors/test_arrays.py`.
+### `contents()` tests (`tests/strategies/contents/test_content.py`)
 
-### 1. TypedDict for kwargs
+The `contents()` strategy has comprehensive property-based and reachability tests
+that verify all options are respected: `max_size` (total scalars), per-type
+gating (`allow_regular`, `allow_list_offset`, `allow_list`), dtypes via leaf
+arrays, `allow_nan`, and `max_depth`. Edge case reachability tests use `find()`
+to verify the strategy can produce empty content, NaN values, specific dtypes,
+maximum depth, nested structures, and edge cases for each list type.
 
-```python
-class ArraysKwargs(TypedDict, total=False):
-    '''Options for `arrays()` strategy.'''
-    dtypes: st.SearchStrategy[np.dtype] | None
-    max_size: int
-    allow_nan: bool
-    allow_regular: bool
-    allow_list_offset: bool
-    allow_list: bool
-    max_depth: int
-```
+### `arrays()` tests (`tests/strategies/constructors/test_array.py`)
 
-### 2. Strategy for kwargs with `st_ak.RecordDraws` and `st_ak.Opts`
+Since `arrays()` is a thin wrapper around `contents()`, the test mocks
+`contents()` and verifies:
 
-```python
-def arrays_kwargs() -> st.SearchStrategy[st_ak.Opts[ArraysKwargs]]:
-    '''Strategy for options for `arrays()` strategy.'''
-    return (
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'dtypes': st.one_of(
-                    st.none(),
-                    st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
-                ),
-                'max_size': st.integers(min_value=0, max_value=50),
-                'allow_nan': st.booleans(),
-                'allow_regular': st.booleans(),
-                'allow_list_offset': st.booleans(),
-                'allow_list': st.booleans(),
-                'max_depth': st.integers(min_value=0, max_value=5),
-            },
-        )
-        .map(lambda d: cast(ArraysKwargs, d))
-        .map(st_ak.Opts)
-    )
-```
+1. All kwargs are forwarded to `contents()` (via `assert_called_once_with`)
+2. The result is an `ak.Array` wrapping the content returned by `contents()`
+   (via identity check on `.layout`)
 
-### 3. Main property-based test
-
-Verifies all options are respected: `max_size` (total scalars), per-type gating
-(`allow_regular`, `allow_list_offset`, `allow_list`), dtypes via leaf arrays,
-`allow_nan`, and `max_depth`.
-
-### 4. Edge case reachability tests
-
-Tests use `find()` to verify that the strategy can produce:
-
-- Empty arrays
-- Arrays using the full scalar budget
-- Arrays with NaN (when allowed)
-- Integer dtype arrays
-- Arrays at exactly `max_depth`
-- Nested arrays (depth >= 2)
-- `RegularArray` with size=0
-- `ListOffsetArray` and `ListArray`
-- Variable-length sublists
-- Empty sublists
-
-### 5. File structure for tests
+### File structure for tests
 
 ```text
+tests/strategies/contents/
++-- __init__.py
++-- test_content.py           # contents() strategy tests
++-- test_numpy_array.py       # numpy_array_contents() tests
++-- test_regular_array.py     # regular_array_contents() tests
+
 tests/strategies/constructors/
 +-- __init__.py
-+-- test_arrays.py
++-- test_array.py             # arrays() strategy tests (mocks contents())
 ```
 
 ## Alternatives Considered
