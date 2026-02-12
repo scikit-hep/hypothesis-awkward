@@ -56,8 +56,9 @@ uv run ruff format src tests
   - `misc/` - Utility strategies: `ranges`, `none_or`, `StMinMaxValuesFactory`,
     `OptsChain`, `RecordDraws`
 
-- **`util/`** - Internal utilities for dtype handling, safe comparisons, and
-  array introspection
+- **`util/`** - Internal utilities for dtype handling, safe comparisons,
+  layout iteration (`iter_contents`, `iter_leaf_contents`, `iter_numpy_arrays`),
+  and array introspection
 
 ### Strategy Design Pattern
 
