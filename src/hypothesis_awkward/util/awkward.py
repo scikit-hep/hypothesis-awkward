@@ -115,36 +115,6 @@ def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     return False
 
 
-def iter_numpy_arrays(a: ak.Array | Content, /) -> Iterator[np.ndarray]:
-    '''Iterate over all NumPy arrays in an Awkward Array layout.
-
-    Parameters
-    ----------
-    a
-        An Awkward Array or Content.
-
-    Yields
-    ------
-    np.ndarray
-        Each underlying NumPy array in the layout.
-
-    Examples
-    --------
-
-    >>> a = ak.Array([[1.0, 2.0], [3.0]])
-    >>> list(iter_numpy_arrays(a))
-    [array([1., 2., 3.])]
-
-    >>> a = ak.Array([{'x': 1, 'y': 2.0}, {'x': 3, 'y': 4.0}])
-    >>> sorted([arr.dtype for arr in iter_numpy_arrays(a)], key=str)
-    [dtype('float64'), dtype('int64')]
-
-    '''
-    for content in iter_leaf_contents(a):
-        if isinstance(content, NumpyArray):
-            yield content.data
-
-
 def iter_contents(a: ak.Array | Content, /) -> Iterator[Content]:
     '''Iterate over all contents in an Awkward Array layout.
 
@@ -201,26 +171,36 @@ def iter_leaf_contents(a: ak.Array | Content, /) -> Iterator[EmptyArray | NumpyA
         Each leaf content in the layout.
 
     '''
-    stack: list[ak.Array | Content] = [a]
-    while stack:
-        item = stack.pop()
-        match item:
-            case ak.Array():
-                stack.append(item.layout)
-            case NumpyArray() | EmptyArray():
-                yield item
-            case RecordArray():
-                for field in item.fields:
-                    stack.append(item[field])
-            case (
-                IndexedOptionArray()
-                | ListArray()
-                | ListOffsetArray()
-                | RegularArray()
-                | UnmaskedArray()
-            ):
-                stack.append(item.content)
-            case UnionArray():
-                stack.extend(item.contents)
-            case _:  # pragma: no cover
-                raise TypeError(f'Unexpected content type: {type(item)}')
+    for content in iter_contents(a):
+        if isinstance(content, (EmptyArray, NumpyArray)):
+            yield content
+
+
+def iter_numpy_arrays(a: ak.Array | Content, /) -> Iterator[np.ndarray]:
+    '''Iterate over all NumPy arrays in an Awkward Array layout.
+
+    Parameters
+    ----------
+    a
+        An Awkward Array or Content.
+
+    Yields
+    ------
+    np.ndarray
+        Each underlying NumPy array in the layout.
+
+    Examples
+    --------
+
+    >>> a = ak.Array([[1.0, 2.0], [3.0]])
+    >>> list(iter_numpy_arrays(a))
+    [array([1., 2., 3.])]
+
+    >>> a = ak.Array([{'x': 1, 'y': 2.0}, {'x': 3, 'y': 4.0}])
+    >>> sorted([arr.dtype for arr in iter_numpy_arrays(a)], key=str)
+    [dtype('float64'), dtype('int64')]
+
+    '''
+    for content in iter_leaf_contents(a):
+        if isinstance(content, NumpyArray):
+            yield content.data
