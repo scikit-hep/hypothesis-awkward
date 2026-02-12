@@ -1,4 +1,4 @@
-from typing import TypedDict, cast
+from typing import Any, TypedDict, cast
 from unittest.mock import patch
 
 import numpy as np
@@ -62,13 +62,38 @@ def arrays_kwargs() -> st.SearchStrategy[ArraysKwargs]:
 def test_arrays(data: st.DataObject) -> None:
     '''Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`.'''
     kwargs = data.draw(arrays_kwargs(), label='kwargs')
-    sentinel = ak.contents.NumpyArray(np.array([1, 2, 3]))
+
+    real_contents = st_ak.contents.contents
+    drawn_layout: ak.contents.Content | None = None
+    raised_exc: Exception | None = None
+
+    def tracking_contents(*a: Any, **kw: Any) -> st.SearchStrategy[ak.contents.Content]:
+        nonlocal drawn_layout, raised_exc
+        strategy = real_contents(*a, **kw)
+
+        @st.composite
+        def wrapped(draw_inner: st.DrawFn) -> ak.contents.Content:
+            nonlocal drawn_layout, raised_exc
+            try:
+                content = draw_inner(strategy)
+            except Exception as e:
+                raised_exc = e
+                raise
+            drawn_layout = content
+            return content
+
+        return wrapped()
 
     with patch.object(
-        st_ak.contents, 'contents', return_value=st.just(sentinel)
+        st_ak.contents, 'contents', side_effect=tracking_contents
     ) as mock:
-        a = data.draw(st_ak.constructors.arrays(**kwargs), label='a')
+        try:
+            a = data.draw(st_ak.constructors.arrays(**kwargs), label='a')
+        except Exception as e:
+            assert raised_exc is not None
+            assert e is raised_exc
+        else:
+            assert isinstance(a, ak.Array)
+            assert a.layout is drawn_layout
 
     mock.assert_called_once_with(**{**DEFAULTS, **kwargs})
-    assert isinstance(a, ak.Array)
-    assert a.layout is sentinel
