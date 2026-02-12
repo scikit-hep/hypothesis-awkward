@@ -5,6 +5,7 @@ from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListOffsetArray
+from hypothesis_awkward.util import iter_contents
 
 MAX_LIST_LENGTH = 5
 
@@ -79,14 +80,7 @@ def test_draw_from_contents() -> None:
     '''Assert that ListOffsetArray can be drawn from `contents()`.'''
 
     def _has_list_offset(c: Content) -> bool:
-        stack: list[Content] = [c]
-        while stack:
-            node = stack.pop()
-            if isinstance(node, ListOffsetArray):
-                return True
-            if hasattr(node, 'content'):
-                stack.append(node.content)
-        return False
+        return any(isinstance(n, ListOffsetArray) for n in iter_contents(c))
 
     find(
         st_ak.contents.contents(),
@@ -99,14 +93,12 @@ def test_draw_from_contents_variable_length() -> None:
     '''Assert that variable-length sublists can be drawn from `contents()`.'''
 
     def _has_variable_length(c: Content) -> bool:
-        node = c
-        while hasattr(node, 'content'):
-            if isinstance(node, ListOffsetArray) and len(node) >= 2:
-                lengths = [len(node[i]) for i in range(len(node))]
-                if len(set(lengths)) > 1:
-                    return True
-            node = node.content
-        return False
+        return any(
+            isinstance(n, ListOffsetArray)
+            and len(n) >= 2
+            and len(set(len(n[i]) for i in range(len(n)))) > 1
+            for n in iter_contents(c)
+        )
 
     find(
         st_ak.contents.contents(),
@@ -119,14 +111,11 @@ def test_draw_from_contents_empty_sublist() -> None:
     '''Assert that empty sublists can be drawn from `contents()`.'''
 
     def _has_empty_sublist(c: Content) -> bool:
-        node = c
-        while hasattr(node, 'content'):
-            if isinstance(node, ListOffsetArray):
-                for i in range(len(node)):
-                    if len(node[i]) == 0:
-                        return True
-            node = node.content
-        return False
+        return any(
+            isinstance(n, ListOffsetArray)
+            and any(len(n[i]) == 0 for i in range(len(n)))
+            for n in iter_contents(c)
+        )
 
     find(
         st_ak.contents.contents(),

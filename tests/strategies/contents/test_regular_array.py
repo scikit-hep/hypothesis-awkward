@@ -5,6 +5,7 @@ from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, RegularArray
+from hypothesis_awkward.util import iter_contents
 
 MAX_REGULAR_SIZE = 5
 
@@ -75,14 +76,9 @@ def test_draw_from_contents_size_zero() -> None:
     '''Assert that RegularArray with size=0 can be drawn from `contents()`.'''
 
     def _has_regular_size_zero(c: Content) -> bool:
-        stack: list[Content] = [c]
-        while stack:
-            node = stack.pop()
-            if isinstance(node, RegularArray) and node.size == 0:
-                return True
-            if hasattr(node, 'content'):
-                stack.append(node.content)
-        return False
+        return any(
+            isinstance(n, RegularArray) and n.size == 0 for n in iter_contents(c)
+        )
 
     find(
         st_ak.contents.contents(),

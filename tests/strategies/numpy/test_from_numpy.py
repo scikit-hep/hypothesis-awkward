@@ -10,6 +10,7 @@ from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
+    iter_contents,
     iter_numpy_arrays,
 )
 
@@ -187,15 +188,7 @@ def _is_structured(a: ak.Array) -> bool:
 
 def _has_regular_array(a: ak.Array) -> bool:
     '''Check if any content in the layout tree is a RegularArray.'''
-    stack: list[ak.contents.Content] = [a.layout]
-    while stack:
-        node = stack.pop()
-        if isinstance(node, ak.contents.RegularArray):
-            return True
-        elif isinstance(node, ak.contents.RecordArray):
-            for field in node.fields:
-                stack.append(node[field])
-    return False
+    return any(isinstance(n, ak.contents.RegularArray) for n in iter_contents(a))
 
 
 def _size(a: ak.Array) -> int:

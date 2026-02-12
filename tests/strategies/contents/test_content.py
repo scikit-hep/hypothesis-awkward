@@ -12,6 +12,7 @@ import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
+    iter_contents,
     iter_numpy_arrays,
 )
 
@@ -200,35 +201,14 @@ def _nesting_depth(c: ak.contents.Content) -> int:
 
 def _has_list_offset(c: ak.contents.Content) -> bool:
     '''Check if the content contains any ListOffsetArray node.'''
-    stack: list[ak.contents.Content] = [c]
-    while stack:
-        node = stack.pop()
-        if isinstance(node, ak.contents.ListOffsetArray):
-            return True
-        if hasattr(node, 'content'):
-            stack.append(node.content)
-    return False
+    return any(isinstance(n, ak.contents.ListOffsetArray) for n in iter_contents(c))
 
 
 def _has_regular(c: ak.contents.Content) -> bool:
     '''Check if the content contains any RegularArray node.'''
-    stack: list[ak.contents.Content] = [c]
-    while stack:
-        node = stack.pop()
-        if isinstance(node, ak.contents.RegularArray):
-            return True
-        if hasattr(node, 'content'):
-            stack.append(node.content)
-    return False
+    return any(isinstance(n, ak.contents.RegularArray) for n in iter_contents(c))
 
 
 def _has_list(c: ak.contents.Content) -> bool:
     '''Check if the content contains any ListArray node.'''
-    stack: list[ak.contents.Content] = [c]
-    while stack:
-        node = stack.pop()
-        if isinstance(node, ak.contents.ListArray):
-            return True
-        if hasattr(node, 'content'):
-            stack.append(node.content)
-    return False
+    return any(isinstance(n, ak.contents.ListArray) for n in iter_contents(c))
