@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Generic, Mapping, Protocol, TypeVar
 
 from hypothesis import strategies as st
@@ -67,3 +69,57 @@ class Opts(Generic[K]):
         for v in self._kwargs.values():
             if isinstance(v, RecordDraws):
                 v.drawn.clear()
+
+
+class OptsChain(Generic[K]):
+    '''Drawn options with explicit recorder registration and kwargs merging.
+
+    Unlike ``Opts``, which discovers ``RecordDraws`` instances by scanning
+    kwargs values, ``OptsChain`` owns recorder creation via ``register()``
+    and supports kwargs merging via ``extend()``.
+
+    Examples
+    --------
+    >>> chain = OptsChain({'a': 1})
+    >>> recorder = chain.register(st.integers())
+    >>> child = chain.extend({'b': recorder})
+    >>> child.kwargs == {'a': 1, 'b': recorder}
+    True
+    >>> child.reset()
+    >>> recorder.drawn
+    []
+    '''
+
+    def __init__(
+        self,
+        kwargs: K,
+        _recorders: list[RecordDraws[Any]] | None = None,
+    ) -> None:
+        self._kwargs = kwargs
+        self._recorders = _recorders if _recorders is not None else []
+
+    @property
+    def kwargs(self) -> K:
+        return self._kwargs
+
+    @property
+    def recorders(self) -> list[RecordDraws[Any]]:
+        return self._recorders
+
+    def register(self, strategy: st.SearchStrategy[T]) -> RecordDraws[T]:
+        '''Create a ``RecordDraws`` wrapper and track it for ``reset()``.'''
+        recorder = RecordDraws(strategy)
+        self._recorders.append(recorder)
+        return recorder
+
+    def extend(self, extra: Mapping[str, Any]) -> OptsChain[Any]:
+        '''Return a new ``OptsChain`` with merged kwargs and a copy of recorders.'''
+        return OptsChain(
+            {**self._kwargs, **extra},
+            _recorders=list(self._recorders),
+        )
+
+    def reset(self) -> None:
+        '''Clear all recorded values from registered recorders.'''
+        for r in self._recorders:
+            r.drawn.clear()
