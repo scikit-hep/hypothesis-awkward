@@ -17,10 +17,7 @@ from awkward.contents import (
 )
 
 
-def any_nan_nat_in_awkward_array(
-    a: ak.Array | Content,
-    /,
-) -> bool:
+def any_nan_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     '''`True` if Awkward Array contains any `NaN` or `NaT` values, else `False`.
 
     Parameters
@@ -52,10 +49,7 @@ def any_nan_nat_in_awkward_array(
     return any_nan_in_awkward_array(a) or any_nat_in_awkward_array(a)
 
 
-def any_nan_in_awkward_array(
-    a: ak.Array | Content,
-    /,
-) -> bool:
+def any_nan_in_awkward_array(a: ak.Array | Content, /) -> bool:
     '''`True` if Awkward Array contains any `NaN` values, else `False`.
 
     Parameters
@@ -90,10 +84,7 @@ def any_nan_in_awkward_array(
     return False
 
 
-def any_nat_in_awkward_array(
-    a: ak.Array | Content,
-    /,
-) -> bool:
+def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     '''`True` if Awkward Array contains any `NaT` values, else `False`.
 
     Parameters
@@ -124,10 +115,7 @@ def any_nat_in_awkward_array(
     return False
 
 
-def iter_numpy_arrays(
-    a: ak.Array | Content,
-    /,
-) -> Iterator[np.ndarray]:
+def iter_numpy_arrays(a: ak.Array | Content, /) -> Iterator[np.ndarray]:
     '''Iterate over all NumPy arrays in an Awkward Array layout.
 
     Parameters
@@ -157,10 +145,7 @@ def iter_numpy_arrays(
             yield content.data
 
 
-def iter_contents(
-    a: ak.Array | Content,
-    /,
-) -> Iterator[Content]:
+def iter_contents(a: ak.Array | Content, /) -> Iterator[Content]:
     '''Iterate over all contents in an Awkward Array layout.
 
     Parameters
@@ -202,10 +187,7 @@ def iter_contents(
                 raise TypeError(f'Unexpected content type: {type(item)}')
 
 
-def iter_leaf_contents(
-    a: ak.Array | Content,
-    /,
-) -> Iterator[EmptyArray | NumpyArray]:
+def iter_leaf_contents(a: ak.Array | Content, /) -> Iterator[EmptyArray | NumpyArray]:
     '''Iterate over all leaf contents in an Awkward Array layout.
 
     Parameters
