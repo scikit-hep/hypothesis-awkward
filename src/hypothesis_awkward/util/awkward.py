@@ -3,10 +3,22 @@ from collections.abc import Iterator
 import numpy as np
 
 import awkward as ak
+from awkward.contents import (
+    Content,
+    EmptyArray,
+    IndexedOptionArray,
+    ListArray,
+    ListOffsetArray,
+    NumpyArray,
+    RecordArray,
+    RegularArray,
+    UnionArray,
+    UnmaskedArray,
+)
 
 
 def any_nan_nat_in_awkward_array(
-    a: ak.Array | ak.contents.Content,
+    a: ak.Array | Content,
     /,
 ) -> bool:
     '''`True` if Awkward Array contains any `NaN` or `NaT` values, else `False`.
@@ -41,7 +53,7 @@ def any_nan_nat_in_awkward_array(
 
 
 def any_nan_in_awkward_array(
-    a: ak.Array | ak.contents.Content,
+    a: ak.Array | Content,
     /,
 ) -> bool:
     '''`True` if Awkward Array contains any `NaN` values, else `False`.
@@ -79,7 +91,7 @@ def any_nan_in_awkward_array(
 
 
 def any_nat_in_awkward_array(
-    a: ak.Array | ak.contents.Content,
+    a: ak.Array | Content,
     /,
 ) -> bool:
     '''`True` if Awkward Array contains any `NaT` values, else `False`.
@@ -113,7 +125,7 @@ def any_nat_in_awkward_array(
 
 
 def iter_numpy_arrays(
-    a: ak.Array | ak.contents.Content,
+    a: ak.Array | Content,
     /,
 ) -> Iterator[np.ndarray]:
     '''Iterate over all NumPy arrays in an Awkward Array layout.
@@ -141,14 +153,14 @@ def iter_numpy_arrays(
 
     '''
     for content in iter_leaf_contents(a):
-        if isinstance(content, ak.contents.NumpyArray):
+        if isinstance(content, NumpyArray):
             yield content.data
 
 
 def iter_contents(
-    a: ak.Array | ak.contents.Content,
+    a: ak.Array | Content,
     /,
-) -> Iterator[ak.contents.Content]:
+) -> Iterator[Content]:
     '''Iterate over all contents in an Awkward Array layout.
 
     Parameters
@@ -158,32 +170,32 @@ def iter_contents(
 
     Yields
     ------
-    ak.contents.Content
+    Content
         Each content node in the layout.
 
     '''
-    stack: list[ak.Array | ak.contents.Content] = [a]
+    stack: list[ak.Array | Content] = [a]
     while stack:
         item = stack.pop()
         match item:
             case ak.Array():
                 stack.append(item.layout)
-            case ak.contents.NumpyArray() | ak.contents.EmptyArray():
+            case NumpyArray() | EmptyArray():
                 yield item
-            case ak.contents.RecordArray():
+            case RecordArray():
                 yield item
                 for field in item.fields:
                     stack.append(item[field])
             case (
-                ak.contents.IndexedOptionArray()
-                | ak.contents.ListArray()
-                | ak.contents.ListOffsetArray()
-                | ak.contents.RegularArray()
-                | ak.contents.UnmaskedArray()
+                IndexedOptionArray()
+                | ListArray()
+                | ListOffsetArray()
+                | RegularArray()
+                | UnmaskedArray()
             ):
                 yield item
                 stack.append(item.content)
-            case ak.contents.UnionArray():
+            case UnionArray():
                 yield item
                 stack.extend(item.contents)
             case _:  # pragma: no cover
@@ -191,9 +203,9 @@ def iter_contents(
 
 
 def iter_leaf_contents(
-    a: ak.Array | ak.contents.Content,
+    a: ak.Array | Content,
     /,
-) -> Iterator[ak.contents.EmptyArray | ak.contents.NumpyArray]:
+) -> Iterator[EmptyArray | NumpyArray]:
     '''Iterate over all leaf contents in an Awkward Array layout.
 
     Parameters
@@ -203,30 +215,30 @@ def iter_leaf_contents(
 
     Yields
     ------
-    ak.contents.EmptyArray | ak.contents.NumpyArray
+    EmptyArray | NumpyArray
         Each leaf content in the layout.
 
     '''
-    stack: list[ak.Array | ak.contents.Content] = [a]
+    stack: list[ak.Array | Content] = [a]
     while stack:
         item = stack.pop()
         match item:
             case ak.Array():
                 stack.append(item.layout)
-            case ak.contents.NumpyArray() | ak.contents.EmptyArray():
+            case NumpyArray() | EmptyArray():
                 yield item
-            case ak.contents.RecordArray():
+            case RecordArray():
                 for field in item.fields:
                     stack.append(item[field])
             case (
-                ak.contents.IndexedOptionArray()
-                | ak.contents.ListArray()
-                | ak.contents.ListOffsetArray()
-                | ak.contents.RegularArray()
-                | ak.contents.UnmaskedArray()
+                IndexedOptionArray()
+                | ListArray()
+                | ListOffsetArray()
+                | RegularArray()
+                | UnmaskedArray()
             ):
                 stack.append(item.content)
-            case ak.contents.UnionArray():
+            case UnionArray():
                 stack.extend(item.contents)
             case _:  # pragma: no cover
                 raise TypeError(f'Unexpected content type: {type(item)}')
