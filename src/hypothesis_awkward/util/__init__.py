@@ -2,6 +2,7 @@ __all__ = [
     'any_nan_in_awkward_array',
     'any_nan_nat_in_awkward_array',
     'any_nat_in_awkward_array',
+    'iter_contents',
     'iter_leaf_contents',
     'iter_numpy_arrays',
     'CountdownDrawer',
@@ -23,6 +24,7 @@ from .awkward import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
+    iter_contents,
     iter_leaf_contents,
     iter_numpy_arrays,
 )

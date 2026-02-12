@@ -145,6 +145,51 @@ def iter_numpy_arrays(
             yield content.data
 
 
+def iter_contents(
+    a: ak.Array | ak.contents.Content,
+    /,
+) -> Iterator[ak.contents.Content]:
+    '''Iterate over all contents in an Awkward Array layout.
+
+    Parameters
+    ----------
+    a
+        An Awkward Array or Content.
+
+    Yields
+    ------
+    ak.contents.Content
+        Each content node in the layout.
+
+    '''
+    stack: list[ak.Array | ak.contents.Content] = [a]
+    while stack:
+        item = stack.pop()
+        match item:
+            case ak.Array():
+                stack.append(item.layout)
+            case ak.contents.NumpyArray() | ak.contents.EmptyArray():
+                yield item
+            case ak.contents.RecordArray():
+                yield item
+                for field in item.fields:
+                    stack.append(item[field])
+            case (
+                ak.contents.IndexedOptionArray()
+                | ak.contents.ListArray()
+                | ak.contents.ListOffsetArray()
+                | ak.contents.RegularArray()
+                | ak.contents.UnmaskedArray()
+            ):
+                yield item
+                stack.append(item.content)
+            case ak.contents.UnionArray():
+                yield item
+                stack.extend(item.contents)
+            case _:  # pragma: no cover
+                raise TypeError(f'Unexpected content type: {type(item)}')
+
+
 def iter_leaf_contents(
     a: ak.Array | ak.contents.Content,
     /,
@@ -183,5 +228,5 @@ def iter_leaf_contents(
                 stack.append(item.content)
             case ak.contents.UnionArray():
                 stack.extend(item.contents)
-            case _:
+            case _:  # pragma: no cover
                 raise TypeError(f'Unexpected content type: {type(item)}')
