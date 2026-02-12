@@ -1,8 +1,8 @@
 import numpy as np
 from hypothesis import strategies as st
 
-import awkward as ak
 import hypothesis_awkward.strategies as st_ak
+from awkward.contents import NumpyArray
 
 
 def numpy_array_contents(
@@ -11,7 +11,7 @@ def numpy_array_contents(
     allow_nan: bool = False,
     min_size: int = 0,
     max_size: int = 10,
-) -> st.SearchStrategy[ak.contents.NumpyArray]:
+) -> st.SearchStrategy[NumpyArray]:
     '''Strategy for NumpyArray content.'''
     return st_ak.numpy_arrays(
         dtype=dtypes,
@@ -20,4 +20,4 @@ def numpy_array_contents(
         max_dims=1,
         min_size=min_size,
         max_size=max_size,
-    ).map(ak.contents.NumpyArray)
+    ).map(NumpyArray)

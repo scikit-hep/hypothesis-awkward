@@ -1,8 +1,8 @@
 from hypothesis import strategies as st
 
-import awkward as ak
+from awkward.contents import EmptyArray
 
 
-def empty_array_contents() -> st.SearchStrategy[ak.contents.EmptyArray]:
+def empty_array_contents() -> st.SearchStrategy[EmptyArray]:
     '''Strategy for EmptyArray content.'''
-    return st.just(ak.contents.EmptyArray())
+    return st.just(EmptyArray())
