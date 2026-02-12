@@ -2,9 +2,8 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
-from awkward.contents import Content
-
 import hypothesis_awkward.strategies as st_ak
+from awkward.contents import Content
 from hypothesis_awkward.util import iter_numpy_arrays
 from hypothesis_awkward.util.awkward import iter_contents, iter_leaf_contents
 from tests.util.awkward.conftest import st_arrays
