@@ -29,7 +29,8 @@ dependencies = ["awkward>=2.8", "hypothesis>=6.147"]
 [project.optional-dependencies]
 pandas = [
     "pandas>=2.3,<3; python_version < '3.11'",
-    "pandas>=2.3; python_version >= '3.11'",
+    "pandas>=2.3; python_version >= '3.11' and python_version < '3.14'",
+    "pandas>=2.3.3; python_version >= '3.14'",
 ]
 arrow = ["pyarrow>=22.0"]
 all = ["hypothesis-awkward[pandas,arrow]"]
