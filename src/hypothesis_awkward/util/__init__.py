@@ -5,6 +5,7 @@ __all__ = [
     'iter_contents',
     'iter_leaf_contents',
     'iter_numpy_arrays',
+    'LeafContent',
     'CountdownDrawer',
     '_StWithMinMaxSize',
     'SUPPORTED_DTYPES',
@@ -21,6 +22,7 @@ __all__ = [
 ]
 
 from .awkward import (
+    LeafContent,
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,

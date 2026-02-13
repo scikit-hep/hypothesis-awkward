@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from typing import Union
 
 import numpy as np
 
@@ -15,6 +16,21 @@ from awkward.contents import (
     UnionArray,
     UnmaskedArray,
 )
+
+LeafContent = Union[NumpyArray, EmptyArray, ListOffsetArray, ListArray, RegularArray]
+
+
+def _is_string_or_bytestring_leaf(
+    c: Content,
+    string_as_leaf: bool,
+    bytestring_as_leaf: bool,
+) -> bool:
+    array_param = c.parameter('__array__')
+    if string_as_leaf and array_param == 'string':
+        return True
+    if bytestring_as_leaf and array_param == 'bytestring':
+        return True
+    return False
 
 
 def any_nan_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
@@ -115,13 +131,25 @@ def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     return False
 
 
-def iter_contents(a: ak.Array | Content, /) -> Iterator[Content]:
+def iter_contents(
+    a: ak.Array | Content,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> Iterator[Content]:
     '''Iterate over all contents in an Awkward Array layout.
 
     Parameters
     ----------
     a
         An Awkward Array or Content.
+    string_as_leaf
+        If `True` (default), treat string `ListOffsetArray`/`ListArray`/
+        `RegularArray` nodes as leaves — do not descend into the inner
+        `NumpyArray(uint8)`.
+    bytestring_as_leaf
+        If `True` (default), treat bytestring nodes as leaves.
 
     Yields
     ------
@@ -140,6 +168,10 @@ def iter_contents(a: ak.Array | Content, /) -> Iterator[Content]:
             case RecordArray():
                 yield item
                 stack.extend([item[f] for f in item.fields])
+            case ListArray() | ListOffsetArray() | RegularArray() if (
+                _is_string_or_bytestring_leaf(item, string_as_leaf, bytestring_as_leaf)
+            ):
+                yield item
             case (
                 IndexedOptionArray()
                 | ListArray()
@@ -156,32 +188,60 @@ def iter_contents(a: ak.Array | Content, /) -> Iterator[Content]:
                 raise TypeError(f'Unexpected content type: {type(item)}')
 
 
-def iter_leaf_contents(a: ak.Array | Content, /) -> Iterator[EmptyArray | NumpyArray]:
+def iter_leaf_contents(
+    a: ak.Array | Content,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> Iterator[LeafContent]:
     '''Iterate over all leaf contents in an Awkward Array layout.
 
     Parameters
     ----------
     a
         An Awkward Array or Content.
+    string_as_leaf
+        If `True` (default), treat string `ListOffsetArray`/`ListArray`/
+        `RegularArray` nodes as leaves.
+    bytestring_as_leaf
+        If `True` (default), treat bytestring nodes as leaves.
 
     Yields
     ------
-    EmptyArray | NumpyArray
+    LeafContent
         Each leaf content in the layout.
 
     '''
-    for content in iter_contents(a):
+    for content in iter_contents(
+        a, string_as_leaf=string_as_leaf, bytestring_as_leaf=bytestring_as_leaf
+    ):
         if isinstance(content, (EmptyArray, NumpyArray)):
             yield content
+        elif isinstance(content, (ListOffsetArray, ListArray, RegularArray)):
+            if _is_string_or_bytestring_leaf(
+                content, string_as_leaf, bytestring_as_leaf
+            ):
+                yield content
 
 
-def iter_numpy_arrays(a: ak.Array | Content, /) -> Iterator[np.ndarray]:
+def iter_numpy_arrays(
+    a: ak.Array | Content,
+    /,
+    *,
+    exclude_string: bool = True,
+    exclude_bytestring: bool = True,
+) -> Iterator[np.ndarray]:
     '''Iterate over all NumPy arrays in an Awkward Array layout.
 
     Parameters
     ----------
     a
         An Awkward Array or Content.
+    exclude_string
+        If `True` (default), exclude the inner `uint8` data of string nodes.
+    exclude_bytestring
+        If `True` (default), exclude the inner `uint8` data of bytestring nodes.
 
     Yields
     ------
@@ -200,6 +260,10 @@ def iter_numpy_arrays(a: ak.Array | Content, /) -> Iterator[np.ndarray]:
     [dtype('float64'), dtype('int64')]
 
     '''
-    for content in iter_leaf_contents(a):
+    for content in iter_leaf_contents(
+        a,
+        string_as_leaf=exclude_string,
+        bytestring_as_leaf=exclude_bytestring,
+    ):
         if isinstance(content, NumpyArray):
             yield content.data
