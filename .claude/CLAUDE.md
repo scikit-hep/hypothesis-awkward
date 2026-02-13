@@ -48,7 +48,8 @@ uv run ruff format src tests
   - `contents/` - Strategies for Awkward Array content layouts:
     `contents`, `leaf_contents`, `numpy_array_contents`,
     `empty_array_contents`, `regular_array_contents`,
-    `list_offset_array_contents`, `list_array_contents`
+    `list_offset_array_contents`, `list_array_contents`,
+    `string_contents`, `bytestring_contents`
   - `constructors/` - Strategies via direct Content constructors: `arrays`
   - `pandas/` - Strategies related to pandas DataFrames: `dicts_for_dataframe`
   - `forms/` - (experimental) Strategies for Awkward Forms: `numpy_forms`

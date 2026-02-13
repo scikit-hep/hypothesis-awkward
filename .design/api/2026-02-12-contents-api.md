@@ -63,6 +63,8 @@ def contents(
     allow_nan: bool = False,
     allow_numpy: bool = True,
     allow_empty: bool = True,
+    allow_string: bool = True,
+    allow_bytestring: bool = True,
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
@@ -89,8 +91,16 @@ def contents(
 
 - **`allow_empty`** — Generate `EmptyArray` leaves. Default: `True`.
   `EmptyArray` is unaffected by `dtypes` and `allow_nan`. At least one of
-  `allow_numpy` or `allow_empty` must be `True`; disabling both raises
-  `ValueError`.
+  `allow_numpy`, `allow_empty`, `allow_string`, or `allow_bytestring` must be
+  `True`; disabling all raises `ValueError`.
+
+- **`allow_string`** — Generate string content (`ListOffsetArray` with
+  `__array__="string"`). Default: `True`. String content is leaf-like and
+  unaffected by `dtypes` and `allow_nan`.
+
+- **`allow_bytestring`** — Generate bytestring content (`ListOffsetArray` with
+  `__array__="bytestring"`). Default: `True`. Bytestring content is leaf-like
+  and unaffected by `dtypes` and `allow_nan`.
 
 - **`allow_regular`** — Generate `RegularArray` wrappers. Default: `True`.
 
@@ -125,7 +135,9 @@ def leaf_contents(
     max_size: int = 10,
     allow_numpy: bool = True,
     allow_empty: bool = True,
-) -> st.SearchStrategy[NumpyArray | EmptyArray]:
+    allow_string: bool = True,
+    allow_bytestring: bool = True,
+) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
 ```
 
 #### Parameters
@@ -150,6 +162,10 @@ def leaf_contents(
 - **`allow_empty`** — Generate `EmptyArray`. Default: `True`. Only effective
   when `min_size == 0`.
 
+- **`allow_string`** — Generate string content. Default: `True`.
+
+- **`allow_bytestring`** — Generate bytestring content. Default: `True`.
+
 #### Behavior
 
 Uses `st.one_of()` to select between enabled leaf types:
@@ -157,6 +173,10 @@ Uses `st.one_of()` to select between enabled leaf types:
 - `allow_numpy=True` → includes `numpy_array_contents(dtypes, allow_nan,
   min_size=min_size, max_size=max_size)`
 - `allow_empty=True` and `min_size == 0` → includes `empty_array_contents()`
+- `allow_string=True` → includes `string_contents(min_size=min_size,
+  max_size=max_size)`
+- `allow_bytestring=True` → includes `bytestring_contents(min_size=min_size,
+  max_size=max_size)`
 
 ### `numpy_array_contents()`
 
@@ -424,8 +444,10 @@ Existing:
                        -->  numpy_forms()
 
 Contents layer:
-  supported_dtypes()  -->  numpy_array_contents()  -->  leaf_contents()
-                                                        empty_array_contents()
+  supported_dtypes()  -->  numpy_array_contents()  ──┐
+                           empty_array_contents()  ──┤
+                           string_contents()       ──┼──>  leaf_contents()
+                           bytestring_contents()   ──┘
 
   leaf_contents()  -->  contents()  ─┬─>  regular_array_contents()
                                      ├─>  list_offset_array_contents()
@@ -440,14 +462,16 @@ Constructors layer:
 ```text
 src/hypothesis_awkward/strategies/
 ├── contents/
-│   ├── __init__.py           # Re-exports all 7 strategies
+│   ├── __init__.py           # Re-exports all 9 strategies
 │   ├── content.py            # contents() — top-level recursive composition
 │   ├── leaf.py               # leaf_contents() — leaf node selector
 │   ├── numpy_array.py        # numpy_array_contents()
 │   ├── empty_array.py        # empty_array_contents()
 │   ├── regular_array.py      # regular_array_contents()
 │   ├── list_offset_array.py  # list_offset_array_contents()
-│   └── list_array.py         # list_array_contents()
+│   ├── list_array.py         # list_array_contents()
+│   ├── string.py             # string_contents()
+│   └── bytestring.py         # bytestring_contents()
 ├── constructors/
 │   ├── __init__.py           # Re-exports arrays()
 │   └── array_.py             # arrays() — thin wrapper around contents()
@@ -554,7 +578,9 @@ tests/strategies/contents/
 ├── test_empty_array.py       # empty_array_contents()
 ├── test_regular_array.py     # regular_array_contents()
 ├── test_list_offset_array.py # list_offset_array_contents()
-└── test_list_array.py        # list_array_contents()
+├── test_list_array.py        # list_array_contents()
+├── test_string.py            # string_contents()
+└── test_bytestring.py        # bytestring_contents()
 ```
 
 ## Alternatives Considered
@@ -639,8 +665,7 @@ values.
 2. Add option type support (`indexed_option_array_contents()`,
    `byte_masked_array_contents()`, etc.)
 3. Add `UnionArray` support (`union_array_contents()`)
-4. Add string/bytestring support — see
-   [string-bytestring-api](./2026-02-13-string-bytestring-api.md) for the
-   proposed design
+4. ~~Add string/bytestring support~~ ✓ — see
+   [string-bytestring-api](./2026-02-13-string-bytestring-api.md)
 5. Consider exposing `MAX_REGULAR_SIZE` / `MAX_LIST_LENGTH` as parameters
 6. Consider adding `min_size` to `contents()`

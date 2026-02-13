@@ -16,7 +16,7 @@ The open question about testing strategy-valued parameters (like
 pattern was adopted:
 
 - Wrap the strategy in `st_ak.RecordDraws(...)` to record drawn values
-- Use `st_ak.Opts` with `reset()` to clear recorders between draws
+- Use `st_ak.OptsChain` with `reset()` to clear recorders between draws
 - Use `match` / `case` in assertions to distinguish concrete values from
   `RecordDraws` instances
 

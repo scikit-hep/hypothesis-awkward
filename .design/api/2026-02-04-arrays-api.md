@@ -90,6 +90,8 @@ def arrays(
     # --- Leaf type control ---
     allow_numpy: bool = True,
     allow_empty: bool = True,
+    allow_string: bool = True,
+    allow_bytestring: bool = True,
 
     # --- Nesting type control ---
     allow_regular: bool = True,
@@ -144,7 +146,11 @@ Control which leaf Content node types are enabled.
 - `allow_numpy`: Generate `NumpyArray` leaves (primitive data).
 - `allow_empty`: Generate `EmptyArray` leaves (zero-length, `UnknownType`).
   `EmptyArray` is unaffected by `dtypes` and `allow_nan`.
-- At least one leaf type must be enabled; disabling both raises `ValueError`.
+- `allow_string`: Generate string content (`ListOffsetArray` with
+  `__array__="string"`). Unaffected by `dtypes` and `allow_nan`.
+- `allow_bytestring`: Generate bytestring content (`ListOffsetArray` with
+  `__array__="bytestring"`). Unaffected by `dtypes` and `allow_nan`.
+- At least one leaf type must be enabled; disabling all raises `ValueError`.
 
 #### `allow_regular`, `allow_list_offset`, `allow_list`
 
@@ -160,7 +166,7 @@ Control which structural Content node types are enabled.
   and/or `EmptyArray`).
 
 Future node type flags (not yet implemented): `allow_record`, `allow_option`,
-`allow_union`, `allow_string`.
+`allow_union`.
 
 #### `max_depth`
 
@@ -325,10 +331,11 @@ src/hypothesis_awkward/strategies/contents/
 +-- regular_array.py          # regular_array_contents()
 +-- list_offset_array.py      # list_offset_array_contents()
 +-- list_array.py             # list_array_contents()
++-- string.py                 # string_contents()
++-- bytestring.py             # bytestring_contents()
 +-- record_array.py           # record_array_contents() (future)
 +-- option.py                 # option content strategies (future)
 +-- union_array.py            # union_array_contents() (future)
-+-- string.py                 # string content strategies (future)
 ```
 
 ### Public API
@@ -556,6 +563,8 @@ tests/strategies/contents/
 +-- test_regular_array.py     # regular_array_contents() tests
 +-- test_list_offset_array.py # list_offset_array_contents() tests
 +-- test_list_array.py        # list_array_contents() tests
++-- test_string.py            # string_contents() tests
++-- test_bytestring.py        # bytestring_contents() tests
 
 tests/strategies/constructors/
 +-- __init__.py
@@ -650,8 +659,7 @@ Accept `np.dtype | st.SearchStrategy[np.dtype] | None` as in `numpy_arrays()`.
 2. Add option type support (`allow_option`) -- `IndexedOptionArray`,
    `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`
 3. Add `UnionArray` support (`allow_union`)
-4. Add string/bytestring support (`allow_string`, `allow_bytestring`) — see
-   [string-bytestring-api](./../api/2026-02-13-string-bytestring-api.md) for
-   the proposed design
+4. ~~Add string/bytestring support (`allow_string`, `allow_bytestring`)~~ ✓ —
+   see [string-bytestring-api](./../api/2026-02-13-string-bytestring-api.md)
 5. Implement content nesting constraint enforcement
 6. Consider connecting `type`/`form` parameters

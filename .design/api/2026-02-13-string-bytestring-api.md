@@ -1,7 +1,7 @@
 # API Design: String and Bytestring Content Strategies
 
 **Date:** 2026-02-13
-**Status:** Proposed
+**Status:** Implemented
 **Author:** Claude (with developer collaboration)
 
 ## Overview
@@ -131,8 +131,8 @@ def leaf_contents(
     max_size: int = 10,
     allow_numpy: bool = True,
     allow_empty: bool = True,
-    allow_string: bool = False,
-    allow_bytestring: bool = False,
+    allow_string: bool = True,
+    allow_bytestring: bool = True,
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
 ```
 
@@ -162,8 +162,8 @@ def contents(
     allow_nan: bool = False,
     allow_numpy: bool = True,
     allow_empty: bool = True,
-    allow_string: bool = False,
-    allow_bytestring: bool = False,
+    allow_string: bool = True,
+    allow_bytestring: bool = True,
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
@@ -198,22 +198,17 @@ tree, not wrapper strategies.
 the inner content is fixed (`NumpyArray(uint8)`) — the wrapper pattern of
 accepting arbitrary content does not apply.
 
-### 2. Default `allow_string=False` / `allow_bytestring=False`
+### 2. Default `allow_string=True` / `allow_bytestring=True`
 
-**Decision:** String and bytestring generation is opt-in.
+**Decision:** String and bytestring generation is enabled by default.
 
 **Rationale:**
 
-- Adding strings to the default leaf pool would change the output distribution
-  of existing `contents()` / `arrays()` calls, potentially breaking existing
-  tests.
-- Strings exercise different code paths than numeric arrays. Users should
-  opt in when testing string-handling code.
-- This matches the incremental extensibility goal: new node types are added as
-  new `allow_*` flags without changing defaults.
-
-**Alternative considered:** Defaulting to `True`. Deferred until the strategy
-is stable and widely tested. Can change the default in a future version.
+- Maximizes coverage by default — `contents()` / `arrays()` with no arguments
+  generate a variety of content types including strings and bytestrings.
+- Consistent with how `allow_numpy`, `allow_empty`, and all wrapper flags
+  default to `True`.
+- Users who want to exclude strings can set `allow_string=False`.
 
 ### 3. `min_size` / `max_size` Count Strings, Not Bytes
 
@@ -422,6 +417,17 @@ Following the patterns in
 - `test_content.py`: Add tests for `allow_string` and `allow_bytestring` flags
   in the main property test
 
+## Completed
+
+1. ~~Implement `string_contents()`~~ ✓
+2. ~~Implement `bytestring_contents()`~~ ✓
+3. ~~Add `allow_string` / `allow_bytestring` to `leaf_contents()`~~ ✓
+4. ~~Add `allow_string` / `allow_bytestring` to `contents()`~~ ✓
+5. ~~Add `allow_string` / `allow_bytestring` to `arrays()`~~ ✓
+6. ~~Export from `contents/__init__.py`~~ ✓
+7. ~~Write tests for `string_contents()` and `bytestring_contents()`~~ ✓
+8. ~~Add `string_as_leaf` / `bytestring_as_leaf` to layout iterators~~ ✓
+
 ## Open Questions
 
 1. **Should individual string length be configurable?** Currently, individual
@@ -432,8 +438,6 @@ Following the patterns in
    initial implementation uses `ListOffsetArray` only. Separate strategies or a
    `list_type` parameter could be added later.
 
-3. **How does `max_size` interact with the scalar budget for strings?** Since
-   bytes count as scalars, a `max_size=10` budget could produce at most 10 bytes
-   total across all strings. This may be too restrictive. The `max_size` on
-   `string_contents()` could instead control the number of strings, with byte
-   count uncapped. This needs to be resolved during implementation.
+3. ~~**How does `max_size` interact with the scalar budget for strings?**~~
+   **Resolved.** Each string or bytestring (not character or byte) counts as one
+   toward `max_size`. The `CountdownDrawer` counts strings, not bytes.
