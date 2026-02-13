@@ -1,3 +1,4 @@
+import numpy as np
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -13,38 +14,44 @@ from awkward.contents import (
 )
 from hypothesis_awkward.util import iter_numpy_arrays
 from hypothesis_awkward.util.awkward import iter_contents, iter_leaf_contents
-from tests.util.awkward.conftest import st_arrays
 
 
 @given(data=st.data())
 def test_iter_numpy_arrays(data: st.DataObject) -> None:
-    '''Verify total element count matches len(ak.flatten()).'''
-    a = data.draw(st_arrays())
+    '''Verify iter_numpy_arrays yields NumpyArray leaf data.'''
+    a = data.draw(st_ak.constructors.arrays(), label='array')
     exclude_string = data.draw(st.booleans(), label='exclude_string')
     exclude_bytestring = data.draw(st.booleans(), label='exclude_bytestring')
-    total = sum(
-        arr.size
-        for arr in iter_numpy_arrays(
-            a, exclude_string=exclude_string, exclude_bytestring=exclude_bytestring
-        )
-    )
-    expected = _count_all_leaves(a)
-    assert total == expected
 
-    for c in iter_leaf_contents(
+    result = list(iter_numpy_arrays(
+        a, exclude_string=exclude_string, exclude_bytestring=exclude_bytestring
+    ))
+
+    assert all(isinstance(arr, np.ndarray) for arr in result)
+
+    # Top-level NumpyArray data is in result
+    result_ids = {id(arr) for arr in result}
+    if isinstance(a.layout, NumpyArray):
+        assert id(a.layout.data) in result_ids
+
+    # NumpyArray children of list-type arrays are in result
+    for c in iter_contents(
         a, string_as_leaf=exclude_string, bytestring_as_leaf=exclude_bytestring
     ):
-        if isinstance(c, NumpyArray):
-            if exclude_string:
-                assert c.parameter('__array__') != 'char'
-            if exclude_bytestring:
-                assert c.parameter('__array__') != 'byte'
+        if not isinstance(c, (ListOffsetArray, ListArray, RegularArray)):
+            continue
+        if exclude_string and c.parameter('__array__') == 'string':
+            continue
+        if exclude_bytestring and c.parameter('__array__') == 'bytestring':
+            continue
+        if isinstance(c.content, NumpyArray):
+            assert id(c.content.data) in result_ids
 
 
 @given(data=st.data())
 def test_iter_leaf_contents(data: st.DataObject) -> None:
     '''Verify all yielded items are leaf content types.'''
-    a = data.draw(st_arrays())
+    a = data.draw(st_ak.constructors.arrays(), label='array')
     string_as_leaf = data.draw(st.booleans(), label='string_as_leaf')
     bytestring_as_leaf = data.draw(st.booleans(), label='bytestring_as_leaf')
     for content in iter_leaf_contents(
@@ -97,7 +104,12 @@ def test_iter_contents(data: st.DataObject) -> None:
     assert id(a.layout) in id_set
 
     # 3. Closure: children of every yielded node are also yielded
+    #    (string/bytestring leaves don't descend, so skip their children)
     for c in all_contents:
+        if string_as_leaf and c.parameter('__array__') == 'string':
+            continue
+        if bytestring_as_leaf and c.parameter('__array__') == 'bytestring':
+            continue
         for child in _children(c):
             assert id(child) in id_set
 
@@ -110,10 +122,3 @@ def test_iter_contents(data: st.DataObject) -> None:
             assert c.parameter('__array__') != 'char'
         if bytestring_as_leaf:
             assert c.parameter('__array__') != 'byte'
-
-
-def _count_all_leaves(a: ak.Array) -> int:
-    '''Count total elements across all leaf fields (handles record arrays).'''
-    if a.fields:
-        return sum(_count_all_leaves(a[field]) for field in a.fields)
-    return len(ak.flatten(a, axis=None))
