@@ -21,6 +21,8 @@ def contents(
     allow_nan: bool = False,
     allow_numpy: bool = True,
     allow_empty: bool = True,
+    allow_string: bool = True,
+    allow_bytestring: bool = True,
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
@@ -28,25 +30,40 @@ def contents(
 ) -> Content:
     '''Strategy for Awkward Array content layouts.
 
-    The current implementation generates layouts with NumpyArray as leaf contents that can
-    be nested multiple levels deep in RegularArray, ListOffsetArray, and ListArray lists.
+    Builds content layouts by drawing from NumpyArray, EmptyArray,
+    string, and bytestring, then optionally wrapping in one or more
+    layers of RegularArray, ListOffsetArray, and ListArray.
 
     Parameters
     ----------
     dtypes
         A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
         default strategy that generates any scalar dtype supported by Awkward Array is
-        used.
+        used. Does not affect string or bytestring content.
     max_size
-        Maximum total number of scalar values in the generated array.
+        Maximum total number of elements in the generated content. Each
+        numerical value, including complex and datetime, counts as one. Each
+        string and bytestring (not character or byte) counts as one.
     allow_nan
-        No ``NaN``/``NaT`` values are generated if ``False``.
+        No ``NaN``/``NaT`` values are generated in ``NumpyArray`` if ``False``.
     allow_numpy
         No ``NumpyArray`` is generated if ``False``.
     allow_empty
         No ``EmptyArray`` is generated if ``False``. ``EmptyArray`` has Awkward
         type ``unknown`` and carries no data. Unlike ``NumpyArray``, it is
         unaffected by ``dtypes`` and ``allow_nan``.
+    allow_string
+        No string content is generated if ``False``. Strings are represented
+        as a ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each
+        string (not character) counts toward ``max_size``. The string
+        itself does not count toward ``max_depth``. Unaffected by ``dtypes``
+        and ``allow_nan``.
+    allow_bytestring
+        No bytestring content is generated if ``False``. Bytestrings are
+        represented as a ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``.
+        Each bytestring (not byte) counts toward ``max_size``. The
+        bytestring itself does not count toward ``max_depth``. Unaffected
+        by ``dtypes`` and ``allow_nan``.
     allow_regular
         No ``RegularArray`` is generated if ``False``.
     allow_list_offset
@@ -54,7 +71,9 @@ def contents(
     allow_list
         No ``ListArray`` is generated if ``False``.
     max_depth
-        Maximum depth of nested arrays.
+        Maximum nesting depth. Each RegularArray, ListOffsetArray, and
+        ListArray layer adds one level, excluding those that form
+        string or bytestring content.
 
     Examples
     --------
@@ -77,6 +96,8 @@ def contents(
         allow_nan=allow_nan,
         allow_numpy=allow_numpy,
         allow_empty=allow_empty,
+        allow_string=allow_string,
+        allow_bytestring=allow_bytestring,
     )
 
     if not nesting_fns or max_size == 0:

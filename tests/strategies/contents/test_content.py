@@ -10,7 +10,6 @@ from hypothesis import strategies as st
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util import (
-    any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     iter_contents,
     iter_numpy_arrays,
@@ -28,6 +27,8 @@ class ContentsKwargs(TypedDict, total=False):
     allow_nan: bool
     allow_numpy: bool
     allow_empty: bool
+    allow_string: bool
+    allow_bytestring: bool
     allow_regular: bool
     allow_list_offset: bool
     allow_list: bool
@@ -56,6 +57,8 @@ def contents_kwargs(
                 'allow_nan': st.booleans(),
                 'allow_numpy': st.booleans(),
                 'allow_empty': st.booleans(),
+                'allow_string': st.booleans(),
+                'allow_bytestring': st.booleans(),
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
@@ -78,7 +81,10 @@ def test_contents(data: st.DataObject) -> None:
     # Assert that disabling all leaf types raises an error
     allow_numpy = opts.kwargs.get('allow_numpy', True)
     allow_empty = opts.kwargs.get('allow_empty', True)
-    if not allow_numpy and not allow_empty:
+    allow_string = opts.kwargs.get('allow_string', True)
+    allow_bytestring = opts.kwargs.get('allow_bytestring', True)
+    allow_any_leaf = any((allow_numpy, allow_empty, allow_string, allow_bytestring))
+    if not allow_any_leaf:
         with pytest.raises(ValueError, match='at least one leaf'):
             data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
         return
@@ -98,17 +104,25 @@ def test_contents(data: st.DataObject) -> None:
     allow_list = opts.kwargs.get('allow_list', True)
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
-    # Flat leaf when all structural types disabled
-    if not allow_regular and not allow_list_offset and not allow_list:
-        assert isinstance(c, (ak.contents.NumpyArray, ak.contents.EmptyArray))
+    allow_any_list_type = any((allow_regular, allow_list_offset, allow_list))
+    if not allow_any_list_type:
+        assert _nesting_depth(c) == 0
 
     # Per-type gating
+    if not allow_numpy:
+        assert not _has_numpy(c)
+    if not allow_empty:
+        assert not _has_empty(c)
     if not allow_regular:
         assert not _has_regular(c)
     if not allow_list_offset:
         assert not _has_list_offset(c)
     if not allow_list:
         assert not _has_list(c)
+    if not allow_string:
+        assert not _has_string(c)
+    if not allow_bytestring:
+        assert not _has_bytestring(c)
 
     # Dtype check via leaf arrays (works for both flat and nested layouts)
     match dtypes:
@@ -126,35 +140,6 @@ def test_contents(data: st.DataObject) -> None:
 
     assert _nesting_depth(c) <= max_depth
 
-
-def test_draw_max_size() -> None:
-    '''Assert that content with max_size scalars can be drawn.'''
-    max_size = 8
-    find(
-        st_ak.contents.contents(max_size=max_size),
-        lambda c: _total_scalars(c) == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=10000),
-    )
-
-
-def test_draw_nan() -> None:
-    '''Assert that content with NaN can be drawn when allowed.'''
-    float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
-    find(
-        st_ak.contents.contents(dtypes=float_dtypes, allow_nan=True),
-        any_nan_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_integer_dtype() -> None:
-    '''Assert that integer dtype content can be drawn.'''
-    int_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'i')
-    find(
-        st_ak.contents.contents(dtypes=int_dtypes),
-        lambda c: isinstance(c, ak.contents.NumpyArray) and c.dtype.kind == 'i',
-        settings=settings(phases=[Phase.generate]),
-    )
 
 
 def test_draw_max_depth() -> None:
@@ -194,14 +179,30 @@ def _nesting_depth(c: ak.contents.Content) -> int:
         node,
         (ak.contents.RegularArray, ak.contents.ListOffsetArray, ak.contents.ListArray),
     ):
+        if node.parameter('__array__') in ('string', 'bytestring'):
+            break
         depth += 1
         node = node.content
     return depth
 
 
+def _has_numpy(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any NumpyArray node.'''
+    return any(isinstance(n, ak.contents.NumpyArray) for n in iter_contents(c))
+
+
+def _has_empty(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any EmptyArray node.'''
+    return any(isinstance(n, ak.contents.EmptyArray) for n in iter_contents(c))
+
+
 def _has_list_offset(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any ListOffsetArray node.'''
-    return any(isinstance(n, ak.contents.ListOffsetArray) for n in iter_contents(c))
+    '''Check if the content contains any structural ListOffsetArray node.'''
+    return any(
+        isinstance(n, ak.contents.ListOffsetArray)
+        and n.parameter('__array__') not in ('string', 'bytestring')
+        for n in iter_contents(c)
+    )
 
 
 def _has_regular(c: ak.contents.Content) -> bool:
@@ -212,3 +213,13 @@ def _has_regular(c: ak.contents.Content) -> bool:
 def _has_list(c: ak.contents.Content) -> bool:
     '''Check if the content contains any ListArray node.'''
     return any(isinstance(n, ak.contents.ListArray) for n in iter_contents(c))
+
+
+def _has_string(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any string node.'''
+    return any(n.parameter('__array__') == 'string' for n in iter_contents(c))
+
+
+def _has_bytestring(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any bytestring node.'''
+    return any(n.parameter('__array__') == 'bytestring' for n in iter_contents(c))

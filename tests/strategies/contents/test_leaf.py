@@ -7,7 +7,7 @@ from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import EmptyArray, NumpyArray
-from hypothesis_awkward.util import any_nan_nat_in_numpy_array
+from hypothesis_awkward.util import any_nan_in_awkward_array, any_nan_nat_in_numpy_array
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 10
@@ -157,4 +157,24 @@ def test_draw_bytestring() -> None:
         st_ak.contents.leaf_contents(),
         lambda c: c.parameter('__array__') == 'bytestring',
         settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_draw_max_size() -> None:
+    '''Assert that leaf content with max_size elements can be drawn.'''
+    max_size = 8
+    find(
+        st_ak.contents.leaf_contents(max_size=max_size),
+        lambda c: len(c) == max_size,
+        settings=settings(phases=[Phase.generate], max_examples=10000),
+    )
+
+
+def test_draw_nan() -> None:
+    '''Assert that leaf content with NaN can be drawn when allowed.'''
+    float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
+    find(
+        st_ak.contents.leaf_contents(dtypes=float_dtypes, allow_nan=True),
+        any_nan_in_awkward_array,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
