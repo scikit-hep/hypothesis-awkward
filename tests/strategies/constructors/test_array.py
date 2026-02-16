@@ -56,13 +56,14 @@ def test_arrays(data: st.DataObject) -> None:
         @st.composite
         def _draw(draw_inner: st.DrawFn) -> ak.contents.Content:
             nonlocal drawn_layout, raised_exc
+            drawn_layout = None
+            raised_exc = None
             try:
-                content = draw_inner(strategy)
+                drawn_layout = draw_inner(strategy)
             except Exception as e:
                 raised_exc = e
                 raise
-            drawn_layout = content
-            return content
+            return drawn_layout
 
         return _draw()
 
