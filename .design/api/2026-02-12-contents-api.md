@@ -6,13 +6,14 @@
 
 ## Overview
 
-This document describes the API for the ten strategies in the `contents/`
-package, which generate `ak.contents.Content` layout objects for property-based
-testing. The `contents/` package is the layout generation layer: it produces
-Awkward Array internal structures (`NumpyArray`, `EmptyArray`, `RegularArray`,
-`ListOffsetArray`, `ListArray`, `RecordArray`) that the `constructors/` package
-wraps in `ak.Array`. See [arrays-api.md](./2026-02-04-arrays-api.md) for the
-`arrays()` strategy that consumes `contents()`.
+This document describes the API for the strategies in the `contents/` package,
+which generate `ak.contents.Content` layout objects for property-based testing.
+The `contents/` package is the layout generation layer: it produces Awkward
+Array internal structures (`NumpyArray`, `EmptyArray`, `RegularArray`,
+`ListOffsetArray`, `ListArray`, `RecordArray`, `UnionArray`) that the
+`constructors/` package wraps in `ak.Array`. See
+[arrays-api.md](./2026-02-04-arrays-api.md) for the `arrays()` strategy that
+consumes `contents()`.
 
 ## Background
 
@@ -46,8 +47,9 @@ From the [arrays API design](./2026-02-04-arrays-api.md) and
 > for the keyword-only convention adopted after this document was written.
 > `contents()`, `numpy_array_contents()`, and `leaf_contents()` fall in Group B
 > (all keyword-only). The wrapper strategies (`regular_array_contents`,
-> `list_offset_array_contents`, `list_array_contents`) fall in Group A:
-> `content` is positional, future config after `*`.
+> `list_offset_array_contents`, `list_array_contents`) and multi-child
+> strategies (`record_array_contents`, `union_array_contents`) fall in
+> Group A: `content`/`contents` is positional, config after `*`.
 
 ### `contents()`
 
@@ -69,6 +71,7 @@ def contents(
     allow_list_offset: bool = True,
     allow_list: bool = True,
     allow_record: bool = True,
+    allow_union: bool = True,
     max_depth: int = 5,
 ) -> Content:
 ```
@@ -117,6 +120,14 @@ def contents(
   tuple records). See
   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for
   algorithm details.
+
+- **`allow_union`** — Generate `UnionArray` nodes. Default: `True`.
+  `UnionArray` requires 2+ children and produces `(tags, index)` buffers.
+  When enabled, multi-child branching in the tree builder can produce union
+  nodes in addition to records. Direct children of a `UnionArray` cannot
+  themselves be `UnionArray` (no nested unions); indirect nesting via list
+  or record nodes is valid. See
+  [union-array-research](../research/2026-02-17-union-array-research.md).
 
 - **`max_depth`** — Maximum nesting depth for structural wrappers. Default: `5`.
   `max_depth=0` forces leaf-only arrays. At each level, a coin flip decides
@@ -321,6 +332,97 @@ split into `starts = offsets[:-1]` and `stops = offsets[1:]`.
 
 - `MAX_LIST_LENGTH = 5` — upper bound for the number of sublists
 
+### `record_array_contents()`
+
+Generates `RecordArray` content from a list of child contents.
+
+```python
+@st.composite
+def record_array_contents(
+    draw: st.DrawFn,
+    contents: list[Content] | st.SearchStrategy[list[Content]] | None = None,
+    *,
+    max_fields: int = 5,
+    allow_tuple: bool = True,
+) -> Content:
+```
+
+#### Parameters
+
+- **`contents`** — The child contents for the record's fields. Accepts three
+  forms:
+  - `None` (default): draws 0 to `max_fields` children from `contents()`
+  - `st.SearchStrategy[list[Content]]`: draws a list from the strategy
+  - `list[Content]`: uses directly
+
+- **`max_fields`** — Maximum number of fields when `contents` is `None`.
+  Default: `5`. Ignored when `contents` is provided.
+
+- **`allow_tuple`** — Allow tuple records (`fields=None`). Default: `True`.
+  When `True`, a coin flip decides between named records and tuples. When
+  `False`, only named records are generated.
+
+#### Behavior
+
+For named records, field names are drawn as unique strings of up to 3 ASCII
+letters. For empty records (0 fields), `length=0` is set explicitly (required
+by the `RecordArray` constructor).
+
+### `union_array_contents()`
+
+Generates `UnionArray` content from a list of child contents with compact
+`(tags, index)` buffers.
+
+```python
+@st.composite
+def union_array_contents(
+    draw: st.DrawFn,
+    contents: list[Content] | st.SearchStrategy[list[Content]] | None = None,
+    *,
+    max_contents: int = 4,
+) -> Content:
+```
+
+#### Parameters
+
+- **`contents`** — The child contents for the union's alternatives. Accepts
+  three forms:
+  - `None` (default): draws 2 to `max_contents` children from `contents()`
+  - `st.SearchStrategy[list[Content]]`: draws a list from the strategy
+  - `list[Content]`: uses directly (must have length >= 2)
+
+- **`max_contents`** — Maximum number of alternative contents when `contents`
+  is `None`. Default: `4`. Minimum is always 2 (required by `UnionArray`).
+  Ignored when `contents` is provided.
+
+#### Behavior
+
+Generates compact `(tags, index)` buffers where every element in every child
+content is referenced exactly once:
+
+1. For each content `k` of length `L_k`, create `L_k` entries with
+   `tags = [k] * L_k` and `index = [0, 1, ..., L_k - 1]`
+2. Concatenate all entries and apply a random permutation
+
+The union length equals `sum(len(c) for c in contents)`. Index dtype is
+`int64` (via `ak.index.Index64`).
+
+#### Constants
+
+None. The `max_contents` default of 4 keeps generated unions small. The
+theoretical maximum is 128 (int8 tag range 0–127).
+
+#### Nesting constraints
+
+`UnionArray` contents cannot include:
+
+- Other `UnionArray` nodes (no nested unions)
+- Non-categorical `IndexedArray` nodes
+
+When used standalone (`contents=None`), the drawn children come from
+`contents()` which may produce any node type. The `UnionArray` constructor
+itself enforces the nesting constraints.
+
 ## Design Decisions
 
 ### 1. Two-Layer Architecture
@@ -462,7 +564,8 @@ Contents layer:
   leaf_contents()  -->  contents()  ─┬─>  regular_array_contents()
                                      ├─>  list_offset_array_contents()
                                      ├─>  list_array_contents()
-                                     └─>  record_array_contents()
+                                     ├─>  record_array_contents()
+                                     └─>  union_array_contents()
 
 Constructors layer:
   contents()  -->  arrays()  -->  ak.Array
@@ -473,7 +576,7 @@ Constructors layer:
 ```text
 src/hypothesis_awkward/strategies/
 ├── contents/
-│   ├── __init__.py           # Re-exports all 10 strategies
+│   ├── __init__.py           # Re-exports all strategies
 │   ├── content.py            # contents() — bottom-up tree builder
 │   ├── leaf.py               # leaf_contents() — leaf node selector
 │   ├── numpy_array.py        # numpy_array_contents()
@@ -483,7 +586,8 @@ src/hypothesis_awkward/strategies/
 │   ├── list_array.py         # list_array_contents()
 │   ├── string.py             # string_contents()
 │   ├── bytestring.py         # bytestring_contents()
-│   └── record_array.py       # record_array_contents()
+│   ├── record_array.py       # record_array_contents()
+│   └── union_array.py        # union_array_contents()
 ├── constructors/
 │   ├── __init__.py           # Re-exports arrays()
 │   └── array_.py             # arrays() — thin wrapper around contents()
@@ -593,7 +697,8 @@ tests/strategies/contents/
 ├── test_list_array.py        # list_array_contents()
 ├── test_string.py            # string_contents()
 ├── test_bytestring.py        # bytestring_contents()
-└── test_record_array.py      # record_array_contents()
+├── test_record_array.py      # record_array_contents()
+└── test_union_array.py       # union_array_contents()
 ```
 
 ## Alternatives Considered
@@ -682,7 +787,8 @@ values.
    [record-array-research](../research/2026-02-17-record-array-research.md)
 2. Add option type support (`indexed_option_array_contents()`,
    `byte_masked_array_contents()`, etc.)
-3. Add `UnionArray` support (`union_array_contents()`)
+3. Add `UnionArray` support (`union_array_contents()`) — see
+   [union-array-research](../research/2026-02-17-union-array-research.md)
 4. ~~Add string/bytestring support~~ ✓ — see
    [string-bytestring-api](./2026-02-13-string-bytestring-api.md)
 5. Consider exposing `MAX_REGULAR_SIZE` / `MAX_LIST_LENGTH` as parameters
