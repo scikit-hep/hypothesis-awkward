@@ -69,10 +69,7 @@ def arrays(
         ListArray layer adds one level, excluding those that form
         string or bytestring content.
     allow_virtual
-        If ``True``, the generated array is sometimes lazified via
-        ``ak.to_buffers``/``ak.from_buffers`` with deferred buffers,
-        producing a virtual (unmaterialized) array. If ``False``, the
-        array is always eager.
+        No virtual arrays are generated if ``False``.
 
     Examples
     --------

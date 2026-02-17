@@ -97,9 +97,11 @@ array=<Array [[], [], [], []] type='4 * var * 2 * timedelta64[W]'>
 array=<Array ['', "e\U00034a9e'"] type='2 * string'>
 array=<Array [[], ['char']] type='2 * var * string'>
 array=<Array [[b'\xd7']] type='1 * var * bytes'>
+array=<Array [??, ??, ??] type='3 * uint32'>
 array=<Array [[[b'6'], [b'\xe6sW\xbf'], []]] type='1 * 3 * var * bytes'>
 array=<Array [[[], []], [[]], [], []] type='5 * var * var * 4 * unknown'>
 array=<Array [] type='0 * unknown'>
+array=<Array [[??], []] type='2 * var * var * bytes'>
 array=<Array [[], [], [], [], []] type='5 * var * unknown'>
 array=<Array [[[]], [[]], [[]]] type='3 * 1 * 0 * unknown'>
 array=<Array [[[], []]] type='1 * var * var * var * timedelta64[ms]'>
@@ -108,7 +110,8 @@ array=<Array [[[[[[]]]]], [[[[[]]]]]] type='2 * 1 * 1 * 1 * 1 * var * unknown'>
 
 The current version generates arrays with `NumpyArray`, `EmptyArray`, string,
 and bytestring as leaf contents that can be nested multiple levels deep in
-`RegularArray`, `ListOffsetArray`, and `ListArray` lists.
+`RegularArray`, `ListOffsetArray`, and `ListArray` lists. Arrays might be
+virtual, shown as `??` in the output.
 
 ### The API of `arrays()`
 
@@ -126,6 +129,7 @@ def arrays(
     allow_list_offset: bool = True,
     allow_list: bool = True,
     max_depth: int = 5,
+    allow_virtual: bool = True,
 ):
 ```
 
@@ -142,6 +146,7 @@ def arrays(
 | `allow_list_offset` | No `ListOffsetArray` is generated if `False`. |
 | `allow_list` | No `ListArray` is generated if `False`. |
 | `max_depth` | Maximum nesting depth. Each `RegularArray`, `ListOffsetArray`, and `ListArray` layer adds one level, excluding those that form string or bytestring content. |
+| `allow_virtual` | No virtual arrays are generated if `False`. |
 
 ## Other strategies
 
