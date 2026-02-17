@@ -19,6 +19,7 @@ def arrays(
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
+    allow_record: bool = True,
     max_depth: int = 5,
     allow_virtual: bool = True,
 ) -> ak.Array:
@@ -89,6 +90,7 @@ def arrays(
             allow_list=allow_list,
             allow_string=allow_string,
             allow_bytestring=allow_bytestring,
+            allow_record=allow_record,
             max_depth=max_depth,
         )
     )

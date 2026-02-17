@@ -75,7 +75,7 @@ def _children(c: Content) -> list[Content]:
     '''Return direct Content children of a node.'''
     match c:
         case ak.contents.RecordArray():
-            return [c[field] for field in c.fields]
+            return list(c.contents)
         case ak.contents.UnionArray():
             return list(c.contents)
         case _ if hasattr(c, 'content'):

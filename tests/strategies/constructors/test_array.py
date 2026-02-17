@@ -27,6 +27,7 @@ DEFAULTS = ArraysKwargs(
     allow_regular=True,
     allow_list_offset=True,
     allow_list=True,
+    allow_record=True,
     max_depth=5,
     allow_virtual=True,
 )

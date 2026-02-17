@@ -32,6 +32,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_regular: bool
     allow_list_offset: bool
     allow_list: bool
+    allow_record: bool
     max_depth: int
 
 
@@ -62,6 +63,7 @@ def contents_kwargs(
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
+                'allow_record': st.booleans(),
                 'max_depth': st.integers(min_value=0, max_value=5),
             },
         )
@@ -102,10 +104,11 @@ def test_contents(data: st.DataObject) -> None:
     allow_regular = opts.kwargs.get('allow_regular', True)
     allow_list_offset = opts.kwargs.get('allow_list_offset', True)
     allow_list = opts.kwargs.get('allow_list', True)
+    allow_record = opts.kwargs.get('allow_record', True)
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
-    allow_any_list_type = any((allow_regular, allow_list_offset, allow_list))
-    if not allow_any_list_type:
+    allow_any_nesting = any((allow_regular, allow_list_offset, allow_list, allow_record))
+    if not allow_any_nesting:
         assert _nesting_depth(c) == 0
 
     # Per-type gating
@@ -123,6 +126,8 @@ def test_contents(data: st.DataObject) -> None:
         assert not _has_string(c)
     if not allow_bytestring:
         assert not _has_bytestring(c)
+    if not allow_record:
+        assert not _has_record(c)
 
     # Dtype check via leaf arrays (works for both flat and nested layouts)
     match dtypes:
@@ -172,18 +177,21 @@ def _leaf_dtypes(c: ak.contents.Content) -> set[np.dtype]:
 
 
 def _nesting_depth(c: ak.contents.Content) -> int:
-    '''Count total structural wrapping layers (RegularArray and ListOffsetArray).'''
-    depth = 0
-    node = c
-    while isinstance(
-        node,
-        (ak.contents.RegularArray, ak.contents.ListOffsetArray, ak.contents.ListArray),
-    ):
-        if node.parameter('__array__') in ('string', 'bytestring'):
-            break
-        depth += 1
-        node = node.content
-    return depth
+    '''Maximum structural nesting depth (deepest path through the tree).'''
+    _nesting_types = (
+        ak.contents.RegularArray,
+        ak.contents.ListOffsetArray,
+        ak.contents.ListArray,
+    )
+    if isinstance(c, ak.contents.RecordArray):
+        if not c.contents:
+            return 1
+        return 1 + max(_nesting_depth(child) for child in c.contents)
+    if isinstance(c, _nesting_types):
+        if c.parameter('__array__') in ('string', 'bytestring'):
+            return 0
+        return 1 + _nesting_depth(c.content)
+    return 0
 
 
 def _has_numpy(c: ak.contents.Content) -> bool:
@@ -223,3 +231,8 @@ def _has_string(c: ak.contents.Content) -> bool:
 def _has_bytestring(c: ak.contents.Content) -> bool:
     '''Check if the content contains any bytestring node.'''
     return any(n.parameter('__array__') == 'bytestring' for n in iter_contents(c))
+
+
+def _has_record(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any RecordArray node.'''
+    return any(isinstance(n, ak.contents.RecordArray) for n in iter_contents(c))

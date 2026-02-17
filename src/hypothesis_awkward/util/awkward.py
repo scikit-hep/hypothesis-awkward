@@ -167,7 +167,7 @@ def iter_contents(
                 yield item
             case RecordArray():
                 yield item
-                stack.extend([item[f] for f in item.fields])
+                stack.extend(item.contents)
             case ListArray() | ListOffsetArray() | RegularArray() if (
                 _is_string_or_bytestring_leaf(item, string_as_leaf, bytestring_as_leaf)
             ):

@@ -1,11 +1,12 @@
 import functools
+import string
 from collections.abc import Callable
 
 import numpy as np
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
-from awkward.contents import Content
+from awkward.contents import Content, RecordArray
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.util.draw import CountdownDrawer
 
@@ -26,6 +27,7 @@ def contents(
     allow_regular: bool = True,
     allow_list_offset: bool = True,
     allow_list: bool = True,
+    allow_record: bool = True,
     max_depth: int = 5,
 ) -> Content:
     '''Strategy for Awkward Array content layouts.
@@ -34,7 +36,7 @@ def contents(
     nodes. At each level, a coin flip decides whether to go deeper or
     produce a leaf. Leaf types include NumpyArray, EmptyArray, string,
     and bytestring. Wrapper types include RegularArray, ListOffsetArray,
-    and ListArray.
+    ListArray, and RecordArray.
 
     Parameters
     ----------
@@ -72,11 +74,13 @@ def contents(
         No ``ListOffsetArray`` is generated if ``False``.
     allow_list
         No ``ListArray`` is generated if ``False``.
+    allow_record
+        No ``RecordArray`` is generated if ``False``.
     max_depth
         Maximum nesting depth. At each level below this limit, a coin flip
         decides whether to descend further or produce a leaf. Each
-        RegularArray, ListOffsetArray, and ListArray layer adds one level,
-        excluding those that form string or bytestring content.
+        RegularArray, ListOffsetArray, ListArray, and RecordArray layer adds
+        one level, excluding those that form string or bytestring content.
 
     Examples
     --------
@@ -93,6 +97,12 @@ def contents(
     if allow_list:
         wrappers['list'] = st_ak.contents.list_array_contents
 
+    can_branch = allow_record  # future: or allow_union
+
+    single_child_types = list(wrappers)
+    if allow_record:
+        single_child_types.append('record')
+
     st_leaf = functools.partial(
         leaf_contents,
         dtypes=dtypes,
@@ -103,7 +113,7 @@ def contents(
         allow_bytestring=allow_bytestring,
     )
 
-    if not wrappers or max_size == 0:
+    if not single_child_types or max_size == 0:
         return draw(st_leaf(min_size=0, max_size=max_size))
 
     draw_leaf = CountdownDrawer(draw, st_leaf, max_size_total=max_size)
@@ -117,8 +127,41 @@ def contents(
     def _build(depth: int) -> Content:
         if depth >= max_depth or not draw(st.booleans()):
             return _leaf()
-        child = _build(depth + 1)
-        node_type = draw(st.sampled_from(sorted(wrappers)))
-        return draw(wrappers[node_type](st.just(child)))
+
+        # Go down first edge
+        children = [_build(depth + 1)]
+
+        # Going up: another edge?
+        while can_branch and draw(st.booleans()):
+            children.append(_build(depth + 1))
+
+        # Draw node type constrained by child count
+        if len(children) == 1:
+            node_type = draw(st.sampled_from(sorted(single_child_types)))
+        else:
+            node_type = 'record'  # only multi-child type for now
+
+        # Construct node
+        if node_type == 'record':
+            is_tuple = draw(st.booleans())
+            if is_tuple:
+                fields = None
+            else:
+                st_names = st.text(
+                    alphabet=string.ascii_letters, max_size=3
+                )
+                fields = draw(
+                    st.lists(
+                        st_names,
+                        min_size=len(children),
+                        max_size=len(children),
+                        unique=True,
+                    )
+                )
+            length = min(len(c) for c in children)
+            return RecordArray(children, fields=fields, length=length)
+
+        # Single-child wrapper
+        return draw(wrappers[node_type](st.just(children[0])))
 
     return _build(0)
