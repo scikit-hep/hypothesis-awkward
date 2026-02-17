@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
-from hypothesis_awkward.strategies.constructors import array_ as array_module
+from awkward.contents import Content
 from tests.strategies.contents.test_content import ContentsKwargs, contents_kwargs
 
 
@@ -42,42 +42,49 @@ def arrays_kwargs(
 @given(data=st.data())
 def test_arrays(data: st.DataObject) -> None:
     '''Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`.'''
+    from hypothesis_awkward.strategies.constructors import array_ as array_module
+
     opts = data.draw(arrays_kwargs(), label='opts')
     opts.reset()
     kwargs = opts.kwargs
 
-    drawn_layout: ak.contents.Content | None = None
-    raised_exc: Exception | None = None
-
-    def wrap_contents(*a: Any, **kw: Any) -> st.SearchStrategy[ak.contents.Content]:
-        nonlocal drawn_layout, raised_exc
-        strategy = st_ak.contents.contents(*a, **kw)
-
-        @st.composite
-        def _draw(draw_inner: st.DrawFn) -> ak.contents.Content:
-            nonlocal drawn_layout, raised_exc
-            drawn_layout = None
-            raised_exc = None
-            try:
-                drawn_layout = draw_inner(strategy)
-            except Exception as e:
-                raised_exc = e
-                raise
-            return drawn_layout
-
-        return _draw()
-
+    spy = ContentsSpy()
     mock_st_ak = Mock(wraps=st_ak)
-    mock_st_ak.contents.contents = Mock(side_effect=wrap_contents)
+    mock_st_ak.contents.contents = Mock(side_effect=spy.wrap_contents)
 
     with patch.object(array_module, 'st_ak', mock_st_ak):
         try:
             a = data.draw(st_ak.constructors.arrays(**kwargs), label='a')
         except Exception as e:
-            assert raised_exc is not None
-            assert e is raised_exc
+            assert spy.raised_exc is not None
+            assert e is spy.raised_exc
         else:
             assert isinstance(a, ak.Array)
-            assert a.layout is drawn_layout
+            assert a.layout is spy.drawn_layout
 
     mock_st_ak.contents.contents.assert_called_once_with(**{**DEFAULTS, **kwargs})
+
+
+class ContentsSpy:
+    '''Wraps `contents()` to capture the drawn layout and any raised exception.'''
+
+    def __init__(self) -> None:
+        self.drawn_layout: Content | None = None
+        self.raised_exc: Exception | None = None
+
+    def wrap_contents(self, *a: Any, **kw: Any) -> st.SearchStrategy[Content]:
+        strategy = st_ak.contents.contents(*a, **kw)
+        spy = self
+
+        @st.composite
+        def _draw(draw_inner: st.DrawFn) -> Content:
+            spy.drawn_layout = None
+            spy.raised_exc = None
+            try:
+                spy.drawn_layout = draw_inner(strategy)
+            except Exception as e:
+                spy.raised_exc = e
+                raise
+            return spy.drawn_layout
+
+        return _draw()
