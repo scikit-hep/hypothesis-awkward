@@ -91,30 +91,28 @@ For example, this might print:
 ```python
 array=<Array [] type='0 * bool'>
 array=<Array [0] type='1 * int16'>
-array=<Array [-9223372036854724544 milliseconds] type='1 * timedelta64[ms]'>
-array=<Array [[9.01e+15+infj], [-6.1e-05+1.23e+176j]] type='2 * 1 * complex128'>
+array=<Array [1.72e-11, -3.4e+38, -3.4e+38, -4.05e+15] type='4 * float32'>
 array=<Array [[], [], [], []] type='4 * var * 2 * timedelta64[W]'>
 array=<Array ['', "e\U00034a9e'"] type='2 * string'>
 array=<Array [[], ['char']] type='2 * var * string'>
 array=<Array [[b'\xd7']] type='1 * var * bytes'>
-array=<Array [??, ??, ??] type='3 * uint32'>
-array=<Array [[[b'6'], [b'\xe6sW\xbf'], []]] type='1 * 3 * var * bytes'>
 array=<Array [[[], []], [[]], [], []] type='5 * var * var * 4 * unknown'>
 array=<Array [] type='0 * unknown'>
-array=<Array [[??], []] type='2 * var * var * bytes'>
-array=<Array [[], [], [], [], []] type='5 * var * unknown'>
-array=<Array [[[]], [[]], [[]]] type='3 * 1 * 0 * unknown'>
-array=<Array [[[], []]] type='1 * var * var * var * timedelta64[ms]'>
-array=<Array [[[[[[]]]]], [[[[[]]]]]] type='2 * 1 * 1 * 1 * 1 * var * unknown'>
+array=<Array [{Rd: []}] type='1 * {Rd: var * datetime64[s]}'>
 array=<Array [(''), (..., ...), ..., (..., ...), ('\U0005f041')] type='6 * (string)'>
-array=<Array [(??, ??), (??, ...), ..., (??, ??)] type='4 * (var * string, string)'>
+array=<Array [False] type='1 * union[bytes, bool]'>
+array=<Array [36, [b'\x92\xa7\x0b']] type='2 * union[int8, 1 * bytes, unknown]'>
+array=<Array [b'5f\x18\xbc', ..., b'5f\x18\xbc'] type='3 * union[string, bytes]'>
+array=<Array [0, 0, -5.53e+16] type='3 * union[float32, unknown]'>
+array=<Array [??, ??, ??] type='3 * uint32'>
+array=<Array [(??, ??)] type='1 * (bytes, union[timedelta64[M], bytes])'>
 array=<Array [??, ??, ??, ??, ??] type='5 * var * var * (uint64, bytes)'>
 ```
 
 The current version generates arrays with `NumpyArray`, `EmptyArray`, string,
 and bytestring as leaf contents that can be nested multiple levels deep in
-`RegularArray`, `ListOffsetArray`, `ListArray`, and `RecordArray`. Arrays might
-be virtual, shown as `??` in the output.
+`RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and
+`UnionArray`. Arrays might be virtual, shown as `??` in the output.
 
 ### The API of `arrays()`
 
@@ -132,6 +130,7 @@ def arrays(
     allow_list_offset: bool = True,
     allow_list: bool = True,
     allow_record: bool = True,
+    allow_union: bool = True,
     max_depth: int = 5,
     allow_virtual: bool = True,
 ):
@@ -150,7 +149,8 @@ def arrays(
 | `allow_list_offset` | No `ListOffsetArray` is generated if `False`. |
 | `allow_list` | No `ListArray` is generated if `False`. |
 | `allow_record` | No `RecordArray` is generated if `False`. |
-| `max_depth` | Maximum nesting depth. Each `RegularArray`, `ListOffsetArray`, `ListArray`, and `RecordArray` layer adds one level, excluding those that form string or bytestring content. |
+| `allow_union` | No `UnionArray` is generated if `False`. |
+| `max_depth` | Maximum nesting depth. Each `RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and `UnionArray` layer adds one level, excluding those that form string or bytestring content. |
 | `allow_virtual` | No virtual arrays are generated if `False`. |
 
 ## Other strategies
