@@ -264,10 +264,12 @@ mechanism (currently used only by RecordArray).
    | 2+       | RecordArray, UnionArray                               |
 
 3. **Minimum children enforcement**: RecordArray works with 1+ children, but
-   UnionArray requires 2+. When UnionArray is selected, at least 2 children must
-   exist. Options:
-   - Draw node type first, then enforce minimum children
-   - Draw children first, then constrain node type (current approach — easier)
+   UnionArray requires 2+. The current approach (draw children first, then
+   constrain node type) handles this naturally — UnionArray is only in the
+   multi-child pool, which is reached only when 2+ children exist. Additionally,
+   the no-nested-unions constraint is enforced post-hoc: if any child is a
+   UnionArray, `'union'` is excluded from the node type options (see "Nesting
+   constraint tracking" below).
 
 4. **Buffer generation**: RecordArray has no buffers. UnionArray needs `(tags,
    index)` arrays.
@@ -307,23 +309,28 @@ tree building:
 
 1. **UnionArray cannot be nested inside option or indexed nodes** — irrelevant for
    now (no option/indexed support yet), but will matter later.
-2. **UnionArray cannot contain union-type children** — a `_build()` call producing
-   a child for UnionArray must not itself produce a UnionArray at the top level.
+2. **UnionArray cannot contain union-type children** — the parent node must not be
+   a UnionArray if any of its direct children is a UnionArray.
 
 The "no nested unions" constraint applies to **direct** children only. Indirect
 nesting like `Union → Record → Union` or `Union → List → Union` is valid because
 the intermediate node (Record or List) is the direct child, not another Union.
 
-However, the tree builder can produce direct nesting: if `_build(depth+1)` returns
-a UnionArray (because at that level, 2+ children were collected and `'union'` was
-drawn), that UnionArray becomes a direct child of the parent. If the parent also
-draws `'union'`, the result is a nested union, which the constructor rejects.
+**Solution:** The tree builder is bottom-up — children are built before the parent
+node type is chosen. So the constraint is enforced **post-hoc**: after children are
+built, check whether any child is a UnionArray. If so, exclude `'union'` from the
+multi-child node type options (forcing RecordArray for 2+ children, which is always
+valid).
 
-**Solution:** Pass an `allow_union_child` flag to `_build()`. When the parent is
-UnionArray, call `_build(depth+1, allow_union_child=False)`. Inside `_build()`,
-when `allow_union_child=False`, exclude `'union'` from the multi-child node types
-(forcing RecordArray for 2+ children, which is always valid). Indirect nesting
-remains possible because the flag is not propagated further down.
+```python
+multi_child_types = ['record']
+if allow_union and not any(c.is_union for c in children):
+    multi_child_types.append('union')
+node_type = draw(st.sampled_from(sorted(multi_child_types)))
+```
+
+Indirect nesting remains possible because deeper descendants are not checked — only
+direct children.
 
 ## Scalar Budget Considerations
 
