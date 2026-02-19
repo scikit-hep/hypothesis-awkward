@@ -3,7 +3,6 @@ from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
-from awkward.forms import UnionForm
 
 
 @st.composite
@@ -106,38 +105,12 @@ def arrays(
     to_lazify = allow_virtual and draw(st.booleans())
     if not to_lazify:
         return array
-    return _lazify(draw, array)
+    return _lazify(array)
 
 
-def _lazify(draw: st.DrawFn, array: ak.Array) -> ak.Array:
+def _lazify(array: ak.Array) -> ak.Array:
     form, length, buffers = ak.to_buffers(array)
     if not buffers:
         return array
-    # UnionArray eagerly accesses tags/index during construction,
-    # so these buffers cannot be made virtual.
-    no_lazify = _union_buffer_keys(form)
-    candidates = [k for k in buffers if k not in no_lazify]
-    if not candidates:
-        return array
-    lazify = set(draw(st.sets(st.sampled_from(candidates))))
-    if not lazify:
-        return array
-    virtual_buffers = {
-        k: (lambda v=v: v) if k in lazify else v for k, v in buffers.items()
-    }
+    virtual_buffers = {k: (lambda v=v: v) for k, v in buffers.items()}
     return ak.from_buffers(form, length, virtual_buffers)
-
-
-def _union_buffer_keys(form: ak.forms.Form) -> set[str]:
-    '''Collect buffer keys for UnionArray tags and index.'''
-    keys: set[str] = set()
-    if isinstance(form, UnionForm):
-        fk = form.form_key
-        keys.add(f'{fk}-tags')
-        keys.add(f'{fk}-index')
-    if hasattr(form, 'contents'):
-        for child in form.contents:
-            keys |= _union_buffer_keys(child)
-    elif hasattr(form, 'content'):
-        keys |= _union_buffer_keys(form.content)
-    return keys

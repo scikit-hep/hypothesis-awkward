@@ -95,6 +95,22 @@ def test_arrays(data: st.DataObject) -> None:
         assert spy.drawn_layout is not None
         assert a.layout.form == spy.drawn_layout.form
 
+        assert_all_buffers_virtual(a)
+
+
+def assert_all_buffers_virtual(a: ak.Array) -> None:
+    '''Assert that all buffers that can remain virtual are not materialized.
+
+    ``ak.from_buffers`` eagerly materializes some buffers during construction
+    (e.g., ListArray starts/stops when a UnionArray is a descendant). These
+    appear as plain ``ndarray`` without ``is_materialized``. We skip those and
+    verify the rest.
+    '''
+    _form, _length, buffers = ak.to_buffers(a)
+    for v in buffers.values():
+        if hasattr(v, 'is_materialized'):
+            assert not v.is_materialized
+
 
 class ContentsSpy:
     '''Wraps `contents()` to capture the drawn layout and any raised exception.'''
