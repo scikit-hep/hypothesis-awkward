@@ -4,7 +4,7 @@ import numpy as np
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
-from awkward.contents import Content, UnionArray
+from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.util.draw import CountdownDrawer
 
@@ -116,58 +116,21 @@ def contents(
 
     draw_leaf = CountdownDrawer(draw, st_leaf, max_size_total=max_size)
 
+    budget_exhausted = False
+
     def _leaf() -> Content:
+        nonlocal budget_exhausted
         content = draw_leaf()
         if content is not None:
             return content
+        budget_exhausted = True
         return draw(st_leaf(min_size=0, max_size=0))
 
-    def _build(depth: int) -> Content:
-        if depth >= max_depth or not draw(st.booleans()):
+    def _build(depth: int, *, allow_union: bool = True) -> Content:
+        if budget_exhausted or depth >= max_depth or not draw(st.booleans()):
             return _leaf()
 
-        # Go down first edge
-        children = [_build(depth + 1)]
-
-        # Going up: another edge?
-        while any((allow_record, allow_union)) and draw(st.booleans()):
-            children.append(_build(depth + 1))
-
-        candidates = _candidate_node_types(
-            children,
-            allow_record,
-            allow_union,
-            allow_regular,
-            allow_list_offset,
-            allow_list,
-        )
-        if not candidates:
-            return children[0]
-        node_type = draw(st.sampled_from(candidates))
-
-        # Construct node
-        if node_type == 'union':
-            return draw(st_ak.contents.union_array_contents(children))
-        if node_type == 'record':
-            return draw(st_ak.contents.record_array_contents(children))
-        if node_type == 'regular':
-            return draw(st_ak.contents.regular_array_contents(children[0]))
-        if node_type == 'list_offset':
-            return draw(st_ak.contents.list_offset_array_contents(children[0]))
-        return draw(st_ak.contents.list_array_contents(children[0]))
-
-    return _build(0)
-
-
-def _candidate_node_types(
-    children: list[Content],
-    allow_record: bool,
-    allow_union: bool,
-    allow_regular: bool,
-    allow_list_offset: bool,
-    allow_list: bool,
-) -> list[str]:
-    if len(children) == 1:
+        # Choose node type from allow_* flags
         candidates: list[str] = []
         if allow_regular:
             candidates.append('regular')
@@ -177,19 +140,36 @@ def _candidate_node_types(
             candidates.append('list')
         if allow_record:
             candidates.append('record')
-        return sorted(candidates)
-    candidates = []
-    if allow_record:
-        candidates.append('record')
-    if allow_union and not any(isinstance(c, UnionArray) for c in children):
-        candidates.append('union')
-    if not candidates:
-        fallback: list[str] = []
-        if allow_regular:
-            fallback.append('regular')
-        if allow_list_offset:
-            fallback.append('list_offset')
-        if allow_list:
-            fallback.append('list')
-        return sorted(fallback)
-    return sorted(candidates)
+        if allow_union:
+            candidates.append('union')
+
+        if not candidates:
+            return _leaf()
+
+        node_type = draw(st.sampled_from(sorted(candidates)))
+
+        # Build children for multi-child types
+        if node_type == 'union':
+            children = [
+                _build(depth + 1, allow_union=False),
+                _build(depth + 1, allow_union=False),
+            ]
+            while not budget_exhausted and draw(st.booleans()):
+                children.append(_build(depth + 1, allow_union=False))
+            return draw(st_ak.contents.union_array_contents(children))
+
+        if node_type == 'record':
+            children = [_build(depth + 1, allow_union=allow_union)]
+            while not budget_exhausted and draw(st.booleans()):
+                children.append(_build(depth + 1, allow_union=allow_union))
+            return draw(st_ak.contents.record_array_contents(children))
+
+        # Single-child wrapper
+        child = _build(depth + 1, allow_union=allow_union)
+        if node_type == 'regular':
+            return draw(st_ak.contents.regular_array_contents(child))
+        if node_type == 'list_offset':
+            return draw(st_ak.contents.list_offset_array_contents(child))
+        return draw(st_ak.contents.list_array_contents(child))
+
+    return _build(0, allow_union=allow_union)
