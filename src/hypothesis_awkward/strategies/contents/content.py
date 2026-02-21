@@ -139,10 +139,10 @@ def contents(
         if node_type == 'record':
             return draw(st_ak.contents.record_array_contents(children))
         if node_type == 'regular':
-            return draw(st_ak.contents.regular_array_contents(st.just(children[0])))
+            return draw(st_ak.contents.regular_array_contents(children[0]))
         if node_type == 'list_offset':
-            return draw(st_ak.contents.list_offset_array_contents(st.just(children[0])))
-        return draw(st_ak.contents.list_array_contents(st.just(children[0])))
+            return draw(st_ak.contents.list_offset_array_contents(children[0]))
+        return draw(st_ak.contents.list_array_contents(children[0]))
 
     return _build(0)
 
