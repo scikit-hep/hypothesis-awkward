@@ -5,3 +5,5 @@
   separate steps so the user can review the staged changes before committing.
 - When the user asks to commit, show the proposed commit message and ask for
   confirmation before running `git commit`.
+- When committing co-authored changes, include a `Co-Authored-By` trailer with
+  the current model name and `<noreply@anthropic.com>`.
