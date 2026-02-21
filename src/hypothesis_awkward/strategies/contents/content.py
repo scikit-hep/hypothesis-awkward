@@ -160,28 +160,34 @@ def contents(
 
         # Construct node
         if node_type == 'union':
-            return draw(st_ak.contents.union_array_contents(children))
+            return _make_union(draw, children)
 
         if node_type == 'record':
-            is_tuple = draw(st.booleans())
-            if is_tuple:
-                fields = None
-            else:
-                st_names = st.text(
-                    alphabet=string.ascii_letters, max_size=3
-                )
-                fields = draw(
-                    st.lists(
-                        st_names,
-                        min_size=len(children),
-                        max_size=len(children),
-                        unique=True,
-                    )
-                )
-            length = min(len(c) for c in children)
-            return RecordArray(children, fields=fields, length=length)
+            return _make_record(draw, children)
 
         # Single-child wrapper
         return draw(wrappers[node_type](st.just(children[0])))
 
     return _build(0)
+
+
+def _make_record(draw: st.DrawFn, children: list[Content]) -> RecordArray:
+    is_tuple = draw(st.booleans())
+    if is_tuple:
+        fields = None
+    else:
+        st_names = st.text(alphabet=string.ascii_letters, max_size=3)
+        fields = draw(
+            st.lists(
+                st_names,
+                min_size=len(children),
+                max_size=len(children),
+                unique=True,
+            )
+        )
+    length = min(len(c) for c in children)
+    return RecordArray(children, fields=fields, length=length)
+
+
+def _make_union(draw: st.DrawFn, children: list[Content]) -> UnionArray:
+    return draw(st_ak.contents.union_array_contents(children))
