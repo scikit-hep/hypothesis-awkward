@@ -116,7 +116,10 @@ def contents(
         allow_bytestring=allow_bytestring,
     )
 
-    if (not single_child_types and not can_branch) or max_size == 0:
+    leaf_only = not any((
+        allow_regular, allow_list_offset, allow_list, allow_record, allow_union,
+    )) or max_size == 0
+    if leaf_only:
         return draw(st_leaf(min_size=0, max_size=max_size))
 
     draw_leaf = CountdownDrawer(draw, st_leaf, max_size_total=max_size)
