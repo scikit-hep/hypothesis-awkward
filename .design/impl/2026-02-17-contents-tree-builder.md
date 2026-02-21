@@ -1,7 +1,7 @@
 # Implementation: Bottom-Up Tree Builder for `contents()`
 
 **Date:** 2026-02-17
-**Status:** Implemented
+**Status:** Superseded by [top-down tree builder](2026-02-21-contents-top-down-builder.md)
 **Author:** Claude (with developer collaboration)
 
 ## Overview
