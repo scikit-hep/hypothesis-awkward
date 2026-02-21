@@ -138,36 +138,40 @@ def contents(
         while can_branch and draw(st.booleans()):
             children.append(_build(depth + 1))
 
-        # Draw node type constrained by child count
-        if len(children) == 1:
-            if not single_child_types:
-                return children[0]
-            node_type = draw(st.sampled_from(sorted(single_child_types)))
-        else:
-            multi_child_types: list[str] = []
-            if allow_record:
-                multi_child_types.append('record')
-            if allow_union and not any(isinstance(c, UnionArray) for c in children):
-                multi_child_types.append('union')
-            if not multi_child_types:
-                # Neither record nor union allowed; fall back to wrapping first child
-                if single_child_types:
-                    node_type = draw(st.sampled_from(sorted(single_child_types)))
-                    return draw(wrappers[node_type](st.just(children[0])))
-                return children[0]
-            node_type = draw(st.sampled_from(sorted(multi_child_types)))
+        candidates = _candidate_node_types(
+            children, single_child_types, allow_record, allow_union, wrappers
+        )
+        if not candidates:
+            return children[0]
+        node_type = draw(st.sampled_from(candidates))
 
         # Construct node
         if node_type == 'union':
             return _make_union(draw, children)
-
         if node_type == 'record':
             return _make_record(draw, children)
-
-        # Single-child wrapper
         return draw(wrappers[node_type](st.just(children[0])))
 
     return _build(0)
+
+
+def _candidate_node_types(
+    children: list[Content],
+    single_child_types: list[str],
+    allow_record: bool,
+    allow_union: bool,
+    wrappers: dict[str, _WrapperFn],
+) -> list[str]:
+    if len(children) == 1:
+        return sorted(single_child_types)
+    candidates: list[str] = []
+    if allow_record:
+        candidates.append('record')
+    if allow_union and not any(isinstance(c, UnionArray) for c in children):
+        candidates.append('union')
+    if not candidates:
+        return sorted(wrappers)
+    return sorted(candidates)
 
 
 def _make_record(draw: st.DrawFn, children: list[Content]) -> Content:
