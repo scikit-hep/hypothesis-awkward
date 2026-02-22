@@ -33,7 +33,7 @@ def union_array_contents(
         case None:
             n = draw(st.integers(min_value=2, max_value=max_contents))
             contents = [
-                draw(st_ak.contents.contents(allow_union=False)) for _ in range(n)
+                draw(st_ak.contents.contents(allow_union_root=False)) for _ in range(n)
             ]
         case st.SearchStrategy():
             contents = draw(contents)
