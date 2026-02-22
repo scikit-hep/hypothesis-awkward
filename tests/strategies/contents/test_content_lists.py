@@ -32,13 +32,9 @@ def content_lists_kwargs(
 
     kwargs = draw(
         st.fixed_dictionaries(
-            {
-                'st_content': st.one_of(
-                    st.just(st_ak.contents.contents),
-                    st.just(st_content),
-                ),
-            },
+            {},
             optional={
+                'st_content': st.just(st_content),
                 'max_total_size': st.integers(min_value=0, max_value=50),
                 'min_size': st.integers(min_value=0, max_value=5),
             },
@@ -68,9 +64,8 @@ def test_content_lists(data: st.DataObject) -> None:
     assert len(result) >= min_size
     assert _total_leaf_size(result) <= max_total_size
 
-    st_content = opts.kwargs['st_content']
-    match st_content:
-        case RecordCallDraws():
+    match opts.kwargs.get('st_content'):
+        case RecordCallDraws() as st_content:
             assert len(st_content.drawn) == len(result)
             assert all(d is r for d, r in zip(st_content.drawn, result))
 

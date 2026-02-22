@@ -204,7 +204,7 @@ class _StContent(Protocol):
 @st.composite
 def content_lists(
     draw: st.DrawFn,
-    st_content: _StContent,
+    st_content: _StContent = contents,
     *,
     max_total_size: int = 10,
     min_size: int = 0,
