@@ -8,6 +8,8 @@ Reference implementations:
 - `tests/strategies/forms/test_numpy_forms.py` (mode selection for
   strategy-valued kwargs)
 - `tests/strategies/misc/test_ranges.py` (dependent kwargs without `OptsChain`)
+- `tests/strategies/contents/test_content_lists.py` (callable-valued kwargs with
+  `register_callable()`)
 
 ## 1. TypedDict for Strategy kwargs
 
@@ -82,6 +84,8 @@ Key techniques:
 - `@st.composite` with `chain` parameter for composability
 - `chain.register(strategy)` creates a `RecordDraws` wrapper that tracks drawn
   values; pass it via `st.just(recorder)` as a strategy-valued kwarg
+- `chain.register_callable(factory)` creates a `RecordCallDraws` wrapper for
+  callable-valued kwargs (see "Callable-valued kwargs" section below)
 - `chain.extend(kwargs)` returns a new `OptsChain` with merged kwargs
 - Use `st.fixed_dictionaries` with `optional` for independently drawn kwargs
 
@@ -232,6 +236,57 @@ Key techniques:
   state)
 - `match` / `case` distinguishes concrete values from `st_ak.RecordDraws` in
   assertions
+
+### Callable-valued kwargs with `register_callable()`
+
+See `tests/strategies/contents/test_content_lists.py` for a full example.
+
+When a parameter is a callable that returns a strategy (not a strategy itself),
+use `chain.register_callable()` to create a `RecordCallDraws` wrapper. Each
+call to the wrapper produces a `RecordDraws` instance, and `drawn` aggregates
+all values across all calls.
+
+```python
+@st.composite
+def content_lists_kwargs(
+    draw: st.DrawFn,
+    chain: st_ak.OptsChain[Any] | None = None,
+) -> st_ak.OptsChain[ContentListsKwargs]:
+    if chain is None:
+        chain = st_ak.OptsChain({})
+    st_content = chain.register_callable(st_ak.contents.contents)
+
+    kwargs = draw(
+        st.fixed_dictionaries(
+            {},
+            optional={
+                'st_content': st.just(st_content),
+                ...
+            },
+        )
+    )
+
+    return chain.extend(cast(ContentListsKwargs, kwargs))
+```
+
+In the test, use `match` to check for `RecordCallDraws` and verify drawn values:
+
+```python
+match opts.kwargs.get('st_content'):
+    case RecordCallDraws() as st_content:
+        assert len(st_content.drawn) == len(result)
+        assert all(d is r for d, r in zip(st_content.drawn, result))
+```
+
+Key techniques:
+
+- `chain.register_callable(factory)` creates a `RecordCallDraws` wrapper that
+  tracks all calls and their drawn values
+- When the kwarg is optional (callable has a default), use `optional` in
+  `st.fixed_dictionaries` so it can be omitted
+- `RecordCallDraws.drawn` returns a flat list of all drawn values across all
+  calls, in order
+- `reset()` on `OptsChain` also resets all callable recorders
 
 ## 3. Main property-based test
 
