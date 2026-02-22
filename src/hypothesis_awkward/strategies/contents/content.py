@@ -169,7 +169,7 @@ def contents(
     match node_type:
         case 'union':
             children = draw(
-                _st_content_lists(
+                content_lists(
                     functools.partial(recurse, allow_union_root=False),
                     max_total_size=max_size,
                     min_size=2,
@@ -178,7 +178,7 @@ def contents(
             return draw(st_ak.contents.union_array_contents(children))
 
         case 'record':
-            children = draw(_st_content_lists(recurse, max_total_size=max_size))
+            children = draw(content_lists(recurse, max_total_size=max_size))
             return draw(st_ak.contents.record_array_contents(children))
 
         case 'regular':
@@ -197,17 +197,12 @@ def contents(
             assert_never(unreachable)
 
 
-def _leaf_size(c: Content) -> int:
-    '''Count total leaf elements in a content tree.'''
-    return sum(len(leaf) for leaf in iter_leaf_contents(c))
-
-
 class _StContent(Protocol):
     def __call__(self, *, max_size: int) -> st.SearchStrategy[Content]: ...
 
 
 @st.composite
-def _st_content_lists(
+def content_lists(
     draw: st.DrawFn,
     st_content: _StContent,
     *,
@@ -239,3 +234,8 @@ def _st_content_lists(
         remaining -= _leaf_size(c)
         contents_.append(c)
     return contents_
+
+
+def _leaf_size(c: Content) -> int:
+    '''Count total leaf elements in a content tree.'''
+    return sum(len(leaf) for leaf in iter_leaf_contents(c))

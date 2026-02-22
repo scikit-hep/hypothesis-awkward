@@ -1,5 +1,6 @@
 __all__ = [
     'bytestring_contents',
+    'content_lists',
     'contents',
     'empty_array_contents',
     'leaf_contents',
@@ -13,7 +14,7 @@ __all__ = [
 ]
 
 from .bytestring import bytestring_contents
-from .content import contents
+from .content import content_lists, contents
 from .empty_array import empty_array_contents
 from .leaf import leaf_contents
 from .list_array import list_array_contents
