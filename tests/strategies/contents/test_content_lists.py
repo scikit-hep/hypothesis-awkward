@@ -7,6 +7,7 @@ import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.misc.record import RecordCallDraws
 from hypothesis_awkward.util import iter_leaf_contents
+from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_TOTAL_SIZE = 10
 DEFAULT_MIN_SIZE = 0
@@ -18,6 +19,7 @@ class ContentListsKwargs(TypedDict, total=False):
     st_content: Callable[..., st.SearchStrategy[Content]]
     max_total_size: int
     min_size: int
+    max_size: int | None
 
 
 @st.composite
@@ -30,13 +32,19 @@ def content_lists_kwargs(
         chain = st_ak.OptsChain({})
     st_content = chain.register_callable(st_ak.contents.contents)
 
+    min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=10, max_start=5))
+
+    drawn = (
+        ('min_size', min_size),
+        ('max_size', max_size),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'st_content': st.just(st_content),
                 'max_total_size': st.integers(min_value=0, max_value=50),
-                'min_size': st.integers(min_value=0, max_value=5),
             },
         )
     )
@@ -53,6 +61,7 @@ def test_content_lists(data: st.DataObject) -> None:
 
     max_total_size = opts.kwargs.get('max_total_size', DEFAULT_MAX_TOTAL_SIZE)
     min_size = opts.kwargs.get('min_size', DEFAULT_MIN_SIZE)
+    max_size = opts.kwargs.get('max_size')
 
     result = data.draw(
         st_ak.contents.content_lists(**opts.kwargs),
@@ -61,7 +70,7 @@ def test_content_lists(data: st.DataObject) -> None:
 
     assert isinstance(result, list)
     assert all(isinstance(c, Content) for c in result)
-    assert len(result) >= min_size
+    assert sc(min_size) <= len(result) <= sc(max_size)
     assert _total_leaf_size(result) <= max_total_size
 
     match opts.kwargs.get('st_content'):
@@ -77,6 +86,15 @@ def test_draw_min_size() -> None:
             st_ak.contents.contents, max_total_size=50, min_size=2
         ),
         lambda cl: len(cl) == 2,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_draw_max_size() -> None:
+    '''Assert that max_size caps the number of contents.'''
+    find(
+        st_ak.contents.content_lists(max_total_size=50, max_size=3),
+        lambda cl: len(cl) == 3,
         settings=settings(phases=[Phase.generate]),
     )
 

@@ -14,6 +14,7 @@ import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.util.awkward import iter_leaf_contents
+from hypothesis_awkward.util.safe import safe_compare as sc
 
 _NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
 
@@ -208,6 +209,7 @@ def content_lists(
     *,
     max_total_size: int = 10,
     min_size: int = 0,
+    max_size: int | None = None,
 ) -> list[Content]:
     '''Strategy for lists of contents within a size budget.
 
@@ -221,6 +223,9 @@ def content_lists(
         list.
     min_size
         Minimum number of contents in the list.
+    max_size
+        Maximum number of contents in the list. By default there is no
+        upper bound.
 
     '''
     remaining = max_total_size
@@ -229,7 +234,7 @@ def content_lists(
         c = draw(st_content(max_size=max(remaining, 0)))
         remaining -= _leaf_size(c)
         contents_.append(c)
-    while draw(st.booleans()) and remaining > 0:
+    while draw(st.booleans()) and remaining > 0 and len(contents_) < sc(max_size):
         c = draw(st_content(max_size=max(remaining, 0)))
         remaining -= _leaf_size(c)
         contents_.append(c)
