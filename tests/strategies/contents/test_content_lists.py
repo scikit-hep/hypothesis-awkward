@@ -11,10 +11,6 @@ DEFAULT_MAX_TOTAL_SIZE = 10
 DEFAULT_MIN_SIZE = 0
 
 
-def _st_content(*, max_size: int) -> st.SearchStrategy[Content]:
-    return st_ak.contents.contents(max_size=max_size, max_depth=1)
-
-
 class ContentListsKwargs(TypedDict, total=False):
     '''Options for `content_lists()` strategy.'''
 
@@ -55,7 +51,7 @@ def test_content_lists(data: st.DataObject) -> None:
     min_size = opts.kwargs.get('min_size', DEFAULT_MIN_SIZE)
 
     result = data.draw(
-        st_ak.contents.content_lists(_st_content, **opts.kwargs),
+        st_ak.contents.content_lists(st_ak.contents.contents, **opts.kwargs),
         label='result',
     )
 
@@ -68,7 +64,9 @@ def test_content_lists(data: st.DataObject) -> None:
 def test_draw_min_size() -> None:
     '''Assert that a list with exactly min_size=2 elements can be drawn.'''
     find(
-        st_ak.contents.content_lists(_st_content, max_total_size=50, min_size=2),
+        st_ak.contents.content_lists(
+            st_ak.contents.contents, max_total_size=50, min_size=2
+        ),
         lambda cl: len(cl) == 2,
         settings=settings(phases=[Phase.generate]),
     )
@@ -77,7 +75,9 @@ def test_draw_min_size() -> None:
 def test_draw_empty_list() -> None:
     '''Assert that an empty list can be drawn when min_size=0.'''
     find(
-        st_ak.contents.content_lists(_st_content, max_total_size=50, min_size=0),
+        st_ak.contents.content_lists(
+            st_ak.contents.contents, max_total_size=50, min_size=0
+        ),
         lambda cl: len(cl) == 0,
         settings=settings(phases=[Phase.generate]),
     )
