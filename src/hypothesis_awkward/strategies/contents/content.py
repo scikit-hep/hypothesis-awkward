@@ -1,4 +1,11 @@
 import functools
+import sys
+from typing import Literal
+
+if sys.version_info >= (3, 11):
+    from typing import assert_never
+else:
+    from typing_extensions import assert_never
 
 import numpy as np
 from hypothesis import strategies as st
@@ -7,6 +14,8 @@ import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.util.awkward import iter_leaf_contents
+
+_NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
 
 
 def _leaf_size(c: Content) -> int:
@@ -145,7 +154,7 @@ def contents(
     )
 
     # Choose node type from allow_* flags
-    candidates: list[str] = []
+    candidates = list[_NodeType]()
     if allow_regular:
         candidates.append('regular')
     if allow_list_offset:
@@ -162,35 +171,44 @@ def contents(
 
     node_type = draw(st.sampled_from(sorted(candidates)))
 
-    # Build children for multi-child types
-    if node_type == 'union':
-        remaining = max_size
-        first = draw(recurse(max_size=remaining, allow_union_root=False))
-        remaining -= _leaf_size(first)
-        second = draw(recurse(max_size=max(remaining, 0), allow_union_root=False))
-        remaining -= _leaf_size(second)
-        children = [first, second]
-        while draw(st.booleans()) and remaining > 0:
-            child = draw(recurse(max_size=max(remaining, 0), allow_union_root=False))
-            remaining -= _leaf_size(child)
-            children.append(child)
-        return draw(st_ak.contents.union_array_contents(children))
+    match node_type:
+        case 'union':
+            remaining = max_size
+            first = draw(recurse(max_size=remaining, allow_union_root=False))
+            remaining -= _leaf_size(first)
+            second = draw(recurse(max_size=max(remaining, 0), allow_union_root=False))
+            remaining -= _leaf_size(second)
+            children = [first, second]
+            while draw(st.booleans()) and remaining > 0:
+                child = draw(
+                    recurse(max_size=max(remaining, 0), allow_union_root=False)
+                )
+                remaining -= _leaf_size(child)
+                children.append(child)
+            return draw(st_ak.contents.union_array_contents(children))
 
-    if node_type == 'record':
-        remaining = max_size
-        first = draw(recurse(max_size=remaining))
-        remaining -= _leaf_size(first)
-        children = [first]
-        while draw(st.booleans()) and remaining > 0:
-            child = draw(recurse(max_size=max(remaining, 0)))
-            remaining -= _leaf_size(child)
-            children.append(child)
-        return draw(st_ak.contents.record_array_contents(children))
+        case 'record':
+            remaining = max_size
+            first = draw(recurse(max_size=remaining))
+            remaining -= _leaf_size(first)
+            children = [first]
+            while draw(st.booleans()) and remaining > 0:
+                child = draw(recurse(max_size=max(remaining, 0)))
+                remaining -= _leaf_size(child)
+                children.append(child)
+            return draw(st_ak.contents.record_array_contents(children))
 
-    # Single-child wrapper
-    child = draw(recurse(max_size=max_size))
-    if node_type == 'regular':
-        return draw(st_ak.contents.regular_array_contents(child))
-    if node_type == 'list_offset':
-        return draw(st_ak.contents.list_offset_array_contents(child))
-    return draw(st_ak.contents.list_array_contents(child))
+        case 'regular':
+            child = draw(recurse(max_size=max_size))
+            return draw(st_ak.contents.regular_array_contents(child))
+
+        case 'list_offset':
+            child = draw(recurse(max_size=max_size))
+            return draw(st_ak.contents.list_offset_array_contents(child))
+
+        case 'list':
+            child = draw(recurse(max_size=max_size))
+            return draw(st_ak.contents.list_array_contents(child))
+
+        case _ as unreachable:  # pragma: no cover
+            assert_never(unreachable)
