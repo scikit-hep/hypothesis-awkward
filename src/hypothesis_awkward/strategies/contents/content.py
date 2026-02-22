@@ -1,6 +1,6 @@
 import functools
 import sys
-from typing import Literal
+from typing import Literal, Protocol
 
 if sys.version_info >= (3, 11):
     from typing import assert_never
@@ -16,11 +16,6 @@ from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.util.awkward import iter_leaf_contents
 
 _NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
-
-
-def _leaf_size(c: Content) -> int:
-    '''Count total leaf elements in a content tree.'''
-    return sum(len(leaf) for leaf in iter_leaf_contents(c))
 
 
 @st.composite
@@ -173,29 +168,17 @@ def contents(
 
     match node_type:
         case 'union':
-            remaining = max_size
-            first = draw(recurse(max_size=remaining, allow_union_root=False))
-            remaining -= _leaf_size(first)
-            second = draw(recurse(max_size=max(remaining, 0), allow_union_root=False))
-            remaining -= _leaf_size(second)
-            children = [first, second]
-            while draw(st.booleans()) and remaining > 0:
-                child = draw(
-                    recurse(max_size=max(remaining, 0), allow_union_root=False)
+            children = draw(
+                _st_content_lists(
+                    functools.partial(recurse, allow_union_root=False),
+                    max_total_size=max_size,
+                    min_size=2,
                 )
-                remaining -= _leaf_size(child)
-                children.append(child)
+            )
             return draw(st_ak.contents.union_array_contents(children))
 
         case 'record':
-            remaining = max_size
-            first = draw(recurse(max_size=remaining))
-            remaining -= _leaf_size(first)
-            children = [first]
-            while draw(st.booleans()) and remaining > 0:
-                child = draw(recurse(max_size=max(remaining, 0)))
-                remaining -= _leaf_size(child)
-                children.append(child)
+            children = draw(_st_content_lists(recurse, max_total_size=max_size))
             return draw(st_ak.contents.record_array_contents(children))
 
         case 'regular':
@@ -212,3 +195,47 @@ def contents(
 
         case _ as unreachable:  # pragma: no cover
             assert_never(unreachable)
+
+
+def _leaf_size(c: Content) -> int:
+    '''Count total leaf elements in a content tree.'''
+    return sum(len(leaf) for leaf in iter_leaf_contents(c))
+
+
+class _StContent(Protocol):
+    def __call__(self, *, max_size: int) -> st.SearchStrategy[Content]: ...
+
+
+@st.composite
+def _st_content_lists(
+    draw: st.DrawFn,
+    st_content: _StContent,
+    *,
+    max_total_size: int,
+    min_size: int = 1,
+) -> list[Content]:
+    '''Strategy for lists of contents within a size budget.
+
+    Parameters
+    ----------
+    st_content
+        A callable that accepts ``max_size`` and returns a strategy for
+        a single content.
+    max_total_size
+        Maximum total number of leaf elements across all contents in the
+        list.
+    min_size
+        Minimum number of contents in the list.
+
+    '''
+    remaining = max_total_size
+    contents_ = list[Content]()
+    for _ in range(min_size):
+        c = draw(st_content(max_size=max(remaining, 0)))
+        remaining -= _leaf_size(c)
+        contents_.append(c)
+    while draw(st.booleans()) and remaining > 0:
+        c = draw(st_content(max_size=max(remaining, 0)))
+        remaining -= _leaf_size(c)
+        contents_.append(c)
+    return contents_
