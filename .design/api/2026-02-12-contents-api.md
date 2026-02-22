@@ -6,6 +6,9 @@
 
 > **Update (2026-02-22):** Since this document was written:
 >
+> - `content_lists()` was added to `content.py` as a public helper strategy
+>   that generates lists of contents within a size budget. Used internally by
+>   `contents()` for `RecordArray` and `UnionArray` children.
 > - `allow_union_root` parameter was added to `contents()` (default: `True`).
 >   It prevents `UnionArray` at the outermost level only, without affecting
 >   deeper nesting. Not forwarded to `arrays()`.
