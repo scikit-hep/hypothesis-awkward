@@ -10,6 +10,7 @@ def regular_array_contents(
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
     max_size: int = 5,
+    max_zeros_length: int = 5,
 ) -> Content:
     '''Strategy for RegularArray Content wrapping child Content.
 
@@ -20,6 +21,9 @@ def regular_array_contents(
         instance, or ``None`` to draw from ``contents()``.
     max_size
         Upper bound on the length of each element.
+    max_zeros_length
+        Upper bound on the number of elements when each element is
+        empty, i.e., when size is zero.
 
     Examples
     --------
@@ -39,14 +43,14 @@ def regular_array_contents(
     if content_len == 0:
         size = draw(st.integers(min_value=0, max_value=max_size))
         if size == 0:
-            zeros_length = draw(st.integers(min_value=0, max_value=max_size))
+            zeros_length = draw(st.integers(min_value=0, max_value=max_zeros_length))
             return RegularArray(content, size=0, zeros_length=zeros_length)
         return RegularArray(content, size=size)
     divisors = [
         d for d in range(1, min(content_len + 1, max_size + 1)) if content_len % d == 0
     ]
     if not divisors:
-        zeros_length = draw(st.integers(min_value=0, max_value=max_size))
+        zeros_length = draw(st.integers(min_value=0, max_value=max_zeros_length))
         return RegularArray(content, size=0, zeros_length=zeros_length)
     size = draw(st.sampled_from(divisors))
     return RegularArray(content, size=size)

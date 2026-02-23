@@ -8,6 +8,7 @@ from awkward.contents import Content, RegularArray
 from hypothesis_awkward.util import iter_contents
 
 MAX_REGULAR_SIZE = 5
+MAX_ZEROS_LENGTH = 5
 
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
@@ -15,6 +16,7 @@ class RegularArrayContentsKwargs(TypedDict, total=False):
 
     content: st.SearchStrategy[Content] | Content
     max_size: int
+    max_zeros_length: int
 
 
 @st.composite
@@ -36,6 +38,7 @@ def regular_array_contents_kwargs(
                     st.just(st_content),
                 ),
                 'max_size': st.integers(min_value=0, max_value=50),
+                'max_zeros_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -60,6 +63,11 @@ def test_regular_array_contents(data: st.DataObject) -> None:
     max_size = opts.kwargs.get('max_size', MAX_REGULAR_SIZE)
     assert result.size <= max_size
 
+    # Assert zeros_length is within bounds
+    max_zeros_length = opts.kwargs.get('max_zeros_length', MAX_ZEROS_LENGTH)
+    if result.size == 0:
+        assert len(result) <= max_zeros_length
+
     # Assert size divides content length when size > 0
     if result.size > 0:
         assert len(result.content) % result.size == 0
@@ -81,6 +89,16 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.regular_array_contents(max_size=max_size),
         lambda c: c.size == max_size,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_max_zeros_length() -> None:
+    '''Assert that zeros_length up to max_zeros_length can be drawn.'''
+    max_zeros_length = 20
+    find(
+        st_ak.contents.regular_array_contents(max_zeros_length=max_zeros_length),
+        lambda c: c.size == 0 and len(c) == max_zeros_length,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
