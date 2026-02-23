@@ -11,6 +11,8 @@
 >   sections below are outdated.
 > - `UnionArray` support is fully implemented via the
 >   [top-down builder](../impl/2026-02-21-contents-top-down-builder.md).
+> - `max_length` parameter was added to `contents()` and `arrays()`. See
+>   [max-length-api](2026-02-23-max-length-api.md) for details.
 
 ## Overview
 
