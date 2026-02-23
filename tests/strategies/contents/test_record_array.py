@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, RecordArray
 from hypothesis_awkward.util import iter_contents
+from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_FIELDS = 5
 
@@ -16,6 +17,7 @@ class RecordArrayContentsKwargs(TypedDict, total=False):
     contents: list[Content] | st.SearchStrategy[list[Content]]
     max_fields: int
     allow_tuple: bool
+    max_length: int
 
 
 @st.composite
@@ -47,6 +49,7 @@ def record_array_contents_kwargs(
                 ),
                 'max_fields': st.integers(min_value=0, max_value=10),
                 'allow_tuple': st.booleans(),
+                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -96,9 +99,16 @@ def test_record_array_contents(data: st.DataObject) -> None:
         assert len(result.fields) == len(result.contents)
         assert len(set(result.fields)) == len(result.fields)
 
-    # Non-empty records: length equals the minimum content length
+    # Assert max_length constraint
+    max_length = opts.kwargs.get('max_length')
+    assert len(result) <= sc(max_length)
+
+    # Non-empty records: length equals the minimum content length, capped by max_length
     if result.contents:
-        assert result.length == min(len(c) for c in result.contents)
+        expected = min(len(c) for c in result.contents)
+        if max_length is not None:
+            expected = min(expected, max_length)
+        assert result.length == expected
 
 
 def test_draw_tuple() -> None:
@@ -126,6 +136,16 @@ def test_draw_max_fields() -> None:
         st_ak.contents.record_array_contents(max_fields=max_fields),
         lambda r: len(r.contents) == max_fields,
         settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_draw_max_length() -> None:
+    '''Assert that max_length constrains the RecordArray length.'''
+    max_length = 10
+    find(
+        st_ak.contents.record_array_contents(max_length=max_length),
+        lambda r: len(r) == max_length,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 

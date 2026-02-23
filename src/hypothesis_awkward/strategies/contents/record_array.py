@@ -13,6 +13,7 @@ def record_array_contents(
     *,
     max_fields: int = 5,
     allow_tuple: bool = True,
+    max_length: int | None = None,
 ) -> Content:
     '''Strategy for RecordArray Content from a list of child Contents.
 
@@ -25,11 +26,25 @@ def record_array_contents(
         Maximum number of fields when ``contents`` is ``None``.
     allow_tuple
         Allow tuple records (no field names) if ``True``.
+    max_length
+        Upper bound on the record length, i.e., ``len(result)``.
 
     Examples
     --------
     >>> c = record_array_contents().example()
     >>> isinstance(c, Content)
+    True
+
+    Limit the number of fields:
+
+    >>> c = record_array_contents(max_fields=3).example()
+    >>> len(c.contents) <= 3
+    True
+
+    Limit the record length:
+
+    >>> c = record_array_contents(max_length=4).example()
+    >>> len(c) <= 4
     True
     '''
     match contents:
@@ -59,5 +74,10 @@ def record_array_contents(
             )
         )
 
-    length = 0 if not contents else None
+    if not contents:
+        length = 0
+    elif max_length is not None:
+        length = min(min(len(c) for c in contents), max_length)
+    else:
+        length = None
     return RecordArray(contents, fields=fields, length=length)
