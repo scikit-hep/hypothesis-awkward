@@ -105,9 +105,25 @@ However, the recent refactoring of `regular_array_contents()` (extracting
 already improves the situation somewhat by giving callers more control over
 the generated arrays.
 
+## Implementation Order
+
+Bottom-up order, starting with wrapper strategies that receive `max_length` from
+their callers, then leaf strategies, then the top-level entry points that wire
+everything together:
+
+1. `regular_array_contents()` — constrain `len(content) // size`
+2. `list_offset_array_contents()` — constrain number of sublists
+3. `list_array_contents()` — constrain number of sublists
+4. `record_array_contents()` — constrain shared field length
+5. `union_array_contents()` — constrain `sum(len(c))`
+6. `numpy_array_contents()` — constrain immediate length
+7. `string_contents()` — constrain number of strings
+8. `bytestring_contents()` — constrain number of bytestrings
+9. `leaf_contents()` — passes through to leaves
+10. `content_lists()` — propagates to children
+11. `contents()` — new parameter, wires everything
+
 ## Status
 
-Research only. No implementation planned at this time. The complexity of
-threading `max_length` through the entire contents hierarchy and coordinating it
-with `max_size` may not be justified by the improvement in `size` coverage for
-`regular_array_contents()`.
+Planned. See [max-length-api](../api/2026-02-23-max-length-api.md) for the API
+design.
