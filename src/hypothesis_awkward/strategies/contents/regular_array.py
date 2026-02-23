@@ -19,7 +19,7 @@ def regular_array_contents(
         Child content. Can be a strategy for Content, a concrete Content
         instance, or ``None`` to draw from ``contents()``.
     max_size
-        Upper bound on the generated RegularArray length.
+        Upper bound on the length of each element.
 
     Examples
     --------
