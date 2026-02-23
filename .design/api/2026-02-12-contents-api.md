@@ -32,6 +32,8 @@
 >   `max_length` parameter to cap the number of lists, replacing the
 >   module-level `MAX_LIST_LENGTH` constant. See
 >   [max-length-api](./2026-02-23-max-length-api.md).
+> - `record_array_contents()` gained `max_length` parameter to cap the record
+>   length. See [max-length-api](./2026-02-23-max-length-api.md).
 
 ## Overview
 
@@ -386,6 +388,7 @@ def record_array_contents(
     *,
     max_fields: int = 5,
     allow_tuple: bool = True,
+    max_length: int | None = None,
 ) -> Content:
 ```
 
@@ -404,11 +407,16 @@ def record_array_contents(
   When `True`, a coin flip decides between named records and tuples. When
   `False`, only named records are generated.
 
+- **`max_length`** — Upper bound on the record length, i.e., `len(result)`.
+  Default: `None` (no constraint). See
+  [max-length-api](./2026-02-23-max-length-api.md).
+
 #### Behavior
 
 For named records, field names are drawn as unique strings of up to 3 ASCII
 letters. For empty records (0 fields), `length=0` is set explicitly (required
-by the `RecordArray` constructor).
+by the `RecordArray` constructor). When `max_length` is set, the RecordArray's
+`length` is capped to `min(min(len(c) for c in contents), max_length)`.
 
 ### `union_array_contents()`
 

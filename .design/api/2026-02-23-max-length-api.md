@@ -87,8 +87,8 @@ have the same `len()`):
 length <= max_length
 ```
 
-This means each child content must have `len() <= max_length`. The strategy
-propagates `max_length` to each child content drawn.
+The RecordArray's `length` is capped to `min(min(len(c) for c in contents),
+max_length)`. Default: `None` (no constraint).
 
 #### `union_array_contents()`
 
@@ -310,3 +310,4 @@ everything together.
 1. `regular_array_contents()` — done
 2. `list_offset_array_contents()` — done
 3. `list_array_contents()` — done
+4. `record_array_contents()` — done
