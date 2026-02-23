@@ -34,6 +34,10 @@
 >   [max-length-api](./2026-02-23-max-length-api.md).
 > - `record_array_contents()` gained `max_length` parameter to cap the record
 >   length. See [max-length-api](./2026-02-23-max-length-api.md).
+> - `union_array_contents()` gained `max_length` parameter to cap the union
+>   length. When the total content length exceeds `max_length`, non-compact
+>   indexing is used (tags/index are truncated after shuffling). See
+>   [max-length-api](./2026-02-23-max-length-api.md).
 
 ## Overview
 
@@ -420,7 +424,7 @@ by the `RecordArray` constructor). When `max_length` is set, the RecordArray's
 
 ### `union_array_contents()`
 
-Generates `UnionArray` content from a list of child contents with compact
+Generates `UnionArray` content from a list of child contents with shuffled
 `(tags, index)` buffers.
 
 ```python
@@ -430,6 +434,7 @@ def union_array_contents(
     contents: list[Content] | st.SearchStrategy[list[Content]] | None = None,
     *,
     max_contents: int = 4,
+    max_length: int | None = None,
 ) -> Content:
 ```
 
@@ -445,17 +450,24 @@ def union_array_contents(
   is `None`. Default: `4`. Minimum is always 2 (required by `UnionArray`).
   Ignored when `contents` is provided.
 
+- **`max_length`** — Upper bound on the union length, i.e., `len(result)`.
+  Default: `None` (no constraint). See
+  [max-length-api](./2026-02-23-max-length-api.md).
+
 #### Behavior
 
-Generates compact `(tags, index)` buffers where every element in every child
-content is referenced exactly once:
+Generates `(tags, index)` buffers:
 
 1. For each content `k` of length `L_k`, create `L_k` entries with
    `tags = [k] * L_k` and `index = [0, 1, ..., L_k - 1]`
 2. Concatenate all entries and apply a random permutation
+3. If `max_length` is set and the total exceeds it, truncate the shuffled
+   arrays to `max_length` entries (non-compact indexing — some child elements
+   become unreachable)
 
-The union length equals `sum(len(c) for c in contents)`. Index dtype is
-`int64` (via `ak.index.Index64`).
+Without `max_length`, indexing is compact: every child element is referenced
+exactly once and the union length equals `sum(len(c) for c in contents)`.
+Index dtype is `int64` (via `ak.index.Index64`).
 
 #### Constants
 

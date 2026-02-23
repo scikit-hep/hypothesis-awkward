@@ -92,16 +92,19 @@ max_length)`. Default: `None` (no constraint).
 
 #### `union_array_contents()`
 
-`max_length` constrains the total union length (the sum of all child content
-lengths):
+`max_length` constrains the union length:
 
 ```text
-sum(len(c) for c in contents) <= max_length
+len(result) <= max_length
 ```
 
-This is consistent with how `UnionArray` length works: every element in every
-child is referenced exactly once, so the union length equals the sum of child
-lengths.
+When `contents` is `None`, `content_lists(max_total_size=max_length)` steers
+generation and `assume()` filters any overshoot. When concrete or
+strategy-valued `contents` are provided, the strategy builds compact tags/index,
+shuffles them, and truncates to `max_length` entries. This produces non-compact
+indexing — some child elements become unreachable — but avoids `Unsatisfied`
+when the caller provides contents whose total length exceeds `max_length`.
+Default: `None` (no constraint).
 
 ### Leaf strategies
 
@@ -285,18 +288,23 @@ its own output `len()`, not on its child content's `len()`.
 - This keeps the semantics uniform: `max_length` always means "the thing you
   get back has `len()` at most this."
 
-### 5. `union_array_contents()` Uses Sum of Child Lengths
+### 5. `union_array_contents()` Uses Non-Compact Indexing for Truncation
 
 **Decision:** For `union_array_contents()`, `max_length` constrains
-`sum(len(c) for c in contents)`.
+`len(result)`. When concrete or strategy-valued contents exceed `max_length`,
+the shuffled tags/index arrays are truncated rather than rejected via
+`assume()`.
 
 **Rationale:**
 
-- `UnionArray` length equals the sum of child lengths (every element is
-  referenced exactly once via compact tags/index).
-- This is the natural definition: `len(union_array) <= max_length`.
-- The constraint is propagated to `content_lists(max_total_size=...)` which
-  distributes the budget across children.
+- `assume()` on concrete/strategy contents causes `Unsatisfied` when the total
+  content length always exceeds `max_length`.
+- `UnionArray` does not require compact indexing — tags/index can reference a
+  subset of each child's elements, leaving some unreachable.
+- Truncation after shuffling gives a uniform random subset of the interleaved
+  elements.
+- `assume()` is still used in the `None` branch where `content_lists()` steers
+  generation and overshoot is rare.
 
 ## Implementation Order
 
@@ -311,3 +319,4 @@ everything together.
 2. `list_offset_array_contents()` — done
 3. `list_array_contents()` — done
 4. `record_array_contents()` — done
+5. `union_array_contents()` — done
