@@ -9,10 +9,10 @@ _Hypothesis strategies for Awkward Arrays._
 [pypi-badge]: https://img.shields.io/pypi/v/hypothesis-awkward.svg
 [pypi-python-badge]: https://img.shields.io/pypi/pyversions/hypothesis-awkward.svg
 [pypi]: https://pypi.org/project/hypothesis-awkward
-[test-badge]: https://github.com/TaiSakuma/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
-[test]: https://github.com/TaiSakuma/hypothesis-awkward/actions/workflows/unit-test.yml
-[codecov-badge]: https://codecov.io/gh/TaiSakuma/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3
-[codecov]: https://codecov.io/gh/TaiSakuma/hypothesis-awkward
+[test-badge]: https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
+[test]: https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml
+[codecov-badge]: https://codecov.io/gh/scikit-hep/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3
+[codecov]: https://codecov.io/gh/scikit-hep/hypothesis-awkward
 
 [Hypothesis] is a _property-based testing_ library. Its [_strategies_][hyp-st]
 are Python functions that strategically generate test data that can fail test
