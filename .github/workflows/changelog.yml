@@ -1,0 +1,66 @@
+name: Generate changelog
+
+# Generate CHANGELOG.md with git-cliff (https://git-cliff.org/) when a
+# version-bump tag (u*.*.*) is pushed, then commit the result, create the
+# corresponding v-prefixed tag, and push both to main.
+#
+# This is the first half of the two-tag release flow:
+#   1. hatch version <rule> → commit → push tag u<version>
+#   2. (this workflow) generates CHANGELOG.md → commits → pushes tag v<version>
+#   3. The "Release a new version" workflow creates a GitHub Release
+
+on:
+  push:
+    tags:
+      - "u*.*.*"
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      # Guard against accidentally tagging a commit on a feature branch.
+      - name: Verify tag is on main
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref_name }})
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" HEAD; then
+            echo "::error::Tag ${{ github.ref_name }} is not on main branch"
+            exit 1
+          fi
+
+      # Transform the trigger tag (u1.2.3) into the release tag (v1.2.3).
+      - name: Determine version tag
+        id: version
+        run: |
+          echo "tag=v${GITHUB_REF_NAME#u}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        with:
+          args: --verbose --tag ${{ steps.version.outputs.tag }}
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit, tag, and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          # Skip the commit when the changelog is unchanged (e.g., re-running
+          # the workflow for an already-processed tag).
+          if git diff --cached --quiet; then
+            echo "No changes to CHANGELOG.md"
+          else
+            git commit -m "docs: update CHANGELOG.md for ${{ steps.version.outputs.tag }}"
+            git tag ${{ steps.version.outputs.tag }}
+            git push origin main --tags
+          fi
