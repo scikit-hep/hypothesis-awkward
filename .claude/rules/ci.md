@@ -40,11 +40,24 @@ The `[all]` extra only runs with `default` deps (excluded from `latest`/`min`).
 | `latest`  | Installs package, then overwrites with `latest/requirements.txt`  |
 | `min`     | Installs package, then downgrades with `minimum/requirements.txt` |
 
-## Release Workflows
+## Release Workflows (Two-Tag Pipeline)
 
-Two workflows triggered by pushing a `v*.*.*` tag:
+Releases use a `u`/`v` two-tag flow to work around the `GITHUB_TOKEN`
+limitation that prevents one workflow from triggering another via tag push:
 
-- **`pypi.yml`** — Builds with `hatch build`, publishes to PyPI via trusted
-  publishing.
-- **`release.yml`** — Creates a GitHub Release with auto-generated notes and
-  updates a `latest` tag.
+1. **`hatch version <rule>`** — bumps the version, commits, and creates a
+   `u<version>` tag (configured via `tag_name` in `pyproject.toml`).
+2. **`changelog.yml`** — triggered by the `u*.*.*` tag push. Generates
+   `CHANGELOG.md` with git-cliff, commits the result, creates the
+   corresponding `v<version>` tag, and pushes both to `main`.
+3. **`release.yml`** — triggered by `workflow_run` on the changelog workflow.
+   Creates a GitHub Release with auto-generated notes and updates a `latest`
+   tag.
+4. **`pypi.yml`** — triggered by `workflow_run` on the changelog workflow.
+   Builds with `hatch build` and publishes to PyPI via trusted publishing.
+
+### PR Workflows
+
+- **`pr-title.yml`** — Validates PR titles follow Conventional Commits format.
+- **`conventional-label.yml`** — Auto-labels PRs based on the commit type in
+  the title (e.g., `feat:` -> `feature` label).
