@@ -21,6 +21,9 @@ body = """
 {% endfor %}
 """
 trim = true
+postprocessors = [
+  { pattern = '\n$', replace = "\n\n" },
+]
 
 [git]
 conventional_commits = true
