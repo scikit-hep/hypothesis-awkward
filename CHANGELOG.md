@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 
 - Switch changelog generation to prepend mode ([#11](https://github.com/scikit-hep/hypothesis-awkward/pull/11)) ([f6d1b31](https://github.com/scikit-hep/hypothesis-awkward/commit/f6d1b31fa263ff8efe906a4fc0d40f2dca53b64c))
 - Bump pandas from 3.0.0 to 3.0.1 in /.github/deps/latest ([#8](https://github.com/scikit-hep/hypothesis-awkward/pull/8)) ([2449969](https://github.com/scikit-hep/hypothesis-awkward/commit/244996988f0ae44b50a1581d47d2a2188377b4b2))
+
 ## [0.7.0] - 2026-03-03
 
 ### Build & CI
