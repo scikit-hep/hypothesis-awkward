@@ -8,17 +8,23 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    commit-message:
+      prefix: "build"
 
   # For `.github/deps/latest/requirements.txt`, used in GitHub Actions
   - package-ecosystem: "pip"
     directory: "/.github/deps/latest"
     schedule:
       interval: "daily"
+    commit-message:
+      prefix: "build"
 
   # Note: `.github/deps/minimum/requirements.txt` is not updated by Dependabot.
 
-  #
+  # For GitHub Actions versions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
+    commit-message:
+      prefix: "ci"
