@@ -72,6 +72,16 @@ doctest support for examples in docstrings and markdown files.
 Design research, API specs, and implementation notes are in `.design/`.
 See `.design/README.md` for the index.
 
+## Conventional Commits and Releases
+
+PR titles must follow [Conventional Commits](https://www.conventionalcommits.org/)
+format (e.g., `feat: add new feature`). Scopes are not used. See
+`CONTRIBUTING.md` for allowed types.
+
+Releases use a two-tag (`u`/`v`) pipeline. Run `hatch version <rule>` to bump
+the version and create a `u`-prefixed tag, then push. CI generates the
+changelog, creates the `v` tag, and publishes the release and package.
+
 ## Code Style
 
 - Use NumPy-style docstrings with single quotes (`'''`).

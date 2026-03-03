@@ -1,17 +1,21 @@
 name: Upload to PyPI
 
+# Publish to PyPI after the "Generate changelog" workflow succeeds.
+# This is part of the two-tag release flow (see changelog.yml).
+
 on:
-  # release:
-  #   types: [created]
-  push:
-    tags:
-      - 'v*.*.*'
+  workflow_run:
+    workflows: ["Generate changelog"]
+    types: [completed]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
     environment: pypi
     permissions:
       id-token: write
+
     steps:
       - uses: actions/checkout@v6
         with:

@@ -46,6 +46,7 @@ print = ["rich>=14.2", "icecream>=2.1"]
 [tool.hatch.version]
 source = "regex_commit"
 path = "src/hypothesis_awkward/__about__.py"
+tag_name = "u{new_version}"
 check_dirty = false
 tag_sign = false
 
