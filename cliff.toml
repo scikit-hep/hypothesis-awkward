@@ -13,13 +13,15 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
   ### {{ group | striptags | trim | upper_first }}
   {% for commit in commits %}
-    - {% if commit.scope %}**{{ commit.scope }}**: {% endif %}{{ commit.message | upper_first }} \
-      {% if commit.remote.pr_number %}([#{{ commit.remote.pr_number }}](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/pull/{{ commit.remote.pr_number }})) {% endif %}\
-      ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }}))\
+    - {% if commit.scope %}**{{ commit.scope }}**: {% endif %}\
+      {{ commit.message | replace_regex(from="\\s*\\(\\S*#\\d+\\)", to="") | upper_first }}\
+      {%- for link in commit.links %} ([{{ link.text }}]({{ link.href }})){% endfor %}\
       {%- if commit.breaking %} **BREAKING**{% endif -%}
   {% endfor %}
 {% endfor %}
 """
+output = "CHANGELOG.md"
+prepend = true
 trim = true
 postprocessors = [
   { pattern = '\n$', replace = "\n\n" },
@@ -30,8 +32,8 @@ conventional_commits = true
 filter_unconventional = true
 split_commits = false
 tag_pattern = "v[0-9].*"
-commit_preprocessors = [
-  { pattern = '\s*\((\w+\s)?#([0-9]+)\)', replace = "" },
+link_parsers = [
+  { pattern = "#(\\d+)", href = "https://github.com/scikit-hep/hypothesis-awkward/pull/$1" },
 ]
 commit_parsers = [
   { message = "^docs: update CHANGELOG", skip = true },

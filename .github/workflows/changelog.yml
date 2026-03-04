@@ -45,9 +45,7 @@ jobs:
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
         with:
-          args: --verbose --tag ${{ steps.version.outputs.tag }} --unreleased --prepend CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          args: --verbose --tag ${{ steps.version.outputs.tag }} --unreleased
 
       - name: Commit, tag, and push
         run: |
