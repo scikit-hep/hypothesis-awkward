@@ -20,8 +20,6 @@ body = """
   {% endfor %}
 {% endfor %}
 """
-output = "CHANGELOG.md"
-prepend = true
 trim = true
 postprocessors = [
   { pattern = '\n$', replace = "\n\n" },

@@ -45,7 +45,7 @@ jobs:
       - name: Generate changelog
         uses: orhun/git-cliff-action@v4
         with:
-          args: --verbose --tag ${{ steps.version.outputs.tag }} --unreleased
+          args: --verbose --tag ${{ steps.version.outputs.tag }} --unreleased --prepend CHANGELOG.md
 
       - name: Commit, tag, and push
         run: |
