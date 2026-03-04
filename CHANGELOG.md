@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [0.7.3] - 2026-03-04
+
+### Bug Fixes
+
+- Restore --prepend arg and add v0.7.2 changelog ([#15](https://github.com/scikit-hep/hypothesis-awkward/pull/15))
+
 ## [0.7.2] - 2026-03-04
 
 ### Bug Fixes
