@@ -6,19 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
-- Clean up historical CHANGELOG.md entries ([#12](https://github.com/scikit-hep/hypothesis-awkward/pull/12)) ([c3d9a01](https://github.com/scikit-hep/hypothesis-awkward/commit/c3d9a012dfbcd97e5bb0eaf0e70ea6dff07c3c50))
+- Clean up historical CHANGELOG.md entries ([#12](https://github.com/scikit-hep/hypothesis-awkward/pull/12))
 
 ### Build & CI
 
-- Switch changelog generation to prepend mode ([#11](https://github.com/scikit-hep/hypothesis-awkward/pull/11)) ([f6d1b31](https://github.com/scikit-hep/hypothesis-awkward/commit/f6d1b31fa263ff8efe906a4fc0d40f2dca53b64c))
-- Bump pandas from 3.0.0 to 3.0.1 in /.github/deps/latest ([#8](https://github.com/scikit-hep/hypothesis-awkward/pull/8)) ([2449969](https://github.com/scikit-hep/hypothesis-awkward/commit/244996988f0ae44b50a1581d47d2a2188377b4b2))
+- Switch changelog generation to prepend mode ([#11](https://github.com/scikit-hep/hypothesis-awkward/pull/11))
+- Bump pandas from 3.0.0 to 3.0.1 in /.github/deps/latest ([#8](https://github.com/scikit-hep/hypothesis-awkward/pull/8))
 
 ## [0.7.0] - 2026-03-03
 
 ### Build & CI
 
-- Add automated changelog and release workflows ([#9](https://github.com/scikit-hep/hypothesis-awkward/pull/9)) ([5bd691b](https://github.com/scikit-hep/hypothesis-awkward/commit/5bd691b7a624a65ff1c4fb7453843b6a1c9ac73a))
-- Add conventional commit prefixes to Dependabot PR titles ([#10](https://github.com/scikit-hep/hypothesis-awkward/pull/10)) ([45ea7b0](https://github.com/scikit-hep/hypothesis-awkward/commit/45ea7b05d9dd6c40043e3a892935891fa7303f73))
+- Add automated changelog and release workflows ([#9](https://github.com/scikit-hep/hypothesis-awkward/pull/9))
+- Add conventional commit prefixes to Dependabot PR titles ([#10](https://github.com/scikit-hep/hypothesis-awkward/pull/10))
 
 ### Pre-Conventional Changes
 
