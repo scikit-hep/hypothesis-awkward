@@ -18,9 +18,6 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
       # workflow_run events don't set GITHUB_REF to the tag; the trigger tag
       # is available via head_branch instead. Transform u1.2.3 → v1.2.3.
       - name: Determine version tag
@@ -29,6 +26,11 @@ jobs:
           echo "tag=v${GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH#u}" >> "$GITHUB_OUTPUT"
         env:
           GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.version.outputs.tag }}
 
       - name: Create GitHub Release
         env:
