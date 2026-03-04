@@ -2,13 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-
 ## [0.7.4] - 2026-03-04
 
 ### Bug Fixes
 
-- Check out v-tag in release and PyPI workflows ([#16](https://github.com/scikit-hep/hypothesis-awkward/pull/16)) ([#16](https://github.com/scikit-hep/hypothesis-awkward/pull/16))
-
+- Check out v-tag in release and PyPI workflows ([#16](https://github.com/scikit-hep/hypothesis-awkward/pull/16))
 
 ## [0.7.3] - 2026-03-04
 
