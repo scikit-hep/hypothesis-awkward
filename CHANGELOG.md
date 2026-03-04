@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.2] - 2026-03-04
+
+### Bug Fixes
+
+- Add missing blank line between versions in changelog ([#13](https://github.com/scikit-hep/hypothesis-awkward/pull/13))
+
+### Refactoring
+
+- Simplify changelog generation config ([#14](https://github.com/scikit-hep/hypothesis-awkward/pull/14))
+
 ## [0.7.1] - 2026-03-03
 
 ### Documentation
