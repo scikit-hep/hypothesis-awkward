@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [0.7.5] - 2026-03-04
+
+### Bug Fixes
+
+- Restrict changelog link parser to commit subject line ([#17](https://github.com/scikit-hep/hypothesis-awkward/pull/17))
+
 ## [0.7.4] - 2026-03-04
 
 ### Bug Fixes
