@@ -31,7 +31,7 @@ filter_unconventional = true
 split_commits = false
 tag_pattern = "v[0-9].*"
 link_parsers = [
-  { pattern = "#(\\d+)", href = "https://github.com/scikit-hep/hypothesis-awkward/pull/$1" },
+  { pattern = "^[^\\n]*\\(#(\\d+)\\)[ \\t]*(?:\\n|$)", href = "https://github.com/scikit-hep/hypothesis-awkward/pull/$1", text = "#$1" },
 ]
 commit_parsers = [
   { message = "^docs: update CHANGELOG", skip = true },
