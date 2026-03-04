@@ -17,9 +17,17 @@ jobs:
       id-token: write
 
     steps:
+      - name: Determine version tag
+        id: version
+        run: |
+          echo "tag=v${GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH#u}" >> "$GITHUB_OUTPUT"
+        env:
+          GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ steps.version.outputs.tag }}
 
       - name: Set up Python
         uses: actions/setup-python@v6
