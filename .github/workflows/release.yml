@@ -18,25 +18,17 @@ jobs:
       contents: write
 
     steps:
-      # workflow_run events don't set GITHUB_REF to the tag; the trigger tag
-      # is available via head_branch instead. Transform u1.2.3 → v1.2.3.
-      - name: Determine version tag
+      - name: Checkout release tag
         id: version
-        run: |
-          echo "tag=v${GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH#u}" >> "$GITHUB_OUTPUT"
-        env:
-          GITHUB_EVENT_WORKFLOW_RUN_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-
-      - name: Checkout
-        uses: actions/checkout@v6
+        uses: TaiSakuma/checkout-version-tag@v1
         with:
-          ref: ${{ steps.version.outputs.tag }}
+          trigger-tag: ${{ github.event.workflow_run.head_branch }}
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ steps.version.outputs.tag }} \
+          gh release create ${{ steps.version.outputs.release-tag }} \
             --generate-notes
 
       # Maintain a rolling `latest` tag so users can always reference the
