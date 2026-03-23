@@ -1,15 +1,22 @@
+'''Strategies for Contents (layouts).
+
+These strategies are related to the section of Awkward Array User Guide ["Direct
+constructors"][ak-user-guide-constructors].
+
+[ak-user-guide-constructors]: https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
+'''
 __all__ = [
-    'bytestring_contents',
-    'content_lists',
     'contents',
-    'empty_array_contents',
+    'content_lists',
     'leaf_contents',
+    'empty_array_contents',
+    'numpy_array_contents',
+    'regular_array_contents',
     'list_array_contents',
     'list_offset_array_contents',
-    'numpy_array_contents',
-    'record_array_contents',
-    'regular_array_contents',
     'string_contents',
+    'bytestring_contents',
+    'record_array_contents',
     'union_array_contents',
 ]
 
