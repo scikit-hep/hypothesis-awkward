@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.8.0] - 2026-03-23
+
+### Documentation
+
+- Add zensical docs setup ([#20](https://github.com/scikit-hep/hypothesis-awkward/pull/20))
+- Improve docs pages, module docstrings, and README ([#22](https://github.com/scikit-hep/hypothesis-awkward/pull/22))
+
+### Build & CI
+
+- Use reusable actions in CI workflows ([#18](https://github.com/scikit-hep/hypothesis-awkward/pull/18))
+- Pin hypothesis in CI deps and drop dev group version bounds ([#19](https://github.com/scikit-hep/hypothesis-awkward/pull/19))
+- Add docs build and deploy workflows ([#21](https://github.com/scikit-hep/hypothesis-awkward/pull/21))
+
+
 ## [0.7.5] - 2026-03-04
 
 ### Bug Fixes
