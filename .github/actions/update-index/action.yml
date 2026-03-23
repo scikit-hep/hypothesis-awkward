@@ -1,0 +1,32 @@
+name: Update index.html
+description: Regenerate index.html, commit and push
+
+inputs:
+  repo-name:
+    description: Repository name for the index page title
+    required: true
+  repo-url:
+    description: Repository URL for the GitHub link
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Create a worktree for gh-pages.
+    - shell: bash
+      run: git worktree add /tmp/gh-pages gh-pages
+
+    # Generate index.html, commit, and push.
+    - shell: bash
+      run: |
+        cd /tmp/gh-pages
+        python "${{ github.action_path }}/generate_index.py" \
+          "${{ inputs.repo-name }}" \
+          "${{ inputs.repo-url }}"
+        git add index.html
+        git diff --cached --quiet || git commit -m "Update index.html"
+        git push origin gh-pages
+
+    # Clean up the worktree.
+    - shell: bash
+      run: git worktree remove /tmp/gh-pages

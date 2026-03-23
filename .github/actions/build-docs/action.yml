@@ -1,0 +1,32 @@
+name: Build docs
+description: Build docs with site_url overridden for subdirectory deployment
+
+inputs:
+  subdir:
+    description: Subdirectory to deploy to (e.g., dev, 1.0.0, pr/3)
+    required: true
+  site-dir:
+    description: Output directory for the built site
+    default: /tmp/built-site
+
+outputs:
+  site-dir:
+    description: Path to the built site
+    value: ${{ inputs.site-dir }}
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        # Update the site url.
+        uv run --group docs python "${{ github.action_path }}/override_site_url.py" "${{ inputs.subdir }}"
+
+        # Build the docs.
+        uv run --group docs zensical build --clean
+
+        # Move the docs to the output directory.
+        mv site "${{ inputs.site-dir }}"
+
+        # Leave the working directory clean for the next action.
+        git checkout -- .

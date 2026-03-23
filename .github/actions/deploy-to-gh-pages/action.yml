@@ -1,0 +1,53 @@
+name: Deploy to gh-pages
+description: Deploy built docs to a subdirectory on gh-pages
+
+inputs:
+  site-dir:
+    description: Path to the built site
+    required: true
+  target:
+    description: Subdirectory to deploy to
+    required: true
+  commit-message:
+    description: Commit message
+    required: true
+
+outputs:
+  url:
+    description: Default GitHub Pages URL for the deployed subdirectory
+    value: ${{ steps.url.outputs.url }}
+
+runs:
+  using: composite
+  steps:
+    # Create a worktree for gh-pages.
+    - shell: bash
+      run: |
+        git fetch origin gh-pages 2>/dev/null || true
+        if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+          git worktree add /tmp/gh-pages gh-pages
+        else
+          git worktree add --orphan -b gh-pages /tmp/gh-pages
+        fi
+
+    # Copy the built site into the target subdirectory, commit, and push.
+    - shell: bash
+      run: |
+        cd /tmp/gh-pages
+        TARGET="${{ inputs.target }}"
+        rm -rf "$TARGET"
+        mkdir -p "$(dirname "$TARGET")"
+        cp -r "${{ inputs.site-dir }}" "$TARGET"
+        touch .nojekyll
+        git add .nojekyll "$TARGET"
+        git diff --cached --quiet || git commit -m "${{ inputs.commit-message }}"
+        git push origin gh-pages
+
+    # Clean up the worktree.
+    - shell: bash
+      run: git worktree remove /tmp/gh-pages
+
+    # Output the default GitHub Pages URL for the deployed subdirectory.
+    - id: url
+      shell: bash
+      run: echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/${{ inputs.target }}/" >> "$GITHUB_OUTPUT"
