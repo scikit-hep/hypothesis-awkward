@@ -88,6 +88,9 @@ docstring_style = "auto"
 members_order = ["__all__", "source"]
 summary = { modules = false, functions = true, classes = true, attributes = true, type_aliases = true }
 show_source = false
+separate_signature = true
+show_signature_annotations = true
+
 
 [project.plugins.mkdocstrings.handlers.python.options.docstring_options]
 method = "heuristics"
