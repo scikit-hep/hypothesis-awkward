@@ -1,0 +1,42 @@
+name: Deploy dev docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+
+      - uses: ./.github/actions/build-docs
+        id: build
+        with:
+          subdir: dev
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - uses: ./.github/actions/deploy-to-gh-pages
+        with:
+          site-dir: ${{ steps.build.outputs.site-dir }}
+          target: dev
+          commit-message: Deploy dev docs
+
+      - uses: ./.github/actions/update-index
+        with:
+          repo-name: ${{ github.event.repository.name }}
+          repo-url: ${{ github.event.repository.html_url }}

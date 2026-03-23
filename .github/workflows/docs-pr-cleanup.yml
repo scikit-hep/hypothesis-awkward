@@ -1,0 +1,39 @@
+name: Remove docs preview
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Remove PR preview
+        run: |
+          git fetch origin gh-pages 2>/dev/null || true
+          if ! git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
+            echo "gh-pages branch does not exist, nothing to clean up"
+            exit 0
+          fi
+          git checkout -B gh-pages origin/gh-pages
+          if [ ! -d "pr/${{ github.event.number }}" ]; then
+            echo "No preview directory found for PR #${{ github.event.number }}"
+            exit 0
+          fi
+          git rm -rf "pr/${{ github.event.number }}"
+          git commit -m "Remove PR #${{ github.event.number }} preview"
+          git push origin gh-pages
