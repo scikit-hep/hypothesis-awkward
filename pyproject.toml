@@ -41,6 +41,7 @@ all = ["hypothesis-awkward[pandas,arrow]"]
 
 [dependency-groups]
 dev = ["mypy", "pytest", "pytest-cov", "ruff"]
+docs = ["mkdocstrings-python", "zensical", "tomlkit"]
 print = ["rich", "icecream"]
 
 [tool.hatch.version]
