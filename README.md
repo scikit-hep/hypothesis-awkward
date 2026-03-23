@@ -44,7 +44,7 @@ tools that use Awkward Array, and Awkward Array itself.
 [xarray]: https://xarray.dev/
 [xarray-st]: https://docs.xarray.dev/en/stable/user-guide/testing.html#hypothesis-testing
 [pyarrow-st]: https://github.com/apache/arrow/blob/apache-arrow-22.0.0/python/pyarrow/tests/strategies.py
-[hypothesis-awkward]: https://github.com/TaiSakuma/hypothesis-awkward
+[hypothesis-awkward]: https://github.com/scikit-hep/hypothesis-awkward
 [awkward-array]: https://awkward-array.org/
 
 > [!NOTE]
@@ -114,77 +114,20 @@ and bytestring as leaf contents that can be nested multiple levels deep in
 `RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and
 `UnionArray`. Arrays might be virtual, shown as `??` in the output.
 
-### The API of `arrays()`
+### The options of `arrays()`
 
-```python
-def arrays(
-    *,
-    dtypes: st.SearchStrategy[np.dtype] | None = None,
-    max_size: int = 10,
-    allow_nan: bool = False,
-    allow_numpy: bool = True,
-    allow_empty: bool = True,
-    allow_string: bool = True,
-    allow_bytestring: bool = True,
-    allow_regular: bool = True,
-    allow_list_offset: bool = True,
-    allow_list: bool = True,
-    allow_record: bool = True,
-    allow_union: bool = True,
-    max_depth: int = 5,
-    max_length: int | None = None,
-    allow_virtual: bool = True,
-):
-```
+The strategy `arrays()` has many options to control the output arrays.
+You can find all options in the API reference:
 
-| Parameter | Description |
-| --- | --- |
-| `dtypes` | A strategy for NumPy scalar dtypes used in `NumpyArray`. If `None`, the default strategy that generates any scalar dtype supported by Awkward Array is used. Does not affect string or bytestring content. |
-| `max_size` | Maximum total number of elements in the generated array. Each numerical value counts as one. Each string and bytestring (not character or byte) counts as one. |
-| `allow_nan` | No `NaN`/`NaT` values are generated if `False`. |
-| `allow_numpy` | No `NumpyArray` is generated if `False`. |
-| `allow_empty` | No `EmptyArray` is generated if `False`. |
-| `allow_string` | No string content is generated if `False`. Each string (not character) counts toward `max_size`. String layers do not count toward `max_depth`. Unaffected by `dtypes` and `allow_nan`. |
-| `allow_bytestring` | No bytestring content is generated if `False`. Each bytestring (not byte) counts toward `max_size`. Bytestring layers do not count toward `max_depth`. Unaffected by `dtypes` and `allow_nan`. |
-| `allow_regular` | No `RegularArray` is generated if `False`. |
-| `allow_list_offset` | No `ListOffsetArray` is generated if `False`. |
-| `allow_list` | No `ListArray` is generated if `False`. |
-| `allow_record` | No `RecordArray` is generated if `False`. |
-| `allow_union` | No `UnionArray` is generated if `False`. |
-| `max_depth` | Maximum nesting depth. Each `RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and `UnionArray` layer adds one level, excluding those that form string or bytestring content. |
-| `max_length` | Maximum `len()` of the generated array. No constraint when `None` (the default). |
-| `allow_virtual` | No virtual arrays are generated if `False`. |
+- [**API reference: `arrays()`**][api-ref-arrays]
+
+[api-ref-arrays]: https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/constructors/
 
 ## Other strategies
 
-In addition to `arrays()` mentioned above, this package includes other
-strategies that generate Awkward Arrays and related data types.
+In addition to `arrays()`, this package includes other strategies that generate
+Awkward Arrays and related data types, which can be found in the API reference:
 
-### NumPy
+- [**API reference**][api-ref]
 
-These strategies are related to the section of Awkward Array User Guide ["How to
-convert to/from NumPy"][ak-user-guide-numpy].
-
-| Strategy                | Data type                                                      |
-| ----------------------- | -------------------------------------------------------------- |
-| `from_numpy`            | Awkward Arrays created from NumPy arrays                       |
-| `numpy_arrays`          | NumPy arrays that can be converted to Awkward Array            |
-| `numpy_dtypes`          | NumPy dtypes (simple or array) supported by Awkward Array      |
-| `supported_dtypes`      | NumPy dtypes (simple only) supported by Awkward Array          |
-| `supported_dtype_names` | Names of NumPy dtypes (simple only) supported by Awkward Array |
-
-### Python lists
-
-These strategies are related to the section of Awkward Array User Guide ["How to
-convert to/from Python objects"][ak-user-guide-python].
-
-| Strategy                   | Data type                                                      |
-| -------------------------- | -------------------------------------------------------------- |
-| `from_list`                | Awkward Arrays created from Python lists                       |
-| `lists`                    | Nested Python lists for which Awkward Arrays can be created    |
-| `items_from_dtype`         | Python built-in type values for a given NumPy dtype            |
-| `builtin_safe_dtypes`      | NumPy dtypes with corresponding Python built-in types          |
-| `builtin_safe_dtype_names` | Names of NumPy dtypes with corresponding Python built-in types |
-
-[ak-user-guide-numpy]: https://awkward-array.org/doc/2.8/user-guide/how-to-convert-numpy.html
-[ak-user-guide-python]: https://awkward-array.org/doc/2.8/user-guide/how-to-convert-python.html
+[api-ref]: https://scikit-hep.github.io/hypothesis-awkward/dev/

@@ -14,7 +14,7 @@ nav = [
     ] },
 ]
 # extra_css = ["stylesheets/extra.css"]
-# extra_javascript = ["javascripts/extra.js"]
+extra_javascript = ["javascripts/extra.js"]
 
 [project.theme]
 # variant = "classic"
@@ -85,8 +85,12 @@ paths = ["src"]
 
 [project.plugins.mkdocstrings.handlers.python.options]
 docstring_style = "auto"
-inherited_members = true
+members_order = ["__all__", "source"]
+summary = { modules = false, functions = true, classes = true, attributes = true, type_aliases = true }
 show_source = false
+separate_signature = true
+show_signature_annotations = true
+
 
 [project.plugins.mkdocstrings.handlers.python.options.docstring_options]
 method = "heuristics"
