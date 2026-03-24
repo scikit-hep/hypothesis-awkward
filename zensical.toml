@@ -79,6 +79,10 @@ toggle.name = "Switch to system preference"
 icon = "fontawesome/brands/github"
 link = "https://github.com/scikit-hep/hypothesis-awkward"
 
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/hypothesis-awkward/"
+
 [project.plugins.mkdocstrings.handlers.python]
 inventories = ["https://docs.python.org/3/objects.inv"]
 paths = ["src"]
