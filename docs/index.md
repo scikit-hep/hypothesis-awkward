@@ -1,5 +1,11 @@
 # API Reference for hypothesis-awkward
 
+[hypothesis-awkward] is a collection of Hypothesis strategies for [Awkward
+Array][awkward-array]. This doc is its API reference.
+
+[hypothesis-awkward]: https://github.com/scikit-hep/hypothesis-awkward
+[awkward-array]: https://awkward-array.org/
+
 **Modules:**
 
 | Name           | Description                                                             |
