@@ -13,7 +13,7 @@ nav = [
         { "Builtins" = "strategies/builtins.md" },
     ] },
 ]
-# extra_css = ["stylesheets/extra.css"]
+extra_css = ["stylesheets/extra.css"]
 extra_javascript = ["javascripts/extra.js"]
 
 [project.theme]
@@ -78,6 +78,10 @@ toggle.name = "Switch to system preference"
 [[project.extra.social]]
 icon = "fontawesome/brands/github"
 link = "https://github.com/scikit-hep/hypothesis-awkward"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/python"
+link = "https://pypi.org/project/hypothesis-awkward/"
 
 [project.plugins.mkdocstrings.handlers.python]
 inventories = ["https://docs.python.org/3/objects.inv"]

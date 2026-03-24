@@ -7,11 +7,11 @@ to/from NumPy"][ak-user-guide-numpy].
 '''
 
 __all__ = [
-    'numpy_dtypes',
     'supported_dtype_names',
     'supported_dtypes',
-    'from_numpy',
+    'numpy_dtypes',
     'numpy_arrays',
+    'from_numpy',
 ]
 
 from .dtype import numpy_dtypes, supported_dtype_names, supported_dtypes
