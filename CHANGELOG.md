@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.8.1] - 2026-03-24
+
+### Documentation
+
+- Improve styling, footer, and page content ([#26](https://github.com/scikit-hep/hypothesis-awkward/pull/26))
+
+### Build & CI
+
+- Bump actions/download-artifact from 4 to 8 ([#25](https://github.com/scikit-hep/hypothesis-awkward/pull/25))
+- Bump actions/github-script from 7 to 8 ([#24](https://github.com/scikit-hep/hypothesis-awkward/pull/24))
+- Bump actions/upload-artifact from 4 to 7 ([#23](https://github.com/scikit-hep/hypothesis-awkward/pull/23))
+
+
 ## [0.8.0] - 2026-03-23
 
 ### Documentation
