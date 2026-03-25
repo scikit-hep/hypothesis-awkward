@@ -47,11 +47,6 @@ tools that use Awkward Array, and Awkward Array itself.
 [hypothesis-awkward]: https://github.com/scikit-hep/hypothesis-awkward
 [awkward-array]: https://awkward-array.org/
 
-> [!NOTE]
->
-> This package is early work in progress and still experimental. The APIs may
-> change over time.
-
 ## Installation
 
 You can install the package from PyPI using pip:
@@ -65,9 +60,8 @@ already installed.
 
 ## The strategy `arrays()`
 
-The function `arrays()` is the main strategy. It is currently experimental and
-developed in `strategies/constructors/`. The plan is to have `arrays()` generate
-fully general Awkward Arrays with many options to control the output arrays.
+The function `arrays()` is the main strategy. It generates Awkward Arrays with
+many options to control the output arrays.
 
 ### Sample outputs of `arrays()`
 
