@@ -36,11 +36,21 @@ type: description
 
 Individual commit messages within a PR are free-form. Only the PR title is enforced.
 
-## Releasing
+## For Maintainers
+
+### Direct Commits to Main
+
+Use the `meta:` type for commits pushed directly to main that should not appear
+in the changelog or release notes, such as changes to:
+
+- `.claude/` (Claude Code configuration)
+- `.design/` (design documents)
+
+### Releasing
 
 Releases use a two-tag flow. The `u` tag triggers changelog generation, which in turn creates the `v` tag and GitHub Release.
 
-### Steps
+#### Steps
 
 1. **Bump the version:**
 
@@ -53,7 +63,7 @@ Releases use a two-tag flow. The `u` tag triggers changelog generation, which in
 2. **Push the commit and tag:**
 
    ```bash
-   git push origin main --tags
+   git push --follow-tags
    ```
 
 3. **Wait for CI:**
