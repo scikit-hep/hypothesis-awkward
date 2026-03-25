@@ -2,13 +2,15 @@
 
 _Hypothesis strategies for Awkward Arrays._
 
-[![pypi-badge]][pypi] [![pypi-python-badge]][pypi]
+[![pypi-badge]][pypi] [![pypi-python-badge]][pypi] [![conda-forge-badge]][conda-forge]
 
 [![test-badge]][test] [![codecov-badge]][codecov]
 
 [pypi-badge]: https://img.shields.io/pypi/v/hypothesis-awkward.svg
 [pypi-python-badge]: https://img.shields.io/pypi/pyversions/hypothesis-awkward.svg
 [pypi]: https://pypi.org/project/hypothesis-awkward
+[conda-forge-badge]: https://img.shields.io/conda/vn/conda-forge/hypothesis-awkward.svg
+[conda-forge]: https://anaconda.org/conda-forge/hypothesis-awkward
 [test-badge]: https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
 [test]: https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml
 [codecov-badge]: https://codecov.io/gh/scikit-hep/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3
