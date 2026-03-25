@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.9.0] - 2026-03-25
+
+### Features
+
+- Update development status from Alpha to Beta ([#27](https://github.com/scikit-hep/hypothesis-awkward/pull/27))
+
+
 ## [0.8.1] - 2026-03-24
 
 ### Documentation
