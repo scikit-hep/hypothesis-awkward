@@ -41,7 +41,10 @@ Individual commit messages within a PR are free-form. Only the PR title is enfor
 ### Direct Commits to Main
 
 Use the `meta:` type for commits pushed directly to main that should not appear
-in the changelog or release notes (e.g., internal tooling configuration).
+in the changelog or release notes, such as changes to:
+
+- `.claude/` (Claude Code configuration)
+- `.design/` (design documents)
 
 ### Releasing
 
