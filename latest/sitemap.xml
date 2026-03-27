@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.9.0/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.10.0/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.9.0/strategies/constructors/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.10.0/strategies/constructors/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.9.0/strategies/contents/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.10.0/strategies/contents/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.9.0/strategies/numpy/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.10.0/strategies/numpy/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.9.0/strategies/builtins/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/0.10.0/strategies/builtins/</loc>
       </url>
 </urlset>
