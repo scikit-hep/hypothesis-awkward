@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.10.0] - 2026-03-27
+
+### Features
+
+- Change allow_nan default from False to True ([#34](https://github.com/scikit-hep/hypothesis-awkward/pull/34))
+
+### Bug Fixes
+
+- Add assert for dtype.names narrowing in structured dtype branches ([#32](https://github.com/scikit-hep/hypothesis-awkward/pull/32))
+
+### Documentation
+
+- Add maintainer section and document meta commit type ([#28](https://github.com/scikit-hep/hypothesis-awkward/pull/28))
+- Add conda-forge badge to README ([#29](https://github.com/scikit-hep/hypothesis-awkward/pull/29))
+
+### Build & CI
+
+- Bump codecov/codecov-action from 5 to 6 ([#30](https://github.com/scikit-hep/hypothesis-awkward/pull/30))
+- Add pre-commit with ruff hooks ([#31](https://github.com/scikit-hep/hypothesis-awkward/pull/31))
+- Replace dprint with prettier for markdown formatting ([#33](https://github.com/scikit-hep/hypothesis-awkward/pull/33))
+
+### Meta
+
+- Add worktree rules for Claude Code
+- Remove personal rules from shared .claude/
+
+
 ## [0.9.0] - 2026-03-25
 
 ### Features
