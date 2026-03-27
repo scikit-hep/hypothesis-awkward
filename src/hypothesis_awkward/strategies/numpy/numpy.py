@@ -19,7 +19,7 @@ def numpy_arrays(
     *,
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
     allow_structured: bool = True,
-    allow_nan: bool = False,
+    allow_nan: bool = True,
     min_dims: int = 1,
     max_dims: int | None = None,
     min_size: int = 0,
@@ -163,7 +163,7 @@ def from_numpy(
     *,
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
     allow_structured: bool = True,
-    allow_nan: bool = False,
+    allow_nan: bool = True,
     regulararray: bool | None = None,
     max_size: int = 10,
 ) -> st.SearchStrategy[ak.Array]:

@@ -71,7 +71,7 @@ def test_from_numpy(data: st.DataObject) -> None:
     # Assert the options were effective
     dtype = opts.kwargs.get('dtype', None)
     allow_structured = opts.kwargs.get('allow_structured', True)
-    allow_nan = opts.kwargs.get('allow_nan', False)
+    allow_nan = opts.kwargs.get('allow_nan', True)
     regulararray = opts.kwargs.get('regulararray', None)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
 

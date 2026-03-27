@@ -15,7 +15,7 @@ def lists(
     draw: st.DrawFn,
     *,
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
-    allow_nan: bool = False,
+    allow_nan: bool = True,
     max_size: int = 10,
 ) -> NestedList:
     '''Strategy for nested Python lists for which Awkward Arrays can be created.
@@ -55,7 +55,7 @@ def lists(
 def from_list(
     *,
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
-    allow_nan: bool = False,
+    allow_nan: bool = True,
     max_size: int = 10,
 ) -> st.SearchStrategy[ak.Array]:
     '''Strategy for Awkward Arrays created from Python lists.

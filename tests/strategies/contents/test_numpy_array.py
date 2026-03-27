@@ -84,7 +84,7 @@ def test_numpy_array_contents(data: st.DataObject) -> None:
 
     # Assert size bounds
     dtypes = opts.kwargs.get('dtypes', None)
-    allow_nan = opts.kwargs.get('allow_nan', False)
+    allow_nan = opts.kwargs.get('allow_nan', True)
     min_size = opts.kwargs.get('min_size', 0)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
 

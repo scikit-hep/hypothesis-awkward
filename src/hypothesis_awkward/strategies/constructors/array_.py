@@ -11,7 +11,7 @@ def arrays(
     *,
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     max_size: int = 10,
-    allow_nan: bool = False,
+    allow_nan: bool = True,
     allow_numpy: bool = True,
     allow_empty: bool = True,
     allow_string: bool = True,

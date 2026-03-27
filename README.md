@@ -96,22 +96,19 @@ For example, this might print:
 
 ```python
 array=<Array [] type='0 * bool'>
-array=<Array [0] type='1 * int16'>
-array=<Array [1.72e-11, -3.4e+38, -3.4e+38, -4.05e+15] type='4 * float32'>
-array=<Array [[], [], [], []] type='4 * var * 2 * timedelta64[W]'>
-array=<Array ['', "e\U00034a9e'"] type='2 * string'>
-array=<Array [[], ['char']] type='2 * var * string'>
+array=<Array [32766, 32766, 32766, 32766, 32766] type='5 * int16'>
+array=<Array [[], [], [], []] type='4 * var * var * unknown'>
+array=<Array ['', ''] type='2 * string'>
 array=<Array [[b'\xd7']] type='1 * var * bytes'>
-array=<Array [[[], []], [[]], [], []] type='5 * var * var * 4 * unknown'>
-array=<Array [] type='0 * unknown'>
-array=<Array [{Rd: []}] type='1 * {Rd: var * datetime64[s]}'>
-array=<Array [(''), (..., ...), ..., (..., ...), ('\U0005f041')] type='6 * (string)'>
-array=<Array [False] type='1 * union[bytes, bool]'>
-array=<Array [36, [b'\x92\xa7\x0b']] type='2 * union[int8, 1 * bytes, unknown]'>
-array=<Array [b'5f\x18\xbc', ..., b'5f\x18\xbc'] type='3 * union[string, bytes]'>
-array=<Array [0, 0, -5.53e+16] type='3 * union[float32, unknown]'>
-array=<Array [??, ??, ??] type='3 * uint32'>
-array=<Array [(??, ??)] type='1 * (bytes, union[timedelta64[M], bytes])'>
+array=<Array [] type='0 * var * {"": bool}'>
+array=<Array [[], []] type='2 * var * (unknown, union[2 * (string, string), bytes])'>
+array=<Array [('\U0003dcd5hE2'), ('¦Ü'), ..., (...), (..., ...)] type='10 * (string)'>
+array=<Array [[NaT], [NaT]] type='2 * 1 * union[(unknown), timedelta64[Y]]'>
+array=<Array [[], [...], [], [], []] type='5 * union[var * unknown, {Nok: unknown...'>
+array=<Array [??, ??, ??, ??, ??, ??] type='6 * bytes'>
+array=<Array [[...], [...], ..., ['ÆÓË\U000913a9\x1fê', 'X']] type='5 * 2 * string'>
+array=<Array [[[??]], [[??]], [[??]]] type='3 * 1 * 1 * var * union[var * bytes, ...'>
+array=<Array [[[[], []], [[]], [], []]]] type='1 * 1 * 3 * var * 1 * var * uint16'>
 array=<Array [??, ??, ??, ??, ??] type='5 * var * var * (uint64, bytes)'>
 ```
 

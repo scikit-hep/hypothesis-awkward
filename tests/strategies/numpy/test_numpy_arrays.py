@@ -86,7 +86,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
     # Assert the options were effective
     dtype = opts.kwargs.get('dtype', None)
     allow_structured = opts.kwargs.get('allow_structured', True)
-    allow_nan = opts.kwargs.get('allow_nan', False)
+    allow_nan = opts.kwargs.get('allow_nan', True)
     min_dims = opts.kwargs.get('min_dims', 1)
     max_dims = opts.kwargs.get('max_dims', None)
     min_size = opts.kwargs.get('min_size', 0)

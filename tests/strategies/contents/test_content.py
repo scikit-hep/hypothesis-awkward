@@ -105,7 +105,7 @@ def test_contents(data: st.DataObject) -> None:
     # Assert the options were effective
     dtypes = opts.kwargs.get('dtypes', None)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    allow_nan = opts.kwargs.get('allow_nan', False)
+    allow_nan = opts.kwargs.get('allow_nan', True)
     allow_regular = opts.kwargs.get('allow_regular', True)
     allow_list_offset = opts.kwargs.get('allow_list_offset', True)
     allow_list = opts.kwargs.get('allow_list', True)
