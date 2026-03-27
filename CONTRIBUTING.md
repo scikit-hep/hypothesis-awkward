@@ -16,7 +16,9 @@ pre-commit install
 
 ## PR Title Convention
 
-This project uses [Conventional Commits](https://www.conventionalcommits.org/) for **PR titles**. Since we squash-merge, the PR title becomes the final commit message.
+This project uses [Conventional Commits](https://www.conventionalcommits.org/)
+for **PR titles**. Since we squash-merge, the PR title becomes the final commit
+message.
 
 ### Format
 
@@ -48,7 +50,8 @@ type: description
 
 ### Individual Commits
 
-Individual commit messages within a PR are free-form. Only the PR title is enforced.
+Individual commit messages within a PR are free-form. Only the PR title is
+enforced.
 
 ## For Maintainers
 
@@ -62,7 +65,8 @@ in the changelog or release notes, such as changes to:
 
 ### Releasing
 
-Releases use a two-tag flow. The `u` tag triggers changelog generation, which in turn creates the `v` tag and GitHub Release.
+Releases use a two-tag flow. The `u` tag triggers changelog generation, which in
+turn creates the `v` tag and GitHub Release.
 
 #### Steps
 
@@ -72,7 +76,9 @@ Releases use a two-tag flow. The `u` tag triggers changelog generation, which in
    hatch version <rule>
    ```
 
-   Where `<rule>` is `patch`, `minor`, or `major`. This updates `src/hypothesis_awkward/__about__.py`, creates a commit, and tags it `u<version>`.
+   Where `<rule>` is `patch`, `minor`, or `major`. This updates
+   `src/hypothesis_awkward/__about__.py`, creates a commit, and tags it
+   `u<version>`.
 
 2. **Push the commit and tag:**
 
@@ -81,6 +87,8 @@ Releases use a two-tag flow. The `u` tag triggers changelog generation, which in
    ```
 
 3. **Wait for CI:**
-   - The **Changelog** workflow generates `CHANGELOG.md`, commits it to `main`, and creates the `v` tag.
-   - The **Release** workflow then creates a GitHub Release with categorized notes.
+   - The **Changelog** workflow generates `CHANGELOG.md`, commits it to `main`,
+     and creates the `v` tag.
+   - The **Release** workflow then creates a GitHub Release with categorized
+     notes.
    - The **PyPI** workflow builds and publishes the package to PyPI.

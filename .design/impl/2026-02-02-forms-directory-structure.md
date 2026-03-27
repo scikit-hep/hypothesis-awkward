@@ -1,8 +1,8 @@
 # Directory Structure: `forms` Module
 
-**Date:** 2026-02-02
-**Status:** Draft
-**Related:** [forms-api.md](./../api/2026-02-02-forms-api.md)
+- **Date:** 2026-02-02
+- **Status:** Draft
+- **Related:** [forms-api.md](./../api/2026-02-02-forms-api.md)
 
 ## Overview
 

@@ -1,8 +1,8 @@
 # Implementation: Top-Down Tree Builder for `contents()`
 
-**Date:** 2026-02-21
-**Status:** Implemented
-**Supersedes:** [Bottom-up tree builder](2026-02-17-contents-tree-builder.md)
+- **Date:** 2026-02-21
+- **Status:** Implemented
+- **Supersedes:** [Bottom-up tree builder](2026-02-17-contents-tree-builder.md)
 
 > **Note (2026-02-22):** The implementation differs from the pseudocode below:
 >
@@ -110,8 +110,8 @@ if node_type == 'union':
         children.append(_build(depth + 1, allow_union=False))
 ```
 
-A child **cannot** be a `UnionArray` because the recursive call excludes it
-from the candidate set.
+A child **cannot** be a `UnionArray` because the recursive call excludes it from
+the candidate set.
 
 ## Pseudocode
 
@@ -207,5 +207,5 @@ def contents(draw, *, ..., allow_union=True) -> Content:
 ## Open Questions
 
 1. **`allow_union` parameter threading** — Only `union` restricts its children.
-   If future node types add constraints, `_build` would need more parameters.
-   A `frozenset` of allowed types could generalize this.
+   If future node types add constraints, `_build` would need more parameters. A
+   `frozenset` of allowed types could generalize this.

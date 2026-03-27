@@ -42,14 +42,14 @@ The `[all]` extra only runs with `default` deps (excluded from `latest`/`min`).
 
 ## Release Workflows (Two-Tag Pipeline)
 
-Releases use a `u`/`v` two-tag flow to work around the `GITHUB_TOKEN`
-limitation that prevents one workflow from triggering another via tag push:
+Releases use a `u`/`v` two-tag flow to work around the `GITHUB_TOKEN` limitation
+that prevents one workflow from triggering another via tag push:
 
 1. **`hatch version <rule>`** — bumps the version, commits, and creates a
    `u<version>` tag (configured via `tag_name` in `pyproject.toml`).
 2. **`changelog.yml`** — triggered by the `u*.*.*` tag push. Generates
-   `CHANGELOG.md` with git-cliff, commits the result, creates the
-   corresponding `v<version>` tag, and pushes both to `main`.
+   `CHANGELOG.md` with git-cliff, commits the result, creates the corresponding
+   `v<version>` tag, and pushes both to `main`.
 3. **`release.yml`** — triggered by `workflow_run` on the changelog workflow.
    Creates a GitHub Release with auto-generated notes and updates a `latest`
    tag.
@@ -59,5 +59,5 @@ limitation that prevents one workflow from triggering another via tag push:
 ### PR Workflows
 
 - **`pr-title.yml`** — Validates PR titles follow Conventional Commits format.
-- **`conventional-label.yml`** — Auto-labels PRs based on the commit type in
-  the title (e.g., `feat:` -> `feature` label).
+- **`conventional-label.yml`** — Auto-labels PRs based on the commit type in the
+  title (e.g., `feat:` -> `feature` label).

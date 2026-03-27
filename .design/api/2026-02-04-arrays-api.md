@@ -1,8 +1,8 @@
 # API Design: `arrays()` Strategy
 
-**Date:** 2026-02-04
-**Status:** Implemented
-**Author:** Claude (with developer collaboration)
+- **Date:** 2026-02-04
+- **Status:** Implemented
+- **Author:** Claude (with developer collaboration)
 
 > **Update (2026-02-22):** Since this document was written:
 >
@@ -30,9 +30,9 @@ From the [UX research](./../research/2026-01-21-ux-interview-01.md),
 [direct constructors research](./../research/2026-02-04-direct-constructors-research.md):
 
 - The ultimate goal is an `arrays()` strategy that generates fully general
-  Awkward Arrays with multiple options to control the layout, data types, missing
-  values, masks, and other array attributes. `type` and `form` parameters are in
-  scope but not mandatory
+  Awkward Arrays with multiple options to control the layout, data types,
+  missing values, masks, and other array attributes. `type` and `form`
+  parameters are in scope but not mandatory
 - Direct constructors produce real arrays in a single step (no roundtrip through
   forms or buffers)
 - Constructor validation catches invalid nesting at construction time
@@ -59,8 +59,8 @@ paths than the canonical representations produced by `from_type()`.
   `arrays()` reuses this work via `numpy_array_contents()`
 - `EmptyArray` is a zero-length placeholder with `UnknownType` -- useful for
   testing edge cases with empty/unknown-typed arrays
-- Starting with leaf node types validates the `arrays()` interface before
-  adding recursive complexity
+- Starting with leaf node types validates the `arrays()` interface before adding
+  recursive complexity
 - Users get immediate value: `arrays()` with no arguments generates flat arrays,
   which is the most common case
 
@@ -68,12 +68,12 @@ paths than the canonical representations produced by `from_type()`.
 
 1. **Incremental extensibility**: Adding new node types must not break the
    existing interface
-2. **Reuse existing strategies**: Build on `numpy_arrays()`, `supported_dtypes()`,
-   etc.
+2. **Reuse existing strategies**: Build on `numpy_arrays()`,
+   `supported_dtypes()`, etc.
 3. **Familiar patterns**: Follow the parameter conventions established by
    `numpy_arrays()`, `types()`, and `numpy_forms()`
-4. **Sensible defaults**: Works well out of the box; generates interesting arrays
-   without configuration
+4. **Sensible defaults**: Works well out of the box; generates interesting
+   arrays without configuration
 5. **Composition with types/forms (future)**: The API should accommodate `type`
    and `form` parameters when those pipelines are connected
 
@@ -173,15 +173,15 @@ Control which structural Content node types are enabled.
 
 - All default to `True`.
 - `allow_regular`: Generate `RegularArray` wrappers (fixed-size lists).
-- `allow_list_offset`: Generate `ListOffsetArray` wrappers (variable-length lists
-  via offsets).
+- `allow_list_offset`: Generate `ListOffsetArray` wrappers (variable-length
+  lists via offsets).
 - `allow_list`: Generate `ListArray` wrappers (variable-length lists via
   starts/stops).
 - When all three are `False`, only flat leaf arrays are generated (`NumpyArray`
   and/or `EmptyArray`).
 
-- `allow_record`: Generate `RecordArray` nodes (named or tuple records with
-  one or more children). Default: `True`. See
+- `allow_record`: Generate `RecordArray` nodes (named or tuple records with one
+  or more children). Default: `True`. See
   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md).
 - `allow_virtual`: Generate virtual (lazy) arrays. Default: `True`. Virtual
   arrays show as `??` in the output and exercise lazy evaluation code paths.
@@ -194,9 +194,9 @@ Maximum nesting depth for structural wrappers.
 
 - Default: `5`.
 - `max_depth=0` forces leaf-only arrays (flat `NumpyArray`).
-- At each level, a coin flip decides whether to go deeper or produce a leaf.
-  See [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for
-  the bottom-up tree builder algorithm.
+- At each level, a coin flip decides whether to go deeper or produce a leaf. See
+  [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for the
+  bottom-up tree builder algorithm.
 
 ### Return Type
 
@@ -222,9 +222,9 @@ NumPy arrays (with named fields), which `ak.from_numpy` converts to
 `RecordArray` when `allow_record=True`. Similarly, multi-dimensional NumpyArrays
 (inner_shape) will be covered by `RegularArray` wrapping.
 
-The `arrays()` strategy generates 1-D `NumpyArray` nodes only. Higher-dimensional
-structure comes from nesting (lists, records), not from multi-dimensional NumPy
-arrays.
+The `arrays()` strategy generates 1-D `NumpyArray` nodes only.
+Higher-dimensional structure comes from nesting (lists, records), not from
+multi-dimensional NumPy arrays.
 
 #### `type` / `form`
 
@@ -262,8 +262,8 @@ This keeps the `arrays()` parameter list focused on structural concerns. The
 
 The implementation is split across two packages:
 
-- **`contents/content.py`**: `contents()` strategy generates `ak.contents.Content`
-  layouts using a bottom-up tree builder
+- **`contents/content.py`**: `contents()` strategy generates
+  `ak.contents.Content` layouts using a bottom-up tree builder
 - **`constructors/array_.py`**: `arrays()` is a thin wrapper that calls
   `contents()` and wraps the result in `ak.Array`
 
@@ -273,8 +273,8 @@ The `contents()` strategy in `contents/content.py` uses a bottom-up tree
 builder. A recursive `_build(depth)` function:
 
 1. Draws "deeper?" or "bottom?" at each level (coin flip)
-2. At the bottom, draws a leaf via `leaf_contents()` with a shared scalar
-   budget managed by `CountdownDrawer`
+2. At the bottom, draws a leaf via `leaf_contents()` with a shared scalar budget
+   managed by `CountdownDrawer`
 3. Going up, draws "another edge?" to decide whether to add sibling children
 4. Draws a node type constrained by child count (1 child: any wrapper or
    RecordArray; 2+ children: RecordArray only)
@@ -459,8 +459,8 @@ interface strict and revisit based on user feedback.
 
 **Rationale:**
 
-- The directory name reflects the approach (direct constructors), not the output.
-  This leaves room for alternative approaches later (e.g., `builders/`,
+- The directory name reflects the approach (direct constructors), not the
+  output. This leaves room for alternative approaches later (e.g., `builders/`,
   `from_types/`).
 - `arrays()` is the main entry point, not specific to NumPy.
 - It will grow to contain multiple internal modules (one per node type).
@@ -565,12 +565,12 @@ Following the patterns in
 
 ### `contents()` tests (`tests/strategies/contents/test_content.py`)
 
-The `contents()` strategy has comprehensive property-based and reachability tests
-that verify all options are respected: `max_size` (total scalars), per-type
-gating (`allow_regular`, `allow_list_offset`, `allow_list`), dtypes via leaf
-arrays, `allow_nan`, and `max_depth`. Edge case reachability tests use `find()`
-to verify the strategy can produce empty content, NaN values, specific dtypes,
-maximum depth, nested structures, and edge cases for each list type.
+The `contents()` strategy has comprehensive property-based and reachability
+tests that verify all options are respected: `max_size` (total scalars),
+per-type gating (`allow_regular`, `allow_list_offset`, `allow_list`), dtypes via
+leaf arrays, `allow_nan`, and `max_depth`. Edge case reachability tests use
+`find()` to verify the strategy can produce empty content, NaN values, specific
+dtypes, maximum depth, nested structures, and edge cases for each list type.
 
 ### `arrays()` tests (`tests/strategies/constructors/test_array.py`)
 
@@ -643,7 +643,8 @@ Control the outermost dimension length rather than total scalars.
 **Rejected because:**
 
 - In nested structures, outermost length alone does not bound total array size.
-- A scalar budget (`max_size`) provides a natural cap regardless of nesting depth.
+- A scalar budget (`max_size`) provides a natural cap regardless of nesting
+  depth.
 - The "budgeted leaf" approach made `max_size` straightforward to implement.
 
 ### Alternative E: Accept Plain `np.dtype` for `dtypes`

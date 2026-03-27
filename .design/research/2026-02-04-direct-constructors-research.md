@@ -1,8 +1,8 @@
 # Direct Constructors (Layouts) Research
 
-**Date:** 2026-02-04
-**Purpose:** Inform the design of an `arrays()` strategy that generates arbitrary
-Awkward Arrays via direct Content constructors
+- **Date:** 2026-02-04
+- **Purpose:** Inform the design of an `arrays()` strategy that generates
+  arbitrary Awkward Arrays via direct Content constructors
 
 ## Motivation
 
@@ -14,8 +14,8 @@ Previous work explored two intermediate approaches:
    classes describing structure; requires `ak.from_buffers()` to produce arrays
 
 This note explores a third approach: building arrays directly from the 12
-**Content** (layout) classes in `ak.contents`. These are the "Direct constructors
-(fastest)" described in the Awkward Array documentation.
+**Content** (layout) classes in `ak.contents`. These are the "Direct
+constructors (fastest)" described in the Awkward Array documentation.
 
 ### Why Direct Constructors
 
@@ -24,8 +24,8 @@ This note explores a third approach: building arrays directly from the 12
 - **No roundtrip** -- avoids the Type-to-Form-to-buffer pipeline
 - **Full coverage** -- exercises all 4 option representations, both list
   representations, etc.
-- **Constructor validation** -- invalid nesting raises errors at construction time,
-  so the strategy can lean on built-in checks
+- **Constructor validation** -- invalid nesting raises errors at construction
+  time, so the strategy can lean on built-in checks
 - **Trivial wrapping** -- `ak.Array(layout)` is zero-cost
 
 ## Content Class Catalog
@@ -88,8 +88,10 @@ RegularArray(content, size, zeros_length=0, *, parameters=None)
 
 - `content`: Content subclass (flattened data)
 - `size`: non-negative integer (fixed length of each list)
-- `zeros_length`: non-negative integer; used as array length only when `size == 0`
-- Length: `len(content) // size` when `size != 0`; `zeros_length` when `size == 0`
+- `zeros_length`: non-negative integer; used as array length only when
+  `size == 0`
+- Length: `len(content) // size` when `size != 0`; `zeros_length` when
+  `size == 0`
 - No buffers (size is metadata)
 
 #### ListOffsetArray
@@ -101,8 +103,8 @@ ListOffsetArray(offsets, content, *, parameters=None)
 - `offsets`: `Index` with dtype in `{int32, uint32, int64}`
 - `content`: Content subclass
 - Length: `len(offsets) - 1`
-- Constraints: `len(offsets) >= 1`; `offsets[i] <= offsets[i+1]`; all values >= 0;
-  values <= `len(content)`
+- Constraints: `len(offsets) >= 1`; `offsets[i] <= offsets[i+1]`; all values >=
+  0; values <= `len(content)`
 - Buffers: `offsets`
 - Most common list form
 
@@ -133,10 +135,10 @@ RecordArray(contents, fields, length=None, *, parameters=None, backend=None)
 - `contents`: iterable of Content subclasses
 - `fields`: list of strings or `None` (`None` = tuple, not record)
 - `length`: explicit length; `None` means compute from shortest content
-- Constraints: when `fields` is not None, `len(fields) == len(contents)`;
-  when `length` is None and `len(contents) == 0`, raises `TypeError` (must
-  specify length for empty records); when `length` is given, each content must
-  have length >= `length`
+- Constraints: when `fields` is not None, `len(fields) == len(contents)`; when
+  `length` is None and `len(contents) == 0`, raises `TypeError` (must specify
+  length for empty records); when `length` is given, each content must have
+  length >= `length`
 - No buffers
 - `__record__` parameter enables behavior dispatch
 
@@ -154,13 +156,13 @@ IndexedArray(index, content, *, parameters=None)
 - Length: `len(index)`
 - Type: transparent -- returns `content.type` (no `IndexedType` exists)
 - Buffers: `index`
-- **Content restriction:** content cannot be union-type (unless
-  `__array__` = `"categorical"`), option-type, or indexed-type
+- **Content restriction:** content cannot be union-type (unless `__array__` =
+  `"categorical"`), option-type, or indexed-type
 
 ### Option Nodes (1 Child: `content`)
 
-All option nodes share the same content restriction: content cannot be union-type
-(unless categorical), option-type, or indexed-type.
+All option nodes share the same content restriction: content cannot be
+union-type (unless categorical), option-type, or indexed-type.
 
 #### IndexedOptionArray
 
@@ -233,10 +235,10 @@ UnionArray(tags, index, contents, *, parameters=None)
 - `index`: `Index` with dtype in `{int32, uint32, int64}`
 - `contents`: list of Content subclasses (minimum 2)
 - Constraints: `len(tags) <= len(index)` (usually equal);
-  `0 <= tags[i] < len(contents)`;
-  `0 <= index[i] < len(contents[tags[i]])`
+  `0 <= tags[i] < len(contents)`; `0 <= index[i] < len(contents[tags[i]])`
 - **Content restriction:** no union content (no nested unions); option content
-  only if ALL contents are option; non-categorical indexed content is not allowed
+  only if ALL contents are option; non-categorical indexed content is not
+  allowed
 - Maximum: 128 contents (because tags are int8, values 0-127)
 - Length: `len(tags)`
 - Type: `UnionType([c.type for c in contents])`
@@ -349,8 +351,8 @@ Multi-content nodes (0+ or 2+ children):
 | Steps to array      | Type -> Form -> buffers -> array | Form -> buffers -> array | Layout -> array         |
 
 The key trade-off: Types and Forms allow any composition (no nesting rules), but
-direct constructors enforce strict constraints. This means a strategy must know the
-rules -- but also means generated arrays are always valid.
+direct constructors enforce strict constraints. This means a strategy must know
+the rules -- but also means generated arrays are always valid.
 
 ## Buffer Generation Patterns
 
@@ -374,12 +376,13 @@ Each non-leaf node requires specific buffer invariants:
 
 A natural structure for the strategy:
 
-- **Base case** (max depth reached): `NumpyArray` with random data, or `EmptyArray`
+- **Base case** (max depth reached): `NumpyArray` with random data, or
+  `EmptyArray`
 - **Recursive case:** choose from allowed node types, generate child content(s)
   recursively, then wrap with the chosen node type
 - **Constraint enforcement:** when generating children for option/indexed nodes,
-  exclude option/indexed/union content; when generating children for union nodes,
-  exclude union content
+  exclude option/indexed/union content; when generating children for union
+  nodes, exclude union content
 
 ### Content nesting rules for strategy
 
@@ -396,7 +399,8 @@ filter out certain child types:
 | `UnionArray`         | `UnionArray`, non-categorical `IndexedArray`; option only if ALL contents are option |
 | All others           | No restrictions                                                                      |
 
-This can be modeled by passing an `allowed` set or exclusion flags when recursing.
+This can be modeled by passing an `allowed` set or exclusion flags when
+recursing.
 
 ### Advantages
 
@@ -407,9 +411,10 @@ This can be modeled by passing an `allowed` set or exclusion flags when recursin
 
 ### Challenges
 
-1. Index buffer generation must satisfy specific invariants (sorted offsets, valid
-   ranges, etc.)
-2. Length coordination -- content lengths must be consistent with wrapping structure
+1. Index buffer generation must satisfy specific invariants (sorted offsets,
+   valid ranges, etc.)
+2. Length coordination -- content lengths must be consistent with wrapping
+   structure
 3. Nesting constraints must be tracked during recursive generation
 4. Combinatorial explosion -- 12 classes with recursive composition
 

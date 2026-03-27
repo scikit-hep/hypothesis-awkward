@@ -2,18 +2,24 @@
 
 _Hypothesis strategies for Awkward Arrays._
 
-[![pypi-badge]][pypi] [![pypi-python-badge]][pypi] [![conda-forge-badge]][conda-forge]
+[![pypi-badge]][pypi] [![pypi-python-badge]][pypi]
+[![conda-forge-badge]][conda-forge]
 
 [![test-badge]][test] [![codecov-badge]][codecov]
 
 [pypi-badge]: https://img.shields.io/pypi/v/hypothesis-awkward.svg
-[pypi-python-badge]: https://img.shields.io/pypi/pyversions/hypothesis-awkward.svg
+[pypi-python-badge]:
+  https://img.shields.io/pypi/pyversions/hypothesis-awkward.svg
 [pypi]: https://pypi.org/project/hypothesis-awkward
-[conda-forge-badge]: https://img.shields.io/conda/vn/conda-forge/hypothesis-awkward.svg
+[conda-forge-badge]:
+  https://img.shields.io/conda/vn/conda-forge/hypothesis-awkward.svg
 [conda-forge]: https://anaconda.org/conda-forge/hypothesis-awkward
-[test-badge]: https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
-[test]: https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml
-[codecov-badge]: https://codecov.io/gh/scikit-hep/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3
+[test-badge]:
+  https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
+[test]:
+  https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml
+[codecov-badge]:
+  https://codecov.io/gh/scikit-hep/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3
 [codecov]: https://codecov.io/gh/scikit-hep/hypothesis-awkward
 
 [Hypothesis] is a _property-based testing_ library. Its [_strategies_][hyp-st]
@@ -41,11 +47,15 @@ tools that use Awkward Array, and Awkward Array itself.
 
 [hypothesis]: https://github.com/HypothesisWorks/hypothesis
 [hyp-st]: https://hypothesis.readthedocs.io/en/latest/reference/strategies.html
-[hyp-st-numpy]: https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#numpy
-[hyp-st-pandas]: https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#pandas
+[hyp-st-numpy]:
+  https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#numpy
+[hyp-st-pandas]:
+  https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#pandas
 [xarray]: https://xarray.dev/
-[xarray-st]: https://docs.xarray.dev/en/stable/user-guide/testing.html#hypothesis-testing
-[pyarrow-st]: https://github.com/apache/arrow/blob/apache-arrow-22.0.0/python/pyarrow/tests/strategies.py
+[xarray-st]:
+  https://docs.xarray.dev/en/stable/user-guide/testing.html#hypothesis-testing
+[pyarrow-st]:
+  https://github.com/apache/arrow/blob/apache-arrow-22.0.0/python/pyarrow/tests/strategies.py
 [hypothesis-awkward]: https://github.com/scikit-hep/hypothesis-awkward
 [awkward-array]: https://awkward-array.org/
 
@@ -107,17 +117,18 @@ array=<Array [??, ??, ??, ??, ??] type='5 * var * var * (uint64, bytes)'>
 
 The current version generates arrays with `NumpyArray`, `EmptyArray`, string,
 and bytestring as leaf contents that can be nested multiple levels deep in
-`RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and
-`UnionArray`. Arrays might be virtual, shown as `??` in the output.
+`RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and `UnionArray`.
+Arrays might be virtual, shown as `??` in the output.
 
 ### The options of `arrays()`
 
-The strategy `arrays()` has many options to control the output arrays.
-You can find all options in the API reference:
+The strategy `arrays()` has many options to control the output arrays. You can
+find all options in the API reference:
 
 - [**API reference: `arrays()`**][api-ref-arrays]
 
-[api-ref-arrays]: https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/constructors/
+[api-ref-arrays]:
+  https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/constructors/
 
 ## Other strategies
 

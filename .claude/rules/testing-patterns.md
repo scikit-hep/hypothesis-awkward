@@ -123,8 +123,8 @@ kwargs = draw(
 return chain.extend(cast(MyKwargs, kwargs))
 ```
 
-See `tests/strategies/numpy/test_numpy_arrays.py` and
-`tests/util/test_draw.py` for full examples.
+See `tests/strategies/numpy/test_numpy_arrays.py` and `tests/util/test_draw.py`
+for full examples.
 
 ### Dependent kwargs (without `OptsChain`)
 
@@ -247,9 +247,9 @@ Key techniques:
 See `tests/strategies/contents/test_content_lists.py` for a full example.
 
 When a parameter is a callable that returns a strategy (not a strategy itself),
-use `chain.register_callable()` to create a `RecordCallDraws` wrapper. Each
-call to the wrapper produces a `RecordDraws` instance, and `drawn` aggregates
-all values across all calls.
+use `chain.register_callable()` to create a `RecordCallDraws` wrapper. Each call
+to the wrapper produces a `RecordDraws` instance, and `drawn` aggregates all
+values across all calls.
 
 ```python
 @st.composite
@@ -339,8 +339,8 @@ from hypothesis_awkward.util.safe import safe_compare as sc
 assert sc(min_size) <= len(result) <= sc(max_size)
 ```
 
-`sc(None)` returns an object that is true for all inequality comparisons,
-so `None` bounds are effectively ignored.
+`sc(None)` returns an object that is true for all inequality comparisons, so
+`None` bounds are effectively ignored.
 
 ## 6. Global constants
 

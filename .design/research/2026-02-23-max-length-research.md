@@ -34,8 +34,8 @@ a content node:
   length 12 has `max_size` cost of 12 (the leaf scalars), but `len()` of 4 (the
   number of groups).
 
-- **`max_length`** (immediate length): The `len()` of a content node at a
-  single level. For a `NumpyArray`, this equals the number of elements. For a
+- **`max_length`** (immediate length): The `len()` of a content node at a single
+  level. For a `NumpyArray`, this equals the number of elements. For a
   `RegularArray`, this is `len(content) // size`. For a `ListOffsetArray`, this
   is `len(offsets) - 1`.
 
@@ -76,14 +76,15 @@ To be useful, `max_length` would need to be:
 
 2. **Propagated to wrapper strategies**: Each wrapper strategy would need to
    accept `max_length` and constrain its output accordingly:
+
    - `regular_array_contents()` — constrain `len(content) // size`
    - `list_offset_array_contents()` — constrain number of sublists
    - `list_array_contents()` — constrain number of sublists
    - `record_array_contents()` — constrain `length` (all fields share it)
    - `union_array_contents()` — constrain `sum(len(c) for c in contents)`
 
-3. **Interaction with `max_size`**: Both constraints must hold simultaneously.
-   A content node must have `len() <= max_length` _and_ total leaf scalars
+3. **Interaction with `max_size`**: Both constraints must hold simultaneously. A
+   content node must have `len() <= max_length` _and_ total leaf scalars
    `<= max_size`. This means the strategies need to coordinate: drawing content
    that satisfies the scalar budget while also hitting a specific length.
 
@@ -102,8 +103,8 @@ the divisor structure of whatever content length happens to be drawn.
 
 However, the recent refactoring of `regular_array_contents()` (extracting
 `_st_group_sizes()`, adding `max_size` and `max_zeros_length` parameters)
-already improves the situation somewhat by giving callers more control over
-the generated arrays.
+already improves the situation somewhat by giving callers more control over the
+generated arrays.
 
 ## Implementation Order
 
@@ -131,6 +132,7 @@ API design.
 ### Completed
 
 1. `regular_array_contents()` — `max_length` constrains the number of groups
-2. `list_offset_array_contents()` — `max_length` constrains the number of sublists
+2. `list_offset_array_contents()` — `max_length` constrains the number of
+   sublists
 3. `list_array_contents()` — `max_length` constrains the number of sublists
 4. `record_array_contents()` — `max_length` constrains the shared field length

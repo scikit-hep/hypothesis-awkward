@@ -1,7 +1,8 @@
 # Awkward Array Form System Research
 
-**Date:** 2026-02-03
-**Purpose:** Inform the design of form-generating strategies for hypothesis-awkward
+- **Date:** 2026-02-03
+- **Purpose:** Inform the design of form-generating strategies for
+  hypothesis-awkward
 
 ## Form Class Hierarchy
 
@@ -57,8 +58,9 @@ Note: `IndexedOptionForm` sets both `is_indexed = True` and `is_option = True`.
 NumpyForm(primitive, inner_shape=(), *, parameters=None, form_key=None)
 ```
 
-- **primitive** -- normalized via `dtype_to_primitive(primitive_to_dtype(primitive))`
-  round-trip; raises `TypeError` for unrecognized primitives
+- **primitive** -- normalized via
+  `dtype_to_primitive(primitive_to_dtype(primitive))` round-trip; raises
+  `TypeError` for unrecognized primitives
 - **inner_shape** -- tuple of positive integers for fixed-size sub-arrays;
   default `()` (most common)
 - **Type:** `NumpyType`, wrapped in reversed `RegularType` layers for non-empty
@@ -491,8 +493,7 @@ requires:
 | UnionForm         | `tags`, `index`   |
 
 Buffer keys are generated via `getkey(form, attribute_name)` which typically
-produces `"{form_key}-{attribute}"` (e.g., `"node0-data"`,
-`"node1-offsets"`).
+produces `"{form_key}-{attribute}"` (e.g., `"node0-data"`, `"node1-offsets"`).
 
 ## Strategy Design Implications
 

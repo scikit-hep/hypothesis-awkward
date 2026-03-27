@@ -1,12 +1,13 @@
 # Types Strategy Tests Progress
 
-**Date:** 2026-01-22
-**Updated:** 2026-02-09
-**Status:** Paused (focus shifted to constructors/arrays)
+- **Date:** 2026-01-22
+- **Updated:** 2026-02-09
+- **Status:** Paused (focus shifted to constructors/arrays)
 
 ## Completed
 
-- [tests/strategies/types/test_numpy_types.py](../../tests/strategies/types/test_numpy_types.py) - Done
+- [tests/strategies/types/test_numpy_types.py](../../tests/strategies/types/test_numpy_types.py) -
+  Done
 - `numpy_types()` strategy implemented and tests pass
 
 ## Resolved: Testing `content` Strategy Parameter
