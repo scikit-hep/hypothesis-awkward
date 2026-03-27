@@ -44,7 +44,7 @@ def test_lists(data: st.DataObject) -> None:
 
     # Assert the options were effective
     dtype = kwargs.get('dtype', None)
-    allow_nan = kwargs.get('allow_nan', False)
+    allow_nan = kwargs.get('allow_nan', True)
     max_size = kwargs.get('max_size', 10)
 
     def _is_nan(x: Any) -> bool:

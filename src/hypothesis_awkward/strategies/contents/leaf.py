@@ -8,7 +8,7 @@ from awkward.contents import EmptyArray, ListOffsetArray, NumpyArray
 def leaf_contents(
     *,
     dtypes: st.SearchStrategy[np.dtype] | None = None,
-    allow_nan: bool = False,
+    allow_nan: bool = True,
     min_size: int = 0,
     max_size: int = 10,
     allow_numpy: bool = True,
