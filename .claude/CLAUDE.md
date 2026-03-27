@@ -6,8 +6,9 @@ code in this repository.
 ## Project Overview
 
 hypothesis-awkward is a Python library providing
-[Hypothesis](https://hypothesis.works/) strategies for generating [Awkward Array](https://awkward-array.org/) test data. It enables property-based testing
-for code that uses Awkward Arrays.
+[Hypothesis](https://hypothesis.works/) strategies for generating
+[Awkward Array](https://awkward-array.org/) test data. It enables property-based
+testing for code that uses Awkward Arrays.
 
 ## Build and Development Commands
 
@@ -42,8 +43,8 @@ uv run ruff format src tests
 - **`strategies/`** - Public Hypothesis strategies (imported as
   `hypothesis_awkward.strategies`). Subpackages: `numpy/`, `builtins_/`,
   `contents/`, `constructors/`, `pandas/`, `forms/`, `types/`, `misc/`
-- **`util/`** - Internal utilities for dtype handling, safe comparisons,
-  layout iteration, and array introspection
+- **`util/`** - Internal utilities for dtype handling, safe comparisons, layout
+  iteration, and array introspection
 
 ### Strategy Design Pattern
 
@@ -69,14 +70,15 @@ doctest support for examples in docstrings and markdown files.
 
 ## Design Documents
 
-Design research, API specs, and implementation notes are in `.design/`.
-See `.design/README.md` for the index.
+Design research, API specs, and implementation notes are in `.design/`. See
+`.design/README.md` for the index.
 
 ## Conventional Commits and Releases
 
-PR titles must follow [Conventional Commits](https://www.conventionalcommits.org/)
-format (e.g., `feat: add new feature`). Scopes are not used. See
-`CONTRIBUTING.md` for allowed types.
+PR titles must follow
+[Conventional Commits](https://www.conventionalcommits.org/) format (e.g.,
+`feat: add new feature`). Scopes are not used. See `CONTRIBUTING.md` for allowed
+types.
 
 Releases use a two-tag (`u`/`v`) pipeline. Run `hatch version <rule>` to bump
 the version and create a `u`-prefixed tag, then push. CI generates the
@@ -86,8 +88,12 @@ changelog, creates the `v` tag, and publishes the release and package.
 
 - Use NumPy-style docstrings with single quotes (`'''`).
 - Prefer single quotes (`'`) for strings.
-- Use absolute imports for parent packages (e.g., `from hypothesis_awkward.strategies.numpy import numpy_arrays`, not `from ..numpy import numpy_arrays`). Same-package relative imports (e.g., `from .arrays_ import arrays`) are fine.
-- For forward references in type annotations, prefer string quotes (e.g., `-> 'MyClass[Any]'`) over `from __future__ import annotations`.
+- Use absolute imports for parent packages (e.g.,
+  `from hypothesis_awkward.strategies.numpy import numpy_arrays`, not
+  `from ..numpy import numpy_arrays`). Same-package relative imports (e.g.,
+  `from .arrays_ import arrays`) are fine.
+- For forward references in type annotations, prefer string quotes (e.g.,
+  `-> 'MyClass[Any]'`) over `from __future__ import annotations`.
 - Prefer generic constructor calls over annotated assignments for typed empty
   collections (e.g., `list[int]()` over `x: list[int] = []`).
 - Place private or supportive functions after the main public functions in a

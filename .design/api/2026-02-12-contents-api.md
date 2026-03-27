@@ -6,12 +6,12 @@
 
 > **Update (2026-02-22):** Since this document was written:
 >
-> - `content_lists()` was added to `content.py` as a public helper strategy
->   that generates lists of contents within a size budget. Used internally by
+> - `content_lists()` was added to `content.py` as a public helper strategy that
+>   generates lists of contents within a size budget. Used internally by
 >   `contents()` for `RecordArray` and `UnionArray` children.
-> - `allow_union_root` parameter was added to `contents()` (default: `True`).
->   It prevents `UnionArray` at the outermost level only, without affecting
->   deeper nesting. Not forwarded to `arrays()`.
+> - `allow_union_root` parameter was added to `contents()` (default: `True`). It
+>   prevents `UnionArray` at the outermost level only, without affecting deeper
+>   nesting. Not forwarded to `arrays()`.
 > - The bottom-up tree builder referenced in this document was replaced by a
 >   [top-down builder](../impl/2026-02-21-contents-top-down-builder.md).
 >   `contents()` is now self-recursive (no inner `_build()` or
@@ -20,10 +20,10 @@
 >
 > **Update (2026-02-23):**
 >
-> - `regular_array_contents()` gained `max_size` and `max_zeros_length`
->   keyword parameters, replacing the module-level `MAX_REGULAR_SIZE` constant.
->   Divisor selection is now in a `_st_group_sizes()` helper. See the updated
->   section below.
+> - `regular_array_contents()` gained `max_size` and `max_zeros_length` keyword
+>   parameters, replacing the module-level `MAX_REGULAR_SIZE` constant. Divisor
+>   selection is now in a `_st_group_sizes()` helper. See the updated section
+>   below.
 > - Research on a `max_length` parameter (immediate `len()` cap) is documented
 >   in [max-length-research](../research/2026-02-23-max-length-research.md).
 > - `regular_array_contents()` gained `max_length` parameter to cap the number
@@ -88,8 +88,8 @@ From the [arrays API design](./2026-02-04-arrays-api.md) and
 > `contents()`, `numpy_array_contents()`, and `leaf_contents()` fall in Group B
 > (all keyword-only). The wrapper strategies (`regular_array_contents`,
 > `list_offset_array_contents`, `list_array_contents`) and multi-child
-> strategies (`record_array_contents`, `union_array_contents`) fall in
-> Group A: `content`/`contents` is positional, config after `*`.
+> strategies (`record_array_contents`, `union_array_contents`) fall in Group A:
+> `content`/`contents` is positional, config after `*`.
 
 ### `contents()`
 
@@ -128,8 +128,8 @@ def contents(
   the outermost dimension length. `EmptyArray` leaves consume no budget (length
   0). Internally managed by `CountdownDrawer`.
 
-- **`allow_nan`** — Generate potentially `NaN`/`NaT` values for relevant
-  dtypes. Default: `False`.
+- **`allow_nan`** — Generate potentially `NaN`/`NaT` values for relevant dtypes.
+  Default: `False`.
 
 - **`allow_numpy`** — Generate `NumpyArray` leaves. Default: `True`.
 
@@ -155,25 +155,25 @@ def contents(
   wrapper flags are `False`, only flat leaf arrays are generated.
 
 - **`allow_record`** — Generate `RecordArray` nodes. Default: `True`.
-  `RecordArray` can appear at any depth and may have one or more children.
-  When enabled, the tree builder can produce multi-child nodes (named or
-  tuple records). See
+  `RecordArray` can appear at any depth and may have one or more children. When
+  enabled, the tree builder can produce multi-child nodes (named or tuple
+  records). See
   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for
   algorithm details.
 
-- **`allow_union`** — Generate `UnionArray` nodes. Default: `True`.
-  `UnionArray` requires 2+ children and produces `(tags, index)` buffers.
-  When enabled, multi-child branching in the tree builder can produce union
-  nodes in addition to records. Direct children of a `UnionArray` cannot
-  themselves be `UnionArray` (no nested unions); indirect nesting via list
-  or record nodes is valid. See
+- **`allow_union`** — Generate `UnionArray` nodes. Default: `True`. `UnionArray`
+  requires 2+ children and produces `(tags, index)` buffers. When enabled,
+  multi-child branching in the tree builder can produce union nodes in addition
+  to records. Direct children of a `UnionArray` cannot themselves be
+  `UnionArray` (no nested unions); indirect nesting via list or record nodes is
+  valid. See
   [union-array-research](../research/2026-02-17-union-array-research.md).
 
 - **`max_depth`** — Maximum nesting depth for structural wrappers. Default: `5`.
   `max_depth=0` forces leaf-only arrays. At each level, a coin flip decides
   whether to go deeper or produce a leaf. See
-  [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for
-  the bottom-up tree builder algorithm.
+  [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for the
+  bottom-up tree builder algorithm.
 
 #### No `min_size`
 
@@ -238,18 +238,18 @@ def leaf_contents(
 
 Uses `st.one_of()` to select between enabled leaf types:
 
-- `allow_numpy=True` → includes `numpy_array_contents(dtypes, allow_nan,
-  min_size=min_size, max_size=max_size, max_length=max_length)`
+- `allow_numpy=True` → includes
+  `numpy_array_contents(dtypes, allow_nan, min_size=min_size, max_size=max_size, max_length=max_length)`
 - `allow_empty=True` and `min_size == 0` → includes `empty_array_contents()`
-- `allow_string=True` → includes `string_contents(min_size=min_size,
-  max_size=max_size, max_length=max_length)`
-- `allow_bytestring=True` → includes `bytestring_contents(min_size=min_size,
-  max_size=max_size, max_length=max_length)`
+- `allow_string=True` → includes
+  `string_contents(min_size=min_size, max_size=max_size, max_length=max_length)`
+- `allow_bytestring=True` → includes
+  `bytestring_contents(min_size=min_size, max_size=max_size, max_length=max_length)`
 
 ### `numpy_array_contents()`
 
-Generates 1-D `NumpyArray` content by drawing a NumPy array via
-`numpy_arrays()` and wrapping it in `ak.contents.NumpyArray`.
+Generates 1-D `NumpyArray` content by drawing a NumPy array via `numpy_arrays()`
+and wrapping it in `ak.contents.NumpyArray`.
 
 ```python
 def numpy_array_contents(
@@ -280,10 +280,10 @@ def numpy_array_contents(
 
 #### Implementation
 
-Delegates to `numpy_arrays(dtype=dtypes, allow_structured=False, allow_nan=...,
-max_dims=1, min_size=..., max_size=...).map(ak.contents.NumpyArray)`. Always
-generates 1-D arrays with no structured dtypes — higher-dimensional structure
-comes from nesting wrappers.
+Delegates to
+`numpy_arrays(dtype=dtypes, allow_structured=False, allow_nan=..., max_dims=1, min_size=..., max_size=...).map(ak.contents.NumpyArray)`.
+Always generates 1-D arrays with no structured dtypes — higher-dimensional
+structure comes from nesting wrappers.
 
 ### `empty_array_contents()`
 
@@ -315,6 +315,7 @@ def regular_array_contents(
 #### Parameters
 
 - **`content`** — The child content to wrap. Accepts three forms:
+
   - `None` (default): draws from `contents()` (recursive)
   - `st.SearchStrategy[Content]`: draws from the strategy
   - `Content`: uses directly
@@ -331,8 +332,9 @@ def regular_array_contents(
 
 #### Behavior
 
-Divisor selection is delegated to the `_st_group_sizes(total_items,
-max_group_size)` helper, which returns a strategy for the `size` parameter:
+Divisor selection is delegated to the
+`_st_group_sizes(total_items, max_group_size)` helper, which returns a strategy
+for the `size` parameter:
 
 - When `total_items == 0`: any `size` from `[0, max_size]` is valid (zero items
   can be split into zero groups of any size)
@@ -367,9 +369,9 @@ def list_offset_array_contents(
 
 #### Behavior
 
-Draws `n` (number of lists) from `[0, max_length]`, then generates sorted
-split points to partition the content into `n` sublists. The resulting offsets
-array is monotonically non-decreasing and covers all content elements.
+Draws `n` (number of lists) from `[0, max_length]`, then generates sorted split
+points to partition the content into `n` sublists. The resulting offsets array
+is monotonically non-decreasing and covers all content elements.
 
 ### `list_array_contents()`
 
@@ -419,6 +421,7 @@ def record_array_contents(
 
 - **`contents`** — The child contents for the record's fields. Accepts three
   forms:
+
   - `None` (default): draws 0 to `max_fields` children from `contents()`
   - `st.SearchStrategy[list[Content]]`: draws a list from the strategy
   - `list[Content]`: uses directly
@@ -426,9 +429,9 @@ def record_array_contents(
 - **`max_fields`** — Maximum number of fields when `contents` is `None`.
   Default: `5`. Ignored when `contents` is provided.
 
-- **`allow_tuple`** — Allow tuple records (`fields=None`). Default: `True`.
-  When `True`, a coin flip decides between named records and tuples. When
-  `False`, only named records are generated.
+- **`allow_tuple`** — Allow tuple records (`fields=None`). Default: `True`. When
+  `True`, a coin flip decides between named records and tuples. When `False`,
+  only named records are generated.
 
 - **`max_length`** — Upper bound on the record length, i.e., `len(result)`.
   Default: `None` (no constraint). See
@@ -437,8 +440,8 @@ def record_array_contents(
 #### Behavior
 
 For named records, field names are drawn as unique strings of up to 3 ASCII
-letters. For empty records (0 fields), `length=0` is set explicitly (required
-by the `RecordArray` constructor). When `max_length` is set, the RecordArray's
+letters. For empty records (0 fields), `length=0` is set explicitly (required by
+the `RecordArray` constructor). When `max_length` is set, the RecordArray's
 `length` is capped to `min(min(len(c) for c in contents), max_length)`.
 
 ### `union_array_contents()`
@@ -461,13 +464,14 @@ def union_array_contents(
 
 - **`contents`** — The child contents for the union's alternatives. Accepts
   three forms:
+
   - `None` (default): draws 2 to `max_contents` children from `contents()`
   - `st.SearchStrategy[list[Content]]`: draws a list from the strategy
   - `list[Content]`: uses directly (must have length >= 2)
 
-- **`max_contents`** — Maximum number of alternative contents when `contents`
-  is `None`. Default: `4`. Minimum is always 2 (required by `UnionArray`).
-  Ignored when `contents` is provided.
+- **`max_contents`** — Maximum number of alternative contents when `contents` is
+  `None`. Default: `4`. Minimum is always 2 (required by `UnionArray`). Ignored
+  when `contents` is provided.
 
 - **`max_length`** — Upper bound on the union length, i.e., `len(result)`.
   Default: `None` (no constraint). See
@@ -480,13 +484,13 @@ Generates `(tags, index)` buffers:
 1. For each content `k` of length `L_k`, create `L_k` entries with
    `tags = [k] * L_k` and `index = [0, 1, ..., L_k - 1]`
 2. Concatenate all entries and apply a random permutation
-3. If `max_length` is set and the total exceeds it, truncate the shuffled
-   arrays to `max_length` entries (non-compact indexing — some child elements
-   become unreachable)
+3. If `max_length` is set and the total exceeds it, truncate the shuffled arrays
+   to `max_length` entries (non-compact indexing — some child elements become
+   unreachable)
 
 Without `max_length`, indexing is compact: every child element is referenced
-exactly once and the union length equals `sum(len(c) for c in contents)`.
-Index dtype is `int64` (via `ak.index.Index64`).
+exactly once and the union length equals `sum(len(c) for c in contents)`. Index
+dtype is `int64` (via `ak.index.Index64`).
 
 #### Constants
 
@@ -539,8 +543,8 @@ randomly choosing wrappers.
 
 ### 3. Polymorphic `content` Parameter (Three-Form Dispatch)
 
-**Decision:** Wrapper strategies use `match`/`case` to dispatch on the
-`content` parameter type.
+**Decision:** Wrapper strategies use `match`/`case` to dispatch on the `content`
+parameter type.
 
 ```python
 match content:
@@ -554,8 +558,7 @@ match content:
 
 **Rationale:**
 
-- Three forms cover all use cases: auto-generate, draw from strategy, use
-  as-is
+- Three forms cover all use cases: auto-generate, draw from strategy, use as-is
 - Pattern matching makes the dispatch explicit and readable
 - Follows the same convention as `numpy_forms(type_=...)` which accepts
   `NumpyType | Strategy | None`
@@ -593,8 +596,8 @@ match content:
 
 - In nested structures, controlling only the outermost dimension does not bound
   total array size
-- `CountdownDrawer` maintains a running total and returns `None` when the
-  budget is exhausted, ensuring the strategy terminates
+- `CountdownDrawer` maintains a running total and returns `None` when the budget
+  is exhausted, ensuring the strategy terminates
 - Per-leaf `min_size` is managed internally — the drawer raises effective
   minimums to satisfy total constraints
 - `contents()` does not expose `min_size` to keep the public API simple
@@ -825,8 +828,8 @@ values.
 **Rejected because:**
 
 - Accepting concrete `Content` directly is more ergonomic for testing
-- The three-form dispatch (`None` / `Strategy` / `Content`) covers all use
-  cases naturally
+- The three-form dispatch (`None` / `Strategy` / `Content`) covers all use cases
+  naturally
 - Pattern matching makes the dispatch clean
 
 ## Open Questions
@@ -848,8 +851,8 @@ values.
    wrapper chain to a bottom-up tree builder. The `_build(depth)` recursive
    function draws "deeper?" and "another edge?" coin flips to produce
    multi-child nodes. See
-   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md).
-   Option types remain an open question.
+   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md). Option
+   types remain an open question.
 
 ## Completed
 

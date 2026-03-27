@@ -32,16 +32,19 @@ def complex_numbers(*, min_magnitude=0, max_magnitude=None, allow_nan=None, ...)
 
 1. **"What" parameter** (the primary input the strategy operates on) is
    positional or positional-capable — placed before `*`.
+
    - Required: `lists(elements)`, `from_dtype(dtype)`, `arrays(dtype, shape)`
    - Optional with default: `text(alphabet=characters())`
 
 2. **Configuration** (flags, bounds, limits) is keyword-only — placed after `*`.
+
    - Boolean flags: `allow_nan`, `unique`, `fullmatch`
    - Size bounds: `min_size`, `max_size`
    - Other config: `width`, `dict_class`
 
-3. **Exception**: When bounds _are_ the purpose (e.g., `integers(min_value,
-   max_value)`), they can be positional-capable with no `*`.
+3. **Exception**: When bounds _are_ the purpose (e.g.,
+   `integers(min_value, max_value)`), they can be positional-capable with no
+   `*`.
 
 4. **Positional-only (`/`)**: Only used for very special cases
    (`builds(target, /)`).
@@ -72,12 +75,12 @@ These have a primary input that should stay positional, with config after `*`:
 
 **Rationale:**
 
-- `items_from_dtype(dtype)` — `dtype` is required, like `from_dtype(dtype, *,
-  ...)`
+- `items_from_dtype(dtype)` — `dtype` is required, like
+  `from_dtype(dtype, *, ...)`
 - `numpy_forms(type_=None)` — `type_` is the primary constraint ("generate a
-  form from this type"). Optional with default, like `text(alphabet=..., *,
-  ...)`. When given, it determines the entire output and other params are
-  ignored.
+  form from this type"). Optional with default, like
+  `text(alphabet=..., *, ...)`. When given, it determines the entire output and
+  other params are ignored.
 - `regular_array_contents(content=None)` — `content` is what you're wrapping,
   like `lists(elements, *, ...)`. Optional because `None` means "generate
   content internally". No keyword-only params exist yet, but the `*` future-

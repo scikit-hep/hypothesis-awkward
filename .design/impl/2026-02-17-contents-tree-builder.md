@@ -1,18 +1,19 @@
 # Implementation: Bottom-Up Tree Builder for `contents()`
 
 - **Date:** 2026-02-17
-- **Status:** Superseded by [top-down tree builder](2026-02-21-contents-top-down-builder.md)
+- **Status:** Superseded by
+  [top-down tree builder](2026-02-21-contents-top-down-builder.md)
 - **Author:** Claude (with developer collaboration)
 
 ## Overview
 
-This document describes the refactoring of the `contents()` generation
-algorithm from a linear wrapper chain to a recursive bottom-up tree builder.
-This enables `RecordArray` support (and future `UnionArray`) by allowing
-multi-child nodes in the content tree.
+This document describes the refactoring of the `contents()` generation algorithm
+from a linear wrapper chain to a recursive bottom-up tree builder. This enables
+`RecordArray` support (and future `UnionArray`) by allowing multi-child nodes in
+the content tree.
 
-See [record-array-research](../research/2026-02-17-record-array-research.md)
-for background on `RecordArray`.
+See [record-array-research](../research/2026-02-17-record-array-research.md) for
+background on `RecordArray`.
 
 ## Motivation
 
@@ -22,8 +23,8 @@ The previous `contents()` built content as a linear chain:
 leaf → wrapper₁ → wrapper₂ → ... → wrapperₙ
 ```
 
-Each wrapper has exactly one child. This cannot accommodate `RecordArray`
-(0+ children) or `UnionArray` (2+ children).
+Each wrapper has exactly one child. This cannot accommodate `RecordArray` (0+
+children) or `UnionArray` (2+ children).
 
 ## Algorithm
 
@@ -212,9 +213,9 @@ depletion naturally discourages wide nodes.
 
 ### 3. Node Type Determined by Child Count
 
-Node type is drawn after all children exist, constrained by the count. This
-lets 1-field RecordArray coexist with list wrappers naturally. Future
-UnionArray (2+ children) slots in without changing the algorithm.
+Node type is drawn after all children exist, constrained by the count. This lets
+1-field RecordArray coexist with list wrappers naturally. Future UnionArray (2+
+children) slots in without changing the algorithm.
 
 ### 4. DFS Budget Order
 
@@ -224,11 +225,11 @@ runs matters more than balance within a single run.
 
 ## Open Questions
 
-1. **"Deeper?" probability**: `draw(st.booleans())` gives 50% chance per
-   level. May need tuning if trees are too shallow or too deep.
+1. **"Deeper?" probability**: `draw(st.booleans())` gives 50% chance per level.
+   May need tuning if trees are too shallow or too deep.
 
-2. **"Another edge?" probability**: Same 50%. Most nodes get 1-2 children.
-   May need tuning if wider records are desired.
+2. **"Another edge?" probability**: Same 50%. Most nodes get 1-2 children. May
+   need tuning if wider records are desired.
 
 3. **Empty records (0 fields)**: The algorithm always produces >= 1 child.
    0-field records are valid but not generated. Could be a special leaf case.

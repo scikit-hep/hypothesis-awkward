@@ -6,7 +6,8 @@
 
 ## Completed
 
-- [tests/strategies/types/test_numpy_types.py](../../tests/strategies/types/test_numpy_types.py) - Done
+- [tests/strategies/types/test_numpy_types.py](../../tests/strategies/types/test_numpy_types.py) -
+  Done
 - `numpy_types()` strategy implemented and tests pass
 
 ## Resolved: Testing `content` Strategy Parameter

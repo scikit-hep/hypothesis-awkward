@@ -117,7 +117,9 @@ var * {
 
 From documentation:
 
-> "There is a one-to-one relationship between `ak.contents.Content` subclasses and `ak.forms.Form` subclasses, and each `ak.forms.Form` maps to only one `ak.types.Type`."
+> "There is a one-to-one relationship between `ak.contents.Content` subclasses
+> and `ak.forms.Form` subclasses, and each `ak.forms.Form` maps to only one
+> `ak.types.Type`."
 
 **Key insight for strategy design:**
 
@@ -260,8 +262,8 @@ the C++ `String` builder in `LayoutBuilder.h`).
 
 ### NumpyType-specific parameters
 
-Only `__array__` (values `"char"` or `"byte"`), `__unit__`, and `__categorical__`
-are relevant for `NumpyType`.
+Only `__array__` (values `"char"` or `"byte"`), `__unit__`, and
+`__categorical__` are relevant for `NumpyType`.
 
 ## Special Considerations
 
@@ -285,8 +287,8 @@ Some types have `__categorical__` parameter for categorical data.
 
 ### Behavior Registration
 
-Types can have custom behaviors (e.g., `Momentum4D` for physics vectors).
-The `parameters` dict stores `__record__` for named record types.
+Types can have custom behaviors (e.g., `Momentum4D` for physics vectors). The
+`parameters` dict stores `__record__` for named record types.
 
 ## Sources
 

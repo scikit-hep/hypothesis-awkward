@@ -99,7 +99,8 @@ tests/strategies/types/
 
 - Matches existing pattern: `test_numpy_arrays.py`, `test_ranges.py`
 - Clear 1:1 mapping between source and test files
-- Easy to run specific tests: `pytest tests/strategies/types/test_numpy_types.py`
+- Easy to run specific tests:
+  `pytest tests/strategies/types/test_numpy_types.py`
 
 ## Alternatives Considered
 

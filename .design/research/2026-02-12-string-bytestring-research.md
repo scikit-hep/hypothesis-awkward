@@ -117,8 +117,8 @@ layout = ak.contents.ListOffsetArray(
 # []  -- type: 0 * string
 ```
 
-Note: `ak.Array([])` produces `EmptyArray` with type `0 * unknown`, not a
-string array. `EmptyArray` cannot hold parameters.
+Note: `ak.Array([])` produces `EmptyArray` with type `0 * unknown`, not a string
+array. `EmptyArray` cannot hold parameters.
 
 ## Validation Constraints
 
@@ -194,8 +194,8 @@ ak.forms.RegularForm(
 
 ### Nested Strings (List of Strings)
 
-`__array__` parameters are only on the **innermost** list-type + NumpyArray pair.
-Outer nesting layers have no `__array__` parameter.
+`__array__` parameters are only on the **innermost** list-type + NumpyArray
+pair. Outer nesting layers have no `__array__` parameter.
 
 ```text
 ListOffsetArray (no __array__)           -- outer list-of-lists
@@ -253,7 +253,8 @@ RecordArray
    fields alongside numeric data.
 2. **Filtering by string content**: `ak.str.starts_with()`,
    `ak.str.match_substring()`, `ak.str.is_in()`.
-3. **String transformation**: `ak.str.split_pattern()`, `ak.str.replace_substring()`.
+3. **String transformation**: `ak.str.split_pattern()`,
+   `ak.str.replace_substring()`.
 4. **Variable-length strings** (dominant): Almost all use cases have
    variable-length strings, not fixed-width.
 5. **Nullable strings**: Common in real data (missing values).
@@ -261,8 +262,8 @@ RecordArray
 ## Current Status in hypothesis-awkward
 
 - **No string/bytestring strategy exists** in the codebase.
-- Listed as "next steps" item 4 in
-  `.design/api/2026-02-12-contents-api.md` (line 642).
+- Listed as "next steps" item 4 in `.design/api/2026-02-12-contents-api.md`
+  (line 642).
 - Planned `allow_string`/`allow_bytestring` flags in
   `.design/api/2026-01-21-types-api.md`.
 - Existing `list_offset_array_contents()` and `list_array_contents()` do not
@@ -282,8 +283,8 @@ For **bytestrings**, use `st.binary()` directly since any bytes are valid.
 
 1. **New leaf-level strategies**: `string_contents()`, `bytestring_contents()`
    that produce `ListOffsetArray` with the required `__array__` parameters.
-2. **Integration with `contents()`**: Add `allow_string` and
-   `allow_bytestring` flags to the top-level `contents()` strategy.
+2. **Integration with `contents()`**: Add `allow_string` and `allow_bytestring`
+   flags to the top-level `contents()` strategy.
 3. **Integration with `arrays()`**: Propagate flags through to `contents()`.
 
 ### Key Constraint

@@ -10,7 +10,8 @@ This document describes the API for `string_contents()` and
 `bytestring_contents()` strategies and their integration into the existing
 `contents()` / `arrays()` pipeline.
 
-See [string-bytestring-research](../research/2026-02-12-string-bytestring-research.md)
+See
+[string-bytestring-research](../research/2026-02-12-string-bytestring-research.md)
 for background on Awkward Array's string representation.
 
 ## Background
@@ -65,9 +66,9 @@ def string_contents(
   (default), uses `st.characters()` (Hypothesis default for `st.text()`). Passed
   directly to `st.text(alphabet=...)`.
 
-- **`min_size`** — Minimum number of strings (list elements). Default: `0`.
-  This is the minimum number of strings in the array, not the minimum byte
-  count. A `min_size=1` array may contain a single empty string `""`.
+- **`min_size`** — Minimum number of strings (list elements). Default: `0`. This
+  is the minimum number of strings in the array, not the minimum byte count. A
+  `min_size=1` array may contain a single empty string `""`.
 
 - **`max_size`** — Maximum number of strings (list elements). Default: `10`.
   This bounds the number of strings, not the total byte count. Individual string
@@ -80,13 +81,13 @@ def string_contents(
 
 #### Behavior
 
-1. Draw `n` strings from `st.lists(st.text(alphabet=alphabet), min_size=...,
-   max_size=...)`.
+1. Draw `n` strings from
+   `st.lists(st.text(alphabet=alphabet), min_size=..., max_size=...)`.
 2. Encode each string to UTF-8 bytes, concatenate into a single `uint8` buffer.
 3. Compute offsets from cumulative byte lengths.
 4. Construct `NumpyArray(buffer, parameters={"__array__": "char"})`.
-5. Construct `ListOffsetArray(offsets, content,
-   parameters={"__array__": "string"})`.
+5. Construct
+   `ListOffsetArray(offsets, content, parameters={"__array__": "string"})`.
 
 ### `bytestring_contents()`
 
@@ -136,8 +137,8 @@ def leaf_contents(
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
 ```
 
-When `allow_string=True`, includes `string_contents(min_size=...,
-max_size=...)` in the `st.one_of()` options. Same for `allow_bytestring`.
+When `allow_string=True`, includes `string_contents(min_size=..., max_size=...)`
+in the `st.one_of()` options. Same for `allow_bytestring`.
 
 The `min_size` guard applies: string/bytestring options are only included when
 they can satisfy the minimum. Since `string_contents(min_size=0)` can produce a
@@ -190,8 +191,8 @@ tree, not wrapper strategies.
   content.
 - String nodes are terminal: nesting layers go _above_ them, not _inside_ them.
 - This matches how `contents()` works: draw a leaf, then wrap it in nesting
-  layers. A string leaf can be wrapped in `RegularArray` or `ListOffsetArray`
-  to produce nested string arrays (list-of-strings).
+  layers. A string leaf can be wrapped in `RegularArray` or `ListOffsetArray` to
+  produce nested string arrays (list-of-strings).
 
 **Alternative considered:** Treating strings as a special case of
 `list_offset_array_contents()` with a `parameters` argument. Rejected because
@@ -213,13 +214,13 @@ accepting arbitrary content does not apply.
 ### 3. `min_size` / `max_size` Count Strings, Not Bytes
 
 **Decision:** The `min_size` and `max_size` parameters on `string_contents()`
-and `bytestring_contents()` count the number of strings (list elements), not
-the total byte count.
+and `bytestring_contents()` count the number of strings (list elements), not the
+total byte count.
 
 **Rationale:**
 
-- Consistent with `list_offset_array_contents()` where size refers to the
-  number of sublists, not the total content length.
+- Consistent with `list_offset_array_contents()` where size refers to the number
+  of sublists, not the total content length.
 - Users think in terms of "how many strings" not "how many bytes".
 - Individual string lengths are controlled by Hypothesis's `st.text()` /
   `st.binary()` defaults, which produce reasonably short strings.
@@ -245,8 +246,8 @@ string layouts.
 
 **Rationale:**
 
-- `ListOffsetArray` is the canonical representation — it is what `ak.Array(
-  ["..."])` produces and what most Awkward operations return.
+- `ListOffsetArray` is the canonical representation — it is what
+  `ak.Array( ["..."])` produces and what most Awkward operations return.
 - `ListArray` and `RegularArray` string layouts are rare in practice (see
   research doc: "Variable-length strings (dominant)").
 - Keeping the initial implementation simple. `ListArray` and `RegularArray`
@@ -255,9 +256,9 @@ string layouts.
 
 ### 6. No `alphabet` / `bytestring_alphabet` on `contents()` / `arrays()`
 
-**Decision:** The top-level `contents()` and `arrays()` strategies do not
-expose `alphabet` parameters. They forward only `allow_string` and
-`allow_bytestring` to `leaf_contents()`.
+**Decision:** The top-level `contents()` and `arrays()` strategies do not expose
+`alphabet` parameters. They forward only `allow_string` and `allow_bytestring`
+to `leaf_contents()`.
 
 **Rationale:**
 
@@ -265,14 +266,14 @@ expose `alphabet` parameters. They forward only `allow_string` and
   complexity for a niche use case.
 - Users who need alphabet control can use `string_contents(alphabet=...)`
   directly and pass it as a concrete leaf.
-- Consistent with how `contents()` does not expose per-leaf configuration
-  beyond `dtypes` and `allow_nan`.
+- Consistent with how `contents()` does not expose per-leaf configuration beyond
+  `dtypes` and `allow_nan`.
 
 ### 7. Scalar Budget: Bytes Count as Scalars
 
-**Decision:** When `string_contents()` / `bytestring_contents()` participate
-in the `CountdownDrawer` scalar budget, the total byte count of all strings
-counts toward `max_size`.
+**Decision:** When `string_contents()` / `bytestring_contents()` participate in
+the `CountdownDrawer` scalar budget, the total byte count of all strings counts
+toward `max_size`.
 
 **Rationale:**
 
@@ -393,8 +394,8 @@ Following the patterns in
 - **TypedDict**: `StringContentsKwargs` with `alphabet`, `min_size`, `max_size`
 - **Kwargs strategy**: `string_contents_kwargs()` with `OptsChain` for
   `alphabet` (strategy-valued kwarg)
-- **Main property test**: Verifies `__array__` parameters, UTF-8 validity,
-  size bounds, dtype is `uint8`
+- **Main property test**: Verifies `__array__` parameters, UTF-8 validity, size
+  bounds, dtype is `uint8`
 - **Edge case reachability tests** (`find()`):
   - `test_draw_empty` — can produce zero-length string array
   - `test_draw_non_ascii` — can produce non-ASCII strings
@@ -405,8 +406,8 @@ Following the patterns in
 ### `bytestring_contents()` tests (`tests/strategies/contents/test_bytestring.py`)
 
 - **TypedDict**: `BytestringContentsKwargs` with `min_size`, `max_size`
-- **Main property test**: Verifies `__array__` parameters, size bounds, dtype
-  is `uint8`
+- **Main property test**: Verifies `__array__` parameters, size bounds, dtype is
+  `uint8`
 - **Edge case reachability tests** (`find()`):
   - `test_draw_empty` — can produce zero-length bytestring array
   - `test_draw_from_contents` — bytestring content can be drawn via

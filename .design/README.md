@@ -16,15 +16,16 @@ hypothesis-awkward.
 
 ## Purpose
 
-- **research/**: Store technical research and UX findings. Topics include Awkward
-  Array internals (type system, form system, direct constructors), user interviews,
-  and feasibility studies for new strategies.
+- **research/**: Store technical research and UX findings. Topics include
+  Awkward Array internals (type system, form system, direct constructors), user
+  interviews, and feasibility studies for new strategies.
 
 - **api/**: Store API design proposals, alternatives considered, and final
   decisions with rationale.
 
-- **impl/**: Store implementation decisions that don't affect the user-facing API,
-  such as directory structure, module organization, and internal architecture.
+- **impl/**: Store implementation decisions that don't affect the user-facing
+  API, such as directory structure, module organization, and internal
+  architecture.
 
 - **notes/**: Store progress tracking and working notes for ongoing work.
 

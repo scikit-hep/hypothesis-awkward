@@ -1,7 +1,8 @@
 # NumpyForm Research
 
 - **Date:** 2026-02-02
-- **Purpose:** Inform the design of a `numpy_forms()` strategy for hypothesis-awkward
+- **Purpose:** Inform the design of a `numpy_forms()` strategy for
+  hypothesis-awkward
 
 ## Constructor
 
@@ -13,8 +14,9 @@ NumpyForm(primitive, inner_shape=(), *, parameters=None, form_key=None)
 
 Validation:
 
-- `primitive` — normalized via `dtype_to_primitive(primitive_to_dtype(primitive))`
-  round-trip; raises `TypeError` for unrecognized primitives
+- `primitive` — normalized via
+  `dtype_to_primitive(primitive_to_dtype(primitive))` round-trip; raises
+  `TypeError` for unrecognized primitives
 - `inner_shape` — must be iterable; converted to tuple; no validation on element
   values
 - `parameters` — must be `dict` or `None` (validated by `Form._init`)

@@ -21,12 +21,12 @@ nodes. There is no way to constrain the immediate `len()` of a content node
 independently:
 
 - **`max_size`** — Total scalar count across all `NumpyArray` leaves, strings,
-  and bytestrings. A `RegularArray` of size 3 wrapping a `NumpyArray` of
-  length 12 has `max_size` cost of 12.
+  and bytestrings. A `RegularArray` of size 3 wrapping a `NumpyArray` of length
+  12 has `max_size` cost of 12.
 
-- **`max_length`** (new) — Immediate `len()` of a content node at one level.
-  For the same `RegularArray`, `max_length` constrains `len(content) // size`,
-  i.e., the number of groups, not the total elements.
+- **`max_length`** (new) — Immediate `len()` of a content node at one level. For
+  the same `RegularArray`, `max_length` constrains `len(content) // size`, i.e.,
+  the number of groups, not the total elements.
 
 Both constraints hold simultaneously: a content node must have
 `len() <= max_length` **and** total leaf scalars `<= max_size`.
@@ -46,8 +46,8 @@ the immediate `len()` of their output.
 
 #### `regular_array_contents()`
 
-`max_length` constrains the number of groups (the array length after dividing
-by `size`):
+`max_length` constrains the number of groups (the array length after dividing by
+`size`):
 
 ```text
 len(content) // size <= max_length
@@ -87,8 +87,9 @@ have the same `len()`):
 length <= max_length
 ```
 
-The RecordArray's `length` is capped to `min(min(len(c) for c in contents),
-max_length)`. Default: `None` (no constraint).
+The RecordArray's `length` is capped to
+`min(min(len(c) for c in contents), max_length)`. Default: `None` (no
+constraint).
 
 #### `union_array_contents()`
 
@@ -153,8 +154,8 @@ in the list independently satisfies the `max_length` constraint.
 #### `contents()`
 
 New `max_length` parameter wired to all child strategies. `contents()` passes
-`max_length` to whichever wrapper or leaf strategy it selects. The parameter
-is orthogonal to `max_size` and `max_depth`.
+`max_length` to whichever wrapper or leaf strategy it selects. The parameter is
+orthogonal to `max_size` and `max_depth`.
 
 ## Parameter Design
 
@@ -233,8 +234,8 @@ Both constraints hold simultaneously. Neither subsumes the other:
 For wrapper strategies, the constraints operate on different dimensions:
 
 - A `RegularArray` with `max_size=20, max_length=3` can have at most 3 groups,
-  but child content can have up to 20 total scalars (e.g., 3 groups of size 6
-  = 18 elements).
+  but child content can have up to 20 total scalars (e.g., 3 groups of size 6 =
+  18 elements).
 - A `ListOffsetArray` with `max_size=20, max_length=3` can have at most 3
   sublists, but child content can have up to 20 total scalars.
 
@@ -253,7 +254,8 @@ For wrapper strategies, the constraints operate on different dimensions:
 
 ### 2. `int | None` Type (Not `int` With Sentinel)
 
-**Decision:** Use `int | None` rather than a sentinel integer like `sys.maxsize`.
+**Decision:** Use `int | None` rather than a sentinel integer like
+`sys.maxsize`.
 
 **Rationale:**
 
@@ -285,8 +287,8 @@ its own output `len()`, not on its child content's `len()`.
 - The caller wants to control the length of the result it receives.
 - Wrapper strategies may internally request child content of different length
   (e.g., `regular_array_contents` needs child length = `size * output_length`).
-- This keeps the semantics uniform: `max_length` always means "the thing you
-  get back has `len()` at most this."
+- This keeps the semantics uniform: `max_length` always means "the thing you get
+  back has `len()` at most this."
 
 ### 5. `union_array_contents()` Uses Non-Compact Indexing for Truncation
 
@@ -308,10 +310,10 @@ the shuffled tags/index arrays are truncated rather than rejected via
 
 ## Implementation Order
 
-See [max-length-research](../research/2026-02-23-max-length-research.md) for
-the bottom-up implementation order. Wrapper strategies are implemented first
-(they receive `max_length`), then leaves, then the entry points that wire
-everything together.
+See [max-length-research](../research/2026-02-23-max-length-research.md) for the
+bottom-up implementation order. Wrapper strategies are implemented first (they
+receive `max_length`), then leaves, then the entry points that wire everything
+together.
 
 ### Progress
 

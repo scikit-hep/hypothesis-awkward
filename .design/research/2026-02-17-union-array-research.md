@@ -20,7 +20,8 @@ Parameters:
 - **`tags`** — An `Index8` (dtype=int8) array. Each value selects which content
   the element comes from: `0 <= tags[i] < len(contents)`.
 - **`index`** — An `Index32`, `IndexU32`, or `Index64` array. Each value selects
-  which element within the chosen content: `0 <= index[i] < len(contents[tags[i]])`.
+  which element within the chosen content:
+  `0 <= index[i] < len(contents[tags[i]])`.
 - **`contents`** — An iterable of `Content` subclasses. Minimum 2 contents
   required (raises `TypeError` otherwise).
 - **`parameters`** — Optional dict. No special keys (unlike `RecordArray`'s
@@ -37,8 +38,8 @@ The constructor enforces:
 3. `len(contents) >= 2` (raises `TypeError`)
 4. No union-type content (no nested unions)
 5. No non-categorical indexed-type content
-6. Option-type contents: either ALL or NONE must be option (raises `TypeError` if
-   mixed)
+6. Option-type contents: either ALL or NONE must be option (raises `TypeError`
+   if mixed)
 7. `len(tags) <= len(index)` (usually equal; extra index values are unreachable)
 
 ## Construction Examples
@@ -181,9 +182,9 @@ The "all or none" option rule means: either every content in the union is an
 option node, or none of them is. Mixed option/non-option contents raise
 `TypeError`.
 
-**Indirect nesting is valid:** `Union → Record → Union` and `Union → List →
-Union` are both fine because the "no nested union" rule applies only to direct
-children.
+**Indirect nesting is valid:** `Union → Record → Union` and
+`Union → List → Union` are both fine because the "no nested union" rule applies
+only to direct children.
 
 ## Tags and Index Mechanics
 
@@ -203,8 +204,8 @@ children.
 
 ### Compact vs. sparse indexing
 
-- **Compact:** Each content element is referenced exactly once. Index values form
-  a dense range `[0, 1, ..., count_k-1]` per tag `k`.
+- **Compact:** Each content element is referenced exactly once. Index values
+  form a dense range `[0, 1, ..., count_k-1]` per tag `k`.
 - **Sparse:** Contents can have unreferenced elements. Index values may skip
   entries.
 
@@ -214,7 +215,8 @@ Both are valid. Compact indexing is simpler for strategy generation.
 
 - `len(UnionArray)` = `len(tags)`
 - `len(index) >= len(tags)` (required)
-- Each content can be **any** length >= the maximum index value referencing it + 1
+- Each content can be **any** length >= the maximum index value referencing it +
+  1
 - Contents do **not** need to share the same length
 
 ### Key difference from RecordArray
@@ -246,8 +248,8 @@ types:
 ## Integration with the Tree Builder
 
 The bottom-up tree builder in `contents()` was designed with UnionArray in mind.
-The existing algorithm already supports multi-child nodes via the "another edge?"
-mechanism (currently used only by RecordArray).
+The existing algorithm already supports multi-child nodes via the "another
+edge?" mechanism (currently used only by RecordArray).
 
 ### What needs to change
 
@@ -271,8 +273,8 @@ mechanism (currently used only by RecordArray).
    UnionArray, `'union'` is excluded from the node type options (see "Nesting
    constraint tracking" below).
 
-4. **Buffer generation**: RecordArray has no buffers. UnionArray needs `(tags,
-   index)` arrays.
+4. **Buffer generation**: RecordArray has no buffers. UnionArray needs
+   `(tags, index)` arrays.
 
 ### Buffer generation strategy
 
@@ -295,32 +297,32 @@ This guarantees:
 ### Length considerations
 
 Unlike RecordArray (where all contents must share the record length), UnionArray
-contents can have different lengths. The union length is determined by `len(tags)`,
-which with compact indexing equals `sum(len(c) for c in contents)`.
+contents can have different lengths. The union length is determined by
+`len(tags)`, which with compact indexing equals `sum(len(c) for c in contents)`.
 
 This means the scalar budget naturally distributes across contents — each child
-draws from the `CountdownDrawer` independently, and the union length is the total
-of all child lengths.
+draws from the `CountdownDrawer` independently, and the union length is the
+total of all child lengths.
 
 ### Nesting constraint tracking
 
-UnionArray introduces the first nesting constraints that need to be tracked during
-tree building:
+UnionArray introduces the first nesting constraints that need to be tracked
+during tree building:
 
-1. **UnionArray cannot be nested inside option or indexed nodes** — irrelevant for
-   now (no option/indexed support yet), but will matter later.
-2. **UnionArray cannot contain union-type children** — the parent node must not be
-   a UnionArray if any of its direct children is a UnionArray.
+1. **UnionArray cannot be nested inside option or indexed nodes** — irrelevant
+   for now (no option/indexed support yet), but will matter later.
+2. **UnionArray cannot contain union-type children** — the parent node must not
+   be a UnionArray if any of its direct children is a UnionArray.
 
 The "no nested unions" constraint applies to **direct** children only. Indirect
 nesting like `Union → Record → Union` or `Union → List → Union` is valid because
 the intermediate node (Record or List) is the direct child, not another Union.
 
-**Solution:** The tree builder is bottom-up — children are built before the parent
-node type is chosen. So the constraint is enforced **post-hoc**: after children are
-built, check whether any child is a UnionArray. If so, exclude `'union'` from the
-multi-child node type options (forcing RecordArray for 2+ children, which is always
-valid).
+**Solution:** The tree builder is bottom-up — children are built before the
+parent node type is chosen. So the constraint is enforced **post-hoc**: after
+children are built, check whether any child is a UnionArray. If so, exclude
+`'union'` from the multi-child node type options (forcing RecordArray for 2+
+children, which is always valid).
 
 ```python
 multi_child_types = ['record']
@@ -329,8 +331,8 @@ if allow_union and not any(c.is_union for c in children):
 node_type = draw(st.sampled_from(sorted(multi_child_types)))
 ```
 
-Indirect nesting remains possible because deeper descendants are not checked — only
-direct children.
+Indirect nesting remains possible because deeper descendants are not checked —
+only direct children.
 
 ## Scalar Budget Considerations
 
@@ -348,9 +350,9 @@ different lengths.
 For `union_array_contents()`:
 
 - **`contents`** — Strategy or list of strategies for the child contents, or
-  `None` for default. The three-form dispatch pattern (None / Strategy / Content)
-  used by existing wrappers needs adaptation: UnionArray needs 2+ children, not
-  just one.
+  `None` for default. The three-form dispatch pattern (None / Strategy /
+  Content) used by existing wrappers needs adaptation: UnionArray needs 2+
+  children, not just one.
 - **`max_contents`** — Maximum number of alternative contents. Default could be
   ~4. Capped at 128 (int8 limit), but practically much lower.
 
@@ -405,8 +407,9 @@ unions gain an index on conversion to Awkward.
 
 ## Open Questions
 
-1. **`union_array_contents()` API**: The existing wrapper strategies take a single
-   `content` parameter. UnionArray needs 2+ children. Options:
+1. **`union_array_contents()` API**: The existing wrapper strategies take a
+   single `content` parameter. UnionArray needs 2+ children. Options:
+
    - Accept `contents: list[st.SearchStrategy[Content]]` (list of strategies)
    - Accept a single strategy and draw multiple times
    - Generate children internally (like the tree builder does)
@@ -415,17 +418,18 @@ unions gain an index on conversion to Awkward.
    typically have heterogeneous types. But `union[int64, int64]` is technically
    valid. For simplicity, we could allow homogeneous unions.
 
-3. **Compact vs. sparse indexing?** Compact is simpler and exercises every content
-   element. Sparse could test more edge cases. Start with compact.
+3. **Compact vs. sparse indexing?** Compact is simpler and exercises every
+   content element. Sparse could test more edge cases. Start with compact.
 
 4. **How does depth counting work?** RecordArray consumes a depth level. Should
    UnionArray also consume a depth level? It adds structural complexity but
    doesn't add "list nesting" in the same way. For consistency with RecordArray,
    it should consume a depth level.
 
-5. **"Another edge?" minimum for UnionArray**: The tree builder's "another edge?"
-   loop starts with 1 child and adds more. UnionArray requires >= 2. If only 1
-   child is collected and UnionArray would be drawn, we need to either:
+5. **"Another edge?" minimum for UnionArray**: The tree builder's "another
+   edge?" loop starts with 1 child and adds more. UnionArray requires >= 2. If
+   only 1 child is collected and UnionArray would be drawn, we need to either:
+
    - Force another child (draw one more `_build()` call)
    - Exclude UnionArray from the 1-child case (already handled by the current
      algorithm — 1 child uses `single_child_types`, 2+ uses multi-child types)
@@ -433,10 +437,10 @@ unions gain an index on conversion to Awkward.
    The current algorithm already handles this: UnionArray is only in the
    multi-child pool, and multi-child is only reached when 2+ children exist.
 
-6. **`allow_union` default**: Should it default to `True` or `False`? RecordArray
-   defaults to `True`. For consistency, UnionArray should also default to `True`.
-   However, UnionArray is less common in practice and adds nesting constraints.
-   Start with `True` for consistency.
+6. **`allow_union` default**: Should it default to `True` or `False`?
+   RecordArray defaults to `True`. For consistency, UnionArray should also
+   default to `True`. However, UnionArray is less common in practice and adds
+   nesting constraints. Start with `True` for consistency.
 
 ## Sources
 

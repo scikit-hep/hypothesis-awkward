@@ -29,11 +29,11 @@ Parameters:
 - **`fields`** — A list of field name strings, or `None`. When `None`, the
   record is a **tuple** (unnamed fields, accessed by index). When a list,
   `len(fields) == len(contents)` is required.
-- **`length`** — Explicit length. When `None`, computed as `min(len(c) for c in
-  contents)`. When `len(contents) == 0` and `length` is `None`, raises
-  `TypeError` — length must be specified for empty records.
-- **`parameters`** — Optional dict. The key `__record__` is special for
-  behavior dispatch (e.g., `{'__record__': 'Point'}`).
+- **`length`** — Explicit length. When `None`, computed as
+  `min(len(c) for c in contents)`. When `len(contents) == 0` and `length` is
+  `None`, raises `TypeError` — length must be specified for empty records.
+- **`parameters`** — Optional dict. The key `__record__` is special for behavior
+  dispatch (e.g., `{'__record__': 'Point'}`).
 
 ## Construction Examples
 
@@ -123,8 +123,8 @@ have exactly the same length.
 ## Field Names
 
 - Any string is valid as a field name.
-- Duplicate field names are allowed at the constructor level (though semantically
-  questionable).
+- Duplicate field names are allowed at the constructor level (though
+  semantically questionable).
 - Empty strings and spaces are allowed.
 - For tuples (`fields=None`), field names are auto-generated as `'0'`, `'1'`,
   etc.
@@ -153,13 +153,13 @@ The current `contents()` strategy uses a wrappers pattern:
 leaf → wrapper₁ → wrapper₂ → ... → wrapperₙ
 ```
 
-RecordArray does not fit neatly into this linear chain because it needs
-multiple children. Two possible integration approaches:
+RecordArray does not fit neatly into this linear chain because it needs multiple
+children. Two possible integration approaches:
 
 ### Approach A: RecordArray as a Branching Wrapper
 
-When RecordArray is selected as a wrapper at depth level k, it takes the
-content built so far as one field and generates additional fields:
+When RecordArray is selected as a wrapper at depth level k, it takes the content
+built so far as one field and generates additional fields:
 
 ```text
 leaf → wrapper₁ → ... → RecordArray(field0=prev, field1=extra₁, ...) → wrapperₖ₊₁ → ...
@@ -252,10 +252,10 @@ For `record_array_contents()`:
 
 - **`content`** — The three-form dispatch (None / Strategy / Content), same as
   existing wrappers. This becomes one field of the record.
-- **`max_fields`** — Maximum number of fields (including the passed-in
-  content). Default could be ~5.
-- **`allow_tuple`** — Whether to generate tuple records (`fields=None`).
-  Default `True`.
+- **`max_fields`** — Maximum number of fields (including the passed-in content).
+  Default could be ~5.
+- **`allow_tuple`** — Whether to generate tuple records (`fields=None`). Default
+  `True`.
 
 For `contents()` / `arrays()`:
 
@@ -330,9 +330,9 @@ RecordArray([
 2. **Should extra fields be leaf-only or allow nesting?** Leaf-only is simpler
    and avoids budget explosion. Nesting support can be added later.
 
-3. **Empty records (0 fields)?** These are valid (`RecordArray([], [], length=n)`)
-   but unusual. Should they be generated? Probably gated by `min_size == 0` or
-   similar.
+3. **Empty records (0 fields)?** These are valid
+   (`RecordArray([], [], length=n)`) but unusual. Should they be generated?
+   Probably gated by `min_size == 0` or similar.
 
 4. **Tuple vs. named?** Both should be supported. The ratio could be controlled
    by a parameter or left to Hypothesis's random choices.
