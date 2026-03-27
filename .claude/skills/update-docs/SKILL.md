@@ -44,8 +44,6 @@ of the repository. Update any docs that are outdated.
    - Check whether any rule file should be path-scoped to reduce default context
      load.
 
-7. **Format** — Run `dprint fmt` on any markdown files you changed.
-
 ## Guidelines
 
 - Do not touch `settings.json` or `settings.local.json`.
