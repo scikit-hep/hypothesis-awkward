@@ -70,6 +70,7 @@ def any_nan_in_numpy_array(n: np.ndarray, /) -> bool:
         arr = stack.pop()
         match arr.dtype.kind:
             case 'V':  # structured
+                assert arr.dtype.names is not None
                 stack.extend(arr[field] for field in arr.dtype.names)
             case 'f' | 'c':  # float or complex
                 if np.any(np.isnan(arr)):
@@ -113,6 +114,7 @@ def any_nat_in_numpy_array(n: np.ndarray, /) -> bool:
         arr = stack.pop()
         match arr.dtype.kind:
             case 'V':  # structured
+                assert arr.dtype.names is not None
                 stack.extend(arr[field] for field in arr.dtype.names)
             case 'm' | 'M':  # timedelta or datetime
                 if np.any(np.isnat(arr)):

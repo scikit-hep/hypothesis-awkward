@@ -63,6 +63,7 @@ def test_n_scalars_in(dtype: np.dtype) -> None:
         kind = x.dtype.kind
         match kind:
             case 'V':
+                assert x.dtype.names is not None
                 return [i for n in x.dtype.names for i in _flatten(x[n])]
             case _:
                 return x.flatten().tolist()
