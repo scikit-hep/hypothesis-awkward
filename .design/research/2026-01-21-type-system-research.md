@@ -1,7 +1,7 @@
 # Awkward Array Type System Research
 
-**Date:** 2026-01-21
-**Purpose:** Inform the design of `types()` strategy for hypothesis-awkward
+- **Date:** 2026-01-21
+- **Purpose:** Inform the design of `types()` strategy for hypothesis-awkward
 
 ## Type Class Hierarchy
 

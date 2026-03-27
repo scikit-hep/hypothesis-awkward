@@ -1,8 +1,8 @@
 # API Design: `arrays()` Strategy
 
-**Date:** 2026-02-04
-**Status:** Implemented
-**Author:** Claude (with developer collaboration)
+- **Date:** 2026-02-04
+- **Status:** Implemented
+- **Author:** Claude (with developer collaboration)
 
 > **Update (2026-02-22):** Since this document was written:
 >

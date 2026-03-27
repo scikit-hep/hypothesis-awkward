@@ -1,7 +1,7 @@
 # NumpyForm Research
 
-**Date:** 2026-02-02
-**Purpose:** Inform the design of a `numpy_forms()` strategy for hypothesis-awkward
+- **Date:** 2026-02-02
+- **Purpose:** Inform the design of a `numpy_forms()` strategy for hypothesis-awkward
 
 ## Constructor
 

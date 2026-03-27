@@ -1,8 +1,8 @@
 # API Design: `contents/` Strategies
 
-**Date:** 2026-02-12
-**Status:** Implemented
-**Author:** Claude (with developer collaboration)
+- **Date:** 2026-02-12
+- **Status:** Implemented
+- **Author:** Claude (with developer collaboration)
 
 > **Update (2026-02-22):** Since this document was written:
 >

@@ -1,7 +1,7 @@
 # UX Research Interview: hypothesis-awkward Developer
 
-**Date:** 2026-01-21
-**Participant:** The developer of hypothesis-awkward
+- **Date:** 2026-01-21
+- **Participant:** The developer of hypothesis-awkward
 **Interviewer:** Claude
 
 ## Project Vision

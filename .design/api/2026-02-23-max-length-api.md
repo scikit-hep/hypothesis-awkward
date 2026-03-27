@@ -1,8 +1,8 @@
 # API Design: `max_length` Parameter
 
-**Date:** 2026-02-23
-**Status:** Implemented
-**Author:** Claude (with developer collaboration)
+- **Date:** 2026-02-23
+- **Status:** Implemented
+- **Author:** Claude (with developer collaboration)
 
 ## Overview
 

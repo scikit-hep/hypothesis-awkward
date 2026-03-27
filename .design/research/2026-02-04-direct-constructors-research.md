@@ -1,7 +1,7 @@
 # Direct Constructors (Layouts) Research
 
-**Date:** 2026-02-04
-**Purpose:** Inform the design of an `arrays()` strategy that generates arbitrary
+- **Date:** 2026-02-04
+- **Purpose:** Inform the design of an `arrays()` strategy that generates arbitrary
 Awkward Arrays via direct Content constructors
 
 ## Motivation

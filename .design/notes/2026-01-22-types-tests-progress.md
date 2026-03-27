@@ -1,8 +1,8 @@
 # Types Strategy Tests Progress
 
-**Date:** 2026-01-22
-**Updated:** 2026-02-09
-**Status:** Paused (focus shifted to constructors/arrays)
+- **Date:** 2026-01-22
+- **Updated:** 2026-02-09
+- **Status:** Paused (focus shifted to constructors/arrays)
 
 ## Completed
 

@@ -1,8 +1,8 @@
 # Implementation: Top-Down Tree Builder for `contents()`
 
-**Date:** 2026-02-21
-**Status:** Implemented
-**Supersedes:** [Bottom-up tree builder](2026-02-17-contents-tree-builder.md)
+- **Date:** 2026-02-21
+- **Status:** Implemented
+- **Supersedes:** [Bottom-up tree builder](2026-02-17-contents-tree-builder.md)
 
 > **Note (2026-02-22):** The implementation differs from the pseudocode below:
 >

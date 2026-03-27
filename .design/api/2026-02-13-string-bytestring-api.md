@@ -1,8 +1,8 @@
 # API Design: String and Bytestring Content Strategies
 
-**Date:** 2026-02-13
-**Status:** Implemented
-**Author:** Claude (with developer collaboration)
+- **Date:** 2026-02-13
+- **Status:** Implemented
+- **Author:** Claude (with developer collaboration)
 
 ## Overview
 

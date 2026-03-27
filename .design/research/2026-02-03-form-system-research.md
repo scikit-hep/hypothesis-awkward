@@ -1,7 +1,7 @@
 # Awkward Array Form System Research
 
-**Date:** 2026-02-03
-**Purpose:** Inform the design of form-generating strategies for hypothesis-awkward
+- **Date:** 2026-02-03
+- **Purpose:** Inform the design of form-generating strategies for hypothesis-awkward
 
 ## Form Class Hierarchy
 

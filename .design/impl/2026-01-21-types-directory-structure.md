@@ -1,8 +1,8 @@
 # Directory Structure: `types` Module
 
-**Date:** 2026-01-21
-**Status:** Draft
-**Related:** [types-api.md](./../api/2026-01-21-types-api.md)
+- **Date:** 2026-01-21
+- **Status:** Draft
+- **Related:** [types-api.md](./../api/2026-01-21-types-api.md)
 
 ## Overview
 
