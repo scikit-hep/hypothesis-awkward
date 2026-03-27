@@ -1,5 +1,19 @@
 # Contributing
 
+## Development Setup
+
+Install the project in development mode:
+
+```bash
+uv pip install -e .[all] --group dev
+```
+
+Set up the pre-commit hooks (optional — CI enforces these on PRs):
+
+```bash
+pre-commit install
+```
+
 ## PR Title Convention
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/) for **PR titles**. Since we squash-merge, the PR title becomes the final commit message.
