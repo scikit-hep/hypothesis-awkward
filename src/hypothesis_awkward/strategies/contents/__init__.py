@@ -5,6 +5,7 @@ constructors"][ak-user-guide-constructors].
 
 [ak-user-guide-constructors]: https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
 '''
+
 __all__ = [
     'contents',
     'content_lists',

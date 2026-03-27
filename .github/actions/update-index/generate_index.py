@@ -1,4 +1,5 @@
 '''Generate index.html listing all doc versions on gh-pages.'''
+
 import re
 import sys
 from pathlib import Path
@@ -8,8 +9,7 @@ from string import Template
 def find_versions() -> list[str]:
     '''Find version directories (e.g., 0.2.1, 1.0.0) sorted descending.'''
     dirs = [
-        d.name for d in Path('.').iterdir()
-        if d.is_dir() and re.match(r'\d', d.name)
+        d.name for d in Path('.').iterdir() if d.is_dir() and re.match(r'\d', d.name)
     ]
     dirs.sort(key=lambda v: [int(x) for x in v.split('.')], reverse=True)
     return dirs
@@ -26,7 +26,9 @@ def build_version_list(versions: list[str], latest_version: str | None) -> str:
     '''Build HTML list items for all versions.'''
     lines: list[str] = []
     if latest_version:
-        lines.append(f'    <li><a href="latest/">latest</a> <span class="meta">({latest_version})</span></li>')
+        lines.append(
+            f'    <li><a href="latest/">latest</a> <span class="meta">({latest_version})</span></li>'
+        )
     if Path('dev').is_dir():
         lines.append('    <li><a href="dev/">dev</a></li>')
     for v in versions:
