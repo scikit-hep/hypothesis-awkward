@@ -47,13 +47,15 @@ def list_array_contents_kwargs(
 @given(data=st.data())
 def test_list_array_contents(data: st.DataObject) -> None:
     '''Test that `list_array_contents()` respects all its options.'''
+    # Draw options
     opts = data.draw(list_array_contents_kwargs(), label='opts')
     opts.reset()
+
+    # Call the test subject
     result = data.draw(
         st_ak.contents.list_array_contents(**opts.kwargs), label='result'
     )
 
-    # Assert the result is always a ListArray content
     assert isinstance(result, ListArray)
 
     # Assert list length is within bounds
@@ -70,7 +72,7 @@ def test_list_array_contents(data: st.DataObject) -> None:
         assert starts[i] <= stops[i]
         assert stops[i] <= len(result.content)
 
-    # Assert content
+    # Assert the options were effective
     content = opts.kwargs.get('content', None)
     match content:
         case Content():

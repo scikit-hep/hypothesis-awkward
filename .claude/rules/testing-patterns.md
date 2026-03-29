@@ -301,10 +301,15 @@ Test that the strategy respects all its options:
 @settings(max_examples=200)
 @given(data=st.data())
 def test_numpy_arrays(data: st.DataObject) -> None:
+    # Draw options
     opts = data.draw(numpy_arrays_kwargs(), label='opts')
     opts.reset()
+
+    # Call the test subject
     n = data.draw(st_ak.numpy_arrays(**opts.kwargs), label='n')
-    # Assert options were effective...
+
+    # Assert the options were effective
+    ...
 ```
 
 ## 4. Edge case reachability tests using `find()`

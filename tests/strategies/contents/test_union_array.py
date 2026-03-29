@@ -63,15 +63,18 @@ def union_array_contents_kwargs(
 @given(data=st.data())
 def test_union_array_contents(data: st.DataObject) -> None:
     '''Test that `union_array_contents()` respects all its options.'''
+    # Draw options
     opts = data.draw(union_array_contents_kwargs(), label='opts')
     opts.reset()
+
+    # Call the test subject
     result = data.draw(
         st_ak.contents.union_array_contents(**opts.kwargs), label='result'
     )
 
-    # Assert the result is always a UnionArray
     assert isinstance(result, UnionArray)
 
+    # Assert the options were effective
     max_contents = opts.kwargs.get('max_contents', DEFAULT_MAX_CONTENTS)
     contents = opts.kwargs.get('contents', None)
 

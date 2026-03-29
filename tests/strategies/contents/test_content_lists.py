@@ -56,6 +56,7 @@ def content_lists_kwargs(
 @given(data=st.data())
 def test_content_lists(data: st.DataObject) -> None:
     '''Test that `content_lists()` respects all its options.'''
+    # Draw options
     opts = data.draw(content_lists_kwargs(), label='opts')
     opts.reset()
 
@@ -63,11 +64,13 @@ def test_content_lists(data: st.DataObject) -> None:
     min_size = opts.kwargs.get('min_size', DEFAULT_MIN_SIZE)
     max_size = opts.kwargs.get('max_size')
 
+    # Call the test subject
     result = data.draw(
         st_ak.contents.content_lists(**opts.kwargs),
         label='result',
     )
 
+    # Assert the options were effective
     assert isinstance(result, list)
     assert all(isinstance(c, Content) for c in result)
     assert sc(min_size) <= len(result) <= sc(max_size)

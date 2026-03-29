@@ -47,13 +47,15 @@ def list_offset_array_contents_kwargs(
 @given(data=st.data())
 def test_list_offset_array_contents(data: st.DataObject) -> None:
     '''Test that `list_offset_array_contents()` respects all its options.'''
+    # Draw options
     opts = data.draw(list_offset_array_contents_kwargs(), label='opts')
     opts.reset()
+
+    # Call the test subject
     result = data.draw(
         st_ak.contents.list_offset_array_contents(**opts.kwargs), label='result'
     )
 
-    # Assert the result is always a ListOffsetArray content
     assert isinstance(result, ListOffsetArray)
 
     # Assert length is within bounds
@@ -69,7 +71,7 @@ def test_list_offset_array_contents(data: st.DataObject) -> None:
     assert offsets[0] == 0
     assert offsets[-1] <= len(result.content)
 
-    # Assert content
+    # Assert the options were effective
     content = opts.kwargs.get('content', None)
     match content:
         case Content():
