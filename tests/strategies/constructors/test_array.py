@@ -60,6 +60,7 @@ def test_arrays(data: st.DataObject) -> None:
     '''Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`.'''
     from hypothesis_awkward.strategies.constructors import array_ as array_module
 
+    # Draw options
     opts = data.draw(arrays_kwargs(), label='opts')
     opts.reset()
     kwargs = opts.kwargs
@@ -73,6 +74,7 @@ def test_arrays(data: st.DataObject) -> None:
         k: v for k, v in {**DEFAULTS, **kwargs}.items() if k in contents_keys
     }
 
+    # Call the test subject
     with patch.object(array_module, 'st_ak', mock_st_ak):
         try:
             a = data.draw(st_ak.constructors.arrays(**kwargs), label='a')

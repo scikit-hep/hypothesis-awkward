@@ -69,6 +69,7 @@ def leaf_contents_kwargs(
 @given(data=st.data())
 def test_leaf_contents(data: st.DataObject) -> None:
     '''Test that `leaf_contents()` respects all its options.'''
+    # Draw options
     opts = data.draw(leaf_contents_kwargs(), label='opts')
     opts.reset()
 
@@ -85,6 +86,7 @@ def test_leaf_contents(data: st.DataObject) -> None:
             st_ak.contents.leaf_contents(**opts.kwargs)
         return
 
+    # Call the test subject
     result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
 
     is_numpy = isinstance(result, NumpyArray)
@@ -94,6 +96,7 @@ def test_leaf_contents(data: st.DataObject) -> None:
 
     assert any((is_numpy, is_empty, is_string, is_bytestring))
 
+    # Assert the options were effective
     if not allow_numpy:
         assert not is_numpy
     if not allow_empty:

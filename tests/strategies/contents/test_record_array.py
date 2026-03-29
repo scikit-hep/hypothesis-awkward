@@ -61,15 +61,18 @@ def record_array_contents_kwargs(
 @given(data=st.data())
 def test_record_array_contents(data: st.DataObject) -> None:
     '''Test that `record_array_contents()` respects all its options.'''
+    # Draw options
     opts = data.draw(record_array_contents_kwargs(), label='opts')
     opts.reset()
+
+    # Call the test subject
     result = data.draw(
         st_ak.contents.record_array_contents(**opts.kwargs), label='result'
     )
 
-    # Assert the result is always a RecordArray
     assert isinstance(result, RecordArray)
 
+    # Assert the options were effective
     max_fields = opts.kwargs.get('max_fields', DEFAULT_MAX_FIELDS)
     allow_tuple = opts.kwargs.get('allow_tuple', True)
     contents = opts.kwargs.get('contents', None)

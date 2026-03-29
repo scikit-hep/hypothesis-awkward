@@ -102,9 +102,13 @@ def _exhaust(
 @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
 @given(data=st.data())
 def test_countdown_drawer(data: st.DataObject) -> None:
+    # Draw options
     kwargs = data.draw(countdown_drawer_kwargs(), label='kwargs')
+
+    # Call the test subject
     total, results = data.draw(_exhaust(**kwargs), label='result')
 
+    # Assert the options were effective
     min_size_each = kwargs.get('min_size_each', DEFAULT_MIN_SIZE_EACH)
     max_size_each = kwargs.get('max_size_each')
     min_size_total = kwargs.get('min_size_total', DEFAULT_MIN_SIZE_TOTAL)

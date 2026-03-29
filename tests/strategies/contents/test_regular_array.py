@@ -53,16 +53,18 @@ def regular_array_contents_kwargs(
 @given(data=st.data())
 def test_regular_array_contents(data: st.DataObject) -> None:
     '''Test that `regular_array_contents()` respects all its options.'''
+    # Draw options
     opts = data.draw(regular_array_contents_kwargs(), label='opts')
     opts.reset()
+
+    # Call the test subject
     result = data.draw(
         st_ak.contents.regular_array_contents(**opts.kwargs), label='result'
     )
 
-    # Assert the result is always a RegularArray content
     assert isinstance(result, RegularArray)
 
-    # Assert size is within bounds
+    # Assert the options were effective
     max_size = opts.kwargs.get('max_size', MAX_REGULAR_SIZE)
     assert result.size <= max_size
 
