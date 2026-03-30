@@ -1,11 +1,5 @@
 import functools
-import sys
-from typing import Literal, Protocol
-
-if sys.version_info >= (3, 11):
-    from typing import assert_never
-else:
-    from typing_extensions import assert_never
+from typing import Protocol
 
 import numpy as np
 from hypothesis import assume
@@ -21,8 +15,6 @@ from .list_offset_array import list_offset_array_from_contents
 from .record_array import record_array_from_contents
 from .regular_array import regular_array_from_contents
 from .union_array import union_array_from_contents
-
-_NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
 
 
 @st.composite
@@ -170,77 +162,31 @@ def contents(
         allow_union=allow_union,
     )
 
-    # Choose node type from allow_* flags
-    candidates = list[_NodeType]()
+    # Choose wrapper type from allow_* flags
+    candidates = list[_StFromContents]()
     if allow_regular:
-        candidates.append('regular')
+        candidates.append(regular_array_from_contents)
     if allow_list_offset:
-        candidates.append('list_offset')
+        candidates.append(list_offset_array_from_contents)
     if allow_list:
-        candidates.append('list')
+        candidates.append(list_array_from_contents)
     if allow_record:
-        candidates.append('record')
+        candidates.append(record_array_from_contents)
     if allow_union and allow_union_root:
-        candidates.append('union')
+        candidates.append(union_array_from_contents)
 
     if not candidates:
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
 
-    node_type = draw(st.sampled_from(sorted(candidates)))
-
-    match node_type:
-        case 'union':
-            return draw(
-                union_array_from_contents(
-                    recurse,
-                    max_size=max_size,
-                    max_leaf_size=max_leaf_size,
-                    max_length=max_length,
-                )
-            )
-
-        case 'record':
-            return draw(
-                record_array_from_contents(
-                    recurse,
-                    max_size=max_size,
-                    max_leaf_size=max_leaf_size,
-                    max_length=max_length,
-                )
-            )
-
-        case 'regular':
-            return draw(
-                regular_array_from_contents(
-                    recurse,
-                    max_size=max_size,
-                    max_leaf_size=max_leaf_size,
-                    max_length=max_length,
-                )
-            )
-
-        case 'list_offset':
-            return draw(
-                list_offset_array_from_contents(
-                    recurse,
-                    max_size=max_size,
-                    max_leaf_size=max_leaf_size,
-                    max_length=max_length,
-                )
-            )
-
-        case 'list':
-            return draw(
-                list_array_from_contents(
-                    recurse,
-                    max_size=max_size,
-                    max_leaf_size=max_leaf_size,
-                    max_length=max_length,
-                )
-            )
-
-        case _ as unreachable:  # pragma: no cover
-            assert_never(unreachable)
+    st_wrapper = draw(st.sampled_from(candidates))
+    return draw(
+        st_wrapper(
+            recurse,
+            max_size=max_size,
+            max_leaf_size=max_leaf_size,
+            max_length=max_length,
+        )
+    )
 
 
 class StContent(Protocol):
@@ -250,6 +196,17 @@ class StContent(Protocol):
         max_size: int,
         max_leaf_size: int | None,
         allow_union_root: bool = ...,
+    ) -> st.SearchStrategy[Content]: ...
+
+
+class _StFromContents(Protocol):
+    def __call__(
+        self,
+        content: StContent,
+        *,
+        max_size: int,
+        max_leaf_size: int | None,
+        max_length: int | None,
     ) -> st.SearchStrategy[Content]: ...
 
 
