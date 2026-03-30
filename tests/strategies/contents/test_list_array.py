@@ -1,20 +1,20 @@
 from typing import Any, TypedDict, cast
 
+import numpy as np
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
-from awkward.contents import Content, ListArray
+from awkward.contents import Content, ListArray, NumpyArray
 from hypothesis_awkward.util import iter_contents
-
-MAX_LENGTH = 5
+from hypothesis_awkward.util.safe import safe_compare as sc
 
 
 class ListArrayContentsKwargs(TypedDict, total=False):
     '''Options for `list_array_contents()` strategy.'''
 
     content: st.SearchStrategy[Content] | Content
-    max_length: int
+    max_length: int | None
 
 
 @st.composite
@@ -58,9 +58,9 @@ def test_list_array_contents(data: st.DataObject) -> None:
 
     assert isinstance(result, ListArray)
 
-    # Assert list length is within bounds
-    max_length = opts.kwargs.get('max_length', MAX_LENGTH)
-    assert len(result) <= max_length
+    # Assert the options were effective
+    max_length = opts.kwargs.get('max_length')
+    assert len(result) <= sc(max_length)
 
     # Assert starts and stops have the same length
     starts = result.starts.data
@@ -88,6 +88,16 @@ def test_draw_max_length() -> None:
     find(
         st_ak.contents.list_array_contents(max_length=max_length),
         lambda c: len(c) == max_length,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_default_max_length() -> None:
+    '''Assert that len(result) can reach len(content) by default.'''
+    content = NumpyArray(np.zeros(20, dtype=np.int64))
+    find(
+        st_ak.contents.list_array_contents(content),
+        lambda c: len(c) == len(content),
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
