@@ -302,3 +302,67 @@ def leaf_size(a: ak.Array | Content, /) -> int:
 
     '''
     return sum(len(leaf) for leaf in iter_leaf_contents(a))
+
+
+def content_size(a: ak.Array | Content, /) -> int:
+    '''Count total scalars stored in an Awkward Array layout.
+
+    Counts data elements, offset/index buffer elements, and metadata values
+    (``RegularArray.size``, ``RecordArray`` field names).
+
+    Parameters
+    ----------
+    a
+        An Awkward Array or Content.
+
+    Returns
+    -------
+    int
+        Total number of scalars stored in the content tree.
+
+    Examples
+    --------
+
+    A flat array has content_size equal to its length:
+
+    >>> a = ak.Array([1, 2, 3])
+    >>> content_size(a)
+    3
+
+    A variable-length list array counts offsets (n+1) plus child data:
+
+    >>> a = ak.Array([[1, 2], [3]])
+    >>> content_size(a)  # 3 offsets + 3 data = 6
+    6
+
+    A string array counts offsets (n+1) plus UTF-8 bytes:
+
+    >>> a = ak.Array(['hello', 'world'])
+    >>> content_size(a)  # 3 offsets + 10 bytes = 13
+    13
+
+    '''
+    match a:
+        case ak.Array():
+            return content_size(a.layout)
+        case NumpyArray():
+            return len(a.data)
+        case EmptyArray():
+            return 0
+        case RegularArray():
+            return 1 + content_size(a.content)
+        case RecordArray():
+            n_fields = 0 if a.is_tuple else len(a.fields)
+            return n_fields + sum(content_size(c) for c in a.contents)
+        case ListOffsetArray():
+            return len(a.offsets.data) + content_size(a.content)
+        case ListArray():
+            return len(a.starts.data) + len(a.stops.data) + content_size(a.content)
+        case UnionArray():
+            return (
+                len(a.tags.data)
+                + len(a.index.data)
+                + sum(content_size(c) for c in a.contents)
+            )
+        case _:  # pragma: no cover
+            raise TypeError(f'Unexpected content type: {type(a)}')
