@@ -14,6 +14,9 @@ from hypothesis import strategies as st
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
+from hypothesis_awkward.strategies.contents.list_offset_array import (
+    list_offset_array_from_contents,
+)
 from hypothesis_awkward.util.awkward import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
 
@@ -225,13 +228,13 @@ def contents(
             )
 
         case 'list_offset':
-            # Draw n first, compute exact overhead (n+1 offsets)
-            n = draw(st.integers(min_value=0, max_value=ml))
-            overhead = n + 1
-            child_budget = max(max_size - overhead, 0)
-            child = draw(recurse(max_size=child_budget, max_leaf_size=max_leaf_size))
-            return _check(
-                draw(st_ak.contents.list_offset_array_contents(child, max_length=n))
+            return draw(
+                list_offset_array_from_contents(
+                    recurse,
+                    max_size=max_size,
+                    max_leaf_size=max_leaf_size,
+                    max_length=ml,
+                )
             )
 
         case 'list':
@@ -246,7 +249,7 @@ def contents(
             assert_never(unreachable)
 
 
-class _StContent(Protocol):
+class StContent(Protocol):
     def __call__(
         self, *, max_size: int, max_leaf_size: int | None
     ) -> st.SearchStrategy[Content]: ...
@@ -255,7 +258,7 @@ class _StContent(Protocol):
 @st.composite
 def content_lists(
     draw: st.DrawFn,
-    st_content: _StContent = contents,
+    st_content: StContent = contents,
     *,
     max_size: int = 50,
     max_leaf_size: int | None = None,

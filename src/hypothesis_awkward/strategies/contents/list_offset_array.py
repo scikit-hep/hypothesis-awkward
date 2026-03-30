@@ -1,9 +1,16 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
+from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListOffsetArray
+from hypothesis_awkward.util.awkward import content_size
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 @st.composite
@@ -12,7 +19,7 @@ def list_offset_array_contents(
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
     max_length: int = 5,
-) -> Content:
+) -> ListOffsetArray:
     '''Strategy for ListOffsetArray Content wrapping child Content.
 
     Parameters
@@ -62,3 +69,43 @@ def list_offset_array_contents(
         offsets_list = [0, *splits, content_len]
     offsets = np.array(offsets_list, dtype=np.int64)
     return ListOffsetArray(ak.index.Index64(offsets), content)
+
+
+@st.composite
+def list_offset_array_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: 'int | None',
+    max_length: int,
+) -> ListOffsetArray:
+    '''Strategy that generates a variable-length list layout within a size limit.
+
+    Draws the number of lists ``n`` first and computes the offset array size
+    (``n + 1``). The remainder of ``max_size`` after this deduction is passed
+    to ``content`` to generate the inner content. The result is validated
+    against ``max_size`` via ``assume()``.
+
+    Called by ``contents()`` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    max_length
+        Upper bound on the number of lists, i.e., ``len(result)``.
+
+    '''
+    n = draw(st.integers(min_value=0, max_value=max_length))
+    overhead = n + 1
+    max_content_size = max(max_size - overhead, 0)
+    st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
+    result = draw(list_offset_array_contents(st_content, max_length=n))
+    assume(content_size(result) <= max_size)
+    return result
