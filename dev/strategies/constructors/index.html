@@ -628,7 +628,7 @@ and other array attributes.</p>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">draw</span><span class="p">:</span> <span class="n">DrawFn</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">dtypes</span><span class="p">:</span> <span class="n">SearchStrategy</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">max_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">max_leaf_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">allow_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">allow_numpy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">allow_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -684,7 +684,7 @@ used. Does not affect string or bytestring content.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>max_size</code>
+                <code>max_leaf_size</code>
             </td>
             <td>
                   <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
@@ -761,7 +761,7 @@ character or byte) counts as one.</p>
               <div class="doc-md-description">
                 <p>No string content is generated if <code>False</code>. Strings are represented as a
 <code>ListOffsetArray</code> wrapping a <code>NumpyArray(uint8)</code>. Each string (not character)
-counts toward <code>max_size</code>. The string itself does not count toward
+counts toward <code>max_leaf_size</code>. The string itself does not count toward
 <code>max_depth</code>. Unaffected by <code>dtypes</code> and <code>allow_nan</code>.</p>
               </div>
             </td>
@@ -780,7 +780,7 @@ counts toward <code>max_size</code>. The string itself does not count toward
               <div class="doc-md-description">
                 <p>No bytestring content is generated if <code>False</code>. Bytestrings are represented as a
 <code>ListOffsetArray</code> wrapping a <code>NumpyArray(uint8)</code>. Each bytestring (not byte)
-counts toward <code>max_size</code>. The bytestring itself does not count toward
+counts toward <code>max_leaf_size</code>. The bytestring itself does not count toward
 <code>max_depth</code>. Unaffected by <code>dtypes</code> and <code>allow_nan</code>.</p>
               </div>
             </td>
