@@ -10,7 +10,7 @@ def arrays(
     draw: st.DrawFn,
     *,
     dtypes: st.SearchStrategy[np.dtype] | None = None,
-    max_leaf_size: int = 10,
+    max_size: int = 50,
     allow_nan: bool = True,
     allow_numpy: bool = True,
     allow_empty: bool = True,
@@ -21,6 +21,7 @@ def arrays(
     allow_list: bool = True,
     allow_record: bool = True,
     allow_union: bool = True,
+    max_leaf_size: int | None = None,
     max_depth: int = 5,
     max_length: int | None = None,
     allow_virtual: bool = True,
@@ -37,10 +38,10 @@ def arrays(
         A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
         default strategy that generates any scalar dtype supported by Awkward Array is
         used. Does not affect string or bytestring content.
-    max_leaf_size
-        Maximum total number of elements in the generated content. Each numerical value,
-        including complex and datetime, counts as one. Each string and bytestring (not
-        character or byte) counts as one.
+    max_size
+        Upper bound on ``content_size()`` of the generated content. Counts all scalars
+        stored in the content tree: data elements, offset/index buffer elements, and
+        metadata values (``RegularArray.size``, ``RecordArray`` field names).
     allow_nan
         No ``NaN``/``NaT`` values are generated in ``NumpyArray`` if ``False``.
     allow_numpy
@@ -69,6 +70,10 @@ def arrays(
         No ``RecordArray`` is generated if ``False``.
     allow_union
         No ``UnionArray`` is generated if ``False``.
+    max_leaf_size
+        Maximum total number of leaf elements in the generated content. Each numerical
+        value, including complex and datetime, counts as one. Each string and bytestring
+        (not character or byte) counts as one.
     max_depth
         Maximum nesting depth. Each RegularArray, ListOffsetArray, ListArray,
         RecordArray, and UnionArray layer adds one level, excluding those that form
@@ -88,6 +93,7 @@ def arrays(
     layout = draw(
         st_ak.contents.contents(
             dtypes=dtypes,
+            max_size=max_size,
             max_leaf_size=max_leaf_size,
             allow_nan=allow_nan,
             allow_numpy=allow_numpy,

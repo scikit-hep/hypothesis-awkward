@@ -11,13 +11,14 @@ import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_nat_in_awkward_array,
+    content_size,
     iter_contents,
     iter_numpy_arrays,
     leaf_size,
 )
 from hypothesis_awkward.util.safe import safe_compare as sc
 
-DEFAULT_MAX_LEAF_SIZE = 10
+DEFAULT_MAX_SIZE = 50
 DEFAULT_MAX_DEPTH = 5
 
 
@@ -25,7 +26,7 @@ class ContentsKwargs(TypedDict, total=False):
     '''Options for `contents()` strategy.'''
 
     dtypes: st.SearchStrategy[np.dtype] | None
-    max_leaf_size: int
+    max_size: int
     allow_nan: bool
     allow_numpy: bool
     allow_empty: bool
@@ -36,6 +37,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_list: bool
     allow_record: bool
     allow_union: bool
+    max_leaf_size: int | None
     max_depth: int
     max_length: int | None
 
@@ -58,7 +60,7 @@ def contents_kwargs(
                     st.none(),
                     st.just(st_dtypes),
                 ),
-                'max_leaf_size': st.integers(min_value=0, max_value=50),
+                'max_size': st.integers(min_value=0, max_value=200),
                 'allow_nan': st.booleans(),
                 'allow_numpy': st.booleans(),
                 'allow_empty': st.booleans(),
@@ -69,6 +71,9 @@ def contents_kwargs(
                 'allow_list': st.booleans(),
                 'allow_record': st.booleans(),
                 'allow_union': st.booleans(),
+                'max_leaf_size': st.one_of(
+                    st.none(), st.integers(min_value=0, max_value=50)
+                ),
                 'max_depth': st.integers(min_value=0, max_value=5),
                 'max_length': st.integers(min_value=0, max_value=50),
             },
@@ -105,13 +110,14 @@ def test_contents(data: st.DataObject) -> None:
 
     # Assert the options were effective
     dtypes = opts.kwargs.get('dtypes', None)
-    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULT_MAX_LEAF_SIZE)
+    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     allow_nan = opts.kwargs.get('allow_nan', True)
     allow_regular = opts.kwargs.get('allow_regular', True)
     allow_list_offset = opts.kwargs.get('allow_list_offset', True)
     allow_list = opts.kwargs.get('allow_list', True)
     allow_record = opts.kwargs.get('allow_record', True)
     allow_union = opts.kwargs.get('allow_union', True)
+    max_leaf_size = opts.kwargs.get('max_leaf_size')
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
     max_length = opts.kwargs.get('max_length')
 
@@ -150,20 +156,32 @@ def test_contents(data: st.DataObject) -> None:
             leaf_dtype_names = {d.name for d in _leaf_dtypes(c)}
             assert leaf_dtype_names <= drawn_dtype_names
 
-    assert leaf_size(c) <= max_leaf_size
+    assert content_size(c) <= max_size
 
     if not allow_nan:
         assert not any_nan_nat_in_awkward_array(c)
 
+    if max_leaf_size is not None:
+        assert leaf_size(c) <= max_leaf_size
     assert _nesting_depth(c) <= max_depth
     assert len(c) <= sc(max_length)
+
+
+def test_draw_max_size() -> None:
+    '''Assert that content at exactly max_size can be drawn.'''
+    max_size = 30
+    find(
+        st_ak.contents.contents(max_size=max_size, max_leaf_size=max_size),
+        lambda c: content_size(c) == max_size,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
 
 
 def test_draw_max_leaf_size() -> None:
     '''Assert that content at exactly max_leaf_size can be drawn.'''
     max_leaf_size = 30
     find(
-        st_ak.contents.contents(max_leaf_size=max_leaf_size),
+        st_ak.contents.contents(max_size=200, max_leaf_size=max_leaf_size),
         lambda c: leaf_size(c) == max_leaf_size,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )

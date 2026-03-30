@@ -119,6 +119,15 @@ def test_draw_from_contents_length_zero() -> None:
     )
 
 
+def test_draw_from_contents_max_size_1() -> None:
+    '''Assert that a NumpyArray with one element can be drawn with max_size=1.'''
+    find(
+        st_ak.contents.contents(max_size=1),
+        lambda c: isinstance(c, NumpyArray) and len(c) == 1,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
 def test_draw_empty() -> None:
     '''Assert that empty arrays can be drawn.'''
     find(

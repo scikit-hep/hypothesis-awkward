@@ -19,7 +19,7 @@ class ArraysKwargs(ContentsKwargs, total=False):
 
 DEFAULTS = ArraysKwargs(
     dtypes=None,
-    max_leaf_size=10,
+    max_size=50,
     allow_nan=True,
     allow_numpy=True,
     allow_empty=True,
@@ -30,6 +30,7 @@ DEFAULTS = ArraysKwargs(
     allow_list=True,
     allow_record=True,
     allow_union=True,
+    max_leaf_size=None,
     max_depth=5,
     max_length=None,
     allow_virtual=True,
