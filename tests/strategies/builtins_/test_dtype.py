@@ -52,7 +52,7 @@ def test_draw_nan() -> None:
     find(
         st_ak.items_from_dtype(np.dtype('float64')),
         lambda item: isinstance(item, float) and math.isnan(item),
-        settings=settings(phases=[Phase.generate]),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
