@@ -21,6 +21,7 @@ __all__ = [
     'indexed_option_array_contents',
     'byte_masked_array_contents',
     'bit_masked_array_contents',
+    'unmasked_array_contents',
     'union_array_contents',
 ]
 
@@ -38,3 +39,4 @@ from .record_array import record_array_contents
 from .regular_array import regular_array_contents
 from .string import string_contents
 from .union_array import union_array_contents
+from .unmasked_array import unmasked_array_contents

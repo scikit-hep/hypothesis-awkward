@@ -12,6 +12,7 @@ from awkward.contents import (
     RecordArray,
     RegularArray,
     UnionArray,
+    UnmaskedArray,
 )
 from hypothesis_awkward.util import content_size, leaf_size
 
@@ -111,6 +112,13 @@ def test_bit_masked_array() -> None:
     )
     # 2 (valid_when + lsb_order) + 1 (mask byte) + 3 (child data) = 6
     assert content_size(c) == 6
+    assert leaf_size(c) == 3
+
+
+def test_unmasked_array() -> None:
+    c = UnmaskedArray(NumpyArray(np.array([10, 20, 30])))
+    # 0 (no buffers) + 3 (child data) = 3
+    assert content_size(c) == 3
     assert leaf_size(c) == 3
 
 

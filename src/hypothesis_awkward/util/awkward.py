@@ -374,5 +374,7 @@ def content_size(a: ak.Array | Content, /) -> int:
             return 1 + len(a.mask.data) + content_size(a.content)
         case IndexedOptionArray():
             return len(a.index.data) + content_size(a.content)
+        case UnmaskedArray():
+            return content_size(a.content)
         case _:  # pragma: no cover
             raise TypeError(f'Unexpected content type: {type(a)}')
