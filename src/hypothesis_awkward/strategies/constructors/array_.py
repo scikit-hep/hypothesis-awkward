@@ -21,7 +21,7 @@ def arrays(
     allow_list: bool = True,
     allow_record: bool = True,
     allow_union: bool = True,
-    max_leaf_size: int = 10,
+    max_leaf_size: int | None = None,
     max_depth: int = 5,
     max_length: int | None = None,
     allow_virtual: bool = True,

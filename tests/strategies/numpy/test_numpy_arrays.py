@@ -229,6 +229,15 @@ def test_draw_max_size_structured() -> None:
     )
 
 
+def test_draw_nonempty_max_size_1() -> None:
+    '''Assert that a non-empty array can be drawn with max_size=1.'''
+    find(
+        st_ak.numpy_arrays(allow_structured=False, max_size=1),
+        lambda a: math.prod(a.shape) == 1,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
 def test_draw_min_size() -> None:
     '''Assert that arrays with exactly min_size scalars can be drawn.'''
     min_size = 5

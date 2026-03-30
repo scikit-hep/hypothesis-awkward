@@ -155,7 +155,7 @@ def _st_empty(min_items: int, max_items: int) -> st.SearchStrategy[bool]:
         return st.just(False)
     if max_items <= 0:
         return st.just(True)
-    average_size = max_items // 2
+    average_size = max(1, max_items // 2)
     return st.integers(min_value=0, max_value=average_size).map(lambda x: x == 0)
 
 

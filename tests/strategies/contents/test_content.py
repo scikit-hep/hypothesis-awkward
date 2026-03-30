@@ -19,7 +19,6 @@ from hypothesis_awkward.util import (
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 50
-DEFAULT_MAX_LEAF_SIZE = 10
 DEFAULT_MAX_DEPTH = 5
 
 
@@ -38,7 +37,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_list: bool
     allow_record: bool
     allow_union: bool
-    max_leaf_size: int
+    max_leaf_size: int | None
     max_depth: int
     max_length: int | None
 
@@ -72,7 +71,9 @@ def contents_kwargs(
                 'allow_list': st.booleans(),
                 'allow_record': st.booleans(),
                 'allow_union': st.booleans(),
-                'max_leaf_size': st.integers(min_value=0, max_value=50),
+                'max_leaf_size': st.one_of(
+                    st.none(), st.integers(min_value=0, max_value=50)
+                ),
                 'max_depth': st.integers(min_value=0, max_value=5),
                 'max_length': st.integers(min_value=0, max_value=50),
             },
@@ -116,7 +117,7 @@ def test_contents(data: st.DataObject) -> None:
     allow_list = opts.kwargs.get('allow_list', True)
     allow_record = opts.kwargs.get('allow_record', True)
     allow_union = opts.kwargs.get('allow_union', True)
-    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULT_MAX_LEAF_SIZE)
+    max_leaf_size = opts.kwargs.get('max_leaf_size')
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
     max_length = opts.kwargs.get('max_length')
 
@@ -160,7 +161,8 @@ def test_contents(data: st.DataObject) -> None:
     if not allow_nan:
         assert not any_nan_nat_in_awkward_array(c)
 
-    assert leaf_size(c) <= max_leaf_size
+    if max_leaf_size is not None:
+        assert leaf_size(c) <= max_leaf_size
     assert _nesting_depth(c) <= max_depth
     assert len(c) <= sc(max_length)
 

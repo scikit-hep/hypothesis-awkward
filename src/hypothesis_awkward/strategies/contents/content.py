@@ -37,7 +37,7 @@ def contents(
     allow_record: bool = True,
     allow_union: bool = True,
     allow_union_root: bool = True,
-    max_leaf_size: int = 10,
+    max_leaf_size: int | None = None,
     max_depth: int = 5,
     max_length: int | None = None,
 ) -> Content:
@@ -119,7 +119,9 @@ def contents(
         allow_string=allow_string,
         allow_bytestring=allow_bytestring,
     )
-    leaf_max_size = min(max_leaf_size, max_size)
+    leaf_max_size = max_size
+    if max_leaf_size is not None:
+        leaf_max_size = min(leaf_max_size, max_leaf_size)
     if max_length is not None:
         leaf_max_size = min(leaf_max_size, max_length)
 
@@ -246,7 +248,7 @@ def contents(
 
 class _StContent(Protocol):
     def __call__(
-        self, *, max_size: int, max_leaf_size: int
+        self, *, max_size: int, max_leaf_size: int | None
     ) -> st.SearchStrategy[Content]: ...
 
 
@@ -256,7 +258,7 @@ def content_lists(
     st_content: _StContent = contents,
     *,
     max_size: int = 50,
-    max_leaf_size: int = 10,
+    max_leaf_size: int | None = None,
     min_len: int = 0,
     max_len: int | None = None,
 ) -> list[Content]:
@@ -280,29 +282,35 @@ def content_lists(
     remaining_leaf = max_leaf_size
     remaining_total = max_size
     contents_ = list[Content]()
+
+    def _remaining_max_leaf_size() -> int | None:
+        return max(remaining_leaf, 0) if remaining_leaf is not None else None
+
     for _ in range(min_len):
         c = draw(
             st_content(
                 max_size=max(remaining_total, 0),
-                max_leaf_size=max(remaining_leaf, 0),
+                max_leaf_size=_remaining_max_leaf_size(),
             )
         )
-        remaining_leaf -= leaf_size(c)
+        if remaining_leaf is not None:
+            remaining_leaf -= leaf_size(c)
         remaining_total -= content_size(c)
         contents_.append(c)
     while (
         draw(st.booleans())
-        and remaining_leaf > 0
+        and sc(remaining_leaf) > 0
         and remaining_total > 0
         and len(contents_) < sc(max_len)
     ):
         c = draw(
             st_content(
                 max_size=max(remaining_total, 0),
-                max_leaf_size=max(remaining_leaf, 0),
+                max_leaf_size=_remaining_max_leaf_size(),
             )
         )
-        remaining_leaf -= leaf_size(c)
+        if remaining_leaf is not None:
+            remaining_leaf -= leaf_size(c)
         remaining_total -= content_size(c)
         contents_.append(c)
     return contents_
