@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.misc.record import RecordCallDraws
-from hypothesis_awkward.util import iter_leaf_contents
+from hypothesis_awkward.util import leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_LEAF_SIZE = 10
@@ -74,7 +74,7 @@ def test_content_lists(data: st.DataObject) -> None:
     assert isinstance(result, list)
     assert all(isinstance(c, Content) for c in result)
     assert sc(min_len) <= len(result) <= sc(max_len)
-    assert _total_leaf_size(result) <= max_leaf_size
+    assert sum(leaf_size(c) for c in result) <= max_leaf_size
 
     match opts.kwargs.get('st_content'):
         case RecordCallDraws() as st_content:
@@ -111,8 +111,3 @@ def test_draw_empty_list() -> None:
         lambda cl: len(cl) == 0,
         settings=settings(phases=[Phase.generate]),
     )
-
-
-def _total_leaf_size(contents: list[Content]) -> int:
-    '''Total leaf elements across all contents.'''
-    return sum(len(leaf) for c in contents for leaf in iter_leaf_contents(c))
