@@ -47,39 +47,47 @@ def contents(
 
 ### Node Type Selection
 
-Option types are added as peer candidates alongside the existing wrapper types:
+Option types are added as peer candidates alongside the existing wrapper types.
+Each option type gets a `*_from_contents` bridge function that conforms to the
+`_StFromContents` protocol, matching the pattern used by
+`list_offset_array_from_contents`, `record_array_from_contents`, etc.:
 
 ```python
-_NodeType = Literal[
-    'list', 'list_offset', 'record', 'regular', 'union',
-    'indexed_option', 'byte_masked', 'bit_masked', 'unmasked',
-]
-
-candidates = list[_NodeType]()
+candidates = list[_StFromContents]()
 # ...existing candidates...
 if allow_indexed_option and allow_option_root:
-    candidates.append('indexed_option')
+    candidates.append(indexed_option_array_from_contents)
 if allow_byte_masked and allow_option_root:
-    candidates.append('byte_masked')
+    candidates.append(byte_masked_array_from_contents)
 if allow_bit_masked and allow_option_root:
-    candidates.append('bit_masked')
+    candidates.append(bit_masked_array_from_contents)
 if allow_unmasked and allow_option_root:
-    candidates.append('unmasked')
+    candidates.append(unmasked_array_from_contents)
 ```
 
 ### Recursion from Option Nodes
 
-When an option type is selected, `contents()` recurses for the child content
-with `allow_option_root=False` to prevent option-inside-option:
+Each `*_from_contents` function receives a `StContent` callable (the partially
+applied `recurse`) and calls it with `allow_option_root=False` to prevent
+option-inside-option. For example:
 
 ```python
-case 'indexed_option':
-    child = draw(recurse(max_size=max_size, allow_option_root=False))
-    return draw(
-        st_ak.contents.indexed_option_array_contents(
-            child, max_length=max_length
-        )
-    )
+@st.composite
+def indexed_option_array_from_contents(
+    draw: st.DrawFn,
+    content: StContent,
+    *,
+    max_size: int,
+    max_leaf_size: int | None,
+    max_length: int | None,
+) -> IndexedOptionArray:
+    ml = max_length if max_length is not None else max_size
+    n = draw(st.integers(min_value=0, max_value=ml))
+    max_content_size = max(max_size - n, 0)  # deduct index overhead
+    child = draw(content(max_size=max_content_size, max_leaf_size=max_leaf_size, allow_option_root=False))
+    result = draw(indexed_option_array_contents(child, max_length=n))
+    assume(content_size(result) <= max_size)
+    return result
 ```
 
 The per-type `allow_*` flags are forwarded to `recurse` unchanged, so option
@@ -87,12 +95,31 @@ types can appear deeper in the tree (just not immediately inside another
 option). `allow_option_root` is not included in the `recurse` partial — it
 defaults to `True` in deeper recursive calls, except when explicitly overridden.
 
-## `max_size`, `max_depth`, `max_length` Semantics
+## `max_size`, `max_leaf_size`, `max_depth`, `max_length` Semantics
 
-### `max_size` — Pass Through
+### `max_size` — Deduct Buffer Overhead
 
-Option types are transparent to the scalar budget. They pass `max_size` through
-to their child content unchanged. No additional accounting is needed.
+Option types with buffers (index, mask) are **not** transparent to `max_size`.
+Each `_from_contents` function must deduct its buffer overhead before passing
+`max_size` to the child, following the same pattern as
+`list_offset_array_from_contents`.
+
+`content_size()` formulas for option types:
+
+```text
+content_size(IndexedOptionArray)  = len(index) + content_size(child)
+content_size(ByteMaskedArray)     = len(mask) + content_size(child)
+content_size(BitMaskedArray)      = ceil(length / 8) + content_size(child)
+content_size(UnmaskedArray)       = content_size(child)
+```
+
+Only `UnmaskedArray` passes `max_size` through unchanged.
+
+### `max_leaf_size` — Pass Through
+
+Option types are transparent to the leaf scalar budget. They pass
+`max_leaf_size` through to their child content unchanged. No additional
+accounting is needed.
 
 ### `max_depth` — Not Consumed
 
@@ -114,12 +141,9 @@ determined by their parent.
 
 ## UnionArray Coordination
 
-### The Constraint
-
+Per the "all or none" rule (see
+[option-types-research](../research/2026-03-27-option-types-research.md#unionarray-all-or-none-rule)),
 `UnionArray` requires either all or none of its contents to be option types.
-Mixed option/non-option contents raise `TypeError`.
-
-### The Solution
 
 When `contents()` generates a `UnionArray`, it flips a coin to decide whether
 branches are option-wrapped:
@@ -134,38 +158,19 @@ branches are option-wrapped:
 
 Both cases use strategies composed top-down. No post-processing is needed.
 
-```python
-case 'union':
-    option_at_root = _any_option_allowed(...) and draw(st.booleans())
-    if option_at_root:
-        child_st = functools.partial(
-            st_ak.contents.option_contents,
-            content=functools.partial(
-                recurse,
-                allow_option_root=False,
-            ),
-            allow_indexed_option=allow_indexed_option,
-            allow_byte_masked=allow_byte_masked,
-            allow_bit_masked=allow_bit_masked,
-            allow_unmasked=allow_unmasked,
-        )
-    else:
-        child_st = functools.partial(recurse, allow_option_root=False)
-    children = draw(
-        content_lists(
-            child_st,
-            max_total_size=max_size,
-            min_size=2,
-        )
-    )
-    return draw(
-        st_ak.contents.union_array_contents(children, max_length=max_length)
-    )
-```
+`contents()` handles the coordination by partially applying the option flags to
+`union_array_from_contents` before adding it to the candidates list:
 
-The `_any_option_allowed()` helper checks whether at least one option type flag
-is `True`. When all option types are disabled, the coin flip is skipped and
-branches are always non-option.
+```python
+if allow_union and allow_union_root:
+    candidates.append(functools.partial(
+        union_array_from_contents,
+        allow_indexed_option=allow_indexed_option,
+        allow_byte_masked=allow_byte_masked,
+        allow_bit_masked=allow_bit_masked,
+        allow_unmasked=allow_unmasked,
+    ))
+```
 
 ### Why Not Post-Process
 

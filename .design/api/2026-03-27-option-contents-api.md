@@ -13,19 +13,6 @@ integration into `contents()` and `arrays()`.
 See [option-types-research](../research/2026-03-27-option-types-research.md) for
 background on Awkward Array's option-type Content classes.
 
-## Background
-
-Awkward Array has four option-type Content classes that represent missing
-(nullable) data:
-
-- **`IndexedOptionArray`** — Index-based; negative index = None
-- **`ByteMaskedArray`** — Byte mask (int8); `valid_when` flag
-- **`BitMaskedArray`** — Bit-packed mask (uint8); `valid_when` + `lsb_order`
-- **`UnmaskedArray`** — No mask; option type with no actual nulls
-
-All four share a common constraint: they cannot directly wrap another option
-type, an indexed type, or a union type.
-
 ## Design Goals
 
 1. **One strategy per option type**: Each option-type Content class gets its own
@@ -167,21 +154,25 @@ Combined selector that picks among the per-type option strategies via
 def option_contents(
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
-    max_size: int = 10,
+    max_size: int = 50,
+    max_leaf_size: int | None = None,
     max_length: int | None = None,
     allow_indexed_option: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
+    allow_union_root: bool = True,
 ) -> st.SearchStrategy[Content]:
 ```
 
 #### Parameters
 
 - **`content`** — Forwarded to each per-type strategy.
-- **`max_size`** — Forwarded to the inner content strategy when `content` is
-  `None`. Allows `option_contents` to conform to the `_StContent` protocol used
-  by `content_lists()`.
+- **`max_size`** — Upper bound on total `content_size()` of the generated
+  content. Forwarded to the inner content strategy.
+- **`max_leaf_size`** — Forwarded to the inner content strategy when `content`
+  is `None`. Caps the total number of leaf elements. `None` means no leaf cap.
+- **`allow_union_root`** — Forwarded to the inner content strategy.
 - **`max_length`** — Forwarded to each per-type strategy.
 - **`allow_indexed_option`** — Include `indexed_option_array_contents()` if
   `True`.
@@ -246,16 +237,18 @@ semantics rather than option semantics. It can be added later via an
 would require the content to be potentially larger than the array, complicating
 the size budget. Deferred for now.
 
-### 5. `max_size` Passed Through to Content
+### 5. `max_leaf_size` and `allow_union_root` Passed Through to Content
 
-**Decision:** `option_contents()` accepts a `max_size` parameter and forwards it
-to the inner content strategy. This is needed so `option_contents` can conform
-to the `_StContent` protocol (callable accepting `max_size`) used by
-`content_lists()`.
+**Decision:** `option_contents()` accepts `max_leaf_size` and `allow_union_root`
+parameters and forwards them to the inner content strategy. This is needed so
+`option_contents` can conform to the `StContent` protocol (callable accepting
+`max_size`, `max_leaf_size`, and `allow_union_root`) used by `content_lists()`.
 
-**Rationale:** Option wrappers add no scalars themselves, but when used inside
-`content_lists()` (e.g., for UnionArray children), they receive the remaining
-scalar budget via `max_size` and must forward it to the inner content strategy.
+**Rationale:** Option wrappers add no leaf scalars themselves, but when used
+inside `content_lists()` (e.g., for UnionArray children), they receive the
+remaining leaf budget via `max_leaf_size` and must forward it to the inner
+content strategy. `allow_union_root` is forwarded so that union-inside-option
+nesting constraints propagate correctly.
 
 ## Module Structure
 

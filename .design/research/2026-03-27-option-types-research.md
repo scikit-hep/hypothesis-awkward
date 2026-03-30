@@ -181,10 +181,15 @@ option content should wrap non-option content and avoid double-wrapping.
 
 ## Scalar Counting and Size Budget
 
-Option types are **transparent to scalar counting**: they do not add scalars
-themselves. The scalars come from the wrapped content. An `IndexedOptionArray`
-wrapping a `NumpyArray` of length 5 has 5 leaf scalars regardless of how many
-entries are masked as None.
+Option types are **transparent to leaf scalar counting** (`max_leaf_size`): they
+do not add leaf scalars themselves. The leaf scalars come from the wrapped
+content. An `IndexedOptionArray` wrapping a `NumpyArray` of length 5 has 5 leaf
+scalars regardless of how many entries are masked as None.
+
+However, option types with buffers (index, mask) are **not** transparent to
+total `content_size()` (`max_size`). See
+[option-integration-api](../api/2026-03-27-option-integration-api.md#max_size--deduct-buffer-overhead)
+for `content_size()` formulas.
 
 For `IndexedOptionArray`, the index can reference content elements multiple
 times or skip some entirely. The leaf scalar count comes from the content, not
@@ -194,26 +199,6 @@ For `ByteMaskedArray` and `BitMaskedArray`, the content may be longer than the
 mask. Extra content elements beyond `len(mask)` (or `length` for
 `BitMaskedArray`) are not accessible through the array but still exist in
 memory.
-
-## Existing References in the Codebase
-
-The utility module `src/hypothesis_awkward/util/awkward.py` already imports and
-handles `IndexedOptionArray` and `UnmaskedArray` in `iter_contents()`:
-
-```python
-case (
-    IndexedOptionArray()
-    | ListArray()
-    | ListOffsetArray()
-    | RegularArray()
-    | UnmaskedArray()
-):
-    yield item
-    stack.append(item.content)
-```
-
-`ByteMaskedArray` and `BitMaskedArray` are not yet imported or handled. Adding
-them to `iter_contents()` will be needed.
 
 ## Generation Considerations
 
