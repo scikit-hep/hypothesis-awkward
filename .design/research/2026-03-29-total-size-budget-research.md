@@ -80,12 +80,12 @@ buffers.
 
 ### Types with no additional buffers
 
-| Type         | Own buffers      | Notes                                |
-| ------------ | ---------------- | ------------------------------------ |
-| NumpyArray   | data (n scalars) | Leaf; dtype varies                   |
-| EmptyArray   | none (0 scalars) | Leaf; no data                        |
-| RegularArray | none             | Logical grouping; child has all data |
-| RecordArray  | none             | Composition; children have all data  |
+| Type         | Own buffers      | Notes                                              |
+| ------------ | ---------------- | -------------------------------------------------- |
+| NumpyArray   | data (n scalars) | Leaf; dtype varies                                 |
+| EmptyArray   | none (0 scalars) | Leaf; no data                                      |
+| RegularArray | none             | Logical grouping; `size` is metadata, not a buffer |
+| RecordArray  | none             | Composition; children have all data                |
 
 ### Types with index/offset buffers
 
@@ -99,51 +99,11 @@ String and bytestring content are `ListOffsetArray` wrapping
 `NumpyArray(uint8)`. Their overhead is covered by the `ListOffsetArray` row
 above.
 
-## Proposed Semantics
+## Proposed API
 
-### `max_size` (new): upper bound on `content_size()`
-
-`max_size` is the upper bound on `content_size(result)`, where `content_size` is
-defined recursively over the content tree:
-
-```text
-content_size(NumpyArray)       = len(data)
-content_size(EmptyArray)       = 0
-content_size(RegularArray)     = 1 (size) + content_size(child)
-content_size(RecordArray)      = num_fields (field names) + sum(content_size(c) for c in children)
-content_size(ListOffsetArray)  = (n + 1) (offsets) + content_size(child)
-content_size(ListArray)        = 2n (starts + stops) + content_size(child)
-content_size(UnionArray)       = 2n (tags + index) + sum(content_size(c) for c in children)
-```
-
-`content_size` counts every scalar stored in the content tree: data elements,
-offset/index buffer elements, and metadata values (`RegularArray.size`,
-`RecordArray` field names).
-
-Notes:
-
-- `RegularArray.size` counts as 1. Though negligible, this prevents arbitrarily
-  deep nesting of `RegularArray` within a finite budget.
-- `RecordArray` field names are Python strings, each counted as 1 regardless of
-  character length.
-
-### `max_leaf_size` (renamed from current `max_size`): leaf element budget
-
-Replaces the current `max_size` parameter. Limits the total number of leaf
-elements and is distributed via `content_lists()` for record/union. Defaults to
-`None` instead of 10, since the new `max_size` now provides the primary size
-constraint.
-
-### Default values
-
-| Parameter       | Default | Rationale                                           |
-| --------------- | ------- | --------------------------------------------------- |
-| `max_size`      | 50      | Large enough for a few nesting levels with overhead |
-| `max_leaf_size` | `None`  | Leaf sizes bounded only by `max_size` by default    |
-
-When both are provided, each leaf is capped at
-`min(remaining_budget, max_leaf_size)` where `remaining_budget` is what
-`max_size` allows after deducting overhead from ancestor wrappers.
+See [max-size-api](../api/2026-03-29-max-size-api.md) for the API design:
+`content_size()` definition, `max_size` and `max_leaf_size` parameters, default
+values, signatures, and design decisions.
 
 ## Top-Down Budget Enforcement
 
@@ -295,7 +255,7 @@ should also be deducted from the budget.
 
 ```python
 def _content_size(c: Content) -> int:
-    '''Count total drawn scalars in a content tree.'''
+    '''Count total scalars stored in a content tree.'''
     match c:
         case NumpyArray():
             return len(c.data)
@@ -315,37 +275,6 @@ def _content_size(c: Content) -> int:
                     + sum(_content_size(child) for child in c.contents))
 ```
 
-## Impact on Public API
-
-### `arrays()` and `contents()`
-
-```python
-# Before
-arrays(max_size=10)
-contents(max_size=10)
-
-# After
-arrays(max_size=50, max_leaf_size=None)
-contents(max_size=50, max_leaf_size=None)
-```
-
-### `content_lists()`
-
-```python
-# Before
-content_lists(max_total_size=10)
-
-# After — same parameter name, semantics change
-content_lists(max_total_size=10)  # now counts drawn scalars, not just leaf
-```
-
-### Per-type strategies
-
-`numpy_array_contents`, `string_contents`, `bytestring_contents`,
-`leaf_contents`: These keep `max_size` with its current meaning ("max
-elements"). The rename to `max_leaf_size` only affects the tree-builder level
-(`contents()` and `arrays()`).
-
 ## Open Questions
 
 1. **Should `max_size` in `regular_array_contents` be renamed?** It currently
@@ -361,8 +290,3 @@ elements"). The rename to `max_leaf_size` only affects the tree-builder level
    `.design/research/2026-03-27-option-types-research.md`). `IndexedOptionArray`
    has an int64 index, `ByteMaskedArray` has an int8 mask, `BitMaskedArray` has
    a uint8 mask. These should be counted for consistency when implemented.
-
-4. **`max_size` at the leaf level keeps its current meaning.** Leaf strategies
-   (`numpy_array_contents`, `string_contents`, `bytestring_contents`) continue
-   to use `max_size` for "max elements." Only the tree-builder level
-   (`contents()`, `arrays()`) gets the new drawn-scalar semantics.
