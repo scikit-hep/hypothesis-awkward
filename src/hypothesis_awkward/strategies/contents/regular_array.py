@@ -1,7 +1,14 @@
+from typing import TYPE_CHECKING
+
+from hypothesis import assume
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, RegularArray
+from hypothesis_awkward.util.awkward import content_size
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 @st.composite
@@ -12,7 +19,7 @@ def regular_array_contents(
     max_size: int = 5,
     max_zeros_length: int = 5,
     max_length: int | None = None,
-) -> Content:
+) -> RegularArray:
     '''Strategy for RegularArray Content wrapping child Content.
 
     Parameters
@@ -104,3 +111,39 @@ def _st_group_sizes(
     if not group_sizes:
         return st.just(0)
     return st.sampled_from(group_sizes)
+
+
+@st.composite
+def regular_array_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: 'int | None',
+    max_length: 'int | None',
+) -> RegularArray:
+    '''Strategy that generates a regular (fixed-size) layout within a size limit.
+
+    Deducts the ``RegularArray.size`` overhead (1) from ``max_size`` and passes
+    the remainder to ``content`` to generate the inner content.
+
+    Called by ``contents()`` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    max_length
+        Upper bound on the number of groups, i.e., ``len(result)``.
+
+    '''
+    max_content_size = max(max_size - 1, 0)
+    st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
+    result = draw(regular_array_contents(st_content, max_length=max_length))
+    assume(content_size(result) <= max_size)
+    return result

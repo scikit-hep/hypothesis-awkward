@@ -1,23 +1,20 @@
 import functools
-import sys
-from typing import Literal, Protocol
-
-if sys.version_info >= (3, 11):
-    from typing import assert_never
-else:
-    from typing_extensions import assert_never
+from typing import Protocol
 
 import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
-from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.util.awkward import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
 
-_NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
+from .leaf import leaf_contents
+from .list_array import list_array_from_contents
+from .list_offset_array import list_offset_array_from_contents
+from .record_array import record_array_from_contents
+from .regular_array import regular_array_from_contents
+from .union_array import union_array_from_contents
 
 
 @st.composite
@@ -165,97 +162,58 @@ def contents(
         allow_union=allow_union,
     )
 
-    # Choose node type from allow_* flags
-    candidates = list[_NodeType]()
+    # Choose wrapper type from allow_* flags
+    candidates = list[_StFromContents]()
     if allow_regular:
-        candidates.append('regular')
+        candidates.append(regular_array_from_contents)
     if allow_list_offset:
-        candidates.append('list_offset')
+        candidates.append(list_offset_array_from_contents)
     if allow_list:
-        candidates.append('list')
+        candidates.append(list_array_from_contents)
     if allow_record:
-        candidates.append('record')
+        candidates.append(record_array_from_contents)
     if allow_union and allow_union_root:
-        candidates.append('union')
+        candidates.append(union_array_from_contents)
 
     if not candidates:
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
 
-    node_type = draw(st.sampled_from(sorted(candidates)))
-    ml = max_length if max_length is not None else 5
-
-    match node_type:
-        case 'union':
-            children = draw(
-                content_lists(
-                    functools.partial(recurse, allow_union_root=False),
-                    max_size=max_size,
-                    max_leaf_size=max_leaf_size,
-                    min_len=2,
-                )
-            )
-            return _check(
-                draw(
-                    st_ak.contents.union_array_contents(children, max_length=max_length)
-                )
-            )
-
-        case 'record':
-            children = draw(
-                content_lists(
-                    recurse, max_size=max_size, max_leaf_size=max_leaf_size, min_len=1
-                )
-            )
-            return _check(
-                draw(
-                    st_ak.contents.record_array_contents(
-                        children, max_length=max_length
-                    )
-                )
-            )
-
-        case 'regular':
-            # RegularArray overhead: 1 (size parameter)
-            child_budget = max(max_size - 1, 0)
-            child = draw(recurse(max_size=child_budget, max_leaf_size=max_leaf_size))
-            return _check(
-                draw(
-                    st_ak.contents.regular_array_contents(child, max_length=max_length)
-                )
-            )
-
-        case 'list_offset':
-            # Draw n first, compute exact overhead (n+1 offsets)
-            n = draw(st.integers(min_value=0, max_value=ml))
-            overhead = n + 1
-            child_budget = max(max_size - overhead, 0)
-            child = draw(recurse(max_size=child_budget, max_leaf_size=max_leaf_size))
-            return _check(
-                draw(st_ak.contents.list_offset_array_contents(child, max_length=n))
-            )
-
-        case 'list':
-            # Draw n first, compute exact overhead (2n: starts + stops)
-            n = draw(st.integers(min_value=0, max_value=ml))
-            overhead = 2 * n
-            child_budget = max(max_size - overhead, 0)
-            child = draw(recurse(max_size=child_budget, max_leaf_size=max_leaf_size))
-            return _check(draw(st_ak.contents.list_array_contents(child, max_length=n)))
-
-        case _ as unreachable:  # pragma: no cover
-            assert_never(unreachable)
+    st_wrapper = draw(st.sampled_from(candidates))
+    return draw(
+        st_wrapper(
+            recurse,
+            max_size=max_size,
+            max_leaf_size=max_leaf_size,
+            max_length=max_length,
+        )
+    )
 
 
-class _StContent(Protocol):
+class StContent(Protocol):
     def __call__(
-        self, *, max_size: int, max_leaf_size: int | None
+        self,
+        *,
+        max_size: int,
+        max_leaf_size: int | None,
+        allow_union_root: bool = ...,
+    ) -> st.SearchStrategy[Content]: ...
+
+
+class _StFromContents(Protocol):
+    def __call__(
+        self,
+        content: StContent,
+        *,
+        max_size: int,
+        max_leaf_size: int | None,
+        max_length: int | None,
     ) -> st.SearchStrategy[Content]: ...
 
 
 @st.composite
 def content_lists(
     draw: st.DrawFn,
-    st_content: _StContent = contents,
+    st_content: StContent = contents,
     *,
     max_size: int = 50,
     max_leaf_size: int | None = None,

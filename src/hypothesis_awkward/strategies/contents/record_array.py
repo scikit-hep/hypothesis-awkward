@@ -1,9 +1,15 @@
 import string
+from typing import TYPE_CHECKING
 
+from hypothesis import assume
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, RecordArray
+from hypothesis_awkward.util.awkward import content_size
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 @st.composite
@@ -14,7 +20,7 @@ def record_array_contents(
     max_fields: int = 5,
     allow_tuple: bool = True,
     max_length: int | None = None,
-) -> Content:
+) -> RecordArray:
     '''Strategy for RecordArray Content from a list of child Contents.
 
     Parameters
@@ -81,3 +87,42 @@ def record_array_contents(
     else:
         length = None
     return RecordArray(contents, fields=fields, length=length)
+
+
+@st.composite
+def record_array_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: 'int | None',
+    max_length: 'int | None',
+) -> RecordArray:
+    '''Strategy that generates a record layout within a size limit.
+
+    Draws one or more children via ``content_lists()`` with ``min_len=1``,
+    then wraps them in a ``RecordArray`` with generated or omitted field names.
+
+    Called by ``contents()`` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    max_length
+        Upper bound on the record length, i.e., ``len(result)``.
+
+    '''
+    children = draw(
+        st_ak.contents.content_lists(
+            content, max_size=max_size, max_leaf_size=max_leaf_size, min_len=1
+        )
+    )
+    result = draw(record_array_contents(children, max_length=max_length))
+    assume(content_size(result) <= max_size)
+    return result
