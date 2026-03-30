@@ -1,26 +1,28 @@
+'''Utility functions for property-based test assertions, etc.'''
+
 __all__ = [
-    'any_nan_in_awkward_array',
     'any_nan_nat_in_awkward_array',
+    'any_nan_in_awkward_array',
     'any_nat_in_awkward_array',
     'iter_contents',
     'iter_leaf_contents',
     'iter_numpy_arrays',
-    'content_size',
     'leaf_size',
-    'LeafContent',
-    'CountdownDrawer',
-    '_StWithMinMaxSize',
-    'SUPPORTED_DTYPES',
-    'SUPPORTED_DTYPE_NAMES',
-    'n_scalars_in',
-    'simple_dtypes_in',
-    'simple_dtype_kinds_in',
+    'content_size',
     'any_nan_nat_in_numpy_array',
     'any_nan_in_numpy_array',
     'any_nat_in_numpy_array',
+    'simple_dtypes_in',
+    'simple_dtype_kinds_in',
+    'n_scalars_in',
     'safe_compare',
     'safe_max',
     'safe_min',
+    'CountdownDrawer',
+    'SUPPORTED_DTYPES',
+    'SUPPORTED_DTYPE_NAMES',
+    'LeafContent',
+    '_StWithMinMaxSize',
 ]
 
 from .awkward import (
