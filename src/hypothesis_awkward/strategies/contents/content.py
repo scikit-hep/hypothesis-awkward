@@ -12,24 +12,15 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content
-from hypothesis_awkward.strategies.contents.leaf import leaf_contents
-from hypothesis_awkward.strategies.contents.list_array import (
-    list_array_from_contents,
-)
-from hypothesis_awkward.strategies.contents.list_offset_array import (
-    list_offset_array_from_contents,
-)
-from hypothesis_awkward.strategies.contents.record_array import (
-    record_array_from_contents,
-)
-from hypothesis_awkward.strategies.contents.regular_array import (
-    regular_array_from_contents,
-)
-from hypothesis_awkward.strategies.contents.union_array import (
-    union_array_from_contents,
-)
 from hypothesis_awkward.util.awkward import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
+
+from .leaf import leaf_contents
+from .list_array import list_array_from_contents
+from .list_offset_array import list_offset_array_from_contents
+from .record_array import record_array_from_contents
+from .regular_array import regular_array_from_contents
+from .union_array import union_array_from_contents
 
 _NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
 
