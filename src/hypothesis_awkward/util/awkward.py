@@ -5,6 +5,7 @@ import numpy as np
 
 import awkward as ak
 from awkward.contents import (
+    BitMaskedArray,
     ByteMaskedArray,
     Content,
     EmptyArray,
@@ -174,7 +175,8 @@ def iter_contents(
             ):
                 yield item
             case (
-                ByteMaskedArray()
+                BitMaskedArray()
+                | ByteMaskedArray()
                 | IndexedOptionArray()
                 | ListArray()
                 | ListOffsetArray()
@@ -366,6 +368,8 @@ def content_size(a: ak.Array | Content, /) -> int:
                 + len(a.index.data)
                 + sum(content_size(c) for c in a.contents)
             )
+        case BitMaskedArray():
+            return 2 + len(a.mask.data) + content_size(a.content)
         case ByteMaskedArray():
             return 1 + len(a.mask.data) + content_size(a.content)
         case IndexedOptionArray():

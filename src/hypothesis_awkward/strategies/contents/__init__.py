@@ -20,9 +20,11 @@ __all__ = [
     'record_array_contents',
     'indexed_option_array_contents',
     'byte_masked_array_contents',
+    'bit_masked_array_contents',
     'union_array_contents',
 ]
 
+from .bit_masked_array import bit_masked_array_contents
 from .byte_masked_array import byte_masked_array_contents
 from .bytestring import bytestring_contents
 from .content import content_lists, contents

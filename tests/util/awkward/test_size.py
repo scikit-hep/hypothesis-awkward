@@ -2,6 +2,7 @@ import numpy as np
 
 import awkward as ak
 from awkward.contents import (
+    BitMaskedArray,
     ByteMaskedArray,
     EmptyArray,
     IndexedOptionArray,
@@ -97,6 +98,19 @@ def test_byte_masked_array() -> None:
     )
     # 1 (valid_when) + 3 (mask) + 3 (child data) = 7
     assert content_size(c) == 7
+    assert leaf_size(c) == 3
+
+
+def test_bit_masked_array() -> None:
+    c = BitMaskedArray(
+        ak.index.IndexU8(np.array([0b101], dtype=np.uint8)),
+        NumpyArray(np.array([10, 20, 30])),
+        valid_when=True,
+        length=3,
+        lsb_order=True,
+    )
+    # 2 (valid_when + lsb_order) + 1 (mask byte) + 3 (child data) = 6
+    assert content_size(c) == 6
     assert leaf_size(c) == 3
 
 
