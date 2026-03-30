@@ -49,7 +49,7 @@ def record_array_contents(
     '''
     match contents:
         case None:
-            contents = draw(st_ak.contents.content_lists(max_size=max_fields))
+            contents = draw(st_ak.contents.content_lists(max_len=max_fields))
         case st.SearchStrategy():
             contents = draw(contents)
         case list():
