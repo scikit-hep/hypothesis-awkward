@@ -18,6 +18,7 @@ __all__ = [
     'string_contents',
     'bytestring_contents',
     'record_array_contents',
+    'option_contents',
     'indexed_option_array_contents',
     'byte_masked_array_contents',
     'bit_masked_array_contents',
@@ -35,6 +36,7 @@ from .leaf import leaf_contents
 from .list_array import list_array_contents
 from .list_offset_array import list_offset_array_contents
 from .numpy_array import numpy_array_contents
+from .option import option_contents
 from .record_array import record_array_contents
 from .regular_array import regular_array_contents
 from .string import string_contents
