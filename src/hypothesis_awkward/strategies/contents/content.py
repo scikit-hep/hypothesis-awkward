@@ -191,7 +191,6 @@ def contents(
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
 
     node_type = draw(st.sampled_from(sorted(candidates)))
-    ml = max_length if max_length is not None else 5
 
     match node_type:
         case 'union':
@@ -239,7 +238,7 @@ def contents(
                     recurse,
                     max_size=max_size,
                     max_leaf_size=max_leaf_size,
-                    max_length=ml,
+                    max_length=max_length,
                 )
             )
 
@@ -249,7 +248,7 @@ def contents(
                     recurse,
                     max_size=max_size,
                     max_leaf_size=max_leaf_size,
-                    max_length=ml,
+                    max_length=max_length,
                 )
             )
 

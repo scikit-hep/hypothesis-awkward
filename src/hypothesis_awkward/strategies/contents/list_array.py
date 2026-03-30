@@ -80,7 +80,7 @@ def list_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: 'int | None',
-    max_length: int,
+    max_length: 'int | None' = None,
 ) -> ListArray:
     '''Strategy that generates a starts/stops list layout within a size limit.
 
@@ -100,10 +100,12 @@ def list_array_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``.
+        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
+        to 5 when ``None``.
 
     '''
-    n = draw(st.integers(min_value=0, max_value=max_length))
+    ml = max_length if max_length is not None else 5
+    n = draw(st.integers(min_value=0, max_value=ml))
     overhead = 2 * n
     max_content_size = max(max_size - overhead, 0)
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
