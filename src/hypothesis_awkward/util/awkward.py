@@ -5,6 +5,7 @@ import numpy as np
 
 import awkward as ak
 from awkward.contents import (
+    ByteMaskedArray,
     Content,
     EmptyArray,
     IndexedOptionArray,
@@ -173,7 +174,8 @@ def iter_contents(
             ):
                 yield item
             case (
-                IndexedOptionArray()
+                ByteMaskedArray()
+                | IndexedOptionArray()
                 | ListArray()
                 | ListOffsetArray()
                 | RegularArray()
@@ -364,5 +366,7 @@ def content_size(a: ak.Array | Content, /) -> int:
                 + len(a.index.data)
                 + sum(content_size(c) for c in a.contents)
             )
+        case ByteMaskedArray():
+            return 1 + len(a.mask.data) + content_size(a.content)
         case _:  # pragma: no cover
             raise TypeError(f'Unexpected content type: {type(a)}')

@@ -19,8 +19,10 @@ __all__ = [
     'bytestring_contents',
     'record_array_contents',
     'union_array_contents',
+    'byte_masked_array_contents',
 ]
 
+from .byte_masked_array import byte_masked_array_contents
 from .bytestring import bytestring_contents
 from .content import content_lists, contents
 from .empty_array import empty_array_contents

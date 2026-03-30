@@ -2,6 +2,7 @@ import numpy as np
 
 import awkward as ak
 from awkward.contents import (
+    ByteMaskedArray,
     EmptyArray,
     ListArray,
     ListOffsetArray,
@@ -84,6 +85,17 @@ def test_union_array() -> None:
     )
     # 3 (tags) + 3 (index) + 2 (child 0) + 1 (child 1) = 9
     assert content_size(c) == 9
+    assert leaf_size(c) == 3
+
+
+def test_byte_masked_array() -> None:
+    c = ByteMaskedArray(
+        ak.index.Index8(np.array([1, 0, 1], dtype=np.int8)),
+        NumpyArray(np.array([10, 20, 30])),
+        valid_when=True,
+    )
+    # 1 (valid_when) + 3 (mask) + 3 (child data) = 7
+    assert content_size(c) == 7
     assert leaf_size(c) == 3
 
 
