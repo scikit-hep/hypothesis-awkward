@@ -11,7 +11,6 @@ import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
 from hypothesis_awkward.strategies.contents.list_array import (
@@ -20,8 +19,14 @@ from hypothesis_awkward.strategies.contents.list_array import (
 from hypothesis_awkward.strategies.contents.list_offset_array import (
     list_offset_array_from_contents,
 )
+from hypothesis_awkward.strategies.contents.record_array import (
+    record_array_from_contents,
+)
 from hypothesis_awkward.strategies.contents.regular_array import (
     regular_array_from_contents,
+)
+from hypothesis_awkward.strategies.contents.union_array import (
+    union_array_from_contents,
 )
 from hypothesis_awkward.util.awkward import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
@@ -194,31 +199,22 @@ def contents(
 
     match node_type:
         case 'union':
-            children = draw(
-                content_lists(
-                    functools.partial(recurse, allow_union_root=False),
+            return draw(
+                union_array_from_contents(
+                    recurse,
                     max_size=max_size,
                     max_leaf_size=max_leaf_size,
-                    min_len=2,
-                )
-            )
-            return _check(
-                draw(
-                    st_ak.contents.union_array_contents(children, max_length=max_length)
+                    max_length=max_length,
                 )
             )
 
         case 'record':
-            children = draw(
-                content_lists(
-                    recurse, max_size=max_size, max_leaf_size=max_leaf_size, min_len=1
-                )
-            )
-            return _check(
-                draw(
-                    st_ak.contents.record_array_contents(
-                        children, max_length=max_length
-                    )
+            return draw(
+                record_array_from_contents(
+                    recurse,
+                    max_size=max_size,
+                    max_leaf_size=max_leaf_size,
+                    max_length=max_length,
                 )
             )
 
@@ -258,7 +254,11 @@ def contents(
 
 class StContent(Protocol):
     def __call__(
-        self, *, max_size: int, max_leaf_size: int | None
+        self,
+        *,
+        max_size: int,
+        max_leaf_size: int | None,
+        allow_union_root: bool = ...,
     ) -> st.SearchStrategy[Content]: ...
 
 

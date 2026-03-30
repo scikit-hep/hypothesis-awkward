@@ -1,4 +1,5 @@
 import functools
+from typing import TYPE_CHECKING
 
 import numpy as np
 from hypothesis import assume
@@ -7,6 +8,10 @@ from hypothesis import strategies as st
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, UnionArray
+from hypothesis_awkward.util.awkward import content_size
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 @st.composite
@@ -16,7 +21,7 @@ def union_array_contents(
     *,
     max_contents: int = 4,
     max_length: int | None = None,
-) -> Content:
+) -> UnionArray:
     '''Strategy for UnionArray Content from a list of child Contents.
 
     Parameters
@@ -90,3 +95,46 @@ def union_array_contents(
         index=ak.index.Index64(index_flat),
         contents=contents,
     )
+
+
+@st.composite
+def union_array_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: 'int | None',
+    max_length: 'int | None',
+) -> UnionArray:
+    '''Strategy that generates a tagged union layout within a size limit.
+
+    Draws multiple children via ``content_lists()`` with ``min_len=2``, then
+    wraps them in a ``UnionArray`` with shuffled tags and index arrays. Prevents
+    nested unions by passing ``allow_union_root=False`` to child generation.
+
+    Called by ``contents()`` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    max_length
+        Upper bound on the union length, i.e., ``len(result)``.
+
+    '''
+    children = draw(
+        st_ak.contents.content_lists(
+            functools.partial(content, allow_union_root=False),
+            max_size=max_size,
+            max_leaf_size=max_leaf_size,
+            min_len=2,
+        )
+    )
+    result = draw(union_array_contents(children, max_length=max_length))
+    assume(content_size(result) <= max_size)
+    return result
