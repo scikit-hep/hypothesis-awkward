@@ -174,8 +174,8 @@ def contents(
             children = draw(
                 content_lists(
                     functools.partial(recurse, allow_union_root=False),
-                    max_total_size=max_leaf_size,
-                    min_size=2,
+                    max_leaf_size=max_leaf_size,
+                    min_len=2,
                 )
             )
             return draw(
@@ -184,7 +184,7 @@ def contents(
 
         case 'record':
             children = draw(
-                content_lists(recurse, max_total_size=max_leaf_size, min_size=1)
+                content_lists(recurse, max_leaf_size=max_leaf_size, min_len=1)
             )
             return draw(
                 st_ak.contents.record_array_contents(children, max_length=max_length)
@@ -227,9 +227,9 @@ def content_lists(
     draw: st.DrawFn,
     st_content: _StContent = contents,
     *,
-    max_total_size: int = 10,
-    min_size: int = 0,
-    max_size: int | None = None,
+    max_leaf_size: int = 10,
+    min_len: int = 0,
+    max_len: int | None = None,
 ) -> list[Content]:
     '''Strategy for lists of contents within a size budget.
 
@@ -238,21 +238,21 @@ def content_lists(
     st_content
         A callable that accepts ``max_leaf_size`` and returns a strategy for a single
         content.
-    max_total_size
+    max_leaf_size
         Maximum total number of leaf elements across all contents in the list.
-    min_size
+    min_len
         Minimum number of contents in the list.
-    max_size
+    max_len
         Maximum number of contents in the list. By default there is no upper bound.
 
     '''
-    remaining = max_total_size
+    remaining = max_leaf_size
     contents_ = list[Content]()
-    for _ in range(min_size):
+    for _ in range(min_len):
         c = draw(st_content(max_leaf_size=max(remaining, 0)))
         remaining -= leaf_size(c)
         contents_.append(c)
-    while draw(st.booleans()) and remaining > 0 and len(contents_) < sc(max_size):
+    while draw(st.booleans()) and remaining > 0 and len(contents_) < sc(max_len):
         c = draw(st_content(max_leaf_size=max(remaining, 0)))
         remaining -= leaf_size(c)
         contents_.append(c)

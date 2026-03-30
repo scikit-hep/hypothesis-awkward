@@ -47,9 +47,9 @@ def union_array_contents(
             contents = draw(
                 st_ak.contents.content_lists(
                     functools.partial(st_ak.contents.contents, allow_union_root=False),
-                    max_total_size=max_length if max_length is not None else 10,
-                    min_size=2,
-                    max_size=max_contents,
+                    max_leaf_size=max_length if max_length is not None else 10,
+                    min_len=2,
+                    max_len=max_contents,
                 )
             )
             if max_length is not None:

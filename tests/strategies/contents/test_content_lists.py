@@ -9,17 +9,17 @@ from hypothesis_awkward.strategies.misc.record import RecordCallDraws
 from hypothesis_awkward.util import iter_leaf_contents
 from hypothesis_awkward.util.safe import safe_compare as sc
 
-DEFAULT_MAX_TOTAL_SIZE = 10
-DEFAULT_MIN_SIZE = 0
+DEFAULT_MAX_LEAF_SIZE = 10
+DEFAULT_MIN_LEN = 0
 
 
 class ContentListsKwargs(TypedDict, total=False):
     '''Options for `content_lists()` strategy.'''
 
     st_content: Callable[..., st.SearchStrategy[Content]]
-    max_total_size: int
-    min_size: int
-    max_size: int | None
+    max_leaf_size: int
+    min_len: int
+    max_len: int | None
 
 
 @st.composite
@@ -32,11 +32,11 @@ def content_lists_kwargs(
         chain = st_ak.OptsChain({})
     st_content = chain.register_callable(st_ak.contents.contents)
 
-    min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=10, max_start=5))
+    min_len, max_len = draw(st_ak.ranges(min_start=0, max_end=10, max_start=5))
 
     drawn = (
-        ('min_size', min_size),
-        ('max_size', max_size),
+        ('min_len', min_len),
+        ('max_len', max_len),
     )
 
     kwargs = draw(
@@ -44,7 +44,7 @@ def content_lists_kwargs(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'st_content': st.just(st_content),
-                'max_total_size': st.integers(min_value=0, max_value=50),
+                'max_leaf_size': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -60,9 +60,9 @@ def test_content_lists(data: st.DataObject) -> None:
     opts = data.draw(content_lists_kwargs(), label='opts')
     opts.reset()
 
-    max_total_size = opts.kwargs.get('max_total_size', DEFAULT_MAX_TOTAL_SIZE)
-    min_size = opts.kwargs.get('min_size', DEFAULT_MIN_SIZE)
-    max_size = opts.kwargs.get('max_size')
+    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULT_MAX_LEAF_SIZE)
+    min_len = opts.kwargs.get('min_len', DEFAULT_MIN_LEN)
+    max_len = opts.kwargs.get('max_len')
 
     # Call the test subject
     result = data.draw(
@@ -73,8 +73,8 @@ def test_content_lists(data: st.DataObject) -> None:
     # Assert the options were effective
     assert isinstance(result, list)
     assert all(isinstance(c, Content) for c in result)
-    assert sc(min_size) <= len(result) <= sc(max_size)
-    assert _total_leaf_size(result) <= max_total_size
+    assert sc(min_len) <= len(result) <= sc(max_len)
+    assert _total_leaf_size(result) <= max_leaf_size
 
     match opts.kwargs.get('st_content'):
         case RecordCallDraws() as st_content:
@@ -82,31 +82,31 @@ def test_content_lists(data: st.DataObject) -> None:
             assert all(d is r for d, r in zip(st_content.drawn, result))
 
 
-def test_draw_min_size() -> None:
-    '''Assert that a list with exactly min_size=2 elements can be drawn.'''
+def test_draw_min_len() -> None:
+    '''Assert that a list with exactly min_len=2 elements can be drawn.'''
     find(
         st_ak.contents.content_lists(
-            st_ak.contents.contents, max_total_size=50, min_size=2
+            st_ak.contents.contents, max_leaf_size=50, min_len=2
         ),
         lambda cl: len(cl) == 2,
         settings=settings(phases=[Phase.generate]),
     )
 
 
-def test_draw_max_size() -> None:
-    '''Assert that max_size caps the number of contents.'''
+def test_draw_max_len() -> None:
+    '''Assert that max_len caps the number of contents.'''
     find(
-        st_ak.contents.content_lists(max_total_size=50, max_size=3),
+        st_ak.contents.content_lists(max_leaf_size=50, max_len=3),
         lambda cl: len(cl) == 3,
         settings=settings(phases=[Phase.generate]),
     )
 
 
 def test_draw_empty_list() -> None:
-    '''Assert that an empty list can be drawn when min_size=0.'''
+    '''Assert that an empty list can be drawn when min_len=0.'''
     find(
         st_ak.contents.content_lists(
-            st_ak.contents.contents, max_total_size=50, min_size=0
+            st_ak.contents.contents, max_leaf_size=50, min_len=0
         ),
         lambda cl: len(cl) == 0,
         settings=settings(phases=[Phase.generate]),
