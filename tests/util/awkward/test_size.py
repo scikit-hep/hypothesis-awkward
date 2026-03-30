@@ -4,6 +4,7 @@ import awkward as ak
 from awkward.contents import (
     ByteMaskedArray,
     EmptyArray,
+    IndexedOptionArray,
     ListArray,
     ListOffsetArray,
     NumpyArray,
@@ -97,6 +98,16 @@ def test_byte_masked_array() -> None:
     # 1 (valid_when) + 3 (mask) + 3 (child data) = 7
     assert content_size(c) == 7
     assert leaf_size(c) == 3
+
+
+def test_indexed_option_array() -> None:
+    c = IndexedOptionArray(
+        ak.index.Index64(np.array([-1, 0, 1])),
+        NumpyArray(np.array([10, 20])),
+    )
+    # 3 (index) + 2 (child data) = 5
+    assert content_size(c) == 5
+    assert leaf_size(c) == 2
 
 
 def test_string() -> None:
