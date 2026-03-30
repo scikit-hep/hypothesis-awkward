@@ -14,8 +14,14 @@ from hypothesis import strategies as st
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
+from hypothesis_awkward.strategies.contents.list_array import (
+    list_array_from_contents,
+)
 from hypothesis_awkward.strategies.contents.list_offset_array import (
     list_offset_array_from_contents,
+)
+from hypothesis_awkward.strategies.contents.regular_array import (
+    regular_array_from_contents,
 )
 from hypothesis_awkward.util.awkward import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
@@ -218,12 +224,12 @@ def contents(
             )
 
         case 'regular':
-            # RegularArray overhead: 1 (size parameter)
-            child_budget = max(max_size - 1, 0)
-            child = draw(recurse(max_size=child_budget, max_leaf_size=max_leaf_size))
-            return _check(
-                draw(
-                    st_ak.contents.regular_array_contents(child, max_length=max_length)
+            return draw(
+                regular_array_from_contents(
+                    recurse,
+                    max_size=max_size,
+                    max_leaf_size=max_leaf_size,
+                    max_length=max_length,
                 )
             )
 
@@ -238,12 +244,14 @@ def contents(
             )
 
         case 'list':
-            # Draw n first, compute exact overhead (2n: starts + stops)
-            n = draw(st.integers(min_value=0, max_value=ml))
-            overhead = 2 * n
-            child_budget = max(max_size - overhead, 0)
-            child = draw(recurse(max_size=child_budget, max_leaf_size=max_leaf_size))
-            return _check(draw(st_ak.contents.list_array_contents(child, max_length=n)))
+            return draw(
+                list_array_from_contents(
+                    recurse,
+                    max_size=max_size,
+                    max_leaf_size=max_leaf_size,
+                    max_length=ml,
+                )
+            )
 
         case _ as unreachable:  # pragma: no cover
             assert_never(unreachable)
