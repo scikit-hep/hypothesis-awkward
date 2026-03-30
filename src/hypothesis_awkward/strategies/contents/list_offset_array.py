@@ -18,7 +18,7 @@ def list_offset_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
-    max_length: int = 5,
+    max_length: int | None = None,
 ) -> ListOffsetArray:
     '''Strategy for ListOffsetArray Content wrapping child Content.
 
@@ -28,7 +28,8 @@ def list_offset_array_contents(
         Child content. Can be a strategy for Content, a concrete Content instance, or
         ``None`` to draw from ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``.
+        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
+        to ``len(content)`` when ``None``.
 
     Examples
     --------
@@ -51,7 +52,8 @@ def list_offset_array_contents(
             pass
     assert isinstance(content, Content)
     content_len = len(content)
-    n = draw(st.integers(min_value=0, max_value=max_length))
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=0, max_value=ml))
     if n == 0:
         offsets_list = [0]
     elif content_len == 0:
@@ -100,10 +102,10 @@ def list_offset_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to 5 when ``None``.
+        to ``max_size - 1`` when ``None``.
 
     '''
-    ml = max_length if max_length is not None else 5
+    ml = max_length if max_length is not None else max_size - 1
     n = draw(st.integers(min_value=0, max_value=ml))
     overhead = n + 1
     max_content_size = max(max_size - overhead, 0)
