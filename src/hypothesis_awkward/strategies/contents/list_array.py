@@ -101,10 +101,10 @@ def list_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to 5 when ``None``.
+        to ``max_size // 2`` when ``None``.
 
     '''
-    ml = max_length if max_length is not None else 5
+    ml = max_length if max_length is not None else max_size // 2
     n = draw(st.integers(min_value=0, max_value=ml))
     overhead = 2 * n
     max_content_size = max(max_size - overhead, 0)
