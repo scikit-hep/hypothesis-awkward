@@ -19,7 +19,7 @@ class ArraysKwargs(ContentsKwargs, total=False):
 
 DEFAULTS = ArraysKwargs(
     dtypes=None,
-    max_size=10,
+    max_leaf_size=10,
     allow_nan=True,
     allow_numpy=True,
     allow_empty=True,
@@ -156,7 +156,7 @@ def test_draw_virtual_union() -> None:
         return has_union and not layout.is_all_materialized
 
     find(
-        st_ak.constructors.arrays(max_size=20),
+        st_ak.constructors.arrays(max_leaf_size=20),
         _is_virtual_union,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )

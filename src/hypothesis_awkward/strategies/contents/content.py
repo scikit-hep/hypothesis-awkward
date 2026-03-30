@@ -13,7 +13,7 @@ from hypothesis import strategies as st
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.contents.leaf import leaf_contents
-from hypothesis_awkward.util.awkward import iter_leaf_contents
+from hypothesis_awkward.util.awkward import leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 _NodeType = Literal['list', 'list_offset', 'record', 'regular', 'union']
@@ -24,7 +24,7 @@ def contents(
     draw: st.DrawFn,
     *,
     dtypes: st.SearchStrategy[np.dtype] | None = None,
-    max_size: int = 10,
+    max_leaf_size: int = 10,
     allow_nan: bool = True,
     allow_numpy: bool = True,
     allow_empty: bool = True,
@@ -52,7 +52,7 @@ def contents(
         A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
         default strategy that generates any scalar dtype supported by Awkward Array is
         used. Does not affect string or bytestring content.
-    max_size
+    max_leaf_size
         Maximum total number of elements in the generated content. Each numerical value,
         including complex and datetime, counts as one. Each string and bytestring (not
         character or byte) counts as one.
@@ -67,12 +67,12 @@ def contents(
     allow_string
         No string content is generated if ``False``. Strings are represented as a
         ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each string (not character)
-        counts toward ``max_size``. The string itself does not count toward
+        counts toward ``max_leaf_size``. The string itself does not count toward
         ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
     allow_bytestring
         No bytestring content is generated if ``False``. Bytestrings are represented as a
         ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each bytestring (not byte)
-        counts toward ``max_size``. The bytestring itself does not count toward
+        counts toward ``max_leaf_size``. The bytestring itself does not count toward
         ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
     allow_regular
         No ``RegularArray`` is generated if ``False``.
@@ -113,7 +113,9 @@ def contents(
         allow_string=allow_string,
         allow_bytestring=allow_bytestring,
     )
-    leaf_max_size = min(max_size, max_length) if max_length is not None else max_size
+    leaf_max_size = (
+        min(max_leaf_size, max_length) if max_length is not None else max_leaf_size
+    )
 
     leaf_only = (
         not any(
@@ -125,7 +127,7 @@ def contents(
                 allow_union,
             )
         )
-        or max_size == 0
+        or max_leaf_size == 0
     )
     if leaf_only:
         return draw(st_leaf(min_size=0, max_size=leaf_max_size))
@@ -172,7 +174,7 @@ def contents(
             children = draw(
                 content_lists(
                     functools.partial(recurse, allow_union_root=False),
-                    max_total_size=max_size,
+                    max_total_size=max_leaf_size,
                     min_size=2,
                 )
             )
@@ -181,19 +183,21 @@ def contents(
             )
 
         case 'record':
-            children = draw(content_lists(recurse, max_total_size=max_size, min_size=1))
+            children = draw(
+                content_lists(recurse, max_total_size=max_leaf_size, min_size=1)
+            )
             return draw(
                 st_ak.contents.record_array_contents(children, max_length=max_length)
             )
 
         case 'regular':
-            child = draw(recurse(max_size=max_size))
+            child = draw(recurse(max_leaf_size=max_leaf_size))
             return draw(
                 st_ak.contents.regular_array_contents(child, max_length=max_length)
             )
 
         case 'list_offset':
-            child = draw(recurse(max_size=max_size))
+            child = draw(recurse(max_leaf_size=max_leaf_size))
             if max_length is not None:
                 return draw(
                     st_ak.contents.list_offset_array_contents(
@@ -203,7 +207,7 @@ def contents(
             return draw(st_ak.contents.list_offset_array_contents(child))
 
         case 'list':
-            child = draw(recurse(max_size=max_size))
+            child = draw(recurse(max_leaf_size=max_leaf_size))
             if max_length is not None:
                 return draw(
                     st_ak.contents.list_array_contents(child, max_length=max_length)
@@ -215,7 +219,7 @@ def contents(
 
 
 class _StContent(Protocol):
-    def __call__(self, *, max_size: int) -> st.SearchStrategy[Content]: ...
+    def __call__(self, *, max_leaf_size: int) -> st.SearchStrategy[Content]: ...
 
 
 @st.composite
@@ -232,7 +236,8 @@ def content_lists(
     Parameters
     ----------
     st_content
-        A callable that accepts ``max_size`` and returns a strategy for a single content.
+        A callable that accepts ``max_leaf_size`` and returns a strategy for a single
+        content.
     max_total_size
         Maximum total number of leaf elements across all contents in the list.
     min_size
@@ -244,16 +249,11 @@ def content_lists(
     remaining = max_total_size
     contents_ = list[Content]()
     for _ in range(min_size):
-        c = draw(st_content(max_size=max(remaining, 0)))
-        remaining -= _leaf_size(c)
+        c = draw(st_content(max_leaf_size=max(remaining, 0)))
+        remaining -= leaf_size(c)
         contents_.append(c)
     while draw(st.booleans()) and remaining > 0 and len(contents_) < sc(max_size):
-        c = draw(st_content(max_size=max(remaining, 0)))
-        remaining -= _leaf_size(c)
+        c = draw(st_content(max_leaf_size=max(remaining, 0)))
+        remaining -= leaf_size(c)
         contents_.append(c)
     return contents_
-
-
-def _leaf_size(c: Content) -> int:
-    '''Count total leaf elements in a content tree.'''
-    return sum(len(leaf) for leaf in iter_leaf_contents(c))

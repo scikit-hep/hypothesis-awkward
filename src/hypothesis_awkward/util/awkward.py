@@ -267,3 +267,38 @@ def iter_numpy_arrays(
     ):
         if isinstance(content, NumpyArray):
             yield content.data
+
+
+def leaf_size(a: ak.Array | Content, /) -> int:
+    '''Count total leaf elements in an Awkward Array layout.
+
+    Each ``NumpyArray`` element counts as one. Each string and bytestring
+    (not character or byte) counts as one. ``EmptyArray`` counts as zero.
+
+    Parameters
+    ----------
+    a
+        An Awkward Array or Content.
+
+    Returns
+    -------
+    int
+        Total number of leaf elements.
+
+    Examples
+    --------
+
+    >>> a = ak.Array([1, 2, 3])
+    >>> leaf_size(a)
+    3
+
+    >>> a = ak.Array([[1, 2], [3]])
+    >>> leaf_size(a)
+    3
+
+    >>> a = ak.Array(['hello', 'world'])
+    >>> leaf_size(a)
+    2
+
+    '''
+    return sum(len(leaf) for leaf in iter_leaf_contents(a))
