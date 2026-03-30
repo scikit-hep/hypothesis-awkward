@@ -96,20 +96,30 @@ For example, this might print:
 
 ```python
 array=<Array [] type='0 * bool'>
-array=<Array [32766, 32766, 32766, 32766, 32766] type='5 * int16'>
-array=<Array [[], [], [], []] type='4 * var * var * unknown'>
-array=<Array ['', ''] type='2 * string'>
-array=<Array [[b'\xd7']] type='1 * var * bytes'>
-array=<Array [] type='0 * var * {"": bool}'>
-array=<Array [[], []] type='2 * var * (unknown, union[2 * (string, string), bytes])'>
-array=<Array [('\U0003dcd5hE2'), ('¦Ü'), ..., (...), (..., ...)] type='10 * (string)'>
-array=<Array [[NaT], [NaT]] type='2 * 1 * union[(unknown), timedelta64[Y]]'>
-array=<Array [[], [...], [], [], []] type='5 * union[var * unknown, {Nok: unknown...'>
-array=<Array [??, ??, ??, ??, ??, ??] type='6 * bytes'>
-array=<Array [[...], [...], ..., ['ÆÓË\U000913a9\x1fê', 'X']] type='5 * 2 * string'>
-array=<Array [[[??]], [[??]], [[??]]] type='3 * 1 * 1 * var * union[var * bytes, ...'>
-array=<Array [[[[], []], [[]], [], []]]] type='1 * 1 * 3 * var * 1 * var * uint16'>
-array=<Array [??, ??, ??, ??, ??] type='5 * var * var * (uint64, bytes)'>
+array=<Array [61038, 65535, 2127] type='3 * uint16'>
+array=<Array [1, nan, 1.19e-07, -0, 0] type='5 * float32'>
+array=<Array [-1e-05+-infj, ..., 5.76e+16+-1.19e-07j] type='36 * complex64'>
+array=<Array ['pÜx\x1d½1', '', '', '', 'z'] type='5 * string'>
+array=<Array [b'\xb7\xb7\xc1b\x1d=\x93', ..., b'M'] type='4 * bytes'>
+array=<Array [[], []] type='2 * var * 3 * unknown'>
+array=<Array [['È\x11헎spµ\U00096bad', '']] type='1 * 2 * string'>
+array=<Array [[], [[]], [[], []], []] type='4 * var * 0 * unknown'>
+array=<Array [[-35858-02-18T15:30:39.815212, ...]] type='1 * var * datetime64[us]'>
+array=<Array [NaT, ..., -290308-12-21T19:59:05.224253] type='7 * datetime64[us]'>
+array=<Array [NaT, NaT, ..., NaT, 100 hours] type='9 * timedelta64[h]'>
+array=<Array [1.56e+16+-5.15e+16j, ..., inf+0j] type='5 * complex64'>
+array=<Array [b'', ..., b'R\xf7\xb6l\x1d\xdd-tmXK'] type='3 * union[bytes, bytes,...'>
+array=<Array [[[[], [inf], [0.0], []]], [...]] type='2 * union[var * float32, var...'>
+array=<Array [] type='0 * {"": string, Z: 1 * union[string, bytes]}'>
+array=<Array [179, 179, 179, 179, 179, ..., 179, 179, 179, 179] type='34 * uint32'>
+array=<Array [[...]] type='1 * var * 1 * bytes'>
+array=<Array [??, ??, ??, ??] type='4 * bytes'>
+array=<Array [[??], [??], [??], [??], [??], [??], [??]] type='7 * 1 * complex64'>
+array=<Array [??, ??, ??, ??, ??, ..., ??, ??, ??, ??] type='29 * timedelta64[us]'>
+array=<Array [3389378472, 7, 234, ..., 249, 7352234684956532367] type='17 * uint64'>
+array=<Array [[], []] type='2 * var * var * var * bytes'>
+array=<Array [1969-12-31T23:59:50.776627963145224442, ...] type='30 * datetime64[as]'>
+array=<Array [0.807+-2.93e+106j, ..., -2.23e-311+2.42e+34j] type='9 * complex128'>
 ```
 
 The current version generates arrays with `NumpyArray`, `EmptyArray`, string,
