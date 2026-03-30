@@ -19,6 +19,7 @@ class ArraysKwargs(ContentsKwargs, total=False):
 
 DEFAULTS = ArraysKwargs(
     dtypes=None,
+    max_size=50,
     max_leaf_size=10,
     allow_nan=True,
     allow_numpy=True,

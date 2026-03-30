@@ -6,9 +6,10 @@ from hypothesis import strategies as st
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
 from hypothesis_awkward.strategies.misc.record import RecordCallDraws
-from hypothesis_awkward.util import leaf_size
+from hypothesis_awkward.util import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
 
+DEFAULT_MAX_SIZE = 50
 DEFAULT_MAX_LEAF_SIZE = 10
 DEFAULT_MIN_LEN = 0
 
@@ -17,6 +18,7 @@ class ContentListsKwargs(TypedDict, total=False):
     '''Options for `content_lists()` strategy.'''
 
     st_content: Callable[..., st.SearchStrategy[Content]]
+    max_size: int
     max_leaf_size: int
     min_len: int
     max_len: int | None
@@ -44,6 +46,7 @@ def content_lists_kwargs(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'st_content': st.just(st_content),
+                'max_size': st.integers(min_value=0, max_value=200),
                 'max_leaf_size': st.integers(min_value=0, max_value=50),
             },
         )
@@ -60,6 +63,7 @@ def test_content_lists(data: st.DataObject) -> None:
     opts = data.draw(content_lists_kwargs(), label='opts')
     opts.reset()
 
+    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULT_MAX_LEAF_SIZE)
     min_len = opts.kwargs.get('min_len', DEFAULT_MIN_LEN)
     max_len = opts.kwargs.get('max_len')
@@ -74,6 +78,7 @@ def test_content_lists(data: st.DataObject) -> None:
     assert isinstance(result, list)
     assert all(isinstance(c, Content) for c in result)
     assert sc(min_len) <= len(result) <= sc(max_len)
+    assert sum(content_size(c) for c in result) <= max_size
     assert sum(leaf_size(c) for c in result) <= max_leaf_size
 
     match opts.kwargs.get('st_content'):
