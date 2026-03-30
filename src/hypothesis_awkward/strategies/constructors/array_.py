@@ -10,7 +10,7 @@ def arrays(
     draw: st.DrawFn,
     *,
     dtypes: st.SearchStrategy[np.dtype] | None = None,
-    max_size: int = 10,
+    max_leaf_size: int = 10,
     allow_nan: bool = True,
     allow_numpy: bool = True,
     allow_empty: bool = True,
@@ -37,7 +37,7 @@ def arrays(
         A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
         default strategy that generates any scalar dtype supported by Awkward Array is
         used. Does not affect string or bytestring content.
-    max_size
+    max_leaf_size
         Maximum total number of elements in the generated content. Each numerical value,
         including complex and datetime, counts as one. Each string and bytestring (not
         character or byte) counts as one.
@@ -52,12 +52,12 @@ def arrays(
     allow_string
         No string content is generated if ``False``. Strings are represented as a
         ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each string (not character)
-        counts toward ``max_size``. The string itself does not count toward
+        counts toward ``max_leaf_size``. The string itself does not count toward
         ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
     allow_bytestring
         No bytestring content is generated if ``False``. Bytestrings are represented as a
         ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each bytestring (not byte)
-        counts toward ``max_size``. The bytestring itself does not count toward
+        counts toward ``max_leaf_size``. The bytestring itself does not count toward
         ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
     allow_regular
         No ``RegularArray`` is generated if ``False``.
@@ -88,7 +88,7 @@ def arrays(
     layout = draw(
         st_ak.contents.contents(
             dtypes=dtypes,
-            max_size=max_size,
+            max_leaf_size=max_leaf_size,
             allow_nan=allow_nan,
             allow_numpy=allow_numpy,
             allow_empty=allow_empty,

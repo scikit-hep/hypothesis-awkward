@@ -26,7 +26,9 @@ def _contents_list(
 ) -> list[Content]:
     '''Draw a list of 1..5 Content objects for testing.'''
     n = draw(st.integers(min_value=1, max_value=5))
-    return [draw(st_ak.contents.contents(max_size=5, max_depth=2)) for _ in range(n)]
+    return [
+        draw(st_ak.contents.contents(max_leaf_size=5, max_depth=2)) for _ in range(n)
+    ]
 
 
 @st.composite
@@ -155,7 +157,7 @@ def test_draw_max_length() -> None:
 def test_draw_from_contents() -> None:
     '''Assert that RecordArray can be drawn from `contents()`.'''
     find(
-        st_ak.contents.contents(max_size=20),
+        st_ak.contents.contents(max_leaf_size=20),
         lambda c: any(isinstance(n, RecordArray) for n in iter_contents(c)),
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )

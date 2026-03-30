@@ -27,7 +27,7 @@ def _contents_list(
     '''Draw a list of 2..5 Content objects for testing.'''
     n = draw(st.integers(min_value=2, max_value=5))
     return [
-        draw(st_ak.contents.contents(max_size=5, max_depth=2, allow_union=False))
+        draw(st_ak.contents.contents(max_leaf_size=5, max_depth=2, allow_union=False))
         for _ in range(n)
     ]
 
@@ -159,7 +159,7 @@ def test_draw_max_length() -> None:
 def test_draw_from_contents() -> None:
     '''Assert that UnionArray can be drawn from `contents()`.'''
     find(
-        st_ak.contents.contents(max_size=20),
+        st_ak.contents.contents(max_leaf_size=20),
         lambda c: (
             isinstance(c, UnionArray)
             or any(isinstance(n, UnionArray) for n in iter_contents(c))
@@ -188,7 +188,7 @@ def test_draw_from_contents_nested_union() -> None:
     but deeper descendants may be, e.g. ``Union[Record[Union[...], ...], ...]``.
     '''
     find(
-        st_ak.contents.contents(max_size=20, max_depth=5),
+        st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_nested_union,
         settings=settings(phases=[Phase.generate], max_examples=5000),
     )
