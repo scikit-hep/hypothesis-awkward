@@ -12,6 +12,9 @@ nav = [
         { "NumPy" = "strategies/numpy.md" },
         { "Builtins" = "strategies/builtins.md" },
     ] },
+    { "Util" = [
+        { "Util" = "util.md" },
+    ] },
 ]
 extra_css = ["stylesheets/extra.css"]
 extra_javascript = ["javascripts/extra.js"]
@@ -92,6 +95,8 @@ docstring_style = "auto"
 members_order = ["__all__", "source"]
 summary = { modules = false, functions = true, classes = true, attributes = true, type_aliases = true }
 show_source = false
+show_root_heading = false
+show_root_toc_entry = false
 separate_signature = true
 show_signature_annotations = true
 
