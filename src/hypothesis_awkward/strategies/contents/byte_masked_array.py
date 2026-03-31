@@ -80,7 +80,10 @@ def byte_masked_array_from_contents(
         Upper bound on ``len(result)``.
 
     '''
-    max_content_size = max((max_size - 1) // 2, 0)
+    if max_leaf_size is not None:
+        max_content_size = max(max_size - 1 - max_leaf_size, 0)
+    else:
+        max_content_size = max((max_size - 1) // 2, 0)
     if max_length is not None:
         max_content_size = min(max_content_size, max_length)
     st_content = content(
