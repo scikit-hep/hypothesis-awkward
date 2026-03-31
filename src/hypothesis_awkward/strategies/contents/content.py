@@ -15,6 +15,7 @@ from .indexed_option_array import indexed_option_array_from_contents
 from .leaf import leaf_contents
 from .list_array import list_array_from_contents
 from .list_offset_array import list_offset_array_from_contents
+from .option import StOption, option_from_contents
 from .record_array import record_array_from_contents
 from .regular_array import regular_array_from_contents
 from .union_array import union_array_from_contents
@@ -215,6 +216,18 @@ def contents(
     if not candidates:
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
 
+    st_option_: StOption | None = (
+        functools.partial(
+            option_from_contents,
+            allow_indexed_option=allow_indexed_option,
+            allow_byte_masked=allow_byte_masked,
+            allow_bit_masked=allow_bit_masked,
+            allow_unmasked=allow_unmasked,
+        )
+        if any_option
+        else None
+    )
+
     st_wrapper = draw(st.sampled_from(candidates))
     return draw(
         st_wrapper(
@@ -222,6 +235,7 @@ def contents(
             max_size=max_size,
             max_leaf_size=max_leaf_size,
             max_length=max_length,
+            st_option=st_option_,
         )
     )
 
@@ -245,6 +259,7 @@ class _StFromContents(Protocol):
         max_size: int,
         max_leaf_size: int | None,
         max_length: int | None,
+        st_option: StOption | None = ...,
     ) -> st.SearchStrategy[Content]: ...
 
 
@@ -257,6 +272,8 @@ def content_lists(
     max_leaf_size: int | None = None,
     min_len: int = 0,
     max_len: int | None = None,
+    all_option_or_none: bool = False,
+    st_option: StOption | None = None,
 ) -> list[Content]:
     '''Strategy for lists of contents within a size budget.
 
@@ -273,6 +290,12 @@ def content_lists(
         Minimum number of contents in the list.
     max_len
         Maximum number of contents in the list. By default there is no upper bound.
+    all_option_or_none
+        If ``True``, enforce all-or-none option typing: the first child decides
+        whether all children are option-wrapped. Requires ``st_option``.
+    st_option
+        A callable conforming to ``StOption`` that wraps content in an option type.
+        Required when ``all_option_or_none`` is ``True``.
 
     '''
     remaining_leaf = max_leaf_size
@@ -282,13 +305,42 @@ def content_lists(
     def _remaining_max_leaf_size() -> int | None:
         return max(remaining_leaf, 0) if remaining_leaf is not None else None
 
-    for _ in range(min_len):
-        c = draw(
+    def _draw_content() -> Content:
+        return draw(
             st_content(
                 max_size=max(remaining_total, 0),
                 max_leaf_size=_remaining_max_leaf_size(),
             )
         )
+
+    def _draw_option() -> Content:
+        assert st_option is not None
+        return draw(
+            st_option(
+                functools.partial(st_content, allow_option_root=False),
+                max_size=max(remaining_total, 0),
+                max_leaf_size=_remaining_max_leaf_size(),
+            )
+        )
+
+    # After the first child, use_option decides whether to wrap all in option
+    use_option: bool | None = None  # None = not yet decided
+
+    def _draw() -> Content:
+        if use_option is True:
+            return _draw_option()
+        if use_option is False:
+            return _draw_content()
+        # Not yet decided (first child) — draw from st_content
+        return _draw_content()
+
+    for i in range(min_len):
+        c = _draw()
+        if all_option_or_none and use_option is None and st_option is not None:
+            use_option = c.is_option
+            if not use_option:
+                # Ensure subsequent draws don't produce option at root
+                st_content = functools.partial(st_content, allow_option_root=False)
         if remaining_leaf is not None:
             remaining_leaf -= leaf_size(c)
         remaining_total -= content_size(c)
@@ -299,12 +351,7 @@ def content_lists(
         and remaining_total > 0
         and len(contents_) < sc(max_len)
     ):
-        c = draw(
-            st_content(
-                max_size=max(remaining_total, 0),
-                max_leaf_size=_remaining_max_leaf_size(),
-            )
-        )
+        c = _draw()
         if remaining_leaf is not None:
             remaining_leaf -= leaf_size(c)
         remaining_total -= content_size(c)

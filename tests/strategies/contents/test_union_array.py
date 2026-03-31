@@ -213,24 +213,48 @@ def _has_nested_union(c: Content) -> bool:
     return False
 
 
-def test_draw_from_contents_option_inside_union() -> None:
-    '''Assert that option types can appear inside union branches.
+def test_draw_from_contents_option_deep_inside_union() -> None:
+    '''Assert that option types can appear deep inside non-option union branches.
 
-    Direct children of a union are not option types, but deeper
-    descendants may be, e.g., ``Union[ListOffset[ByteMasked[...]], ...]``.
+    The direct children of the union are not option types, but deeper
+    descendants are, e.g., ``Union[ListOffset[ByteMasked[...]], ...]``.
     '''
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
-        _has_option_inside_union,
+        _has_option_deep_inside_union,
         settings=settings(phases=[Phase.generate], max_examples=5000),
     )
 
 
-def _has_option_inside_union(c: Content) -> bool:
+def _has_option_deep_inside_union(c: Content) -> bool:
     for node in iter_contents(c):
         if not isinstance(node, UnionArray):
             continue
         for child in node.contents:
+            if child.is_option:
+                continue
             if any(d.is_option for d in iter_contents(child)):
                 return True
+    return False
+
+
+def test_draw_from_contents_all_option_union() -> None:
+    '''Assert that a UnionArray with all-option children can be drawn.
+
+    All direct children of the union are option types, satisfying the
+    "all or none" rule.
+    '''
+    find(
+        st_ak.contents.contents(max_leaf_size=20, max_depth=5),
+        _has_all_option_union,
+        settings=settings(phases=[Phase.generate], max_examples=5000),
+    )
+
+
+def _has_all_option_union(c: Content) -> bool:
+    for node in iter_contents(c):
+        if not isinstance(node, UnionArray):
+            continue
+        if all(child.is_option for child in node.contents):
+            return True
     return False

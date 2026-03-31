@@ -10,6 +10,7 @@ from hypothesis_awkward.util.awkward import content_size
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -97,6 +98,7 @@ def record_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None',
+    st_option: 'StOption | None' = None,
 ) -> RecordArray:
     '''Strategy that generates a record layout within a size limit.
 

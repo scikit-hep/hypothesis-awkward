@@ -7,6 +7,7 @@ from awkward.contents import Content, UnmaskedArray
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -52,6 +53,7 @@ def unmasked_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None',
+    st_option: 'StOption | None' = None,
 ) -> UnmaskedArray:
     '''Strategy that generates an unmasked layout within a size limit.
 

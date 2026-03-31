@@ -12,6 +12,7 @@ from hypothesis_awkward.util.awkward import content_size
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -109,12 +110,14 @@ def union_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None',
+    st_option: 'StOption | None' = None,
 ) -> UnionArray:
     '''Strategy that generates a tagged union layout within a size limit.
 
     Draws multiple children via ``content_lists()`` with ``min_len=2``, then
     wraps them in a ``UnionArray`` with shuffled tags and index arrays. Prevents
     nested unions by passing ``allow_union_root=False`` to child generation.
+    Enforces the all-or-none option rule via ``all_option_or_none=True``.
 
     Called by ``contents()`` during recursive tree generation.
 
@@ -129,14 +132,19 @@ def union_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the union length, i.e., ``len(result)``.
+    st_option
+        A callable conforming to ``StOption`` that wraps content in an option
+        type. Used for all-or-none option coordination.
 
     '''
     children = draw(
         st_ak.contents.content_lists(
-            functools.partial(content, allow_union_root=False, allow_option_root=False),
+            functools.partial(content, allow_union_root=False),
             max_size=max_size,
             max_leaf_size=max_leaf_size,
             min_len=2,
+            all_option_or_none=st_option is not None,
+            st_option=st_option,
         )
     )
     result = draw(union_array_contents(children, max_length=max_length))

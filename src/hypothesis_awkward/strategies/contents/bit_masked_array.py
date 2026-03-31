@@ -12,6 +12,7 @@ from hypothesis_awkward.util.safe import safe_compare as sc
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -65,6 +66,7 @@ def bit_masked_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None',
+    st_option: 'StOption | None' = None,
 ) -> BitMaskedArray:
     '''Strategy that generates a bit-masked layout within a size limit.
 
