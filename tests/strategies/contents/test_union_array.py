@@ -140,7 +140,7 @@ def test_draw_multiple_contents() -> None:
     find(
         st_ak.contents.union_array_contents(max_contents=max_contents),
         lambda u: len(u.contents) == max_contents,
-        settings=settings(phases=[Phase.generate]),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
