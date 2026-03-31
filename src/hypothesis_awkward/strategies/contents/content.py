@@ -50,11 +50,28 @@ def contents(
 ) -> Content:
     '''Strategy for Awkward Array content layouts.
 
-    Builds content layouts by recursively constructing a tree of content nodes. At each
-    level, a coin flip decides whether to go deeper or produce a leaf. Leaf types include
-    NumpyArray, EmptyArray, string, and bytestring. Wrapper types include RegularArray,
-    ListOffsetArray, ListArray, RecordArray, and UnionArray. Option types include
-    IndexedOptionArray, ByteMaskedArray, BitMaskedArray, and UnmaskedArray.
+    The current implementation generates the following layouts:
+
+    - ``EmptyArray``
+    - ``NumpyArray``
+    - ``RegularArray``
+    - ``ListArray``
+    - ``ListOffsetArray``
+    - Strings
+    - Bytestrings
+    - ``RecordArray``
+    - ``IndexedOptionArray``
+    - ``ByteMaskedArray``
+    - ``BitMaskedArray``
+    - ``UnmaskedArray``
+    - ``UnionArray``
+
+    Each type can be excluded separately with the corresponding ``allow_*`` argument.
+
+    The ``max_size`` is the main argument for constraining the array size. It counts most
+    of the scalar values in the layout, including data elements, offsets, indices, field
+    names, and parameters.  The array size can also be constrained with
+    ``max_leaf_size``, ``max_depth``, and ``max_length``.
 
     Parameters
     ----------

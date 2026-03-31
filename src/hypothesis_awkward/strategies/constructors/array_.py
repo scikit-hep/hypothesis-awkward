@@ -34,10 +34,46 @@ def arrays(
 ) -> ak.Array:
     '''Strategy for Awkward Arrays.
 
-    Builds arrays with NumpyArray, EmptyArray, string, and bytestring as leaf contents
-    that can be nested multiple levels deep in RegularArray, ListOffsetArray, ListArray,
-    RecordArray, and UnionArray. Option types include IndexedOptionArray,
-    ByteMaskedArray, BitMaskedArray, and UnmaskedArray. Arrays might be virtual.
+    This is the main strategy in this package. It is under development. The aim is to
+    generate fully general Awkward Arrays, with many options to control layout, data
+    types, missing values, masks, and other array attributes.
+
+    In constructing arrays, this strategy follows the Awkward Array User Guide section
+    ["Direct constructors"][ak-user-guide-constructors]. It constructs _layouts_ and
+    layout types wraps them in an ``ak.Array``. The layouts are instances of subclasses
+    of ``ak.contents.Content``.
+
+    [ak-user-guide-constructors]: https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
+
+    By default, when called with no arguments, ``arrays()`` generates the most general
+    arrays currently implemented, subject to a finite maximum size. Arguments can be
+    provided to exclude certain layouts or data types, or to constrain values and sizes.
+
+    The current implementation generates arrays with the following layouts:
+
+    - ``EmptyArray``
+    - ``NumpyArray``
+    - ``RegularArray``
+    - ``ListArray``
+    - ``ListOffsetArray``
+    - Strings
+    - Bytestrings
+    - ``RecordArray``
+    - ``IndexedOptionArray``
+    - ``ByteMaskedArray``
+    - ``BitMaskedArray``
+    - ``UnmaskedArray``
+    - ``UnionArray``
+
+    Each type can be excluded separately with the corresponding ``allow_*`` argument.
+
+    The ``max_size`` is the main argument for constraining the array size. It counts most
+    of the scalar values in the layout, including data elements, offsets, indices, field
+    names, and parameters.  The array size can also be constrained with
+    ``max_leaf_size``, ``max_depth``, and ``max_length``.
+
+    The ``arrays()`` randomly generates virtual arrays by lazifying buffers. The
+    ``allow_virtual`` can be used to disable virtual arrays.
 
     Parameters
     ----------
