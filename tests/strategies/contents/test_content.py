@@ -37,6 +37,10 @@ class ContentsKwargs(TypedDict, total=False):
     allow_list: bool
     allow_record: bool
     allow_union: bool
+    allow_indexed_option: bool
+    allow_byte_masked: bool
+    allow_bit_masked: bool
+    allow_unmasked: bool
     max_leaf_size: int | None
     max_depth: int
     max_length: int | None
@@ -71,6 +75,10 @@ def contents_kwargs(
                 'allow_list': st.booleans(),
                 'allow_record': st.booleans(),
                 'allow_union': st.booleans(),
+                'allow_indexed_option': st.booleans(),
+                'allow_byte_masked': st.booleans(),
+                'allow_bit_masked': st.booleans(),
+                'allow_unmasked': st.booleans(),
                 'max_leaf_size': st.one_of(
                     st.none(), st.integers(min_value=0, max_value=50)
                 ),
@@ -121,10 +129,18 @@ def test_contents(data: st.DataObject) -> None:
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
     max_length = opts.kwargs.get('max_length')
 
+    allow_indexed_option = opts.kwargs.get('allow_indexed_option', True)
+    allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
+    allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
+    allow_unmasked = opts.kwargs.get('allow_unmasked', True)
+
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
     )
-    if not allow_any_nesting:
+    allow_any_option = any(
+        (allow_indexed_option, allow_byte_masked, allow_bit_masked, allow_unmasked)
+    )
+    if not allow_any_nesting and not allow_any_option:
         assert _nesting_depth(c) == 0
 
     # Per-type gating
@@ -146,6 +162,14 @@ def test_contents(data: st.DataObject) -> None:
         assert not _has_record(c)
     if not allow_union:
         assert not _has_union(c)
+    if not allow_indexed_option:
+        assert not _has_indexed_option(c)
+    if not allow_byte_masked:
+        assert not _has_byte_masked(c)
+    if not allow_bit_masked:
+        assert not _has_bit_masked(c)
+    if not allow_unmasked:
+        assert not _has_unmasked(c)
 
     # Dtype check via leaf arrays (works for both flat and nested layouts)
     match dtypes:
@@ -238,6 +262,14 @@ def _nesting_depth(c: ak.contents.Content) -> int:
         ak.contents.ListOffsetArray,
         ak.contents.ListArray,
     )
+    _option_types = (
+        ak.contents.IndexedOptionArray,
+        ak.contents.ByteMaskedArray,
+        ak.contents.BitMaskedArray,
+        ak.contents.UnmaskedArray,
+    )
+    if isinstance(c, _option_types):
+        return _nesting_depth(c.content)
     if isinstance(c, ak.contents.UnionArray):
         return 1 + max(_nesting_depth(child) for child in c.contents)
     if isinstance(c, ak.contents.RecordArray):
@@ -298,3 +330,59 @@ def _has_record(c: ak.contents.Content) -> bool:
 def _has_union(c: ak.contents.Content) -> bool:
     '''Check if the content contains any UnionArray node.'''
     return any(isinstance(n, ak.contents.UnionArray) for n in iter_contents(c))
+
+
+def _has_indexed_option(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any IndexedOptionArray node.'''
+    return any(isinstance(n, ak.contents.IndexedOptionArray) for n in iter_contents(c))
+
+
+def _has_byte_masked(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any ByteMaskedArray node.'''
+    return any(isinstance(n, ak.contents.ByteMaskedArray) for n in iter_contents(c))
+
+
+def _has_bit_masked(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any BitMaskedArray node.'''
+    return any(isinstance(n, ak.contents.BitMaskedArray) for n in iter_contents(c))
+
+
+def _has_unmasked(c: ak.contents.Content) -> bool:
+    '''Check if the content contains any UnmaskedArray node.'''
+    return any(isinstance(n, ak.contents.UnmaskedArray) for n in iter_contents(c))
+
+
+def test_draw_from_contents_indexed_option() -> None:
+    '''Assert that IndexedOptionArray can be drawn from `contents()`.'''
+    find(
+        st_ak.contents.contents(),
+        _has_indexed_option,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_from_contents_byte_masked() -> None:
+    '''Assert that ByteMaskedArray can be drawn from `contents()`.'''
+    find(
+        st_ak.contents.contents(),
+        _has_byte_masked,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_from_contents_bit_masked() -> None:
+    '''Assert that BitMaskedArray can be drawn from `contents()`.'''
+    find(
+        st_ak.contents.contents(),
+        _has_bit_masked,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_from_contents_unmasked() -> None:
+    '''Assert that UnmaskedArray can be drawn from `contents()`.'''
+    find(
+        st_ak.contents.contents(),
+        _has_unmasked,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )

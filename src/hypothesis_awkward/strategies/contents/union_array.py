@@ -51,7 +51,11 @@ def union_array_contents(
         case None:
             contents = draw(
                 st_ak.contents.content_lists(
-                    functools.partial(st_ak.contents.contents, allow_union_root=False),
+                    functools.partial(
+                        st_ak.contents.contents,
+                        allow_union_root=False,
+                        allow_option_root=False,
+                    ),
                     max_leaf_size=max_length if max_length is not None else 10,
                     min_len=2,
                     max_len=max_contents,
@@ -129,7 +133,7 @@ def union_array_from_contents(
     '''
     children = draw(
         st_ak.contents.content_lists(
-            functools.partial(content, allow_union_root=False),
+            functools.partial(content, allow_union_root=False, allow_option_root=False),
             max_size=max_size,
             max_leaf_size=max_leaf_size,
             min_len=2,

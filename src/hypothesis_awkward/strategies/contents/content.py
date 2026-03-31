@@ -9,12 +9,16 @@ from awkward.contents import Content
 from hypothesis_awkward.util.awkward import content_size, leaf_size
 from hypothesis_awkward.util.safe import safe_compare as sc
 
+from .bit_masked_array import bit_masked_array_from_contents
+from .byte_masked_array import byte_masked_array_from_contents
+from .indexed_option_array import indexed_option_array_from_contents
 from .leaf import leaf_contents
 from .list_array import list_array_from_contents
 from .list_offset_array import list_offset_array_from_contents
 from .record_array import record_array_from_contents
 from .regular_array import regular_array_from_contents
 from .union_array import union_array_from_contents
+from .unmasked_array import unmasked_array_from_contents
 
 
 @st.composite
@@ -34,6 +38,11 @@ def contents(
     allow_record: bool = True,
     allow_union: bool = True,
     allow_union_root: bool = True,
+    allow_indexed_option: bool = True,
+    allow_byte_masked: bool = True,
+    allow_bit_masked: bool = True,
+    allow_unmasked: bool = True,
+    allow_option_root: bool = True,
     max_leaf_size: int | None = None,
     max_depth: int = 5,
     max_length: int | None = None,
@@ -43,7 +52,8 @@ def contents(
     Builds content layouts by recursively constructing a tree of content nodes. At each
     level, a coin flip decides whether to go deeper or produce a leaf. Leaf types include
     NumpyArray, EmptyArray, string, and bytestring. Wrapper types include RegularArray,
-    ListOffsetArray, ListArray, RecordArray, and UnionArray.
+    ListOffsetArray, ListArray, RecordArray, and UnionArray. Option types include
+    IndexedOptionArray, ByteMaskedArray, BitMaskedArray, and UnmaskedArray.
 
     Parameters
     ----------
@@ -87,6 +97,17 @@ def contents(
         The outermost content node cannot be a ``UnionArray`` if ``False``. Unlike
         ``allow_union``, this does not prevent ``UnionArray`` at deeper levels. Awkward
         Array does not allow a ``UnionArray`` to directly contain another ``UnionArray``.
+    allow_indexed_option
+        No ``IndexedOptionArray`` is generated if ``False``.
+    allow_byte_masked
+        No ``ByteMaskedArray`` is generated if ``False``.
+    allow_bit_masked
+        No ``BitMaskedArray`` is generated if ``False``.
+    allow_unmasked
+        No ``UnmaskedArray`` is generated if ``False``.
+    allow_option_root
+        The outermost content node cannot be an option type if ``False``. Does not
+        affect deeper levels. Prevents option-inside-option nesting.
     max_leaf_size
         Maximum total number of leaf elements in the generated content. Each numerical
         value, including complex and datetime, counts as one. Each string and bytestring
@@ -122,18 +143,22 @@ def contents(
     if max_length is not None:
         leaf_max_size = min(leaf_max_size, max_length)
 
-    leaf_only = (
-        not any(
+    any_wrapper = any(
+        (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
+    )
+    any_option = (
+        any(
             (
-                allow_regular,
-                allow_list_offset,
-                allow_list,
-                allow_record,
-                allow_union,
+                allow_indexed_option,
+                allow_byte_masked,
+                allow_bit_masked,
+                allow_unmasked,
             )
         )
-        or max_leaf_size == 0
-        or max_size == 0
+        and allow_option_root
+    )
+    leaf_only = (
+        not any_wrapper and not any_option or max_leaf_size == 0 or max_size == 0
     )
 
     def _check(c: Content) -> Content:
@@ -160,6 +185,10 @@ def contents(
         allow_list=allow_list,
         allow_record=allow_record,
         allow_union=allow_union,
+        allow_indexed_option=allow_indexed_option,
+        allow_byte_masked=allow_byte_masked,
+        allow_bit_masked=allow_bit_masked,
+        allow_unmasked=allow_unmasked,
     )
 
     # Choose wrapper type from allow_* flags
@@ -174,6 +203,14 @@ def contents(
         candidates.append(record_array_from_contents)
     if allow_union and allow_union_root:
         candidates.append(union_array_from_contents)
+    if allow_indexed_option and allow_option_root:
+        candidates.append(indexed_option_array_from_contents)
+    if allow_byte_masked and allow_option_root:
+        candidates.append(byte_masked_array_from_contents)
+    if allow_bit_masked and allow_option_root:
+        candidates.append(bit_masked_array_from_contents)
+    if allow_unmasked and allow_option_root:
+        candidates.append(unmasked_array_from_contents)
 
     if not candidates:
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
@@ -196,6 +233,7 @@ class StContent(Protocol):
         max_size: int,
         max_leaf_size: int | None,
         allow_union_root: bool = ...,
+        allow_option_root: bool = ...,
     ) -> st.SearchStrategy[Content]: ...
 
 

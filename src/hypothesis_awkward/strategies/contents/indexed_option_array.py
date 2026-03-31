@@ -1,9 +1,16 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
+from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, IndexedOptionArray
+from hypothesis_awkward.util.awkward import content_size
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 @st.composite
@@ -36,7 +43,9 @@ def indexed_option_array_contents(
     '''
     match content:
         case None:
-            content = draw(st_ak.contents.contents(allow_union_root=False))
+            content = draw(
+                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+            )
         case st.SearchStrategy():
             content = draw(content)
         case Content():
@@ -53,3 +62,48 @@ def indexed_option_array_contents(
     else:
         index = ak.index.Index64(index_array)
     return IndexedOptionArray(index, content)
+
+
+@st.composite
+def indexed_option_array_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: 'int | None',
+    max_length: 'int | None',
+) -> IndexedOptionArray:
+    '''Strategy that generates an indexed-option layout within a size limit.
+
+    Draws the index length first, then gives the remainder of the budget
+    to the child content.
+
+    Called by ``contents()`` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    max_length
+        Upper bound on ``len(result)``.
+
+    '''
+    ml = max_length if max_length is not None else max_size
+    n = draw(st.integers(min_value=0, max_value=ml))
+    max_content_size = max(max_size - n, 0)
+    child = draw(
+        content(
+            max_size=max_content_size,
+            max_leaf_size=max_leaf_size,
+            allow_option_root=False,
+            allow_union_root=False,
+        )
+    )
+    result = draw(indexed_option_array_contents(child, max_size=n))
+    assume(content_size(result) <= max_size)
+    return result

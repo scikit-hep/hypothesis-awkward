@@ -27,7 +27,14 @@ def _contents_list(
     '''Draw a list of 2..5 Content objects for testing.'''
     n = draw(st.integers(min_value=2, max_value=5))
     return [
-        draw(st_ak.contents.contents(max_leaf_size=5, max_depth=2, allow_union=False))
+        draw(
+            st_ak.contents.contents(
+                max_leaf_size=5,
+                max_depth=2,
+                allow_union=False,
+                allow_option_root=False,
+            )
+        )
         for _ in range(n)
     ]
 

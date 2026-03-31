@@ -21,14 +21,18 @@ def unmasked_array_contents_kwargs(
     '''Strategy for options for `unmasked_array_contents()` strategy.'''
     if chain is None:
         chain = st_ak.OptsChain({})
-    st_content = chain.register(st_ak.contents.contents(allow_union_root=False))
+    st_content = chain.register(
+        st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+    )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {},
             optional={
                 'content': st.one_of(
-                    st_ak.contents.contents(allow_union_root=False),
+                    st_ak.contents.contents(
+                        allow_union_root=False, allow_option_root=False
+                    ),
                     st.just(st_content),
                 ),
             },
@@ -64,6 +68,15 @@ def test_unmasked_array_contents(data: st.DataObject) -> None:
         case st_ak.RecordDraws():
             assert len(content.drawn) == 1
             assert result.content is content.drawn[0]
+
+
+def test_draw_from_contents() -> None:
+    '''Assert that UnmaskedArray can be the root node from `contents()`.'''
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, UnmaskedArray),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
 
 
 def test_draw_nonempty() -> None:

@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from hypothesis import strategies as st
 
@@ -21,6 +23,10 @@ def arrays(
     allow_list: bool = True,
     allow_record: bool = True,
     allow_union: bool = True,
+    allow_indexed_option: bool = True,
+    allow_byte_masked: bool = True,
+    allow_bit_masked: bool = True,
+    allow_unmasked: bool = True,
     max_leaf_size: int | None = None,
     max_depth: int = 5,
     max_length: int | None = None,
@@ -30,7 +36,8 @@ def arrays(
 
     Builds arrays with NumpyArray, EmptyArray, string, and bytestring as leaf contents
     that can be nested multiple levels deep in RegularArray, ListOffsetArray, ListArray,
-    RecordArray, and UnionArray. Arrays might be virtual.
+    RecordArray, and UnionArray. Option types include IndexedOptionArray,
+    ByteMaskedArray, BitMaskedArray, and UnmaskedArray. Arrays might be virtual.
 
     Parameters
     ----------
@@ -70,6 +77,14 @@ def arrays(
         No ``RecordArray`` is generated if ``False``.
     allow_union
         No ``UnionArray`` is generated if ``False``.
+    allow_indexed_option
+        No ``IndexedOptionArray`` is generated if ``False``.
+    allow_byte_masked
+        No ``ByteMaskedArray`` is generated if ``False``.
+    allow_bit_masked
+        No ``BitMaskedArray`` is generated if ``False``.
+    allow_unmasked
+        No ``UnmaskedArray`` is generated if ``False``.
     max_leaf_size
         Maximum total number of leaf elements in the generated content. Each numerical
         value, including complex and datetime, counts as one. Each string and bytestring
@@ -105,6 +120,10 @@ def arrays(
             allow_bytestring=allow_bytestring,
             allow_record=allow_record,
             allow_union=allow_union,
+            allow_indexed_option=allow_indexed_option,
+            allow_byte_masked=allow_byte_masked,
+            allow_bit_masked=allow_bit_masked,
+            allow_unmasked=allow_unmasked,
             max_depth=max_depth,
             max_length=max_length,
         )
@@ -113,7 +132,15 @@ def arrays(
     to_lazify = allow_virtual and draw(st.booleans())
     if not to_lazify:
         return array
-    return _lazify(array)
+    try:
+        return _lazify(array)
+    except BaseException as e:  # pragma: no cover
+        msg = (
+            f'An exception {e} was raised while lazifying {array!r}. '
+            'Returning the original array.'
+        )
+        warnings.warn(msg, RuntimeWarning, stacklevel=2)
+        return array
 
 
 def _lazify(array: ak.Array) -> ak.Array:

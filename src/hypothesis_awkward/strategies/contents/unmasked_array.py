@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, UnmaskedArray
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 @st.composite
@@ -28,10 +33,52 @@ def unmasked_array_contents(
     '''
     match content:
         case None:
-            content = draw(st_ak.contents.contents(allow_union_root=False))
+            content = draw(
+                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+            )
         case st.SearchStrategy():
             content = draw(content)
         case Content():
             pass
     assert isinstance(content, Content)
     return UnmaskedArray(content)
+
+
+@st.composite
+def unmasked_array_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: 'int | None',
+    max_length: 'int | None',
+) -> UnmaskedArray:
+    '''Strategy that generates an unmasked layout within a size limit.
+
+    Called by ``contents()`` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    max_length
+        Upper bound on ``len(result)``.
+
+    '''
+    max_content_size = max_size
+    if max_length is not None:
+        max_content_size = min(max_content_size, max_length)
+    child = draw(
+        content(
+            max_size=max_content_size,
+            max_leaf_size=max_leaf_size,
+            allow_option_root=False,
+            allow_union_root=False,
+        )
+    )
+    return UnmaskedArray(child)

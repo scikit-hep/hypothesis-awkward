@@ -95,37 +95,40 @@ def test_array(array: ak.Array) -> None:
 For example, this might print:
 
 ```python
-array=<Array [] type='0 * bool'>
-array=<Array [61038, 65535, 2127] type='3 * uint16'>
-array=<Array [1, nan, 1.19e-07, -0, 0] type='5 * float32'>
-array=<Array [-1e-05+-infj, ..., 5.76e+16+-1.19e-07j] type='36 * complex64'>
-array=<Array ['pÜx\x1d½1', '', '', '', 'z'] type='5 * string'>
-array=<Array [b'\xb7\xb7\xc1b\x1d=\x93', ..., b'M'] type='4 * bytes'>
-array=<Array [[], []] type='2 * var * 3 * unknown'>
-array=<Array [['È\x11헎spµ\U00096bad', '']] type='1 * 2 * string'>
-array=<Array [[], [[]], [[], []], []] type='4 * var * 0 * unknown'>
-array=<Array [[-35858-02-18T15:30:39.815212, ...]] type='1 * var * datetime64[us]'>
-array=<Array [NaT, ..., -290308-12-21T19:59:05.224253] type='7 * datetime64[us]'>
-array=<Array [NaT, NaT, ..., NaT, 100 hours] type='9 * timedelta64[h]'>
-array=<Array [1.56e+16+-5.15e+16j, ..., inf+0j] type='5 * complex64'>
-array=<Array [b'', ..., b'R\xf7\xb6l\x1d\xdd-tmXK'] type='3 * union[bytes, bytes,...'>
-array=<Array [[[[], [inf], [0.0], []]], [...]] type='2 * union[var * float32, var...'>
-array=<Array [] type='0 * {"": string, Z: 1 * union[string, bytes]}'>
-array=<Array [179, 179, 179, 179, 179, ..., 179, 179, 179, 179] type='34 * uint32'>
-array=<Array [[...]] type='1 * var * 1 * bytes'>
-array=<Array [??, ??, ??, ??] type='4 * bytes'>
-array=<Array [[??], [??], [??], [??], [??], [??], [??]] type='7 * 1 * complex64'>
-array=<Array [??, ??, ??, ??, ??, ..., ??, ??, ??, ??] type='29 * timedelta64[us]'>
-array=<Array [3389378472, 7, 234, ..., 249, 7352234684956532367] type='17 * uint64'>
-array=<Array [[], []] type='2 * var * var * var * bytes'>
-array=<Array [1969-12-31T23:59:50.776627963145224442, ...] type='30 * datetime64[as]'>
-array=<Array [0.807+-2.93e+106j, ..., -2.23e-311+2.42e+34j] type='9 * complex128'>
+array=<Array ['', '\U000c2f9f', ..., '@ú\x94j\U000c4364e'] type='4 * string'>
+array=<Array [[], [], None, [], ..., [], [], None] type='42 * option[var * ?bytes]'>
+array=<Array [??, ??, ??, ??, ??, ??] type='6 * var * unknown'>
+array=<Array [[], [], [], [], [], [], [], []] type='8 * var * string'>
+array=<Array [??, ??, ??, ??, ??, ??, ??, ??] type='8 * var * string'>
+array=<Array [b'O\x01\x14\xecE\xdb_'] type='1 * bytes'>
+array=<Array [??, ??] type='2 * var * bytes'>
+array=<Array [None] type='1 * ?bytes'>
+array=<Array [??, ??, ??, ??] type='4 * string'>
+array=<Array [NaT, NaT, ..., -9223372036854773681] type='26 * datetime64[Y]'>
+array=<Array [[??, ??], [??, ??], ..., [??, ??]] type='8 * 2 * var * timedelta64[fs]'>
+array=<Array [[[[], [], [], [], []]]] type='1 * 1 * var * var * timedelta64[fs]'>
+array=<Array [[[[[], [], [], [], []]]]] type='1 * 1 * 1 * var * var * var * bool'>
+array=<Array [[16996], [10841], ..., [10841], None] type='7 * option[1 * uint16]'>
+array=<Array [[0]] type='1 * option[1 * uint16]'>
+array=<Array [??] type='1 * option[1 * uint16]'>
+array=<Array [[None]] type='1 * 1 * option[1 * option[var * int16]]'>
+array=<Array [[]] type='1 * option[var * 0 * union[timedelta64[D], 0 * unknown]]'>
+array=<Array [??, ??] type='2 * datetime64[D]'>
+array=<Array [??, ??, ??, ??] type='4 * ?timedelta64[us]'>
+array=<Array [??, ??, ??, ??, ??, ??, ..., ??, ??, ??, ??, ??, ??] type='14 * bytes'>
+array=<Array [[], [], [], [], ..., [], [], [], []] type='55 * option[var * var * ...'>
+array=<Array [0.0, inf, 0.0, nan, 0.0] type='5 * float16'>
+array=<Array [None, -768614336404561008-11, ..., None] type='6 * ?datetime64[M]'>
+array=<Array [??, ??] type='2 * option[var * 1 * string]'>
 ```
 
 The current version generates arrays with `NumpyArray`, `EmptyArray`, string,
 and bytestring as leaf contents that can be nested multiple levels deep in
 `RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and `UnionArray`.
-Arrays might be virtual, shown as `??` in the output.
+Option types (`IndexedOptionArray`, `ByteMaskedArray`, `BitMaskedArray`,
+`UnmaskedArray`) add nullable values shown as `None` in the output. The `?` in
+type strings (e.g., `?int64`) indicates option types. Arrays might be virtual,
+shown as `??` in the output.
 
 ### The options of `arrays()`
 

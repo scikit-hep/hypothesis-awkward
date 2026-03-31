@@ -24,14 +24,18 @@ def indexed_option_array_contents_kwargs(
     '''Strategy for options for `indexed_option_array_contents()` strategy.'''
     if chain is None:
         chain = st_ak.OptsChain({})
-    st_content = chain.register(st_ak.contents.contents(allow_union_root=False))
+    st_content = chain.register(
+        st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+    )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {},
             optional={
                 'content': st.one_of(
-                    st_ak.contents.contents(allow_union_root=False),
+                    st_ak.contents.contents(
+                        allow_union_root=False, allow_option_root=False
+                    ),
                     st.just(st_content),
                 ),
                 'max_size': st.integers(min_value=0, max_value=50),
@@ -94,6 +98,15 @@ def test_draw_index_dtype_int64() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: c.index.data.dtype == np.int64,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_from_contents() -> None:
+    '''Assert that IndexedOptionArray can be the root node from `contents()`.'''
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, IndexedOptionArray),
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
