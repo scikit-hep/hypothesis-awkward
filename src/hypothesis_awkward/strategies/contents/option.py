@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Protocol
+
 from hypothesis import strategies as st
 
 from awkward.contents import Content
@@ -6,6 +8,9 @@ from .bit_masked_array import bit_masked_array_contents
 from .byte_masked_array import byte_masked_array_contents
 from .indexed_option_array import indexed_option_array_contents
 from .unmasked_array import unmasked_array_contents
+
+if TYPE_CHECKING:
+    from .content import StContent
 
 
 def option_contents(
@@ -59,3 +64,70 @@ def option_contents(
     if allow_unmasked:
         options.append(unmasked_array_contents(content))
     return st.one_of(options)
+
+
+class StOption(Protocol):
+    '''Callable that wraps content drawn from a ``StContent`` in an option type.'''
+
+    def __call__(
+        self,
+        content: 'StContent',
+        *,
+        max_size: int,
+        max_leaf_size: int | None,
+    ) -> st.SearchStrategy[Content]: ...
+
+
+@st.composite
+def option_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: int | None,
+    allow_indexed_option: bool = True,
+    allow_byte_masked: bool = True,
+    allow_bit_masked: bool = True,
+    allow_unmasked: bool = True,
+) -> Content:
+    '''Strategy that draws content and wraps it in an option type.
+
+    Conforms to ``StOption`` when partially applied with ``allow_*`` flags.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        a strategy for a single content.
+    max_size
+        Upper bound on ``content_size()`` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. ``None`` means no constraint.
+    allow_indexed_option
+        Include ``IndexedOptionArray`` if ``True``.
+    allow_byte_masked
+        Include ``ByteMaskedArray`` if ``True``.
+    allow_bit_masked
+        Include ``BitMaskedArray`` if ``True``.
+    allow_unmasked
+        Include ``UnmaskedArray`` if ``True``.
+
+    '''
+    child = draw(
+        content(
+            max_size=max_size,
+            max_leaf_size=max_leaf_size,
+            allow_option_root=False,
+            allow_union_root=False,
+        )
+    )
+    return draw(
+        option_contents(
+            child,
+            max_size=max_size,
+            allow_indexed_option=allow_indexed_option,
+            allow_byte_masked=allow_byte_masked,
+            allow_bit_masked=allow_bit_masked,
+            allow_unmasked=allow_unmasked,
+        )
+    )

@@ -12,6 +12,7 @@ from hypothesis_awkward.util.safe import safe_compare as sc
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -60,6 +61,7 @@ def byte_masked_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None',
+    st_option: 'StOption | None' = None,
 ) -> ByteMaskedArray:
     '''Strategy that generates a byte-masked layout within a size limit.
 
@@ -78,7 +80,10 @@ def byte_masked_array_from_contents(
         Upper bound on ``len(result)``.
 
     '''
-    max_content_size = max((max_size - 1) // 2, 0)
+    if max_leaf_size is not None:
+        max_content_size = max(max_size - 1 - max_leaf_size, 0)
+    else:
+        max_content_size = max((max_size - 1) // 2, 0)
     if max_length is not None:
         max_content_size = min(max_content_size, max_length)
     st_content = content(

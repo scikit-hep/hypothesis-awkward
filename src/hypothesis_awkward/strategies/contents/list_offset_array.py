@@ -11,6 +11,7 @@ from hypothesis_awkward.util.awkward import content_size
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -81,6 +82,7 @@ def list_offset_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None' = None,
+    st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:
     '''Strategy that generates a variable-length list layout within a size limit.
 

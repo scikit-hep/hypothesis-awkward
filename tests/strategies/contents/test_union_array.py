@@ -140,7 +140,7 @@ def test_draw_multiple_contents() -> None:
     find(
         st_ak.contents.union_array_contents(max_contents=max_contents),
         lambda u: len(u.contents) == max_contents,
-        settings=settings(phases=[Phase.generate]),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -210,4 +210,60 @@ def _has_nested_union(c: Content) -> bool:
             for descendant in iter_contents(child):
                 if isinstance(descendant, UnionArray):
                     return True
+    return False
+
+
+def test_draw_from_contents_option_deep_inside_union() -> None:
+    '''Assert that option types can appear deep inside non-option union branches.
+
+    The direct children of the union are not option types, but deeper
+    descendants are, e.g., ``Union[ListOffset[ByteMasked[...]], ...]``.
+    '''
+    find(
+        st_ak.contents.contents(max_leaf_size=20, max_depth=5),
+        _has_option_deep_inside_union,
+        settings=settings(phases=[Phase.generate], max_examples=5000),
+    )
+
+
+def _has_option_deep_inside_union(c: Content) -> bool:
+    for node in iter_contents(c):
+        if not isinstance(node, UnionArray):
+            continue
+        for child in node.contents:
+            if child.is_option:
+                continue
+            if any(d.is_option for d in iter_contents(child)):
+                return True
+    return False
+
+
+def test_draw_from_contents_all_option_union() -> None:
+    '''Assert that a UnionArray with all-option children can be drawn.
+
+    All direct children of the union are option types, satisfying the
+    "all or none" rule.
+    '''
+    find(
+        st_ak.contents.contents(max_leaf_size=20, max_depth=5),
+        _has_all_option_union,
+        settings=settings(phases=[Phase.generate], max_examples=5000),
+    )
+
+
+def test_draw_all_option_union() -> None:
+    '''Assert that standalone union_array_contents() can produce all-option children.'''
+    find(
+        st_ak.contents.union_array_contents(),
+        lambda c: all(child.is_option for child in c.contents),
+        settings=settings(phases=[Phase.generate], max_examples=5000),
+    )
+
+
+def _has_all_option_union(c: Content) -> bool:
+    for node in iter_contents(c):
+        if not isinstance(node, UnionArray):
+            continue
+        if all(child.is_option for child in node.contents):
+            return True
     return False

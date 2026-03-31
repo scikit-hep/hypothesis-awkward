@@ -11,6 +11,7 @@ from hypothesis_awkward.util.awkward import content_size
 
 if TYPE_CHECKING:
     from .content import StContent
+    from .option import StOption
 
 
 @st.composite
@@ -83,6 +84,7 @@ def list_array_from_contents(
     max_size: int,
     max_leaf_size: 'int | None',
     max_length: 'int | None' = None,
+    st_option: 'StOption | None' = None,
 ) -> ListArray:
     '''Strategy that generates a starts/stops list layout within a size limit.
 
