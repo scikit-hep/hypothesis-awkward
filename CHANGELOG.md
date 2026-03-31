@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.11.0] - 2026-03-31
+
+### Features
+
+- Rename max_size to max_leaf_size in contents() and arrays() ([#37](https://github.com/scikit-hep/hypothesis-awkward/pull/37))
+- Rename content_lists() params for clarity ([#39](https://github.com/scikit-hep/hypothesis-awkward/pull/39))
+- Add max_size parameter to bound total content_size() ([#40](https://github.com/scikit-hep/hypothesis-awkward/pull/40))
+- Derive default max_length from size budgets ([#43](https://github.com/scikit-hep/hypothesis-awkward/pull/43))
+- Add option type strategies ([#44](https://github.com/scikit-hep/hypothesis-awkward/pull/44))
+- UnionArray all-or-none option coordination ([#46](https://github.com/scikit-hep/hypothesis-awkward/pull/46))
+
+### Bug Fixes
+
+- Increase max_examples for flaky test_draw_nan ([#38](https://github.com/scikit-hep/hypothesis-awkward/pull/38))
+
+### Documentation
+
+- Add util module to API reference ([#41](https://github.com/scikit-hep/hypothesis-awkward/pull/41))
+- Update arrays() and contents() docstrings ([#47](https://github.com/scikit-hep/hypothesis-awkward/pull/47))
+
+### Refactoring
+
+- Extract case blocks from contents() into strategy modules ([#42](https://github.com/scikit-hep/hypothesis-awkward/pull/42))
+
+### Testing
+
+- Add section comments to property-based tests ([#35](https://github.com/scikit-hep/hypothesis-awkward/pull/35))
+
+### Meta
+
+- Add option types research and API design documents
+- Update option type design docs for max_size budget
+
+
 ## [0.10.0] - 2026-03-27
 
 ### Features
