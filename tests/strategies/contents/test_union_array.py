@@ -251,6 +251,15 @@ def test_draw_from_contents_all_option_union() -> None:
     )
 
 
+def test_draw_all_option_union() -> None:
+    '''Assert that standalone union_array_contents() can produce all-option children.'''
+    find(
+        st_ak.contents.union_array_contents(),
+        lambda c: all(child.is_option for child in c.contents),
+        settings=settings(phases=[Phase.generate], max_examples=5000),
+    )
+
+
 def _has_all_option_union(c: Content) -> bool:
     for node in iter_contents(c):
         if not isinstance(node, UnionArray):

@@ -10,6 +10,8 @@ import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, UnionArray
 from hypothesis_awkward.util.awkward import content_size
 
+from .option import option_from_contents
+
 if TYPE_CHECKING:
     from .content import StContent
     from .option import StOption
@@ -55,11 +57,12 @@ def union_array_contents(
                     functools.partial(
                         st_ak.contents.contents,
                         allow_union_root=False,
-                        allow_option_root=False,
                     ),
                     max_leaf_size=max_length if max_length is not None else 10,
                     min_len=2,
                     max_len=max_contents,
+                    all_option_or_none=True,
+                    st_option=option_from_contents,
                 )
             )
             if max_length is not None:
