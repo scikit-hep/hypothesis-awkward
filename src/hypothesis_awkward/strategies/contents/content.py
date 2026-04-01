@@ -38,15 +38,15 @@ def contents(
     allow_list: bool = True,
     allow_record: bool = True,
     allow_union: bool = True,
-    allow_union_root: bool = True,
     allow_indexed_option: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
-    allow_option_root: bool = True,
     max_leaf_size: int | None = None,
     max_depth: int = 5,
     max_length: int | None = None,
+    allow_union_root: bool = True,
+    allow_option_root: bool = True,
 ) -> Content:
     '''Strategy for Awkward Array content layouts.
 
@@ -80,9 +80,8 @@ def contents(
         default strategy that generates any scalar dtype supported by Awkward Array is
         used. Does not affect string or bytestring content.
     max_size
-        Upper bound on ``content_size()`` of the generated content. Counts all scalars
-        stored in the content tree: data elements, offset/index buffer elements, and
-        metadata values (``RegularArray.size``, ``RecordArray`` field names).
+        Upper bound on the number of scalars in the generated content. Counts data
+        elements, offsets, indices, field names, and parameters.
     allow_nan
         No ``NaN``/``NaT`` values are generated in ``NumpyArray`` if ``False``.
     allow_numpy
@@ -92,15 +91,21 @@ def contents(
         ``unknown`` and carries no data. Unlike ``NumpyArray``, it is unaffected by
         ``dtypes`` and ``allow_nan``.
     allow_string
-        No string content is generated if ``False``. Strings are represented as a
-        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each string (not character)
-        counts toward ``max_leaf_size``. The string itself does not count toward
-        ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
+        No string content is generated if ``False``. A string is represented as a
+        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each character (uint8) and
+        offset in the ``ListOffsetArray`` counts toward ``max_size``. A string is
+        considered a single leaf element in counting toward ``max_leaf_size`` and
+        ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``. A
+        string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
+        ``allow_nan``.
     allow_bytestring
-        No bytestring content is generated if ``False``. Bytestrings are represented as a
-        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each bytestring (not byte)
-        counts toward ``max_leaf_size``. The bytestring itself does not count toward
-        ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
+        No bytestring content is generated if ``False``. A bytestring is represented as a
+        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each byte (uint8) and
+        offset in the ``ListOffsetArray`` counts toward ``max_size``. A bytestring is
+        considered a single leaf element in counting toward ``max_leaf_size`` and
+        ``max_depth``. Each bytestring (not byte) counts toward ``max_leaf_size``. A
+        bytestring does not count toward ``max_depth``. Unaffected by ``dtypes`` and
+        ``allow_nan``.
     allow_regular
         No ``RegularArray`` is generated if ``False``.
     allow_list_offset
@@ -111,10 +116,6 @@ def contents(
         No ``RecordArray`` is generated if ``False``.
     allow_union
         No ``UnionArray`` is generated if ``False``.
-    allow_union_root
-        The outermost content node cannot be a ``UnionArray`` if ``False``. Unlike
-        ``allow_union``, this does not prevent ``UnionArray`` at deeper levels. Awkward
-        Array does not allow a ``UnionArray`` to directly contain another ``UnionArray``.
     allow_indexed_option
         No ``IndexedOptionArray`` is generated if ``False``.
     allow_byte_masked
@@ -123,21 +124,24 @@ def contents(
         No ``BitMaskedArray`` is generated if ``False``.
     allow_unmasked
         No ``UnmaskedArray`` is generated if ``False``.
-    allow_option_root
-        The outermost content node cannot be an option type if ``False``. Does not
-        affect deeper levels. Prevents option-inside-option nesting.
     max_leaf_size
         Maximum total number of leaf elements in the generated content. Each numerical
         value, including complex and datetime, counts as one. Each string and bytestring
         (not character or byte) counts as one.
     max_depth
-        Maximum nesting depth. At each level below this limit, a coin flip decides
-        whether to descend further or produce a leaf. Each RegularArray, ListOffsetArray,
-        ListArray, RecordArray, and UnionArray layer adds one level, excluding those that
+        Maximum nesting depth. Each ``RegularArray``, ``ListOffsetArray``, ``ListArray``,
+        ``RecordArray``, and ``UnionArray`` layer adds one level, excluding those that
         form string or bytestring content.
     max_length
-        Maximum ``len()`` of the generated content. No constraint when ``None`` (the
+        Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).
+    allow_union_root
+        The outermost content node cannot be a ``UnionArray`` if ``False``. Unlike
+        ``allow_union``, this does not prevent ``UnionArray`` at deeper levels. Awkward
+        Array does not allow a ``UnionArray`` to directly contain another ``UnionArray``.
+    allow_option_root
+        The outermost content node cannot be an option type if ``False``. Does not
+        affect deeper levels. Prevents option-inside-option nesting.
 
     Examples
     --------
