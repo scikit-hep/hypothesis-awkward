@@ -40,7 +40,7 @@ def arrays(
 
     In constructing arrays, this strategy follows the Awkward Array User Guide section
     ["Direct constructors"][ak-user-guide-constructors]. It constructs _layouts_ and
-    layout types wraps them in an ``ak.Array``. The layouts are instances of subclasses
+    wraps them in an ``ak.Array``. The layouts are instances of subclasses
     of ``ak.contents.Content``.
 
     [ak-user-guide-constructors]: https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
@@ -82,9 +82,8 @@ def arrays(
         default strategy that generates any scalar dtype supported by Awkward Array is
         used. Does not affect string or bytestring content.
     max_size
-        Upper bound on ``content_size()`` of the generated content. Counts all scalars
-        stored in the content tree: data elements, offset/index buffer elements, and
-        metadata values (``RegularArray.size``, ``RecordArray`` field names).
+        Upper bound on the number of scalars in the generated content. Counts data
+        elements, offsets, indices, field names, and parameters.
     allow_nan
         No ``NaN``/``NaT`` values are generated in ``NumpyArray`` if ``False``.
     allow_numpy
@@ -94,15 +93,21 @@ def arrays(
         ``unknown`` and carries no data. Unlike ``NumpyArray``, it is unaffected by
         ``dtypes`` and ``allow_nan``.
     allow_string
-        No string content is generated if ``False``. Strings are represented as a
-        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each string (not character)
-        counts toward ``max_leaf_size``. The string itself does not count toward
-        ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
+        No string content is generated if ``False``. A string is represented as a
+        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each character (uint8) and
+        offset in the ``ListOffsetArray`` counts toward ``max_size``. A string is
+        considered a single leaf element in counting toward ``max_leaf_size`` and
+        ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``. A
+        string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
+        ``allow_nan``.
     allow_bytestring
-        No bytestring content is generated if ``False``. Bytestrings are represented as a
-        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each bytestring (not byte)
-        counts toward ``max_leaf_size``. The bytestring itself does not count toward
-        ``max_depth``. Unaffected by ``dtypes`` and ``allow_nan``.
+        No bytestring content is generated if ``False``. A bytestring is represented as a
+        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each byte (uint8) and
+        offset in the ``ListOffsetArray`` counts toward ``max_size``. A bytestring is
+        considered a single leaf element in counting toward ``max_leaf_size`` and
+        ``max_depth``. Each bytestring (not byte) counts toward ``max_leaf_size``. A
+        bytestring does not count toward ``max_depth``. Unaffected by ``dtypes`` and
+        ``allow_nan``.
     allow_regular
         No ``RegularArray`` is generated if ``False``.
     allow_list_offset
@@ -126,9 +131,9 @@ def arrays(
         value, including complex and datetime, counts as one. Each string and bytestring
         (not character or byte) counts as one.
     max_depth
-        Maximum nesting depth. Each RegularArray, ListOffsetArray, ListArray,
-        RecordArray, and UnionArray layer adds one level, excluding those that form
-        string or bytestring content.
+        Maximum nesting depth. Each ``RegularArray``, ``ListOffsetArray``, ``ListArray``,
+        ``RecordArray``, and ``UnionArray`` layer adds one level, excluding those that
+        form string or bytestring content.
     max_length
         Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).
