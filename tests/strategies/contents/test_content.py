@@ -203,7 +203,7 @@ def test_draw_max_size() -> None:
 
 def test_draw_max_leaf_size() -> None:
     '''Assert that content at exactly max_leaf_size can be drawn.'''
-    max_leaf_size = 30
+    max_leaf_size = 20
     find(
         st_ak.contents.contents(max_size=200, max_leaf_size=max_leaf_size),
         lambda c: leaf_size(c) == max_leaf_size,
