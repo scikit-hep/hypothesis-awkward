@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.12.0] - 2026-04-01
+
+### Features
+
+- Change max_depth default from 5 to None (unbounded) ([#50](https://github.com/scikit-hep/hypothesis-awkward/pull/50))
+
+### Bug Fixes
+
+- Reduce max_leaf_size in test_draw_max_leaf_size to fix flaky failure ([#49](https://github.com/scikit-hep/hypothesis-awkward/pull/49))
+
+### Documentation
+
+- Fix docstring typos and reorder contents() parameters ([#48](https://github.com/scikit-hep/hypothesis-awkward/pull/48))
+
+
 ## [0.11.0] - 2026-03-31
 
 ### Features
