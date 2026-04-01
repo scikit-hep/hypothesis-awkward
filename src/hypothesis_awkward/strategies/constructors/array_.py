@@ -28,7 +28,7 @@ def arrays(
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
     max_leaf_size: int | None = None,
-    max_depth: int = 5,
+    max_depth: int | None = None,
     max_length: int | None = None,
     allow_virtual: bool = True,
 ) -> ak.Array:
@@ -133,7 +133,7 @@ def arrays(
     max_depth
         Maximum nesting depth. Each ``RegularArray``, ``ListOffsetArray``, ``ListArray``,
         ``RecordArray``, and ``UnionArray`` layer adds one level, excluding those that
-        form string or bytestring content.
+        form string or bytestring content. No constraint when ``None`` (the default).
     max_length
         Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).

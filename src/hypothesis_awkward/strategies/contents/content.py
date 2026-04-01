@@ -43,7 +43,7 @@ def contents(
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
     max_leaf_size: int | None = None,
-    max_depth: int = 5,
+    max_depth: int | None = None,
     max_length: int | None = None,
     allow_union_root: bool = True,
     allow_option_root: bool = True,
@@ -131,7 +131,7 @@ def contents(
     max_depth
         Maximum nesting depth. Each ``RegularArray``, ``ListOffsetArray``, ``ListArray``,
         ``RecordArray``, and ``UnionArray`` layer adds one level, excluding those that
-        form string or bytestring content.
+        form string or bytestring content. No constraint when ``None`` (the default).
     max_length
         Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).
@@ -190,7 +190,7 @@ def contents(
     if leaf_only:
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
 
-    if max_depth <= 0 or not draw(st.booleans()):
+    if max_depth is not None and max_depth <= 0 or not draw(st.booleans()):
         return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
 
     recurse = functools.partial(
@@ -201,7 +201,7 @@ def contents(
         allow_empty=allow_empty,
         allow_string=allow_string,
         allow_bytestring=allow_bytestring,
-        max_depth=max_depth - 1,
+        max_depth=None if max_depth is None else max_depth - 1,
         allow_regular=allow_regular,
         allow_list_offset=allow_list_offset,
         allow_list=allow_list,

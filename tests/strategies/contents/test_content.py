@@ -19,7 +19,7 @@ from hypothesis_awkward.util import (
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 50
-DEFAULT_MAX_DEPTH = 5
+DEFAULT_MAX_DEPTH = None
 
 
 class ContentsKwargs(TypedDict, total=False):
@@ -42,7 +42,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_bit_masked: bool
     allow_unmasked: bool
     max_leaf_size: int | None
-    max_depth: int
+    max_depth: int | None
     max_length: int | None
 
 
@@ -82,7 +82,9 @@ def contents_kwargs(
                 'max_leaf_size': st.one_of(
                     st.none(), st.integers(min_value=0, max_value=50)
                 ),
-                'max_depth': st.integers(min_value=0, max_value=5),
+                'max_depth': st.one_of(
+                    st.none(), st.integers(min_value=0, max_value=5)
+                ),
                 'max_length': st.integers(min_value=0, max_value=50),
             },
         )
@@ -187,7 +189,7 @@ def test_contents(data: st.DataObject) -> None:
 
     if max_leaf_size is not None:
         assert leaf_size(c) <= max_leaf_size
-    assert _nesting_depth(c) <= max_depth
+    assert _nesting_depth(c) <= sc(max_depth)
     assert len(c) <= sc(max_length)
 
 
@@ -215,8 +217,17 @@ def test_draw_max_depth() -> None:
     '''Assert that content at exactly max_depth can be drawn.'''
     max_depth = 8
     find(
-        st_ak.contents.contents(max_leaf_size=20, max_depth=max_depth),
+        st_ak.contents.contents(max_size=200, max_depth=max_depth),
         lambda c: _nesting_depth(c) == max_depth,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_deep_without_max_depth() -> None:
+    '''Assert that deep content can be drawn without specifying max_depth.'''
+    find(
+        st_ak.contents.contents(max_size=200),
+        lambda c: _nesting_depth(c) >= 8,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
