@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import ExitStack
 from typing import Any, TypedDict, cast
 
 import numpy as np
@@ -106,14 +107,27 @@ def test_contents(data: st.DataObject) -> None:
     allow_empty = opts.kwargs.get('allow_empty', True)
     allow_string = opts.kwargs.get('allow_string', True)
     allow_bytestring = opts.kwargs.get('allow_bytestring', True)
-    allow_any_leaf = any((allow_numpy, allow_empty, allow_string, allow_bytestring))
-    if not allow_any_leaf:
-        with pytest.raises(ValueError, match='at least one leaf'):
-            data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
-        return
+
+    def _is_any_leaf_allowed() -> bool:
+        return any(
+            (
+                allow_numpy,
+                allow_empty,
+                allow_string,
+                allow_bytestring,
+            )
+        )
 
     # Call the test subject
-    c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
+    expect_raised = False
+    with ExitStack() as stack:
+        if not _is_any_leaf_allowed():
+            expect_raised = True
+            stack.enter_context(pytest.raises(ValueError))
+        c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
+
+    if expect_raised:
+        return
 
     # Assert the result is always an ak.contents.Content
     assert isinstance(c, ak.contents.Content)
