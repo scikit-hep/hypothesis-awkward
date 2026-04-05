@@ -208,6 +208,22 @@ def test_draw_empty() -> None:
     )
 
 
+@pytest.mark.parametrize('max_dims', [1, None])
+@pytest.mark.parametrize('max_size', [1, DEFAULT_MAX_SIZE])
+@pytest.mark.parametrize('allow_structured', [True, False])
+def test_draw_empty_parametrized(
+    max_size: int, max_dims: int | None, allow_structured: bool
+) -> None:
+    '''Assert that empty arrays can be drawn when max allows at most one scalar.'''
+    find(
+        st_ak.numpy_arrays(
+            max_dims=max_dims, max_size=max_size, allow_structured=allow_structured
+        ),
+        lambda a: math.prod(a.shape) == 0,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
 def test_draw_max_size() -> None:
     '''Assert that arrays with exactly max_size scalars can be drawn.'''
     find(
