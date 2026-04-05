@@ -1,11 +1,23 @@
+'''Strategies for NumPy dtypes with corresponding Python built-in types.
+
+Attributes
+----------
+BUILTIN_SAFE_DTYPE_NAMES
+    Names of NumPy dtypes with corresponding Python built-in types. They are sorted for
+    optimal shrinking from simple to complex dtypes.
+    Note that `datetime64[us]` isn't entirely safe. For example, a value with the year
+    zero is coerced to `int`: `np.datetime64('0000-12-31').item() = -719163`.
+BUILTIN_SAFE_DTYPES
+    NumPy dtypes with corresponding Python built-in types.
+
+'''
+
 from typing import Any
 
 import numpy as np
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
-# NOTE: `datetime64[us]` isn't entirely safe. For example, a value with the year zero is
-# coerced to `int`: `np.datetime64('0000-12-31').item() = -719163`.
 BUILTIN_SAFE_DTYPE_NAMES = (
     'bool',
     'int64',

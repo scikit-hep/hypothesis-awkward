@@ -1,6 +1,7 @@
 __all__ = [
     'contents',
     'constructors',
+    'builtin_safe_dtype_names',
     'builtin_safe_dtypes',
     'from_list',
     'items_from_dtype',
@@ -23,6 +24,7 @@ __all__ = [
 
 from . import constructors, contents
 from .builtins_ import (
+    builtin_safe_dtype_names,
     builtin_safe_dtypes,
     from_list,
     items_from_dtype,
