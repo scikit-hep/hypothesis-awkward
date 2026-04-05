@@ -1,8 +1,40 @@
+'''NumPy dtype utilities for Awkward Array.
+
+Attributes
+----------
+BUILTIN_SAFE_DTYPE_NAMES
+    Names of NumPy dtypes with corresponding Python built-in types. Sorted
+    for optimal shrinking from simple to complex dtypes.
+    Note that ``datetime64[us]`` isn't entirely safe. For example, a value
+    with the year zero is coerced to ``int``.
+BUILTIN_SAFE_DTYPES
+    NumPy dtypes with corresponding Python built-in types. Sorted for optimal shrinking
+    from simple to complex dtypes.
+SUPPORTED_DTYPE_NAMES
+    Names of all NumPy scalar dtypes supported by Awkward Array.
+SUPPORTED_DTYPES
+    All NumPy scalar dtypes supported by Awkward Array.
+
+'''
+
 from collections.abc import Mapping
 
 import numpy as np
 
 from awkward.types.numpytype import _primitive_to_dtype_dict, primitive_to_dtype
+
+BUILTIN_SAFE_DTYPE_NAMES = (
+    'bool',
+    'int64',
+    'float64',
+    'complex128',
+    'datetime64[us]',
+    'timedelta64[us]',
+)
+
+BUILTIN_SAFE_DTYPES = tuple[np.dtype, ...](
+    primitive_to_dtype(name) for name in BUILTIN_SAFE_DTYPE_NAMES
+)
 
 
 def _supported_dtype_names() -> tuple[str, ...]:

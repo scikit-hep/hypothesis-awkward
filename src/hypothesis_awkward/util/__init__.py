@@ -22,6 +22,8 @@ __all__ = [
     'safe_max',
     'safe_min',
     'CountdownDrawer',
+    'BUILTIN_SAFE_DTYPE_NAMES',
+    'BUILTIN_SAFE_DTYPES',
     'SUPPORTED_DTYPES',
     'SUPPORTED_DTYPE_NAMES',
     'LeafContent',
@@ -44,6 +46,8 @@ from .awkward import (
 )
 from .draw import CountdownDrawer, _StWithMinMaxSize
 from .dtype import (
+    BUILTIN_SAFE_DTYPE_NAMES,
+    BUILTIN_SAFE_DTYPES,
     SUPPORTED_DTYPE_NAMES,
     SUPPORTED_DTYPES,
     n_scalars_in,
