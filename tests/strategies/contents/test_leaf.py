@@ -8,7 +8,12 @@ from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import EmptyArray, NumpyArray
-from hypothesis_awkward.util import any_nan_in_awkward_array, any_nan_nat_in_numpy_array
+from hypothesis_awkward.util import (
+    any_nan_in_awkward_array,
+    any_nan_nat_in_numpy_array,
+    is_bytestring_leaf,
+    is_string_leaf,
+)
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 10
@@ -106,8 +111,8 @@ def test_leaf_contents(data: st.DataObject) -> None:
 
     is_numpy = isinstance(result, NumpyArray)
     is_empty = isinstance(result, EmptyArray)
-    is_string = result.parameter('__array__') == 'string'
-    is_bytestring = result.parameter('__array__') == 'bytestring'
+    is_string = is_string_leaf(result)
+    is_bytestring = is_bytestring_leaf(result)
 
     assert any((is_numpy, is_empty, is_string, is_bytestring))
 
@@ -143,10 +148,7 @@ def test_draw_numpy_array() -> None:
     '''Assert that NumpyArray can be drawn by default.'''
     find(
         st_ak.contents.leaf_contents(),
-        lambda c: (
-            isinstance(c, NumpyArray)
-            and c.parameter('__array__') not in ('string', 'bytestring')
-        ),
+        lambda c: isinstance(c, NumpyArray),
         settings=settings(phases=[Phase.generate]),
     )
 
@@ -164,7 +166,7 @@ def test_draw_string() -> None:
     '''Assert that string content can be drawn by default.'''
     find(
         st_ak.contents.leaf_contents(),
-        lambda c: c.parameter('__array__') == 'string',
+        lambda c: is_string_leaf(c),
         settings=settings(phases=[Phase.generate]),
     )
 
@@ -173,7 +175,7 @@ def test_draw_bytestring() -> None:
     '''Assert that bytestring content can be drawn by default.'''
     find(
         st_ak.contents.leaf_contents(),
-        lambda c: c.parameter('__array__') == 'bytestring',
+        lambda c: is_bytestring_leaf(c),
         settings=settings(phases=[Phase.generate]),
     )
 
