@@ -22,19 +22,6 @@ from awkward.contents import (
 LeafContent = Union[NumpyArray, EmptyArray, ListOffsetArray, ListArray, RegularArray]
 
 
-def _is_string_or_bytestring_leaf(
-    c: Content,
-    string_as_leaf: bool,
-    bytestring_as_leaf: bool,
-) -> bool:
-    array_param = c.parameter('__array__')
-    if string_as_leaf and array_param == 'string':
-        return True
-    if bytestring_as_leaf and array_param == 'bytestring':
-        return True
-    return False
-
-
 def any_nan_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     '''`True` if Awkward Array contains any `NaN` or `NaT` values, else `False`.
 
@@ -133,6 +120,37 @@ def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     return False
 
 
+def is_string_or_bytestring_leaf(
+    c: Content,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> bool:
+    '''Check whether an Awkward Content node is a string or bytestring
+    leaf.
+
+    Parameters
+    ----------
+    c
+        An Awkward Content node.
+    string_as_leaf
+        If ``True`` (default), treat string content as a leaf.
+    bytestring_as_leaf
+        If ``True`` (default), treat bytestring content as a leaf.
+
+    Returns
+    -------
+    bool
+        ``True`` if the content is a string or bytestring leaf.
+
+    '''
+    array_param = c.parameter('__array__')
+    if string_as_leaf and array_param == 'string':
+        return True
+    if bytestring_as_leaf and array_param == 'bytestring':
+        return True
+    return False
+
+
 def iter_contents(
     a: ak.Array | Content,
     /,
@@ -171,7 +189,7 @@ def iter_contents(
                 yield item
                 stack.extend(item.contents)
             case ListArray() | ListOffsetArray() | RegularArray() if (
-                _is_string_or_bytestring_leaf(item, string_as_leaf, bytestring_as_leaf)
+                is_string_or_bytestring_leaf(item, string_as_leaf, bytestring_as_leaf)
             ):
                 yield item
             case (
@@ -223,7 +241,7 @@ def iter_leaf_contents(
         if isinstance(content, (EmptyArray, NumpyArray)):
             yield content
         elif isinstance(content, (ListOffsetArray, ListArray, RegularArray)):
-            if _is_string_or_bytestring_leaf(
+            if is_string_or_bytestring_leaf(
                 content, string_as_leaf, bytestring_as_leaf
             ):
                 yield content
