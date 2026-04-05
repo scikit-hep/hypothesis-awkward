@@ -48,18 +48,15 @@ def leaf_contents(
     >>> isinstance(c, (NumpyArray, EmptyArray, ListOffsetArray))
     True
     '''
-    if not any((allow_numpy, allow_empty, allow_string, allow_bytestring)):
-        raise ValueError('at least one leaf content type must be allowed')
-
     options: list[st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]] = []
+    if allow_empty and min_size <= 0 <= max_size:
+        options.append(st_ak.contents.empty_array_contents())
     if allow_numpy:
         options.append(
             st_ak.contents.numpy_array_contents(
                 dtypes=dtypes, allow_nan=allow_nan, min_size=min_size, max_size=max_size
             )
         )
-    if allow_empty and min_size == 0:
-        options.append(st_ak.contents.empty_array_contents())
     if allow_string:
         options.append(
             st_ak.contents.string_contents(min_size=min_size, max_size=max_size)
@@ -68,4 +65,10 @@ def leaf_contents(
         options.append(
             st_ak.contents.bytestring_contents(min_size=min_size, max_size=max_size)
         )
+
+    if not options:
+        raise ValueError(
+            'no content types are possible with the given options and size constraints'
+        )
+
     return st.one_of(options)

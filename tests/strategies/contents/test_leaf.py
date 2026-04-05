@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from typing import Any, TypedDict, cast
 
 import numpy as np
@@ -37,7 +38,9 @@ def leaf_contents_kwargs(
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
     min_size, max_size = draw(
-        st_ak.ranges(min_start=0, max_start=DEFAULT_MAX_SIZE, max_end=100)
+        st_ak.ranges(
+            min_start=0, max_start=DEFAULT_MAX_SIZE, max_end=DEFAULT_MAX_SIZE + 50
+        )
     )
 
     drawn = (
@@ -73,21 +76,33 @@ def test_leaf_contents(data: st.DataObject) -> None:
     opts = data.draw(leaf_contents_kwargs(), label='opts')
     opts.reset()
 
+    min_size = opts.kwargs.get('min_size', 0)
+    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     allow_numpy = opts.kwargs.get('allow_numpy', True)
     allow_empty = opts.kwargs.get('allow_empty', True)
     allow_string = opts.kwargs.get('allow_string', True)
     allow_bytestring = opts.kwargs.get('allow_bytestring', True)
 
-    # If all are False, expect ValueError
-    if not any((allow_numpy, allow_empty, allow_string, allow_bytestring)):
-        with pytest.raises(
-            ValueError, match='at least one leaf content type must be allowed'
-        ):
-            st_ak.contents.leaf_contents(**opts.kwargs)
-        return
+    def _is_allowed_any() -> bool:
+        return any(
+            (
+                min_size <= 0 <= max_size and allow_empty,
+                allow_numpy,
+                allow_string,
+                allow_bytestring,
+            )
+        )
 
     # Call the test subject
-    result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
+    expect_raised = False
+    with ExitStack() as stack:
+        if not _is_allowed_any():
+            expect_raised = True
+            stack.enter_context(pytest.raises(ValueError))
+        result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
+
+    if expect_raised:
+        return
 
     is_numpy = isinstance(result, NumpyArray)
     is_empty = isinstance(result, EmptyArray)
@@ -108,8 +123,6 @@ def test_leaf_contents(data: st.DataObject) -> None:
 
     dtypes = opts.kwargs.get('dtypes', None)
     allow_nan = opts.kwargs.get('allow_nan', True)
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
 
     if is_empty:
         assert len(result) == 0
