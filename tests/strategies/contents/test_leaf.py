@@ -182,11 +182,11 @@ def test_draw_bytestring() -> None:
 
 def test_draw_max_size() -> None:
     '''Assert that leaf content with max_size elements can be drawn.'''
-    max_size = 8
+    max_size = 25
     find(
         st_ak.contents.leaf_contents(max_size=max_size),
         lambda c: len(c) == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=10000),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -194,7 +194,7 @@ def test_draw_nan() -> None:
     '''Assert that leaf content with NaN can be drawn when allowed.'''
     float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
     find(
-        st_ak.contents.leaf_contents(dtypes=float_dtypes, allow_nan=True),
+        st_ak.contents.leaf_contents(dtypes=float_dtypes),
         any_nan_in_awkward_array,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
