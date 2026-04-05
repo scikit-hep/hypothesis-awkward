@@ -40,9 +40,63 @@ BUILTIN_SAFE_DTYPES = tuple[np.dtype, ...](
 def _supported_dtype_names() -> tuple[str, ...]:
     '''Return names of NumPy scalar dtypes supported by Awkward Array.
 
-    I.e., ('int32', 'float64', 'datetime64[ns]', ...)
+    They are sorted for optimal shrinking from simple to complex dtypes,
+    with dtypes corresponding to Python built-in types first, then
+    remaining dtypes grouped by kind (int, uint, float, complex,
+    datetime, timedelta) and ordered smallest to largest within each.
+
+    Datetime and timedelta units are interleaved and ordered by
+    proximity to microseconds (``us``), the built-in-safe unit.
+
+    The set of supported dtypes is derived from Awkward Array's
+    internal ``_primitive_to_dtype_dict``; only the ordering is
+    controlled here.
+
+    As of this writing::
+
+        ('bool',
+         'int64',
+         'float64',
+         'complex128',
+         'datetime64[us]',
+         'timedelta64[us]',
+         'int8',
+         'int16',
+         'int32',
+         'uint8',
+         'uint16',
+         'uint32',
+         'uint64',
+         'float16',
+         'float32',
+         'complex64',
+         'datetime64[ms]',
+         'timedelta64[ms]',
+         'datetime64[ns]',
+         'timedelta64[ns]',
+         'datetime64[s]',
+         'timedelta64[s]',
+         'datetime64[ps]',
+         'timedelta64[ps]',
+         'datetime64[m]',
+         'timedelta64[m]',
+         'datetime64[fs]',
+         'timedelta64[fs]',
+         'datetime64[h]',
+         'timedelta64[h]',
+         'datetime64[as]',
+         'timedelta64[as]',
+         'datetime64[D]',
+         'timedelta64[D]',
+         'datetime64[W]',
+         'timedelta64[W]',
+         'datetime64[M]',
+         'timedelta64[M]',
+         'datetime64[Y]',
+         'timedelta64[Y]')
     '''
-    DATETIME_UNITS = tuple('Y M W D h m s ms us ns ps fs as'.split())
+    # Ordered for optimal shrinking
+    DATETIME_UNITS = tuple('us ms ns s ps m fs h as D W M Y'.split())
 
     # ('bool', 'int8', ...)
     base = tuple(
@@ -51,13 +105,32 @@ def _supported_dtype_names() -> tuple[str, ...]:
         if d.kind not in ('M', 'm')  # Exclude datetime/timedelta as they need units
     )
 
-    # ('datetime64[Y]', 'datetime64[M]', ...)
+    # ('datetime64[us]', 'datetime64[ms]', ...)
     dt = tuple(f'datetime64[{unit}]' for unit in DATETIME_UNITS)
 
-    # ('timedelta64[Y]', 'timedelta64[M]', ...)
+    # ('timedelta64[us]', 'timedelta64[ms]', ...)
     td = tuple(f'timedelta64[{unit}]' for unit in DATETIME_UNITS)
 
-    return base + dt + td
+    # Interleave datetime and timedelta: datetime64[us], timedelta64[us], ...
+    dt_td = tuple(n for pair in zip(dt, td) for n in pair)
+
+    all_names = base + dt_td
+    preferred = set(BUILTIN_SAFE_DTYPE_NAMES)
+    rest = sorted(
+        (n for n in all_names if n not in preferred),
+        key=_dtype_sort_key,
+    )
+    return BUILTIN_SAFE_DTYPE_NAMES + tuple(rest)
+
+
+# Sort order for remaining dtypes: int → uint → float → complex → datetime → timedelta,
+# smallest to largest within each kind.
+_KIND_ORDER = {'b': 0, 'i': 1, 'u': 2, 'f': 3, 'c': 4, 'M': 5, 'm': 5}
+
+
+def _dtype_sort_key(name: str) -> tuple[int, int]:
+    d = primitive_to_dtype(name)
+    return (_KIND_ORDER[d.kind], d.itemsize)
 
 
 # Names of NumPy dtypes supported by Awkward Array
