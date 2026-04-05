@@ -191,10 +191,11 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that leaf content with NaN can be drawn when allowed.'''
-    float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
-    find(
-        st_ak.contents.leaf_contents(dtypes=float_dtypes),
+    '''Assert that leaf content with NaN can be drawn.'''
+    c = find(
+        st_ak.contents.leaf_contents(),
         any_nan_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=10_000, database=None),
     )
+    assert isinstance(c, NumpyArray)
+    assert np.array_equal(c.data, np.array([np.nan]), equal_nan=True)
