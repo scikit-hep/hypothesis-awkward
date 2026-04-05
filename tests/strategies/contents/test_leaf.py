@@ -199,3 +199,23 @@ def test_draw_nan() -> None:
     )
     assert isinstance(c, NumpyArray)
     assert np.array_equal(c.data, np.array([np.nan]), equal_nan=True)
+
+
+def test_shrink_leaf_contents_empty() -> None:
+    '''Assert that leaf content can shrink to an empty array when allowed.'''
+    c = find(
+        st_ak.contents.leaf_contents(),
+        lambda c: len(c) == 0,
+        settings=settings(max_examples=2000, database=None),
+    )
+    assert isinstance(c, EmptyArray)
+
+
+def test_shrink_leaf_contents_one() -> None:
+    '''Assert that leaf content with one element shrinks to a single empty bytestring.'''
+    c = find(
+        st_ak.contents.leaf_contents(),
+        lambda c: len(c) == 1,
+        settings=settings(database=None),
+    )
+    assert c.to_list() == [b'']
