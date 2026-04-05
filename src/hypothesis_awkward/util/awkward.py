@@ -143,12 +143,45 @@ def is_string_or_bytestring_leaf(
         ``True`` if the content is a string or bytestring leaf.
 
     '''
-    array_param = c.parameter('__array__')
-    if string_as_leaf and array_param == 'string':
-        return True
-    if bytestring_as_leaf and array_param == 'bytestring':
-        return True
-    return False
+    return (string_as_leaf and is_string_leaf(c)) or (
+        bytestring_as_leaf and is_bytestring_leaf(c)
+    )
+
+
+def is_string_leaf(c: Content) -> bool:
+    '''Check whether an Awkward Content node is a string leaf.
+
+    Parameters
+    ----------
+    c
+        An Awkward Content node.
+
+    Returns
+    -------
+    bool
+        ``True`` if the content has ``__array__`` parameter
+        ``'string'``.
+
+    '''
+    return c.parameter('__array__') == 'string'
+
+
+def is_bytestring_leaf(c: Content) -> bool:
+    '''Check whether an Awkward Content node is a bytestring leaf.
+
+    Parameters
+    ----------
+    c
+        An Awkward Content node.
+
+    Returns
+    -------
+    bool
+        ``True`` if the content has ``__array__`` parameter
+        ``'bytestring'``.
+
+    '''
+    return c.parameter('__array__') == 'bytestring'
 
 
 def iter_contents(
