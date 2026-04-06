@@ -12,7 +12,7 @@ DEFAULT_MAX_FIELDS = 5
 
 
 class RecordArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `record_array_contents()` strategy.'''
+    """Options for `record_array_contents()` strategy."""
 
     contents: list[Content] | st.SearchStrategy[list[Content]]
     max_fields: int
@@ -24,7 +24,7 @@ class RecordArrayContentsKwargs(TypedDict, total=False):
 def _contents_list(
     draw: st.DrawFn,
 ) -> list[Content]:
-    '''Draw a list of 1..5 Content objects for testing.'''
+    """Draw a list of 1..5 Content objects for testing."""
     n = draw(st.integers(min_value=1, max_value=5))
     return [
         draw(st_ak.contents.contents(max_leaf_size=5, max_depth=2)) for _ in range(n)
@@ -36,7 +36,7 @@ def record_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[RecordArrayContentsKwargs]:
-    '''Strategy for options for `record_array_contents()` strategy.'''
+    """Strategy for options for `record_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_contents = chain.register(_contents_list())
@@ -62,7 +62,7 @@ def record_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_record_array_contents(data: st.DataObject) -> None:
-    '''Test that `record_array_contents()` respects all its options.'''
+    """Test that `record_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(record_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -117,7 +117,7 @@ def test_record_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_tuple() -> None:
-    '''Assert that `record_array_contents()` can produce a tuple record.'''
+    """Assert that `record_array_contents()` can produce a tuple record."""
     find(
         st_ak.contents.record_array_contents(),
         lambda r: r.is_tuple,
@@ -126,7 +126,7 @@ def test_draw_tuple() -> None:
 
 
 def test_draw_named() -> None:
-    '''Assert that `record_array_contents()` can produce a named record.'''
+    """Assert that `record_array_contents()` can produce a named record."""
     find(
         st_ak.contents.record_array_contents(),
         lambda r: not r.is_tuple,
@@ -135,7 +135,8 @@ def test_draw_named() -> None:
 
 
 def test_draw_max_fields() -> None:
-    '''Assert that `record_array_contents()` can produce a record with max_fields fields.'''
+    """Assert that `record_array_contents()` can produce a record with max_fields
+    fields."""
     max_fields = 3
     find(
         st_ak.contents.record_array_contents(max_fields=max_fields),
@@ -145,7 +146,7 @@ def test_draw_max_fields() -> None:
 
 
 def test_draw_max_length() -> None:
-    '''Assert that max_length constrains the RecordArray length.'''
+    """Assert that max_length constrains the RecordArray length."""
     max_length = 10
     find(
         st_ak.contents.record_array_contents(max_length=max_length),
@@ -155,7 +156,7 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that RecordArray can be drawn from `contents()`.'''
+    """Assert that RecordArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(max_leaf_size=20),
         lambda c: any(isinstance(n, RecordArray) for n in iter_contents(c)),

@@ -25,7 +25,7 @@ def union_array_contents(
     max_contents: int = 4,
     max_length: int | None = None,
 ) -> UnionArray:
-    '''Strategy for UnionArray Content from a list of child Contents.
+    """Strategy for UnionArray Content from a list of child Contents.
 
     Parameters
     ----------
@@ -49,7 +49,7 @@ def union_array_contents(
     >>> c = union_array_contents(max_length=4).example()
     >>> len(c) <= 4
     True
-    '''
+    """
     match contents:
         case None:
             contents = draw(
@@ -115,7 +115,7 @@ def union_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
-    '''Strategy that generates a tagged union layout within a size limit.
+    """Strategy that generates a tagged union layout within a size limit.
 
     Draws multiple children via ``content_lists()`` with ``min_len=2``, then
     wraps them in a ``UnionArray`` with shuffled tags and index arrays. Prevents
@@ -138,8 +138,7 @@ def union_array_from_contents(
     st_option
         A callable conforming to ``StOption`` that wraps content in an option
         type. Used for all-or-none option coordination.
-
-    '''
+    """
     children = draw(
         st_ak.contents.content_lists(
             functools.partial(content, allow_union_root=False),

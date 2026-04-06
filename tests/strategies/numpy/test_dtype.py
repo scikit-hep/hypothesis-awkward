@@ -21,7 +21,7 @@ def test_supported_dtypes(dtype: np.dtype) -> None:
 
 
 def test_supported_dtypes_shrinks_to_bool() -> None:
-    '''Assert that supported_dtypes() shrinks to bool.'''
+    """Assert that supported_dtypes() shrinks to bool."""
     result = find(
         st_ak.supported_dtypes(),
         lambda _: True,
@@ -31,7 +31,7 @@ def test_supported_dtypes_shrinks_to_bool() -> None:
 
 
 class NumpyDtypesKwargs(TypedDict, total=False):
-    '''Options for `numpy_dtypes()` strategy.'''
+    """Options for `numpy_dtypes()` strategy."""
 
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_array: bool
@@ -39,7 +39,7 @@ class NumpyDtypesKwargs(TypedDict, total=False):
 
 
 def numpy_dtypes_kwargs() -> st.SearchStrategy[NumpyDtypesKwargs]:
-    '''Strategy for options for `numpy_dtypes()` strategy.'''
+    """Strategy for options for `numpy_dtypes()` strategy."""
     return st.fixed_dictionaries(
         {},
         optional={

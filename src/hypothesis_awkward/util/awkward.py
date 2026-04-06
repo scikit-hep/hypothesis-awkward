@@ -23,7 +23,7 @@ LeafContent = Union[NumpyArray, EmptyArray, ListOffsetArray, ListArray, RegularA
 
 
 def any_nan_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
-    '''`True` if Awkward Array contains any `NaN` or `NaT` values, else `False`.
+    """`True` if Awkward Array contains any `NaN` or `NaT` values, else `False`.
 
     Parameters
     ----------
@@ -49,13 +49,12 @@ def any_nan_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     >>> a = ak.Array([{'x': 1.0, 'y': np.nan}, {'x': 2.0, 'y': 3.0}])
     >>> any_nan_nat_in_awkward_array(a)
     True
-
-    '''
+    """
     return any_nan_in_awkward_array(a) or any_nat_in_awkward_array(a)
 
 
 def any_nan_in_awkward_array(a: ak.Array | Content, /) -> bool:
-    '''`True` if Awkward Array contains any `NaN` values, else `False`.
+    """`True` if Awkward Array contains any `NaN` values, else `False`.
 
     Parameters
     ----------
@@ -81,8 +80,7 @@ def any_nan_in_awkward_array(a: ak.Array | Content, /) -> bool:
     >>> a = ak.Array([{'x': 1.0, 'y': np.nan}, {'x': 2.0, 'y': 3.0}])
     >>> any_nan_in_awkward_array(a)
     True
-
-    '''
+    """
     for arr in iter_numpy_arrays(a):
         if arr.dtype.kind in {'f', 'c'} and np.any(np.isnan(arr)):
             return True
@@ -90,7 +88,7 @@ def any_nan_in_awkward_array(a: ak.Array | Content, /) -> bool:
 
 
 def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
-    '''`True` if Awkward Array contains any `NaT` values, else `False`.
+    """`True` if Awkward Array contains any `NaT` values, else `False`.
 
     Parameters
     ----------
@@ -112,8 +110,7 @@ def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
     >>> a = ak.Array(np.array(['2020-01-01', '2020-01-02'], dtype='datetime64[D]'))
     >>> any_nat_in_awkward_array(a)
     False
-
-    '''
+    """
     for arr in iter_numpy_arrays(a):
         if arr.dtype.kind in {'m', 'M'} and np.any(np.isnat(arr)):
             return True
@@ -125,8 +122,7 @@ def is_string_or_bytestring_leaf(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> bool:
-    '''Check whether an Awkward Content node is a string or bytestring
-    leaf.
+    """Check whether an Awkward Content node is a string or bytestring leaf.
 
     Parameters
     ----------
@@ -141,15 +137,14 @@ def is_string_or_bytestring_leaf(
     -------
     bool
         ``True`` if the content is a string or bytestring leaf.
-
-    '''
+    """
     return (string_as_leaf and is_string_leaf(c)) or (
         bytestring_as_leaf and is_bytestring_leaf(c)
     )
 
 
 def is_string_leaf(c: Content) -> bool:
-    '''Check whether an Awkward Content node is a string leaf.
+    """Check whether an Awkward Content node is a string leaf.
 
     Parameters
     ----------
@@ -161,13 +156,12 @@ def is_string_leaf(c: Content) -> bool:
     bool
         ``True`` if the content has ``__array__`` parameter
         ``'string'``.
-
-    '''
+    """
     return c.parameter('__array__') == 'string'
 
 
 def is_bytestring_leaf(c: Content) -> bool:
-    '''Check whether an Awkward Content node is a bytestring leaf.
+    """Check whether an Awkward Content node is a bytestring leaf.
 
     Parameters
     ----------
@@ -179,8 +173,7 @@ def is_bytestring_leaf(c: Content) -> bool:
     bool
         ``True`` if the content has ``__array__`` parameter
         ``'bytestring'``.
-
-    '''
+    """
     return c.parameter('__array__') == 'bytestring'
 
 
@@ -191,7 +184,7 @@ def iter_contents(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> Iterator[Content]:
-    '''Iterate over all contents in an Awkward Array layout.
+    """Iterate over all contents in an Awkward Array layout.
 
     Parameters
     ----------
@@ -208,8 +201,7 @@ def iter_contents(
     ------
     Content
         Each content node in the layout.
-
-    '''
+    """
     stack: list[ak.Array | Content] = [a]
     while stack:
         item = stack.pop()
@@ -250,7 +242,7 @@ def iter_leaf_contents(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> Iterator[LeafContent]:
-    '''Iterate over all leaf contents in an Awkward Array layout.
+    """Iterate over all leaf contents in an Awkward Array layout.
 
     Parameters
     ----------
@@ -266,8 +258,7 @@ def iter_leaf_contents(
     ------
     LeafContent
         Each leaf content in the layout.
-
-    '''
+    """
     for content in iter_contents(
         a, string_as_leaf=string_as_leaf, bytestring_as_leaf=bytestring_as_leaf
     ):
@@ -287,7 +278,7 @@ def iter_numpy_arrays(
     exclude_string: bool = True,
     exclude_bytestring: bool = True,
 ) -> Iterator[np.ndarray]:
-    '''Iterate over all NumPy arrays in an Awkward Array layout.
+    """Iterate over all NumPy arrays in an Awkward Array layout.
 
     Parameters
     ----------
@@ -313,8 +304,7 @@ def iter_numpy_arrays(
     >>> a = ak.Array([{'x': 1, 'y': 2.0}, {'x': 3, 'y': 4.0}])
     >>> sorted([arr.dtype for arr in iter_numpy_arrays(a)], key=str)
     [dtype('float64'), dtype('int64')]
-
-    '''
+    """
     for content in iter_leaf_contents(
         a,
         string_as_leaf=exclude_string,
@@ -325,7 +315,7 @@ def iter_numpy_arrays(
 
 
 def leaf_size(a: ak.Array | Content, /) -> int:
-    '''Count total leaf elements in an Awkward Array layout.
+    """Count total leaf elements in an Awkward Array layout.
 
     Each ``NumpyArray`` element counts as one. Each string and bytestring
     (not character or byte) counts as one. ``EmptyArray`` counts as zero.
@@ -354,13 +344,12 @@ def leaf_size(a: ak.Array | Content, /) -> int:
     >>> a = ak.Array(['hello', 'world'])
     >>> leaf_size(a)
     2
-
-    '''
+    """
     return sum(len(leaf) for leaf in iter_leaf_contents(a))
 
 
 def content_size(a: ak.Array | Content, /) -> int:
-    '''Count total scalars stored in an Awkward Array layout.
+    """Count total scalars stored in an Awkward Array layout.
 
     Counts data elements, offset/index buffer elements, and metadata values
     (``RegularArray.size``, ``RecordArray`` field names).
@@ -395,8 +384,7 @@ def content_size(a: ak.Array | Content, /) -> int:
     >>> a = ak.Array(['hello', 'world'])
     >>> content_size(a)  # 3 offsets + 10 bytes = 13
     13
-
-    '''
+    """
     match a:
         case ak.Array():
             return content_size(a.layout)

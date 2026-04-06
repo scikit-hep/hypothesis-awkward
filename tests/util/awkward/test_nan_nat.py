@@ -16,7 +16,7 @@ from hypothesis_awkward.util.awkward import iter_leaf_contents
 
 @given(data=st.data())
 def test_any_nan_nat_in_awkward_array(data: st.DataObject) -> None:
-    '''Verify result matches element-by-element iteration.'''
+    """Verify result matches element-by-element iteration."""
     allow_nan = data.draw(st.booleans())
     a = data.draw(st_ak.constructors.arrays(allow_nan=allow_nan, allow_virtual=False))
     actual = any_nan_nat_in_awkward_array(a)
@@ -29,7 +29,7 @@ def test_any_nan_nat_in_awkward_array(data: st.DataObject) -> None:
 
 @given(data=st.data())
 def test_any_nan_in_awkward_array(data: st.DataObject) -> None:
-    '''Verify result matches element-by-element iteration.'''
+    """Verify result matches element-by-element iteration."""
     allow_nan = data.draw(st.booleans())
     a = data.draw(st_ak.constructors.arrays(allow_nan=allow_nan, allow_virtual=False))
     actual = any_nan_in_awkward_array(a)
@@ -42,7 +42,7 @@ def test_any_nan_in_awkward_array(data: st.DataObject) -> None:
 
 @given(data=st.data())
 def test_any_nat_in_awkward_array(data: st.DataObject) -> None:
-    '''Verify result matches element-by-element iteration.'''
+    """Verify result matches element-by-element iteration."""
     allow_nan = data.draw(st.booleans())
     a = data.draw(st_ak.constructors.arrays(allow_nan=allow_nan, allow_virtual=False))
     actual = any_nat_in_awkward_array(a)
@@ -54,7 +54,7 @@ def test_any_nat_in_awkward_array(data: st.DataObject) -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that arrays with NaN can be drawn.'''
+    """Assert that arrays with NaN can be drawn."""
     find(
         st_ak.constructors.arrays(allow_nan=True, allow_virtual=False),
         _expected_any_nan,
@@ -63,7 +63,7 @@ def test_draw_nan() -> None:
 
 
 def test_draw_nat() -> None:
-    '''Assert that arrays with NaT can be drawn.'''
+    """Assert that arrays with NaT can be drawn."""
     find(
         st_ak.constructors.arrays(allow_nan=True, allow_virtual=False),
         _expected_any_nat,
@@ -72,12 +72,12 @@ def test_draw_nat() -> None:
 
 
 def _expected_any_nan_nat(a: ak.Array) -> bool:
-    '''Check if array contains any NaN or NaT.'''
+    """Check if array contains any NaN or NaT."""
     return _expected_any_nan(a) or _expected_any_nat(a)
 
 
 def _expected_any_nan(a: ak.Array) -> bool:
-    '''Check if array contains any NaN.'''
+    """Check if array contains any NaN."""
     for content in iter_leaf_contents(a):
         if not isinstance(content, ak.contents.NumpyArray):
             continue
@@ -95,7 +95,7 @@ def _expected_any_nan(a: ak.Array) -> bool:
 
 
 def _expected_any_nat(a: ak.Array) -> bool:
-    '''Check if array contains any NaT.'''
+    """Check if array contains any NaT."""
     for content in iter_leaf_contents(a):
         if not isinstance(content, ak.contents.NumpyArray):
             continue

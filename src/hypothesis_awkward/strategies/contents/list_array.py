@@ -21,7 +21,7 @@ def list_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListArray:
-    '''Strategy for ListArray Content wrapping child Content.
+    """Strategy for ListArray Content wrapping child Content.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def list_array_contents(
     >>> c = list_array_contents(max_length=4).example()
     >>> len(c) <= 4
     True
-    '''
+    """
     match content:
         case None:
             content = draw(st_ak.contents.contents())
@@ -86,7 +86,7 @@ def list_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListArray:
-    '''Strategy that generates a starts/stops list layout within a size limit.
+    """Strategy that generates a starts/stops list layout within a size limit.
 
     Draws the number of lists ``n`` first and computes the starts/stops
     overhead (``2 * n``). The remainder of ``max_size`` after this deduction
@@ -106,8 +106,7 @@ def list_array_from_contents(
     max_length
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
         to ``max_size // 2`` when ``None``.
-
-    '''
+    """
     ml = max_length if max_length is not None else max_size // 2
     n = draw(st.integers(min_value=0, max_value=ml))
     overhead = 2 * n

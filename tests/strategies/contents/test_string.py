@@ -13,7 +13,7 @@ DEFAULT_MAX_SIZE = 10
 
 
 class StringContentsKwargs(TypedDict, total=False):
-    '''Options for `string_contents()` strategy.'''
+    """Options for `string_contents()` strategy."""
 
     alphabet: st.SearchStrategy[str] | None
     min_size: int
@@ -25,7 +25,7 @@ def string_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[StringContentsKwargs]:
-    '''Strategy for options for `string_contents()` strategy.'''
+    """Strategy for options for `string_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_alphabet = chain.register(st.characters(codec='utf-8'))
@@ -57,7 +57,7 @@ def string_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_string_contents(data: st.DataObject) -> None:
-    '''Test that `string_contents()` respects all its options.'''
+    """Test that `string_contents()` respects all its options."""
     # Draw options
     opts = data.draw(string_contents_kwargs(), label='opts')
     opts.reset()
@@ -103,7 +103,7 @@ def test_string_contents(data: st.DataObject) -> None:
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty arrays (zero strings) can be drawn.'''
+    """Assert that empty arrays (zero strings) can be drawn."""
     find(
         st_ak.contents.string_contents(),
         lambda c: len(c) == 0,
@@ -112,7 +112,7 @@ def test_draw_empty() -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that arrays with exactly max_size strings can be drawn.'''
+    """Assert that arrays with exactly max_size strings can be drawn."""
     find(
         st_ak.contents.string_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
@@ -121,7 +121,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_empty_string() -> None:
-    '''Assert that arrays containing an empty string can be drawn.'''
+    """Assert that arrays containing an empty string can be drawn."""
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: '' in ak.Array(c).to_list(),
@@ -130,7 +130,7 @@ def test_draw_empty_string() -> None:
 
 
 def test_draw_non_ascii() -> None:
-    '''Assert that arrays containing non-ASCII characters can be drawn.'''
+    """Assert that arrays containing non-ASCII characters can be drawn."""
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: any(not s.isascii() for s in ak.Array(c).to_list()),

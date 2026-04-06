@@ -16,7 +16,7 @@ def leaf_contents(
     allow_string: bool = True,
     allow_bytestring: bool = True,
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
-    '''Strategy for leaf content types.
+    """Strategy for leaf content types.
 
     This strategy generates ``EmptyArray``, bytestring content, string content, and
     ``NumpyArray`` and shrinks in that order towards ``EmptyArray``.
@@ -46,8 +46,7 @@ def leaf_contents(
     ------
     ValueError
         If no content types are possible with the given options.
-
-    '''
+    """
 
     options: list[st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]] = []
 

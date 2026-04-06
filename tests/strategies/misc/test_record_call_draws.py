@@ -1,4 +1,4 @@
-'''Tests for `RecordCallDraws` and `OptsChain.register_callable()`.'''
+"""Tests for `RecordCallDraws` and `OptsChain.register_callable()`."""
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -9,7 +9,7 @@ from hypothesis_awkward.strategies.misc.record import RecordCallDraws, RecordDra
 @settings(max_examples=200)
 @given(data=st.data())
 def test_record_call_draws(data: st.DataObject) -> None:
-    '''Calling a RecordCallDraws records every drawn value in order.'''
+    """Calling a RecordCallDraws records every drawn value in order."""
     recorder = RecordCallDraws(st.integers)
 
     n_resets = data.draw(st.integers(min_value=0, max_value=3), label='n_resets')

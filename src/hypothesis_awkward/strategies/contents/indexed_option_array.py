@@ -21,7 +21,7 @@ def indexed_option_array_contents(
     *,
     max_size: int | None = None,
 ) -> IndexedOptionArray:
-    '''Strategy for IndexedOptionArray Content wrapping child Content.
+    """Strategy for IndexedOptionArray Content wrapping child Content.
 
     The index length is drawn independently of the content length. Valid
     entries can reference any content position (duplicates allowed).
@@ -41,7 +41,7 @@ def indexed_option_array_contents(
     >>> c = indexed_option_array_contents().example()
     >>> isinstance(c, Content)
     True
-    '''
+    """
     match content:
         case None:
             content = draw(
@@ -75,7 +75,7 @@ def indexed_option_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> IndexedOptionArray:
-    '''Strategy that generates an indexed-option layout within a size limit.
+    """Strategy that generates an indexed-option layout within a size limit.
 
     Draws the index length first, then gives the remainder of the budget
     to the child content.
@@ -93,8 +93,7 @@ def indexed_option_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
-
-    '''
+    """
     ml = max_length if max_length is not None else max_size
     n = draw(st.integers(min_value=0, max_value=ml))
     max_content_size = max(max_size - n, 0)

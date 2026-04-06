@@ -1,10 +1,11 @@
-'''Strategies related to NumPy in the context of Awkward Array.
+"""Strategies related to NumPy in the context of Awkward Array.
 
 These strategies are related to the section of Awkward Array User Guide ["How to convert
 to/from NumPy"][ak-user-guide-numpy].
 
-[ak-user-guide-numpy]: https://awkward-array.org/doc/stable/user-guide/how-to-convert-numpy.html
-'''
+[ak-user-guide-numpy]:
+https://awkward-array.org/doc/stable/user-guide/how-to-convert-numpy.html
+"""
 
 __all__ = [
     'supported_dtype_names',

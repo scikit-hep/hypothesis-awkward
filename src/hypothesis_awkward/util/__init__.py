@@ -1,4 +1,4 @@
-'''Utility functions for property-based test assertions, etc.'''
+"""Utility functions for property-based test assertions, etc."""
 
 __all__ = [
     'any_nan_nat_in_awkward_array',

@@ -2,7 +2,7 @@ import numpy as np
 
 
 def any_nan_nat_in_numpy_array(n: np.ndarray, /) -> bool:
-    '''`True` if NumPy array contains any `NaN` or `NaT` values, else `False`.
+    """`True` if NumPy array contains any `NaN` or `NaT` values, else `False`.
 
     Parameters
     ----------
@@ -30,13 +30,12 @@ def any_nan_nat_in_numpy_array(n: np.ndarray, /) -> bool:
     ...              dtype=[('a', 'i4'), ('b', 'M8[D]')])
     >>> any_nan_nat_in_numpy_array(n)
     True
-
-    '''
+    """
     return any_nan_in_numpy_array(n) or any_nat_in_numpy_array(n)
 
 
 def any_nan_in_numpy_array(n: np.ndarray, /) -> bool:
-    '''`True` if NumPy array contains any `NaN` values, else `False`.
+    """`True` if NumPy array contains any `NaN` values, else `False`.
 
     Parameters
     ----------
@@ -63,8 +62,7 @@ def any_nan_in_numpy_array(n: np.ndarray, /) -> bool:
     ...              dtype=[('a', 'i4'), ('b', 'f8')])
     >>> any_nan_in_numpy_array(n)
     True
-
-    '''
+    """
     stack = [n]
     while stack:
         arr = stack.pop()
@@ -79,7 +77,7 @@ def any_nan_in_numpy_array(n: np.ndarray, /) -> bool:
 
 
 def any_nat_in_numpy_array(n: np.ndarray, /) -> bool:
-    '''`True` if NumPy array contains any `NaT` values, else `False`.
+    """`True` if NumPy array contains any `NaT` values, else `False`.
 
     Parameters
     ----------
@@ -107,8 +105,7 @@ def any_nat_in_numpy_array(n: np.ndarray, /) -> bool:
     ...              dtype=[('a', 'i4'), ('b', 'M8[D]')])
     >>> any_nat_in_numpy_array(n)
     True
-
-    '''
+    """
     stack = [n]
     while stack:
         arr = stack.pop()

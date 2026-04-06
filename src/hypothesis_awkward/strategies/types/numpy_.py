@@ -10,7 +10,7 @@ def numpy_types(
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     allow_datetime: bool = True,
 ) -> st.SearchStrategy[ak.types.NumpyType]:
-    '''Strategy for NumpyType (primitive/leaf types).
+    """Strategy for NumpyType (primitive/leaf types).
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def numpy_types(
     >>> t = st_ak.numpy_types().example()
     >>> isinstance(t, ak.types.NumpyType)
     True
-    '''
+    """
     if dtypes is None:
         if allow_datetime:
             dtypes = st.sampled_from(SUPPORTED_DTYPES)

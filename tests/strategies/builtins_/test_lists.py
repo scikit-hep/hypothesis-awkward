@@ -10,7 +10,7 @@ import hypothesis_awkward.strategies as st_ak
 
 
 class ListsKwargs(TypedDict, total=False):
-    '''Options for `lists()` strategy.'''
+    """Options for `lists()` strategy."""
 
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
@@ -18,7 +18,7 @@ class ListsKwargs(TypedDict, total=False):
 
 
 def lists_kwargs() -> st.SearchStrategy[ListsKwargs]:
-    '''Strategy for options for `lists()` strategy.'''
+    """Strategy for options for `lists()` strategy."""
     return st.fixed_dictionaries(
         {},
         optional={

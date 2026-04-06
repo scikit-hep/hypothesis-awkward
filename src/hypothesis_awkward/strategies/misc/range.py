@@ -28,7 +28,7 @@ def ranges(
     let_end_none_if_start_none: bool = False,
     allow_equal: bool = True,
 ) -> st.SearchStrategy[tuple[Optional[T], Optional[T]]]:
-    '''Generate two values (start, end) from a strategy, where start <= end.
+    """Generate two values (start, end) from a strategy, where start <= end.
 
     The minimum and maximum values can be specified by `min_start`,
     `max_start`, `min_end`, `max_end`.
@@ -59,8 +59,7 @@ def ranges(
     >>> l = st.lists(st.integers(), min_size=start, max_size=end).example()
     >>> start <= len(l) <= end
     True
-
-    '''
+    """
 
     def starts() -> st.SearchStrategy[Optional[T]]:
         _max_start = safe_min((max_start, max_end))

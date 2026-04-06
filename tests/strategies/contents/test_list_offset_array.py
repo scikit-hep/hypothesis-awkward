@@ -11,7 +11,7 @@ from hypothesis_awkward.util.safe import safe_compare as sc
 
 
 class ListOffsetArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `list_offset_array_contents()` strategy.'''
+    """Options for `list_offset_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
     max_length: int | None
@@ -22,7 +22,7 @@ def list_offset_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[ListOffsetArrayContentsKwargs]:
-    '''Strategy for options for `list_offset_array_contents()` strategy.'''
+    """Strategy for options for `list_offset_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(st_ak.contents.contents())
@@ -46,7 +46,7 @@ def list_offset_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_list_offset_array_contents(data: st.DataObject) -> None:
-    '''Test that `list_offset_array_contents()` respects all its options.'''
+    """Test that `list_offset_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(list_offset_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -82,7 +82,7 @@ def test_list_offset_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_max_length() -> None:
-    '''Assert that max_length constrains the ListOffsetArray length.'''
+    """Assert that max_length constrains the ListOffsetArray length."""
     max_length = 10
     find(
         st_ak.contents.list_offset_array_contents(max_length=max_length),
@@ -92,7 +92,7 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_default_max_length() -> None:
-    '''Assert that len(result) can reach len(content) by default.'''
+    """Assert that len(result) can reach len(content) by default."""
     content = NumpyArray(np.zeros(20, dtype=np.int64))
     find(
         st_ak.contents.list_offset_array_contents(content),
@@ -102,7 +102,7 @@ def test_draw_default_max_length() -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that ListOffsetArray can be drawn from `contents()`.'''
+    """Assert that ListOffsetArray can be drawn from `contents()`."""
 
     def _has_list_offset(c: Content) -> bool:
         return any(isinstance(n, ListOffsetArray) for n in iter_contents(c))
@@ -115,7 +115,7 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_from_contents_variable_length() -> None:
-    '''Assert that variable-length sublists can be drawn from `contents()`.'''
+    """Assert that variable-length sublists can be drawn from `contents()`."""
 
     def _has_variable_length(c: Content) -> bool:
         return any(
@@ -133,7 +133,7 @@ def test_draw_from_contents_variable_length() -> None:
 
 
 def test_draw_from_contents_empty_sublist() -> None:
-    '''Assert that empty sublists can be drawn from `contents()`.'''
+    """Assert that empty sublists can be drawn from `contents()`."""
 
     def _has_empty_sublist(c: Content) -> bool:
         return any(

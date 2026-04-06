@@ -10,7 +10,7 @@ from hypothesis_awkward.strategies.numpy.dtype import SUPPORTED_DTYPE_NAMES
 
 
 class NumpyFormsKwargs(TypedDict, total=False):
-    '''Options for `numpy_forms()` strategy.'''
+    """Options for `numpy_forms()` strategy."""
 
     type_: ak.types.NumpyType | st.SearchStrategy[ak.types.NumpyType] | None
     dtypes: st.SearchStrategy[np.dtype] | None
@@ -20,7 +20,7 @@ class NumpyFormsKwargs(TypedDict, total=False):
 
 
 def _inner_shape_strategies() -> st.SearchStrategy[tuple[int, ...]]:
-    '''Strategy for generating small inner_shape tuples.'''
+    """Strategy for generating small inner_shape tuples."""
     return st.lists(
         st.integers(min_value=1, max_value=5),
         min_size=1,
@@ -33,12 +33,12 @@ def numpy_forms_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[NumpyFormsKwargs]:
-    '''Strategy for options for `numpy_forms()` strategy.
+    """Strategy for options for `numpy_forms()` strategy.
 
     Two modes:
     - type_ mode: type_ is set, other params omitted.
     - dtypes mode: type_ omitted, dtypes/allow_datetime/inner_shape/allow_inner_shape drawn.
-    '''
+    """
     if chain is None:
         chain = st_ak.OptsChain({})
     st_type = chain.register(st_ak.numpy_types())
@@ -89,7 +89,7 @@ DATETIME_PRIMITIVES = frozenset(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_numpy_forms(data: st.DataObject) -> None:
-    '''Test that `numpy_forms()` respects all its options.'''
+    """Test that `numpy_forms()` respects all its options."""
     # Draw options
     opts = data.draw(numpy_forms_kwargs(), label='opts')
     opts.reset()
@@ -143,7 +143,7 @@ def test_numpy_forms(data: st.DataObject) -> None:
 
 
 def test_draw_empty_inner_shape() -> None:
-    '''Assert that forms with empty inner_shape can be drawn.'''
+    """Assert that forms with empty inner_shape can be drawn."""
     find(
         st_ak.numpy_forms(),
         lambda f: f.inner_shape == (),
@@ -152,7 +152,7 @@ def test_draw_empty_inner_shape() -> None:
 
 
 def test_draw_nonempty_inner_shape() -> None:
-    '''Assert that forms with non-empty inner_shape can be drawn.'''
+    """Assert that forms with non-empty inner_shape can be drawn."""
     find(
         st_ak.numpy_forms(),
         lambda f: len(f.inner_shape) > 0,
@@ -161,7 +161,7 @@ def test_draw_nonempty_inner_shape() -> None:
 
 
 def test_draw_datetime_primitive() -> None:
-    '''Assert that datetime64 primitive can be drawn.'''
+    """Assert that datetime64 primitive can be drawn."""
     find(
         st_ak.numpy_forms(),
         lambda f: f.primitive.startswith('datetime64'),
@@ -170,7 +170,7 @@ def test_draw_datetime_primitive() -> None:
 
 
 def test_draw_integer_primitive() -> None:
-    '''Assert that integer primitives can be drawn.'''
+    """Assert that integer primitives can be drawn."""
     find(
         st_ak.numpy_forms(),
         lambda f: f.primitive in ('int8', 'int16', 'int32', 'int64'),
@@ -179,7 +179,7 @@ def test_draw_integer_primitive() -> None:
 
 
 def test_draw_from_type() -> None:
-    '''Assert that a form from a NumpyType matches the type.'''
+    """Assert that a form from a NumpyType matches the type."""
     t = ak.types.NumpyType('float64')
     f = find(
         st_ak.numpy_forms(type_=t),

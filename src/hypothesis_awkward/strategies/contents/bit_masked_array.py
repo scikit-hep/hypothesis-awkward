@@ -20,7 +20,7 @@ def bit_masked_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
 ) -> BitMaskedArray:
-    '''Strategy for BitMaskedArray Content wrapping child Content.
+    """Strategy for BitMaskedArray Content wrapping child Content.
 
     The logical length always equals ``len(content)``. The mask is
     bit-packed into uint8 bytes.
@@ -36,7 +36,7 @@ def bit_masked_array_contents(
     >>> c = bit_masked_array_contents().example()
     >>> isinstance(c, Content)
     True
-    '''
+    """
     match content:
         case None:
             content = draw(
@@ -68,7 +68,7 @@ def bit_masked_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> BitMaskedArray:
-    '''Strategy that generates a bit-masked layout within a size limit.
+    """Strategy that generates a bit-masked layout within a size limit.
 
     Called by ``contents()`` during recursive tree generation.
 
@@ -83,8 +83,7 @@ def bit_masked_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
-
-    '''
+    """
     max_content_size = max(max_size - 2, 0)
     if max_length is not None:
         max_content_size = min(max_content_size, max_length)

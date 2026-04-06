@@ -13,7 +13,7 @@ DEFAULT_MAX_SIZE = 10
 
 
 class BytestringContentsKwargs(TypedDict, total=False):
-    '''Options for `bytestring_contents()` strategy.'''
+    """Options for `bytestring_contents()` strategy."""
 
     min_size: int
     max_size: int
@@ -24,7 +24,7 @@ def bytestring_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[BytestringContentsKwargs]:
-    '''Strategy for options for `bytestring_contents()` strategy.'''
+    """Strategy for options for `bytestring_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
 
@@ -49,7 +49,7 @@ def bytestring_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_bytestring_contents(data: st.DataObject) -> None:
-    '''Test that `bytestring_contents()` respects all its options.'''
+    """Test that `bytestring_contents()` respects all its options."""
     # Draw options
     opts = data.draw(bytestring_contents_kwargs(), label='opts')
     opts.reset()
@@ -87,7 +87,7 @@ def test_bytestring_contents(data: st.DataObject) -> None:
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty arrays (zero bytestrings) can be drawn.'''
+    """Assert that empty arrays (zero bytestrings) can be drawn."""
     find(
         st_ak.contents.bytestring_contents(),
         lambda c: len(c) == 0,
@@ -96,7 +96,7 @@ def test_draw_empty() -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that arrays with exactly max_size bytestrings can be drawn.'''
+    """Assert that arrays with exactly max_size bytestrings can be drawn."""
     find(
         st_ak.contents.bytestring_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
@@ -105,7 +105,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_empty_bytestring() -> None:
-    '''Assert that arrays containing an empty bytestring can be drawn.'''
+    """Assert that arrays containing an empty bytestring can be drawn."""
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: b'' in ak.Array(c).to_list(),
@@ -114,7 +114,7 @@ def test_draw_empty_bytestring() -> None:
 
 
 def test_draw_null_byte() -> None:
-    '''Assert that arrays containing a bytestring with a null byte can be drawn.'''
+    """Assert that arrays containing a bytestring with a null byte can be drawn."""
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: any(b'\x00' in b for b in ak.Array(c).to_list()),

@@ -1,4 +1,4 @@
-'''Strategies for NumPy dtypes with corresponding Python built-in types.'''
+"""Strategies for NumPy dtypes with corresponding Python built-in types."""
 
 from typing import Any
 
@@ -10,31 +10,31 @@ from hypothesis_awkward.util import BUILTIN_SAFE_DTYPE_NAMES, BUILTIN_SAFE_DTYPE
 
 
 def builtin_safe_dtype_names() -> st.SearchStrategy[str]:
-    '''Strategy for names of NumPy dtypes with corresponding Python built-in types.
+    """Strategy for names of NumPy dtypes with corresponding Python built-in types.
 
     Examples
     --------
     >>> builtin_safe_dtype_names().example()
     '...'
-    '''
+    """
     return st.sampled_from(BUILTIN_SAFE_DTYPE_NAMES)
 
 
 def builtin_safe_dtypes() -> st.SearchStrategy[np.dtype]:
-    '''Strategy for NumPy dtypes with corresponding Python built-in types.
+    """Strategy for NumPy dtypes with corresponding Python built-in types.
 
     Examples
     --------
     >>> builtin_safe_dtypes().example()
     dtype(...)
-    '''
+    """
     return st.sampled_from(BUILTIN_SAFE_DTYPES)
 
 
 def items_from_dtype(
     dtype: np.dtype, *, allow_nan: bool = True
 ) -> st.SearchStrategy[Any]:
-    '''Strategy for Python built-in type values for a given NumPy dtype.
+    """Strategy for Python built-in type values for a given NumPy dtype.
 
     Parameters
     ----------
@@ -48,7 +48,7 @@ def items_from_dtype(
     >>> i = items_from_dtype(np.dtype('int64')).example()
     >>> isinstance(i, int)
     True
-    '''
+    """
     return (
         st_np.from_dtype(dtype, allow_nan=allow_nan)
         .map(lambda x: x.item())

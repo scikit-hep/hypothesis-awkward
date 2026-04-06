@@ -1,4 +1,4 @@
-'''Tests for `OptsChain` with `register()` and `extend()`.'''
+"""Tests for `OptsChain` with `register()` and `extend()`."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from hypothesis_awkward.strategies.misc.record import OptsChain, RecordDraws
 def draw_opts_chain(
     draw: st.DrawFn,
 ) -> tuple[OptsChain[Any], list[OptsChain[Any]]]:
-    '''Build a chain of OptsChain produced by repeated extend() calls.
+    """Build a chain of OptsChain produced by repeated extend() calls.
 
     Returns
     -------
@@ -22,7 +22,7 @@ def draw_opts_chain(
         The OptsChain after all extend() calls.
     chain : list[OptsChain]
         All OptsChain in the chain, from base (index 0) to final (index -1).
-    '''
+    """
     depth = draw(st.integers(min_value=0, max_value=4), label='depth')
 
     chain: list[OptsChain[Any]] = []
@@ -58,7 +58,7 @@ def _draw_value(
     opts: OptsChain[Any],
     max_depth: int = 2,
 ) -> Any:
-    '''Draw a value that may be plain, a registered recorder, or a nested structure.'''
+    """Draw a value that may be plain, a registered recorder, or a nested structure."""
     choices = ['plain', 'strategy']
     if max_depth > 0:
         choices += ['list', 'dict']
@@ -98,12 +98,12 @@ def _level_kwargs(
     *,
     opts: OptsChain[Any],
 ) -> dict[str, Any]:
-    '''Draw kwargs for a single level in the opts chain.
+    """Draw kwargs for a single level in the opts chain.
 
     Values can be plain, registered recorders, or nested lists/dicts
     containing recorders. Strategies are registered on *opts* via
     ``opts.register()``.
-    '''
+    """
     fresh_key = st.text(min_size=1, max_size=10).filter(lambda k: k not in opts.kwargs)
     keys = draw(
         st.lists(fresh_key, min_size=0, max_size=10, unique=True),
@@ -116,7 +116,7 @@ def _level_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_opts_chain(data: st.DataObject) -> None:
-    '''Test that register(), extend(), and reset() work together.'''
+    """Test that register(), extend(), and reset() work together."""
     final, chain = data.draw(draw_opts_chain(), label='opts_chain')
     all_recorders = final.recorders
 
@@ -157,9 +157,8 @@ def test_opts_chain(data: st.DataObject) -> None:
 @settings(max_examples=200)
 @given(data=st.data())
 def test_extend_does_not_affect_parent(data: st.DataObject) -> None:
-    '''Test that resetting a child does not lose parent-only recorders,
-    and that resetting a parent leaves child-only recorders untouched.
-    '''
+    """Test that resetting a child does not lose parent-only recorders, and that
+    resetting a parent leaves child-only recorders untouched."""
     final, chain = data.draw(draw_opts_chain(), label='opts_chain')
 
     # Need at least depth >= 1 for this test
@@ -204,14 +203,14 @@ def test_extend_does_not_affect_parent(data: st.DataObject) -> None:
 
 
 def test_empty() -> None:
-    '''OptsChain({}) — reset() does not raise, kwargs == {}.'''
+    """OptsChain({}) — reset() does not raise, kwargs == {}."""
     opts: OptsChain[Any] = OptsChain({})
     opts.reset()
     assert opts.kwargs == {}
 
 
 def test_register_on_empty() -> None:
-    '''OptsChain({}).register(st.integers()) works and returns a RecordDraws.'''
+    """OptsChain({}).register(st.integers()) works and returns a RecordDraws."""
     opts: OptsChain[Any] = OptsChain({})
     recorder = opts.register(st.integers())
     assert isinstance(recorder, RecordDraws)
@@ -226,7 +225,7 @@ def test_register_on_empty() -> None:
 
 
 def test_extend_empty() -> None:
-    '''OptsChain({'a': 1}).extend({}) — kwargs unchanged.'''
+    """OptsChain({'a': 1}).extend({}) — kwargs unchanged."""
     opts: OptsChain[Any] = OptsChain({'a': 1})
     extended = opts.extend({})
     assert extended.kwargs == {'a': 1}

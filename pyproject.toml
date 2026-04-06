@@ -79,6 +79,10 @@ known-first-party = ["awkward"]
 quote-style = "preserve"
 indent-style = "space"
 
+[tool.docformatter]
+recursive = true
+wrap-summaries = 88
+wrap-descriptions = 88
 
 [[tool.mypy.overrides]]
 module = ["awkward.*", "pyarrow.*", "pandas.*"]

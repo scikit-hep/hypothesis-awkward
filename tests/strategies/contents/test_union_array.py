@@ -13,7 +13,7 @@ DEFAULT_MAX_CONTENTS = 4
 
 
 class UnionArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `union_array_contents()` strategy.'''
+    """Options for `union_array_contents()` strategy."""
 
     contents: list[Content] | st.SearchStrategy[list[Content]]
     max_contents: int
@@ -24,7 +24,7 @@ class UnionArrayContentsKwargs(TypedDict, total=False):
 def _contents_list(
     draw: st.DrawFn,
 ) -> list[Content]:
-    '''Draw a list of 2..5 Content objects for testing.'''
+    """Draw a list of 2..5 Content objects for testing."""
     n = draw(st.integers(min_value=2, max_value=5))
     return [
         draw(
@@ -44,7 +44,7 @@ def union_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[UnionArrayContentsKwargs]:
-    '''Strategy for options for `union_array_contents()` strategy.'''
+    """Strategy for options for `union_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_contents = chain.register(_contents_list())
@@ -69,7 +69,7 @@ def union_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_union_array_contents(data: st.DataObject) -> None:
-    '''Test that `union_array_contents()` respects all its options.'''
+    """Test that `union_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(union_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -135,7 +135,7 @@ def test_union_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_multiple_contents() -> None:
-    '''Assert that a union with max_contents contents can be drawn.'''
+    """Assert that a union with max_contents contents can be drawn."""
     max_contents = 4
     find(
         st_ak.contents.union_array_contents(max_contents=max_contents),
@@ -145,7 +145,7 @@ def test_draw_multiple_contents() -> None:
 
 
 def test_draw_different_content_lengths() -> None:
-    '''Assert that a union with different-length contents can be drawn.'''
+    """Assert that a union with different-length contents can be drawn."""
     find(
         st_ak.contents.union_array_contents(),
         lambda u: len({len(c) for c in u.contents}) > 1,
@@ -154,7 +154,7 @@ def test_draw_different_content_lengths() -> None:
 
 
 def test_draw_max_length() -> None:
-    '''Assert that max_length constrains the UnionArray length.'''
+    """Assert that max_length constrains the UnionArray length."""
     max_length = 10
     find(
         st_ak.contents.union_array_contents(max_length=max_length),
@@ -164,7 +164,7 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that UnionArray can be drawn from `contents()`.'''
+    """Assert that UnionArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(max_leaf_size=20),
         lambda c: (
@@ -176,11 +176,11 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_nested_union() -> None:
-    '''Assert that a UnionArray with a descendant UnionArray can be drawn.
+    """Assert that a UnionArray with a descendant UnionArray can be drawn.
 
     Direct children of a union must not be unions (no ``Union[Union[...]]``),
     but deeper descendants may be, e.g. ``Union[Record[Union[...], ...], ...]``.
-    '''
+    """
     find(
         st_ak.contents.union_array_contents(),
         _has_nested_union,
@@ -189,11 +189,11 @@ def test_draw_nested_union() -> None:
 
 
 def test_draw_from_contents_nested_union() -> None:
-    '''Assert that a UnionArray with a descendant UnionArray can be drawn.
+    """Assert that a UnionArray with a descendant UnionArray can be drawn.
 
     Direct children of a union must not be unions (no ``Union[Union[...]]``),
     but deeper descendants may be, e.g. ``Union[Record[Union[...], ...], ...]``.
-    '''
+    """
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_nested_union,
@@ -214,11 +214,11 @@ def _has_nested_union(c: Content) -> bool:
 
 
 def test_draw_from_contents_option_deep_inside_union() -> None:
-    '''Assert that option types can appear deep inside non-option union branches.
+    """Assert that option types can appear deep inside non-option union branches.
 
     The direct children of the union are not option types, but deeper
     descendants are, e.g., ``Union[ListOffset[ByteMasked[...]], ...]``.
-    '''
+    """
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_option_deep_inside_union,
@@ -239,11 +239,11 @@ def _has_option_deep_inside_union(c: Content) -> bool:
 
 
 def test_draw_from_contents_all_option_union() -> None:
-    '''Assert that a UnionArray with all-option children can be drawn.
+    """Assert that a UnionArray with all-option children can be drawn.
 
-    All direct children of the union are option types, satisfying the
-    "all or none" rule.
-    '''
+    All direct children of the union are option types, satisfying the "all or none"
+    rule.
+    """
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_all_option_union,
@@ -252,7 +252,7 @@ def test_draw_from_contents_all_option_union() -> None:
 
 
 def test_draw_all_option_union() -> None:
-    '''Assert that standalone union_array_contents() can produce all-option children.'''
+    """Assert that standalone union_array_contents() can produce all-option children."""
     find(
         st_ak.contents.union_array_contents(),
         lambda c: all(child.is_option for child in c.contents),

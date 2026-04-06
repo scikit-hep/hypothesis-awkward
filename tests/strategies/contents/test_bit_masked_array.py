@@ -10,7 +10,7 @@ from awkward.contents import BitMaskedArray, Content
 
 
 class BitMaskedArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `bit_masked_array_contents()` strategy.'''
+    """Options for `bit_masked_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
 
@@ -20,7 +20,7 @@ def bit_masked_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[BitMaskedArrayContentsKwargs]:
-    '''Strategy for options for `bit_masked_array_contents()` strategy.'''
+    """Strategy for options for `bit_masked_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
@@ -47,7 +47,7 @@ def bit_masked_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_bit_masked_array_contents(data: st.DataObject) -> None:
-    '''Test that `bit_masked_array_contents()` respects all its options.'''
+    """Test that `bit_masked_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(bit_masked_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -83,7 +83,7 @@ def test_bit_masked_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_valid_when_true() -> None:
-    '''Assert that valid_when=True can be drawn.'''
+    """Assert that valid_when=True can be drawn."""
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.valid_when is True,
@@ -92,7 +92,7 @@ def test_draw_valid_when_true() -> None:
 
 
 def test_draw_valid_when_false() -> None:
-    '''Assert that valid_when=False can be drawn.'''
+    """Assert that valid_when=False can be drawn."""
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.valid_when is False,
@@ -101,7 +101,7 @@ def test_draw_valid_when_false() -> None:
 
 
 def test_draw_lsb_order_true() -> None:
-    '''Assert that lsb_order=True can be drawn.'''
+    """Assert that lsb_order=True can be drawn."""
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.lsb_order is True,
@@ -110,7 +110,7 @@ def test_draw_lsb_order_true() -> None:
 
 
 def test_draw_lsb_order_false() -> None:
-    '''Assert that lsb_order=False can be drawn.'''
+    """Assert that lsb_order=False can be drawn."""
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.lsb_order is False,
@@ -119,7 +119,7 @@ def test_draw_lsb_order_false() -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that BitMaskedArray can be the root node from `contents()`.'''
+    """Assert that BitMaskedArray can be the root node from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, BitMaskedArray),
@@ -128,7 +128,7 @@ def test_draw_from_contents() -> None:
 
 
 def _is_valid(c: BitMaskedArray, j: int) -> bool:
-    '''Check whether element j is valid according to the bit mask.'''
+    """Check whether element j is valid according to the bit mask."""
     byte = c.mask.data[j // 8]
     if c.lsb_order:
         bit = bool(byte & (1 << (j % 8)))
@@ -138,7 +138,7 @@ def _is_valid(c: BitMaskedArray, j: int) -> bool:
 
 
 def test_draw_with_none_values() -> None:
-    '''Assert that masked (None) entries can appear.'''
+    """Assert that masked (None) entries can appear."""
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.length > 0 and any(not _is_valid(c, j) for j in range(c.length)),
@@ -147,7 +147,7 @@ def test_draw_with_none_values() -> None:
 
 
 def test_draw_all_valid() -> None:
-    '''Assert that all-valid arrays can be drawn.'''
+    """Assert that all-valid arrays can be drawn."""
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.length > 0 and all(_is_valid(c, j) for j in range(c.length)),

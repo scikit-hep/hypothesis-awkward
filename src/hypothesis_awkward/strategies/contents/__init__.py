@@ -1,10 +1,11 @@
-'''Strategies for Contents (layouts).
+"""Strategies for Contents (layouts).
 
 These strategies are related to the section of Awkward Array User Guide ["Direct
 constructors"][ak-user-guide-constructors].
 
-[ak-user-guide-constructors]: https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
-'''
+[ak-user-guide-constructors]:
+https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
+"""
 
 __all__ = [
     'contents',

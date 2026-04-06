@@ -24,7 +24,7 @@ DEFAULT_MAX_DEPTH = None
 
 
 class ContentsKwargs(TypedDict, total=False):
-    '''Options for `contents()` strategy.'''
+    """Options for `contents()` strategy."""
 
     dtypes: st.SearchStrategy[np.dtype] | None
     max_size: int
@@ -52,7 +52,7 @@ def contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[ContentsKwargs]:
-    '''Strategy for options for `contents()` strategy.'''
+    """Strategy for options for `contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
@@ -97,7 +97,7 @@ def contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_contents(data: st.DataObject) -> None:
-    '''Test that `contents()` respects all its options.'''
+    """Test that `contents()` respects all its options."""
     # Draw options
     opts = data.draw(contents_kwargs(), label='opts')
     opts.reset()
@@ -208,7 +208,7 @@ def test_contents(data: st.DataObject) -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that content at exactly max_size can be drawn.'''
+    """Assert that content at exactly max_size can be drawn."""
     max_size = 30
     find(
         st_ak.contents.contents(max_size=max_size, max_leaf_size=max_size),
@@ -218,7 +218,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_max_leaf_size() -> None:
-    '''Assert that content at exactly max_leaf_size can be drawn.'''
+    """Assert that content at exactly max_leaf_size can be drawn."""
     max_leaf_size = 20
     find(
         st_ak.contents.contents(max_size=200, max_leaf_size=max_leaf_size),
@@ -228,7 +228,7 @@ def test_draw_max_leaf_size() -> None:
 
 
 def test_draw_max_depth() -> None:
-    '''Assert that content at exactly max_depth can be drawn.'''
+    """Assert that content at exactly max_depth can be drawn."""
     max_depth = 8
     find(
         st_ak.contents.contents(max_size=200, max_depth=max_depth),
@@ -238,7 +238,7 @@ def test_draw_max_depth() -> None:
 
 
 def test_draw_deep_without_max_depth() -> None:
-    '''Assert that deep content can be drawn without specifying max_depth.'''
+    """Assert that deep content can be drawn without specifying max_depth."""
     find(
         st_ak.contents.contents(max_size=200),
         lambda c: _nesting_depth(c) >= 8,
@@ -247,7 +247,7 @@ def test_draw_deep_without_max_depth() -> None:
 
 
 def test_draw_nested() -> None:
-    '''Assert that nested content (depth >= 2) can be drawn.'''
+    """Assert that nested content (depth >= 2) can be drawn."""
     find(
         st_ak.contents.contents(max_leaf_size=20),
         lambda c: _nesting_depth(c) >= 2,
@@ -256,7 +256,7 @@ def test_draw_nested() -> None:
 
 
 def test_draw_max_length() -> None:
-    '''Assert that max_length constrains the content length.'''
+    """Assert that max_length constrains the content length."""
     max_length = 5
     find(
         st_ak.contents.contents(max_leaf_size=50, max_length=max_length),
@@ -266,7 +266,7 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_max_length_not_recursed() -> None:
-    '''Assert that max_length does not constrain nested content length.'''
+    """Assert that max_length does not constrain nested content length."""
     max_length = 2
     find(
         st_ak.contents.contents(max_leaf_size=50, max_length=max_length),
@@ -276,12 +276,12 @@ def test_draw_max_length_not_recursed() -> None:
 
 
 def _leaf_dtypes(c: ak.contents.Content) -> set[np.dtype]:
-    '''Dtypes of leaf NumPy arrays contained in `c`.'''
+    """Dtypes of leaf NumPy arrays contained in `c`."""
     return {arr.dtype for arr in iter_numpy_arrays(c)}
 
 
 def _nesting_depth(c: ak.contents.Content) -> int:
-    '''Maximum structural nesting depth (deepest path through the tree).'''
+    """Maximum structural nesting depth (deepest path through the tree)."""
     _nesting_types = (
         ak.contents.RegularArray,
         ak.contents.ListOffsetArray,
@@ -309,17 +309,17 @@ def _nesting_depth(c: ak.contents.Content) -> int:
 
 
 def _has_numpy(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any NumpyArray node.'''
+    """Check if the content contains any NumpyArray node."""
     return any(isinstance(n, ak.contents.NumpyArray) for n in iter_contents(c))
 
 
 def _has_empty(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any EmptyArray node.'''
+    """Check if the content contains any EmptyArray node."""
     return any(isinstance(n, ak.contents.EmptyArray) for n in iter_contents(c))
 
 
 def _has_list_offset(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any structural ListOffsetArray node.'''
+    """Check if the content contains any structural ListOffsetArray node."""
     return any(
         isinstance(n, ak.contents.ListOffsetArray)
         and n.parameter('__array__') not in ('string', 'bytestring')
@@ -328,57 +328,57 @@ def _has_list_offset(c: ak.contents.Content) -> bool:
 
 
 def _has_regular(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any RegularArray node.'''
+    """Check if the content contains any RegularArray node."""
     return any(isinstance(n, ak.contents.RegularArray) for n in iter_contents(c))
 
 
 def _has_list(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any ListArray node.'''
+    """Check if the content contains any ListArray node."""
     return any(isinstance(n, ak.contents.ListArray) for n in iter_contents(c))
 
 
 def _has_string(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any string node.'''
+    """Check if the content contains any string node."""
     return any(n.parameter('__array__') == 'string' for n in iter_contents(c))
 
 
 def _has_bytestring(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any bytestring node.'''
+    """Check if the content contains any bytestring node."""
     return any(n.parameter('__array__') == 'bytestring' for n in iter_contents(c))
 
 
 def _has_record(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any RecordArray node.'''
+    """Check if the content contains any RecordArray node."""
     return any(isinstance(n, ak.contents.RecordArray) for n in iter_contents(c))
 
 
 def _has_union(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any UnionArray node.'''
+    """Check if the content contains any UnionArray node."""
     return any(isinstance(n, ak.contents.UnionArray) for n in iter_contents(c))
 
 
 def _has_indexed_option(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any IndexedOptionArray node.'''
+    """Check if the content contains any IndexedOptionArray node."""
     return any(isinstance(n, ak.contents.IndexedOptionArray) for n in iter_contents(c))
 
 
 def _has_byte_masked(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any ByteMaskedArray node.'''
+    """Check if the content contains any ByteMaskedArray node."""
     return any(isinstance(n, ak.contents.ByteMaskedArray) for n in iter_contents(c))
 
 
 def _has_bit_masked(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any BitMaskedArray node.'''
+    """Check if the content contains any BitMaskedArray node."""
     return any(isinstance(n, ak.contents.BitMaskedArray) for n in iter_contents(c))
 
 
 def _has_unmasked(c: ak.contents.Content) -> bool:
-    '''Check if the content contains any UnmaskedArray node.'''
+    """Check if the content contains any UnmaskedArray node."""
     return any(isinstance(n, ak.contents.UnmaskedArray) for n in iter_contents(c))
 
 
 def test_draw_from_contents_indexed_option() -> None:
-    '''Assert that IndexedOptionArray can be drawn from `contents()`.'''
+    """Assert that IndexedOptionArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         _has_indexed_option,
@@ -387,7 +387,7 @@ def test_draw_from_contents_indexed_option() -> None:
 
 
 def test_draw_from_contents_byte_masked() -> None:
-    '''Assert that ByteMaskedArray can be drawn from `contents()`.'''
+    """Assert that ByteMaskedArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         _has_byte_masked,
@@ -396,7 +396,7 @@ def test_draw_from_contents_byte_masked() -> None:
 
 
 def test_draw_from_contents_bit_masked() -> None:
-    '''Assert that BitMaskedArray can be drawn from `contents()`.'''
+    """Assert that BitMaskedArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         _has_bit_masked,
@@ -405,7 +405,7 @@ def test_draw_from_contents_bit_masked() -> None:
 
 
 def test_draw_from_contents_unmasked() -> None:
-    '''Assert that UnmaskedArray can be drawn from `contents()`.'''
+    """Assert that UnmaskedArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         _has_unmasked,

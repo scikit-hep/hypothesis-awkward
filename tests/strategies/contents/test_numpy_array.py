@@ -17,7 +17,7 @@ DEFAULT_MAX_SIZE = 10
 
 
 class NumpyArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `numpy_array_contents()` strategy.'''
+    """Options for `numpy_array_contents()` strategy."""
 
     dtypes: st.SearchStrategy[np.dtype] | None
     allow_nan: bool
@@ -30,7 +30,7 @@ def numpy_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[NumpyArrayContentsKwargs]:
-    '''Strategy for options for `numpy_array_contents()` strategy.'''
+    """Strategy for options for `numpy_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
@@ -63,7 +63,7 @@ def numpy_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_numpy_array_contents(data: st.DataObject) -> None:
-    '''Test that `numpy_array_contents()` respects all its options.'''
+    """Test that `numpy_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(numpy_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -102,7 +102,7 @@ def test_numpy_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that NumpyArray can be drawn from `contents()`.'''
+    """Assert that NumpyArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, NumpyArray),
@@ -111,7 +111,7 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_from_contents_length_zero() -> None:
-    '''Assert that NumpyArray with length 0 can be drawn from `contents()`.'''
+    """Assert that NumpyArray with length 0 can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, NumpyArray) and len(c) == 0,
@@ -120,7 +120,7 @@ def test_draw_from_contents_length_zero() -> None:
 
 
 def test_draw_from_contents_max_size_1() -> None:
-    '''Assert that a NumpyArray with one element can be drawn with max_size=1.'''
+    """Assert that a NumpyArray with one element can be drawn with max_size=1."""
     find(
         st_ak.contents.contents(max_size=1),
         lambda c: isinstance(c, NumpyArray) and len(c) == 1,
@@ -129,7 +129,7 @@ def test_draw_from_contents_max_size_1() -> None:
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty arrays can be drawn.'''
+    """Assert that empty arrays can be drawn."""
     find(
         st_ak.contents.numpy_array_contents(),
         lambda c: len(c) == 0,
@@ -138,7 +138,7 @@ def test_draw_empty() -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that arrays with exactly max_size elements can be drawn.'''
+    """Assert that arrays with exactly max_size elements can be drawn."""
     find(
         st_ak.contents.numpy_array_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
@@ -147,7 +147,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_min_size() -> None:
-    '''Assert that arrays with exactly min_size elements can be drawn.'''
+    """Assert that arrays with exactly min_size elements can be drawn."""
     min_size = 5
     find(
         st_ak.contents.numpy_array_contents(min_size=min_size),
@@ -157,7 +157,7 @@ def test_draw_min_size() -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that arrays with NaN can be drawn when allowed.'''
+    """Assert that arrays with NaN can be drawn when allowed."""
     float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
     find(
         st_ak.contents.numpy_array_contents(
@@ -169,7 +169,7 @@ def test_draw_nan() -> None:
 
 
 def test_draw_nat() -> None:
-    '''Assert that arrays with NaT can be drawn when allowed.'''
+    """Assert that arrays with NaT can be drawn when allowed."""
     datetime_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind in ('M', 'm'))
     find(
         st_ak.contents.numpy_array_contents(

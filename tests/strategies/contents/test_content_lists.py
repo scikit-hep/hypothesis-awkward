@@ -14,7 +14,7 @@ DEFAULT_MIN_LEN = 0
 
 
 class ContentListsKwargs(TypedDict, total=False):
-    '''Options for `content_lists()` strategy.'''
+    """Options for `content_lists()` strategy."""
 
     st_content: Callable[..., st.SearchStrategy[Content]]
     max_size: int
@@ -28,7 +28,7 @@ def content_lists_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[ContentListsKwargs]:
-    '''Strategy for options for `content_lists()` strategy.'''
+    """Strategy for options for `content_lists()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register_callable(st_ak.contents.contents)
@@ -59,7 +59,7 @@ def content_lists_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_content_lists(data: st.DataObject) -> None:
-    '''Test that `content_lists()` respects all its options.'''
+    """Test that `content_lists()` respects all its options."""
     # Draw options
     opts = data.draw(content_lists_kwargs(), label='opts')
     opts.reset()
@@ -90,7 +90,7 @@ def test_content_lists(data: st.DataObject) -> None:
 
 
 def test_draw_min_len() -> None:
-    '''Assert that a list with exactly min_len=2 elements can be drawn.'''
+    """Assert that a list with exactly min_len=2 elements can be drawn."""
     find(
         st_ak.contents.content_lists(
             st_ak.contents.contents, max_leaf_size=50, min_len=2
@@ -101,7 +101,7 @@ def test_draw_min_len() -> None:
 
 
 def test_draw_max_len() -> None:
-    '''Assert that max_len caps the number of contents.'''
+    """Assert that max_len caps the number of contents."""
     find(
         st_ak.contents.content_lists(max_leaf_size=50, max_len=3),
         lambda cl: len(cl) == 3,
@@ -110,7 +110,7 @@ def test_draw_max_len() -> None:
 
 
 def test_draw_empty_list() -> None:
-    '''Assert that an empty list can be drawn when min_len=0.'''
+    """Assert that an empty list can be drawn when min_len=0."""
     find(
         st_ak.contents.content_lists(
             st_ak.contents.contents, max_leaf_size=50, min_len=0

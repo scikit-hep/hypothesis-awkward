@@ -18,7 +18,7 @@ def dicts_for_dataframe(
     allow_nested: bool = True,
     allow_empty: bool = True,
 ) -> dict[str, list]:
-    '''Strategy for dicts for Pandas DataFrame initialization.
+    """Strategy for dicts for Pandas DataFrame initialization.
 
     Parameters
     ----------
@@ -38,8 +38,7 @@ def dicts_for_dataframe(
         When list elements are lists, those lists may be nested lists if `True`.
     allow_empty
         When list elements are lists, those lists may be empty if `True`.
-
-    '''
+    """
     if max_rows is None:
         max_rows = max(5, min_rows + 5)
 

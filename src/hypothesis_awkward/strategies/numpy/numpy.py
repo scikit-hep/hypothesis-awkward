@@ -25,7 +25,7 @@ def numpy_arrays(
     min_size: int = 0,
     max_size: int = 10,
 ) -> np.ndarray:
-    '''Strategy for NumPy arrays from which Awkward Arrays can be created.
+    """Strategy for NumPy arrays from which Awkward Arrays can be created.
 
     Parameters
     ----------
@@ -52,8 +52,7 @@ def numpy_arrays(
     >>> n = numpy_arrays().example()
     >>> ak.from_numpy(n)
     <Array ... type='...'>
-
-    '''
+    """
     # Limit dtype_size so that the size can be between min_size and max_size
     max_dtype_size = max_size // min_size if min_size > 0 else max_size
     max_dtype_size = max(1, max_dtype_size)
@@ -102,7 +101,7 @@ def _st_shape(
     min_dims: int,
     max_dims: int | None,
 ) -> tuple[int, ...]:
-    '''Strategy for a non-empty array shape.
+    """Strategy for a non-empty array shape.
 
     A shape is a tuple of positive integers, e.g., ``(3, 5, 2)``, where each
     value is the length of a dimension (called a "side").
@@ -117,7 +116,7 @@ def _st_shape(
         Minimum number of dimensions, i.e., ``len(shape) >= min_dims``.
     max_dims
         Maximum number of dimensions. If ``None``, derived from ``max_items``.
-    '''
+    """
 
     # Generate empty shape manually as `st_np.array_shapes()` doesn't.
     empty = draw(_st_empty(min_items, max_items))
@@ -165,11 +164,11 @@ def _st_shape(
 
 
 def _st_empty(min_items: int, max_items: int) -> st.SearchStrategy[bool]:
-    '''Strategy for whether to generate an empty array.
+    """Strategy for whether to generate an empty array.
 
-    P(empty) = 1 / (1 + average_size), matching Hypothesis st.lists() behavior.
-    For max_size=10: average_size=5, P(empty) = 1/6 ≈ 16.7%
-    '''
+    P(empty) = 1 / (1 + average_size), matching Hypothesis st.lists() behavior. For
+    max_size=10: average_size=5, P(empty) = 1/6 ≈ 16.7%
+    """
     if min_items > 0:
         return st.just(False)
     if max_items <= 0:
@@ -186,7 +185,7 @@ def from_numpy(
     regulararray: bool | None = None,
     max_size: int = 10,
 ) -> st.SearchStrategy[ak.Array]:
-    '''Strategy for Awkward Arrays created from NumPy arrays.
+    """Strategy for Awkward Arrays created from NumPy arrays.
 
     Parameters
     ----------
@@ -209,8 +208,7 @@ def from_numpy(
     --------
     >>> from_numpy().example()
     <Array ... type='...'>
-
-    '''
+    """
 
     reg_array = st.booleans() if regulararray is None else st.just(regulararray)
 
