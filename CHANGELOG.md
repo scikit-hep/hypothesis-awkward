@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.13.0] - 2026-04-06
+
+### Features
+
+- Improve shrink quality for leaf contents, numpy arrays, and dtypes ([#52](https://github.com/scikit-hep/hypothesis-awkward/pull/52))
+- Improve regular_array defaults and docstrings ([#56](https://github.com/scikit-hep/hypothesis-awkward/pull/56))
+
+### Bug Fixes
+
+- Increase max_examples for rare find() condition in test ([#58](https://github.com/scikit-hep/hypothesis-awkward/pull/58))
+
+### Testing
+
+- Add shrink quality tests for contents() ([#57](https://github.com/scikit-hep/hypothesis-awkward/pull/57))
+
+### Build & CI
+
+- Switch to double-quote docstrings and add docformatter ([#53](https://github.com/scikit-hep/hypothesis-awkward/pull/53))
+- Harden composite actions for gh-pages deployment ([#54](https://github.com/scikit-hep/hypothesis-awkward/pull/54))
+- Split docs-pr-preview into build and deploy workflows ([#55](https://github.com/scikit-hep/hypothesis-awkward/pull/55))
+
+### Meta
+
+- Update CI rules, testing patterns, and option-contents design status
+
+
 ## [0.12.0] - 2026-04-01
 
 ### Features
