@@ -18,8 +18,8 @@ def leaf_contents(
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
     '''Strategy for leaf content types.
 
-    Produces one of NumpyArray, EmptyArray, string, or bytestring content, selected by
-    ``st.one_of``.
+    This strategy generates ``EmptyArray``, bytestring content, string content, and
+    ``NumpyArray`` and shrinks in that order towards ``EmptyArray``.
 
     Parameters
     ----------
@@ -42,33 +42,31 @@ def leaf_contents(
     allow_bytestring
         No bytestring content is generated if ``False``.
 
-    Examples
-    --------
-    >>> c = leaf_contents().example()
-    >>> isinstance(c, (NumpyArray, EmptyArray, ListOffsetArray))
-    True
+    Raises
+    ------
+    ValueError
+        If no content types are possible with the given options.
+
     '''
+
     options: list[st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]] = []
+
+    # Append strategies in optimal order for shrinking.
     if allow_empty and min_size <= 0 <= max_size:
         options.append(st_ak.contents.empty_array_contents())
     if allow_bytestring:
-        options.append(
-            st_ak.contents.bytestring_contents(min_size=min_size, max_size=max_size)
-        )
+        s = st_ak.contents.bytestring_contents(min_size=min_size, max_size=max_size)
+        options.append(s)
     if allow_string:
-        options.append(
-            st_ak.contents.string_contents(min_size=min_size, max_size=max_size)
-        )
+        s = st_ak.contents.string_contents(min_size=min_size, max_size=max_size)
+        options.append(s)
     if allow_numpy:
-        options.append(
-            st_ak.contents.numpy_array_contents(
-                dtypes=dtypes, allow_nan=allow_nan, min_size=min_size, max_size=max_size
-            )
+        s = st_ak.contents.numpy_array_contents(
+            dtypes=dtypes, allow_nan=allow_nan, min_size=min_size, max_size=max_size
         )
+        options.append(s)
 
     if not options:
-        raise ValueError(
-            'no content types are possible with the given options and size constraints'
-        )
+        raise ValueError('no content types are possible with the given options.')
 
     return st.one_of(options)
