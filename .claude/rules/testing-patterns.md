@@ -36,7 +36,13 @@ class ContentsKwargs(TypedDict, total=False):
     allow_list: bool
     allow_record: bool
     allow_union: bool
-    max_depth: int
+    allow_indexed_option: bool
+    allow_byte_masked: bool
+    allow_bit_masked: bool
+    allow_unmasked: bool
+    max_leaf_size: int | None
+    max_depth: int | None
+    max_length: int | None
 ```
 
 ## 2. Strategy for kwargs
@@ -65,7 +71,7 @@ def contents_kwargs(
                     st.none(),
                     st.just(st_dtypes),
                 ),
-                'max_size': st.integers(min_value=0, max_value=50),
+                'max_size': st.integers(min_value=0, max_value=200),
                 'allow_nan': st.booleans(),
                 'allow_numpy': st.booleans(),
                 'allow_empty': st.booleans(),
@@ -76,7 +82,17 @@ def contents_kwargs(
                 'allow_list': st.booleans(),
                 'allow_record': st.booleans(),
                 'allow_union': st.booleans(),
-                'max_depth': st.integers(min_value=0, max_value=5),
+                'allow_indexed_option': st.booleans(),
+                'allow_byte_masked': st.booleans(),
+                'allow_bit_masked': st.booleans(),
+                'allow_unmasked': st.booleans(),
+                'max_leaf_size': st.one_of(
+                    st.none(), st.integers(min_value=0, max_value=50)
+                ),
+                'max_depth': st.one_of(
+                    st.none(), st.integers(min_value=0, max_value=5)
+                ),
+                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )

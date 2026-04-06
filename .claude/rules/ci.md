@@ -56,8 +56,21 @@ that prevents one workflow from triggering another via tag push:
 4. **`pypi.yml`** — triggered by `workflow_run` on the changelog workflow.
    Builds with `hatch build` and publishes to PyPI via trusted publishing.
 
+### Documentation Workflows
+
+- **`docs-dev.yml`** — Builds and deploys docs to the `dev/` path on gh-pages
+  when `main` is pushed.
+- **`docs-release.yml`** — Builds and deploys versioned docs on release.
+- **`docs-pr-build.yml`** — Builds docs preview for PRs (runs on
+  `pull_request`).
+- **`docs-pr-deploy.yml`** — Deploys the built docs preview to gh-pages (runs on
+  `workflow_run` after the build).
+- **`docs-pr-cleanup.yml`** — Removes the preview from gh-pages when a PR is
+  closed.
+
 ### PR Workflows
 
 - **`pr-title.yml`** — Validates PR titles follow Conventional Commits format.
 - **`conventional-label.yml`** — Auto-labels PRs based on the commit type in the
   title (e.g., `feat:` -> `feature` label).
+- **`pre-commit.yml`** — Runs pre-commit hooks (ruff, etc.) on PRs.

@@ -1,7 +1,9 @@
 # API Design: Option Content Strategies
 
 - **Date:** 2026-03-27
-- **Status:** Proposed
+- **Status:** Partially implemented — `option_contents()` is missing the
+  `max_leaf_size` parameter specified here; size/union constraints are forwarded
+  only via `contents()`, not the standalone selector.
 - **Author:** Claude (with developer collaboration)
 
 ## Overview
