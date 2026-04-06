@@ -277,8 +277,8 @@ class _StFromContents(Protocol):
         content: StContent,
         *,
         max_size: int,
-        max_leaf_size: int | None,
-        max_length: int | None,
+        max_leaf_size: int | None = ...,
+        max_length: int | None = ...,
         st_option: StOption | None = ...,
     ) -> st.SearchStrategy[Content]: ...
 

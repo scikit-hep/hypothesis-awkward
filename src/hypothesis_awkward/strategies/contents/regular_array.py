@@ -17,11 +17,11 @@ def regular_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
-    max_size: int = 5,
-    max_zeros_length: int = 5,
+    max_size: int | None = None,
+    max_zeros_length: int | None = None,
     max_length: int | None = None,
 ) -> RegularArray:
-    """Strategy for RegularArray Content wrapping child Content.
+    """Strategy for ``RegularArray``.
 
     Parameters
     ----------
@@ -29,10 +29,11 @@ def regular_array_contents(
         Child content. Can be a strategy for Content, a concrete Content instance, or
         ``None`` to draw from ``contents()``.
     max_size
-        Upper bound on the length of each element.
+        Upper bound on the length of each element. Defaults to ``len(content)``
+        when ``None``.
     max_zeros_length
         Upper bound on the number of elements when each element is empty, i.e., when
-        size is zero.
+        size is zero. Defaults to ``len(content)`` when ``None``.
     max_length
         Upper bound on the number of groups, i.e., ``len(result)``.
 
@@ -68,7 +69,12 @@ def regular_array_contents(
         case Content():
             pass
     assert isinstance(content, Content)
-    size = draw(_st_group_sizes(len(content), max_size, max_length))
+    content_len = len(content)
+    if max_size is None:
+        max_size = content_len
+    if max_zeros_length is None:
+        max_zeros_length = content_len
+    size = draw(_st_group_sizes(content_len, max_size, max_length))
     if size == 0:
         max_zl = max_zeros_length
         if max_length is not None:
@@ -120,16 +126,14 @@ def regular_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None',
-    max_length: 'int | None',
+    max_leaf_size: 'int | None' = None,
+    max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> RegularArray:
-    """Strategy that generates a regular (fixed-size) layout within a size limit.
+    """Strategy for inner ``RegularArray`` to be drawn by an outer layout strategy.
 
-    Deducts the ``RegularArray.size`` overhead (1) from ``max_size`` and passes
-    the remainder to ``content`` to generate the inner content.
-
-    Called by ``contents()`` during recursive tree generation.
+    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    function that returns a strategy for the inner layout of the ``RegularArray``.
 
     Parameters
     ----------
@@ -142,6 +146,25 @@ def regular_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the number of groups, i.e., ``len(result)``.
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = regular_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, Content)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
     max_content_size = max(max_size - 1, 0)
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
