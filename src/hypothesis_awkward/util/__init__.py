@@ -4,6 +4,9 @@ __all__ = [
     'any_nan_nat_in_awkward_array',
     'any_nan_in_awkward_array',
     'any_nat_in_awkward_array',
+    'is_string_or_bytestring_leaf',
+    'is_string_leaf',
+    'is_bytestring_leaf',
     'iter_contents',
     'iter_leaf_contents',
     'iter_numpy_arrays',
@@ -19,6 +22,8 @@ __all__ = [
     'safe_max',
     'safe_min',
     'CountdownDrawer',
+    'BUILTIN_SAFE_DTYPE_NAMES',
+    'BUILTIN_SAFE_DTYPES',
     'SUPPORTED_DTYPES',
     'SUPPORTED_DTYPE_NAMES',
     'LeafContent',
@@ -31,6 +36,9 @@ from .awkward import (
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
     content_size,
+    is_bytestring_leaf,
+    is_string_leaf,
+    is_string_or_bytestring_leaf,
     iter_contents,
     iter_leaf_contents,
     iter_numpy_arrays,
@@ -38,6 +46,8 @@ from .awkward import (
 )
 from .draw import CountdownDrawer, _StWithMinMaxSize
 from .dtype import (
+    BUILTIN_SAFE_DTYPE_NAMES,
+    BUILTIN_SAFE_DTYPES,
     SUPPORTED_DTYPE_NAMES,
     SUPPORTED_DTYPES,
     n_scalars_in,

@@ -7,11 +7,12 @@ convert to/from Python objects"][ak-user-guide-python].
 '''
 
 __all__ = [
+    'builtin_safe_dtype_names',
     'builtin_safe_dtypes',
     'items_from_dtype',
     'lists',
     'from_list',
 ]
 
-from .dtype import builtin_safe_dtypes, items_from_dtype
+from .dtype import builtin_safe_dtype_names, builtin_safe_dtypes, items_from_dtype
 from .list_ import from_list, lists

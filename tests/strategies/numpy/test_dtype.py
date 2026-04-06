@@ -1,7 +1,7 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import given
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -18,6 +18,16 @@ def test_supported_dtype_names(name: str) -> None:
 @given(dtype=st_ak.supported_dtypes())
 def test_supported_dtypes(dtype: np.dtype) -> None:
     ak.from_numpy(np.array([], dtype=dtype))
+
+
+def test_supported_dtypes_shrinks_to_bool() -> None:
+    '''Assert that supported_dtypes() shrinks to bool.'''
+    result = find(
+        st_ak.supported_dtypes(),
+        lambda _: True,
+        settings=settings(database=None),
+    )
+    assert result == np.dtype('bool')
 
 
 class NumpyDtypesKwargs(TypedDict, total=False):

@@ -1,21 +1,12 @@
+'''Strategies for NumPy dtypes with corresponding Python built-in types.'''
+
 from typing import Any
 
 import numpy as np
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
-# NOTE: `datetime64[us]` isn't entirely safe. For example, a value with the year zero is
-# coerced to `int`: `np.datetime64('0000-12-31').item() = -719163`.
-BUILTIN_SAFE_DTYPE_NAMES = (
-    'bool',
-    'int64',
-    'float64',
-    'complex128',
-    'datetime64[us]',
-    'timedelta64[us]',
-)
-
-BUILTIN_SAFE_DTYPES = tuple(np.dtype(name) for name in BUILTIN_SAFE_DTYPE_NAMES)
+from hypothesis_awkward.util import BUILTIN_SAFE_DTYPE_NAMES, BUILTIN_SAFE_DTYPES
 
 
 def builtin_safe_dtype_names() -> st.SearchStrategy[str]:

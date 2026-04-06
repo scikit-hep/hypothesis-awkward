@@ -47,6 +47,26 @@ def test_items_from_dtype(data: st.DataObject) -> None:
         assert result == item
 
 
+def test_builtin_safe_dtype_names_shrinks_to_bool() -> None:
+    '''Assert that builtin_safe_dtype_names() shrinks to bool.'''
+    result = find(
+        st_ak.builtin_safe_dtype_names(),
+        lambda _: True,
+        settings=settings(database=None),
+    )
+    assert result == 'bool'
+
+
+def test_builtin_safe_dtypes_shrinks_to_bool() -> None:
+    '''Assert that builtin_safe_dtypes() shrinks to bool.'''
+    result = find(
+        st_ak.builtin_safe_dtypes(),
+        lambda _: True,
+        settings=settings(database=None),
+    )
+    assert result == np.dtype('bool')
+
+
 def test_draw_nan() -> None:
     '''Assert that NaN can be drawn by default.'''
     find(

@@ -1,3 +1,4 @@
+from contextlib import ExitStack
 from typing import Any, TypedDict, cast
 
 import numpy as np
@@ -7,7 +8,12 @@ from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import EmptyArray, NumpyArray
-from hypothesis_awkward.util import any_nan_in_awkward_array, any_nan_nat_in_numpy_array
+from hypothesis_awkward.util import (
+    any_nan_in_awkward_array,
+    any_nan_nat_in_numpy_array,
+    is_bytestring_leaf,
+    is_string_leaf,
+)
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 10
@@ -37,7 +43,9 @@ def leaf_contents_kwargs(
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
     min_size, max_size = draw(
-        st_ak.ranges(min_start=0, max_start=DEFAULT_MAX_SIZE, max_end=100)
+        st_ak.ranges(
+            min_start=0, max_start=DEFAULT_MAX_SIZE, max_end=DEFAULT_MAX_SIZE + 50
+        )
     )
 
     drawn = (
@@ -73,26 +81,38 @@ def test_leaf_contents(data: st.DataObject) -> None:
     opts = data.draw(leaf_contents_kwargs(), label='opts')
     opts.reset()
 
+    min_size = opts.kwargs.get('min_size', 0)
+    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     allow_numpy = opts.kwargs.get('allow_numpy', True)
     allow_empty = opts.kwargs.get('allow_empty', True)
     allow_string = opts.kwargs.get('allow_string', True)
     allow_bytestring = opts.kwargs.get('allow_bytestring', True)
 
-    # If all are False, expect ValueError
-    if not any((allow_numpy, allow_empty, allow_string, allow_bytestring)):
-        with pytest.raises(
-            ValueError, match='at least one leaf content type must be allowed'
-        ):
-            st_ak.contents.leaf_contents(**opts.kwargs)
-        return
+    def _is_allowed_any() -> bool:
+        return any(
+            (
+                min_size <= 0 <= max_size and allow_empty,
+                allow_numpy,
+                allow_string,
+                allow_bytestring,
+            )
+        )
 
     # Call the test subject
-    result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
+    expect_raised = False
+    with ExitStack() as stack:
+        if not _is_allowed_any():
+            expect_raised = True
+            stack.enter_context(pytest.raises(ValueError))
+        result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
+
+    if expect_raised:
+        return
 
     is_numpy = isinstance(result, NumpyArray)
     is_empty = isinstance(result, EmptyArray)
-    is_string = result.parameter('__array__') == 'string'
-    is_bytestring = result.parameter('__array__') == 'bytestring'
+    is_string = is_string_leaf(result)
+    is_bytestring = is_bytestring_leaf(result)
 
     assert any((is_numpy, is_empty, is_string, is_bytestring))
 
@@ -108,8 +128,6 @@ def test_leaf_contents(data: st.DataObject) -> None:
 
     dtypes = opts.kwargs.get('dtypes', None)
     allow_nan = opts.kwargs.get('allow_nan', True)
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
 
     if is_empty:
         assert len(result) == 0
@@ -130,10 +148,7 @@ def test_draw_numpy_array() -> None:
     '''Assert that NumpyArray can be drawn by default.'''
     find(
         st_ak.contents.leaf_contents(),
-        lambda c: (
-            isinstance(c, NumpyArray)
-            and c.parameter('__array__') not in ('string', 'bytestring')
-        ),
+        lambda c: isinstance(c, NumpyArray),
         settings=settings(phases=[Phase.generate]),
     )
 
@@ -151,7 +166,7 @@ def test_draw_string() -> None:
     '''Assert that string content can be drawn by default.'''
     find(
         st_ak.contents.leaf_contents(),
-        lambda c: c.parameter('__array__') == 'string',
+        lambda c: is_string_leaf(c),
         settings=settings(phases=[Phase.generate]),
     )
 
@@ -160,26 +175,47 @@ def test_draw_bytestring() -> None:
     '''Assert that bytestring content can be drawn by default.'''
     find(
         st_ak.contents.leaf_contents(),
-        lambda c: c.parameter('__array__') == 'bytestring',
+        lambda c: is_bytestring_leaf(c),
         settings=settings(phases=[Phase.generate]),
     )
 
 
 def test_draw_max_size() -> None:
     '''Assert that leaf content with max_size elements can be drawn.'''
-    max_size = 8
+    max_size = 25
     find(
         st_ak.contents.leaf_contents(max_size=max_size),
         lambda c: len(c) == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=10000),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
 def test_draw_nan() -> None:
-    '''Assert that leaf content with NaN can be drawn when allowed.'''
-    float_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
-    find(
-        st_ak.contents.leaf_contents(dtypes=float_dtypes, allow_nan=True),
+    '''Assert that leaf content with NaN can be drawn.'''
+    c = find(
+        st_ak.contents.leaf_contents(),
         any_nan_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=10_000, database=None),
     )
+    assert isinstance(c, NumpyArray)
+    assert np.array_equal(c.data, np.array([np.nan]), equal_nan=True)
+
+
+def test_shrink_leaf_contents_empty() -> None:
+    '''Assert that leaf content can shrink to an empty array when allowed.'''
+    c = find(
+        st_ak.contents.leaf_contents(),
+        lambda c: len(c) == 0,
+        settings=settings(max_examples=2000, database=None),
+    )
+    assert isinstance(c, EmptyArray)
+
+
+def test_shrink_leaf_contents_one() -> None:
+    '''Assert that leaf content with one element shrinks to a single empty bytestring.'''
+    c = find(
+        st_ak.contents.leaf_contents(),
+        lambda c: len(c) == 1,
+        settings=settings(database=None),
+    )
+    assert c.to_list() == [b'']
