@@ -21,7 +21,7 @@ def regular_array_contents(
     max_zeros_length: int = 5,
     max_length: int | None = None,
 ) -> RegularArray:
-    """Strategy for RegularArray Content wrapping child Content.
+    """Strategy for ``RegularArray``.
 
     Parameters
     ----------
@@ -124,12 +124,10 @@ def regular_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> RegularArray:
-    """Strategy that generates a regular (fixed-size) layout within a size limit.
+    """Strategy for inner ``RegularArray`` to be drawn by an outer layout strategy.
 
-    Deducts the ``RegularArray.size`` overhead (1) from ``max_size`` and passes
-    the remainder to ``content`` to generate the inner content.
-
-    Called by ``contents()`` during recursive tree generation.
+    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    function that returns a strategy for the inner layout of the ``RegularArray``.
 
     Parameters
     ----------
