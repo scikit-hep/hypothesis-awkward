@@ -5,14 +5,21 @@ import sys
 from pathlib import Path
 from string import Template
 
+from packaging.version import InvalidVersion, Version
+
 
 def find_versions() -> list[str]:
     """Find version directories (e.g., 0.2.1, 1.0.0) sorted descending."""
-    dirs = [
-        d.name for d in Path('.').iterdir() if d.is_dir() and re.match(r'\d', d.name)
-    ]
-    dirs.sort(key=lambda v: [int(x) for x in v.split('.')], reverse=True)
-    return dirs
+    versions: list[tuple[Version, str]] = []
+    for d in Path('.').iterdir():
+        if not d.is_dir() or not re.match(r'\d', d.name):
+            continue
+        try:
+            versions.append((Version(d.name), d.name))
+        except InvalidVersion:
+            continue
+    versions.sort(key=lambda item: item[0], reverse=True)
+    return [name for _, name in versions]
 
 
 def find_latest_version(versions: list[str]) -> str | None:

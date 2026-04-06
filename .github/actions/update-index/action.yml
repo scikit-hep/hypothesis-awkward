@@ -14,13 +14,19 @@ runs:
   steps:
     # Create a worktree for gh-pages.
     - shell: bash
-      run: git worktree add /tmp/gh-pages gh-pages
+      run: |
+        if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+          git fetch origin gh-pages
+          git worktree add -B gh-pages /tmp/gh-pages origin/gh-pages
+        else
+          git worktree add --orphan -b gh-pages /tmp/gh-pages
+        fi
 
     # Generate index.html, commit, and push.
     - shell: bash
       run: |
         cd /tmp/gh-pages
-        python "${{ github.action_path }}/generate_index.py" \
+        uv run --project "$GITHUB_WORKSPACE" --group docs python "${{ github.action_path }}/generate_index.py" \
           "${{ inputs.repo-name }}" \
           "${{ inputs.repo-url }}"
         git add index.html
