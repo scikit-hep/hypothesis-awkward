@@ -65,6 +65,25 @@ def numpy_arrays(
         )
     )
     dtype_size = n_scalars_in(dtype)
+
+    def _is_1d_dtype_determined() -> bool:
+        if max_dims is None:
+            return False
+        return dtype_size == 1 and min_dims <= 1 and max_dims <= 1
+
+    if _is_1d_dtype_determined():
+        # Fast path for better shrinking.
+        return draw(
+            st.builds(
+                lambda v: np.array(v, dtype=dtype),
+                st.lists(
+                    st_np.from_dtype(dtype=dtype, allow_nan=allow_nan),
+                    min_size=min_size,
+                    max_size=max_size,
+                ),
+            )
+        )
+
     min_items = -(-min_size // dtype_size)  # n items of dtype, rounded up
     max_items = max_size // dtype_size  # n items of dtype, rounded down
 
