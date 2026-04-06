@@ -141,7 +141,7 @@ def test_string() -> None:
 
 
 def test_nested() -> None:
-    '''Test a nested structure: ListOffsetArray wrapping RegularArray wrapping NumpyArray.'''
+    """Test a nested structure: ListOffsetArray wrapping RegularArray wrapping NumpyArray."""
     inner = NumpyArray(np.array([1, 2, 3, 4]))
     regular = RegularArray(inner, size=2)
     outer = ListOffsetArray(

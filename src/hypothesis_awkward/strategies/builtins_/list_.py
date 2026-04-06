@@ -18,7 +18,7 @@ def lists(
     allow_nan: bool = True,
     max_size: int = 10,
 ) -> NestedList:
-    '''Strategy for nested Python lists for which Awkward Arrays can be created.
+    """Strategy for nested Python lists for which Awkward Arrays can be created.
 
     Parameters
     ----------
@@ -35,9 +35,7 @@ def lists(
     >>> l = lists().example()
     >>> ak.Array(l)
     <Array ... type='...'>
-
-    '''
-
+    """
     if dtype is None:
         dtype = draw(builtin_safe_dtypes())
     if isinstance(dtype, st.SearchStrategy):
@@ -58,7 +56,7 @@ def from_list(
     allow_nan: bool = True,
     max_size: int = 10,
 ) -> st.SearchStrategy[ak.Array]:
-    '''Strategy for Awkward Arrays created from Python lists.
+    """Strategy for Awkward Arrays created from Python lists.
 
     Parameters
     ----------
@@ -74,8 +72,7 @@ def from_list(
     --------
     >>> from_list().example()
     <Array ... type='...'>
-
-    '''
+    """
     return st.builds(
         ak.Array, lists(dtype=dtype, allow_nan=allow_nan, max_size=max_size)
     )

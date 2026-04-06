@@ -1,4 +1,4 @@
-'''Generate index.html listing all doc versions on gh-pages.'''
+"""Generate index.html listing all doc versions on gh-pages."""
 
 import re
 import sys
@@ -7,7 +7,7 @@ from string import Template
 
 
 def find_versions() -> list[str]:
-    '''Find version directories (e.g., 0.2.1, 1.0.0) sorted descending.'''
+    """Find version directories (e.g., 0.2.1, 1.0.0) sorted descending."""
     dirs = [
         d.name for d in Path('.').iterdir() if d.is_dir() and re.match(r'\d', d.name)
     ]
@@ -16,14 +16,14 @@ def find_versions() -> list[str]:
 
 
 def find_latest_version(versions: list[str]) -> str | None:
-    '''Return the version that /latest/ points to, if any.'''
+    """Return the version that /latest/ points to, if any."""
     if not versions or not Path('latest').is_dir():
         return None
     return versions[0]
 
 
 def build_version_list(versions: list[str], latest_version: str | None) -> str:
-    '''Build HTML list items for all versions.'''
+    """Build HTML list items for all versions."""
     lines: list[str] = []
     if latest_version:
         lines.append(

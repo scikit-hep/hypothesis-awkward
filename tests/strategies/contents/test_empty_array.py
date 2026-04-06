@@ -8,14 +8,14 @@ from hypothesis_awkward.util import iter_leaf_contents
 
 @given(data=st.data())
 def test_empty_array_contents(data: st.DataObject) -> None:
-    '''Test that `empty_array_contents()` produces an EmptyArray.'''
+    """Test that `empty_array_contents()` produces an EmptyArray."""
     result = data.draw(st_ak.contents.empty_array_contents(), label='result')
     assert isinstance(result, ak.contents.EmptyArray)
     assert len(result) == 0
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that EmptyArray can be drawn from `contents()`.'''
+    """Assert that EmptyArray can be drawn from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: any(

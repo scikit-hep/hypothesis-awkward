@@ -18,7 +18,7 @@ from hypothesis_awkward.util.awkward import iter_contents, iter_leaf_contents
 
 @given(data=st.data())
 def test_iter_numpy_arrays(data: st.DataObject) -> None:
-    '''Verify iter_numpy_arrays yields NumpyArray leaf data.'''
+    """Verify iter_numpy_arrays yields NumpyArray leaf data."""
     a = data.draw(st_ak.constructors.arrays(allow_virtual=False), label='array')
     exclude_string = data.draw(st.booleans(), label='exclude_string')
     exclude_bytestring = data.draw(st.booleans(), label='exclude_bytestring')
@@ -52,7 +52,7 @@ def test_iter_numpy_arrays(data: st.DataObject) -> None:
 
 @given(data=st.data())
 def test_iter_leaf_contents(data: st.DataObject) -> None:
-    '''Verify all yielded items are leaf content types.'''
+    """Verify all yielded items are leaf content types."""
     a = data.draw(st_ak.constructors.arrays(), label='array')
     string_as_leaf = data.draw(st.booleans(), label='string_as_leaf')
     bytestring_as_leaf = data.draw(st.booleans(), label='bytestring_as_leaf')
@@ -74,7 +74,7 @@ def test_iter_leaf_contents(data: st.DataObject) -> None:
 
 
 def _children(c: Content) -> list[Content]:
-    '''Return direct Content children of a node.'''
+    """Return direct Content children of a node."""
     match c:
         case ak.contents.RecordArray():
             return list(c.contents)
@@ -88,7 +88,7 @@ def _children(c: Content) -> list[Content]:
 
 @given(data=st.data())
 def test_iter_contents(data: st.DataObject) -> None:
-    '''Verify iter_contents yields exactly the full Content tree.'''
+    """Verify iter_contents yields exactly the full Content tree."""
     a = data.draw(st_ak.constructors.arrays(), label='array')
     string_as_leaf = data.draw(st.booleans(), label='string_as_leaf')
     bytestring_as_leaf = data.draw(st.booleans(), label='bytestring_as_leaf')

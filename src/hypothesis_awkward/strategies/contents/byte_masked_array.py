@@ -20,7 +20,7 @@ def byte_masked_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
 ) -> ByteMaskedArray:
-    '''Strategy for ByteMaskedArray Content wrapping child Content.
+    """Strategy for ByteMaskedArray Content wrapping child Content.
 
     The mask length always equals ``len(content)``.
 
@@ -35,7 +35,7 @@ def byte_masked_array_contents(
     >>> c = byte_masked_array_contents().example()
     >>> isinstance(c, Content)
     True
-    '''
+    """
     match content:
         case None:
             content = draw(
@@ -63,7 +63,7 @@ def byte_masked_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> ByteMaskedArray:
-    '''Strategy that generates a byte-masked layout within a size limit.
+    """Strategy that generates a byte-masked layout within a size limit.
 
     Called by ``contents()`` during recursive tree generation.
 
@@ -78,8 +78,7 @@ def byte_masked_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
-
-    '''
+    """
     if max_leaf_size is not None:
         max_content_size = max(max_size - 1 - max_leaf_size, 0)
     else:

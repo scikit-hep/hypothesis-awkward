@@ -11,7 +11,7 @@ _T = TypeVar('_T', bound=Sized)
 
 
 class _StWithMinMaxSize(Protocol[_C_co]):
-    '''A callable that takes ``min_size`` and ``max_size`` keywords.'''
+    """A callable that takes ``min_size`` and ``max_size`` keywords."""
 
     def __call__(self, *, min_size: int, max_size: int) -> st.SearchStrategy[_C_co]: ...
 
@@ -25,7 +25,7 @@ def CountdownDrawer(
     max_size_total: int = 10,
     max_draws: int = 100,
 ) -> Callable[[], _T | None]:
-    '''Create a draw function with a shared element budget.
+    """Create a draw function with a shared element budget.
 
     Each call draws from ``st_`` and adds the length of the result
     to a running total. Returns ``None`` once the budget is exhausted,
@@ -49,8 +49,7 @@ def CountdownDrawer(
         Total element budget shared across all draws.
     max_draws
         Maximum number of non-None draws.
-    '''
-
+    """
     if min_size_total > 0:
         if max_size_each is not None and max_size_each > 0:
             n_draws_needed = ceil(min_size_total / max_size_each)

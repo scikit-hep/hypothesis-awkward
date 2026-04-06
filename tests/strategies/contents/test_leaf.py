@@ -20,7 +20,7 @@ DEFAULT_MAX_SIZE = 10
 
 
 class LeafContentsKwargs(TypedDict, total=False):
-    '''Options for `leaf_contents()` strategy.'''
+    """Options for `leaf_contents()` strategy."""
 
     dtypes: st.SearchStrategy[np.dtype] | None
     allow_nan: bool
@@ -37,7 +37,7 @@ def leaf_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[LeafContentsKwargs]:
-    '''Strategy for options for `leaf_contents()` strategy.'''
+    """Strategy for options for `leaf_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
@@ -76,7 +76,7 @@ def leaf_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_leaf_contents(data: st.DataObject) -> None:
-    '''Test that `leaf_contents()` respects all its options.'''
+    """Test that `leaf_contents()` respects all its options."""
     # Draw options
     opts = data.draw(leaf_contents_kwargs(), label='opts')
     opts.reset()
@@ -145,7 +145,7 @@ def test_leaf_contents(data: st.DataObject) -> None:
 
 
 def test_draw_numpy_array() -> None:
-    '''Assert that NumpyArray can be drawn by default.'''
+    """Assert that NumpyArray can be drawn by default."""
     find(
         st_ak.contents.leaf_contents(),
         lambda c: isinstance(c, NumpyArray),
@@ -154,7 +154,7 @@ def test_draw_numpy_array() -> None:
 
 
 def test_draw_empty_array() -> None:
-    '''Assert that EmptyArray can be drawn by default.'''
+    """Assert that EmptyArray can be drawn by default."""
     find(
         st_ak.contents.leaf_contents(),
         lambda c: isinstance(c, EmptyArray),
@@ -163,7 +163,7 @@ def test_draw_empty_array() -> None:
 
 
 def test_draw_string() -> None:
-    '''Assert that string content can be drawn by default.'''
+    """Assert that string content can be drawn by default."""
     find(
         st_ak.contents.leaf_contents(),
         lambda c: is_string_leaf(c),
@@ -172,7 +172,7 @@ def test_draw_string() -> None:
 
 
 def test_draw_bytestring() -> None:
-    '''Assert that bytestring content can be drawn by default.'''
+    """Assert that bytestring content can be drawn by default."""
     find(
         st_ak.contents.leaf_contents(),
         lambda c: is_bytestring_leaf(c),
@@ -181,7 +181,7 @@ def test_draw_bytestring() -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that leaf content with max_size elements can be drawn.'''
+    """Assert that leaf content with max_size elements can be drawn."""
     max_size = 25
     find(
         st_ak.contents.leaf_contents(max_size=max_size),
@@ -191,7 +191,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that leaf content with NaN can be drawn.'''
+    """Assert that leaf content with NaN can be drawn."""
     c = find(
         st_ak.contents.leaf_contents(),
         any_nan_in_awkward_array,
@@ -202,7 +202,7 @@ def test_draw_nan() -> None:
 
 
 def test_shrink_leaf_contents_empty() -> None:
-    '''Assert that leaf content can shrink to an empty array when allowed.'''
+    """Assert that leaf content can shrink to an empty array when allowed."""
     c = find(
         st_ak.contents.leaf_contents(),
         lambda c: len(c) == 0,
@@ -212,7 +212,7 @@ def test_shrink_leaf_contents_empty() -> None:
 
 
 def test_shrink_leaf_contents_one() -> None:
-    '''Assert that leaf content with one element shrinks to a single empty bytestring.'''
+    """Assert that leaf content with one element shrinks to [b'']."""
     c = find(
         st_ak.contents.leaf_contents(),
         lambda c: len(c) == 1,

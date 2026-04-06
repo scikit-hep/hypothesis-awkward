@@ -18,7 +18,7 @@ DEFAULT_MAX_SIZE = 10
 
 
 class FromNumpyKwargs(TypedDict, total=False):
-    '''Options for `from_numpy()` strategy.'''
+    """Options for `from_numpy()` strategy."""
 
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_structured: bool
@@ -32,7 +32,7 @@ def from_numpy_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[FromNumpyKwargs]:
-    '''Strategy for options for `from_numpy()` strategy.'''
+    """Strategy for options for `from_numpy()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
@@ -107,7 +107,7 @@ def test_from_numpy(data: st.DataObject) -> None:
 
 
 def test_draw_structured() -> None:
-    '''Assert that structured arrays can be drawn by default.'''
+    """Assert that structured arrays can be drawn by default."""
     find(
         st_ak.from_numpy(),
         lambda a: isinstance(a.layout, ak.contents.RecordArray),
@@ -116,7 +116,7 @@ def test_draw_structured() -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that arrays with NaN can be drawn when allowed.'''
+    """Assert that arrays with NaN can be drawn when allowed."""
     floating_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'f')
     find(
         st_ak.from_numpy(dtype=floating_dtypes, allow_nan=True),
@@ -126,7 +126,7 @@ def test_draw_nan() -> None:
 
 
 def test_draw_nat_datetime64() -> None:
-    '''Assert that datetime64 arrays with NaT can be drawn when allowed.'''
+    """Assert that datetime64 arrays with NaT can be drawn when allowed."""
     datetime64_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'M')
     find(
         st_ak.from_numpy(dtype=datetime64_dtypes, allow_nan=True),
@@ -136,7 +136,7 @@ def test_draw_nat_datetime64() -> None:
 
 
 def test_draw_nat_timedelta64() -> None:
-    '''Assert that timedelta64 arrays with NaT can be drawn when allowed.'''
+    """Assert that timedelta64 arrays with NaT can be drawn when allowed."""
     timedelta64_dtypes = st_ak.supported_dtypes().filter(lambda d: d.kind == 'm')
     find(
         st_ak.from_numpy(dtype=timedelta64_dtypes, allow_nan=True),
@@ -146,7 +146,7 @@ def test_draw_nat_timedelta64() -> None:
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty arrays can be drawn by default.'''
+    """Assert that empty arrays can be drawn by default."""
     find(
         st_ak.from_numpy(),
         lambda a: len(a) == 0,
@@ -155,7 +155,7 @@ def test_draw_empty() -> None:
 
 
 def test_draw_regulararray() -> None:
-    '''Assert that RegularArray layout can be drawn with regulararray=True.'''
+    """Assert that RegularArray layout can be drawn with regulararray=True."""
     find(
         st_ak.from_numpy(allow_structured=False, regulararray=True),
         lambda a: isinstance(a.layout, ak.contents.RegularArray),
@@ -164,7 +164,7 @@ def test_draw_regulararray() -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that arrays with max_size elements can be drawn by default.'''
+    """Assert that arrays with max_size elements can be drawn by default."""
     find(
         st_ak.from_numpy(allow_structured=False),
         lambda a: _size(a) == DEFAULT_MAX_SIZE,
@@ -173,12 +173,12 @@ def test_draw_max_size() -> None:
 
 
 def _leaf_dtypes(a: ak.Array) -> set[np.dtype]:
-    '''Dtypes of leaf NumPy arrays contained in `a`.'''
+    """Dtypes of leaf NumPy arrays contained in `a`."""
     return {arr.dtype for arr in iter_numpy_arrays(a)}
 
 
 def _is_structured(a: ak.Array) -> bool:
-    '''Check if `a` is a structured array.'''
+    """Check if `a` is a structured array."""
     layout = a.layout
     if isinstance(layout, (ak.contents.NumpyArray, ak.contents.RegularArray)):
         return False
@@ -187,10 +187,10 @@ def _is_structured(a: ak.Array) -> bool:
 
 
 def _has_regular_array(a: ak.Array) -> bool:
-    '''Check if any content in the layout tree is a RegularArray.'''
+    """Check if any content in the layout tree is a RegularArray."""
     return any(isinstance(n, ak.contents.RegularArray) for n in iter_contents(a))
 
 
 def _size(a: ak.Array) -> int:
-    '''Total size of all leaf NumPy arrays contained in `a`.'''
+    """Total size of all leaf NumPy arrays contained in `a`."""
     return sum(arr.size for arr in iter_numpy_arrays(a))

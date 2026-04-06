@@ -22,7 +22,7 @@ DEFAULT_MAX_SIZE = 10
 
 
 class NumpyArraysKwargs(TypedDict, total=False):
-    '''Options for `numpy_arrays()` strategy.'''
+    """Options for `numpy_arrays()` strategy."""
 
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_structured: bool
@@ -38,7 +38,7 @@ def numpy_arrays_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[NumpyArraysKwargs]:
-    '''Strategy for options for `numpy_arrays()` strategy.'''
+    """Strategy for options for `numpy_arrays()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
@@ -137,13 +137,11 @@ def test_numpy_arrays(data: st.DataObject) -> None:
     # Structured arrays may not result in identical values.
 
     def _is_numpy_convertible(a: ak.Array) -> bool:
-        '''True if `a.to_numpy()` is expected to work without error.
+        """True if `a.to_numpy()` is expected to work without error.
 
         `to_numpy()` fails for structured arrays with non-1D fields
         https://github.com/scikit-hep/awkward/issues/3690
-
-
-        '''
+        """
         layout = a.layout
         if isinstance(layout, ak.contents.NumpyArray):  # simple array
             return True
@@ -164,7 +162,7 @@ def test_numpy_arrays(data: st.DataObject) -> None:
 
 
 def test_draw_structured() -> None:
-    '''Assert that structured arrays can be drawn by default.'''
+    """Assert that structured arrays can be drawn by default."""
     find(
         st_ak.numpy_arrays(),
         lambda a: a.dtype.names is not None,
@@ -173,7 +171,7 @@ def test_draw_structured() -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that arrays with NaN can be drawn when allowed.'''
+    """Assert that arrays with NaN can be drawn when allowed."""
     find(
         st_ak.numpy_arrays(dtype=st_np.floating_dtypes(), allow_nan=True),
         lambda a: any_nan_in_numpy_array(a),
@@ -182,7 +180,7 @@ def test_draw_nan() -> None:
 
 
 def test_draw_nat_datetime64() -> None:
-    '''Assert that datetime64 arrays with NaT can be drawn when allowed.'''
+    """Assert that datetime64 arrays with NaT can be drawn when allowed."""
     find(
         st_ak.numpy_arrays(dtype=st_np.datetime64_dtypes(), allow_nan=True),
         lambda a: any_nat_in_numpy_array(a),
@@ -191,7 +189,7 @@ def test_draw_nat_datetime64() -> None:
 
 
 def test_draw_nat_timedelta64() -> None:
-    '''Assert that timedelta64 arrays with NaT can be drawn when allowed.'''
+    """Assert that timedelta64 arrays with NaT can be drawn when allowed."""
     find(
         st_ak.numpy_arrays(dtype=st_np.timedelta64_dtypes(), allow_nan=True),
         lambda a: any_nat_in_numpy_array(a),
@@ -200,7 +198,7 @@ def test_draw_nat_timedelta64() -> None:
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty arrays can be drawn by default.'''
+    """Assert that empty arrays can be drawn by default."""
     find(
         st_ak.numpy_arrays(),
         lambda a: math.prod(a.shape) == 0,
@@ -214,7 +212,7 @@ def test_draw_empty() -> None:
 def test_draw_empty_parametrized(
     max_size: int, max_dims: int | None, allow_structured: bool
 ) -> None:
-    '''Assert that empty arrays can be drawn when max allows at most one scalar.'''
+    """Assert that empty arrays can be drawn when max allows at most one scalar."""
     find(
         st_ak.numpy_arrays(
             max_dims=max_dims, max_size=max_size, allow_structured=allow_structured
@@ -225,7 +223,7 @@ def test_draw_empty_parametrized(
 
 
 def test_draw_max_size() -> None:
-    '''Assert that arrays with exactly max_size scalars can be drawn.'''
+    """Assert that arrays with exactly max_size scalars can be drawn."""
     find(
         st_ak.numpy_arrays(allow_structured=False),
         lambda a: math.prod(a.shape) == DEFAULT_MAX_SIZE,
@@ -234,7 +232,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_max_size_structured() -> None:
-    '''Assert that max_size counts scalars for structured dtypes.'''
+    """Assert that max_size counts scalars for structured dtypes."""
     find(
         st_ak.numpy_arrays(),
         lambda a: (
@@ -246,7 +244,7 @@ def test_draw_max_size_structured() -> None:
 
 
 def test_draw_nonempty_max_size_1() -> None:
-    '''Assert that a non-empty array can be drawn with max_size=1.'''
+    """Assert that a non-empty array can be drawn with max_size=1."""
     find(
         st_ak.numpy_arrays(allow_structured=False, max_size=1),
         lambda a: math.prod(a.shape) == 1,
@@ -255,7 +253,7 @@ def test_draw_nonempty_max_size_1() -> None:
 
 
 def test_draw_min_size() -> None:
-    '''Assert that arrays with exactly min_size scalars can be drawn.'''
+    """Assert that arrays with exactly min_size scalars can be drawn."""
     min_size = 5
     find(
         st_ak.numpy_arrays(allow_structured=False, min_size=min_size),
@@ -265,7 +263,7 @@ def test_draw_min_size() -> None:
 
 
 def test_draw_min_size_structured() -> None:
-    '''Assert that min_size counts scalars for structured dtypes.'''
+    """Assert that min_size counts scalars for structured dtypes."""
     min_size = 5
     find(
         st_ak.numpy_arrays(min_size=min_size),
@@ -278,7 +276,7 @@ def test_draw_min_size_structured() -> None:
 
 
 def test_draw_one_dim() -> None:
-    '''Assert that 1-D arrays can be drawn by default.'''
+    """Assert that 1-D arrays can be drawn by default."""
     find(
         st_ak.numpy_arrays(allow_structured=False),
         lambda a: len(a.shape) == 1,
@@ -287,7 +285,7 @@ def test_draw_one_dim() -> None:
 
 
 def test_draw_min_dims() -> None:
-    '''Assert that arrays with at least min_dims dimensions can be drawn.'''
+    """Assert that arrays with at least min_dims dimensions can be drawn."""
     find(
         st_ak.numpy_arrays(allow_structured=False, min_dims=2),
         lambda a: len(a.shape) == 2,
@@ -296,7 +294,7 @@ def test_draw_min_dims() -> None:
 
 
 def test_draw_max_dims() -> None:
-    '''Assert that arrays with max_dims dimensions can be drawn.'''
+    """Assert that arrays with max_dims dimensions can be drawn."""
     find(
         st_ak.numpy_arrays(allow_structured=False, max_dims=3),
         lambda a: len(a.shape) == 3,

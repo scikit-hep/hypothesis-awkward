@@ -10,7 +10,7 @@ from hypothesis_awkward.util import any_nan_nat_in_numpy_array
 
 
 class FromListsKwargs(TypedDict, total=False):
-    '''Options for `from_list()` strategy.'''
+    """Options for `from_list()` strategy."""
 
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
@@ -18,7 +18,7 @@ class FromListsKwargs(TypedDict, total=False):
 
 
 def from_lists_kwargs() -> st.SearchStrategy[FromListsKwargs]:
-    '''Strategy for options for `from_list()` strategy.'''
+    """Strategy for options for `from_list()` strategy."""
     return st.fixed_dictionaries(
         {},
         optional={

@@ -17,7 +17,7 @@ OPTION_TYPES = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArr
 
 
 class OptionContentsKwargs(TypedDict, total=False):
-    '''Options for `option_contents()` strategy.'''
+    """Options for `option_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
     max_size: int | None
@@ -32,7 +32,7 @@ def option_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[OptionContentsKwargs]:
-    '''Strategy for options for `option_contents()` strategy.'''
+    """Strategy for options for `option_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
@@ -64,7 +64,7 @@ def option_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_option_contents(data: st.DataObject) -> None:
-    '''Test that `option_contents()` respects all its options.'''
+    """Test that `option_contents()` respects all its options."""
     # Draw options
     opts = data.draw(option_contents_kwargs(), label='opts')
     opts.reset()
@@ -110,7 +110,7 @@ def test_option_contents(data: st.DataObject) -> None:
 
 
 def test_draw_indexed_option() -> None:
-    '''Assert that IndexedOptionArray can be drawn.'''
+    """Assert that IndexedOptionArray can be drawn."""
     find(
         st_ak.contents.option_contents(),
         lambda c: isinstance(c, IndexedOptionArray),
@@ -119,7 +119,7 @@ def test_draw_indexed_option() -> None:
 
 
 def test_draw_byte_masked() -> None:
-    '''Assert that ByteMaskedArray can be drawn.'''
+    """Assert that ByteMaskedArray can be drawn."""
     find(
         st_ak.contents.option_contents(),
         lambda c: isinstance(c, ByteMaskedArray),
@@ -128,7 +128,7 @@ def test_draw_byte_masked() -> None:
 
 
 def test_draw_bit_masked() -> None:
-    '''Assert that BitMaskedArray can be drawn.'''
+    """Assert that BitMaskedArray can be drawn."""
     find(
         st_ak.contents.option_contents(),
         lambda c: isinstance(c, BitMaskedArray),
@@ -137,7 +137,7 @@ def test_draw_bit_masked() -> None:
 
 
 def test_draw_unmasked() -> None:
-    '''Assert that UnmaskedArray can be drawn.'''
+    """Assert that UnmaskedArray can be drawn."""
     find(
         st_ak.contents.option_contents(),
         lambda c: isinstance(c, UnmaskedArray),

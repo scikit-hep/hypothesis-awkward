@@ -62,12 +62,20 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = [
+    "D", # pydocstyle
     "E", # pycodestyle errors
     "W", # pycodestyle warnings
     "F", # pyflakes
     "I", # isort
 ]
 ignore = [
+    "D100", # Missing docstring in public module
+    "D101", # Missing docstring in public class
+    "D102", # Missing docstring in public method
+    "D103", # Missing docstring in public function
+    "D104", # Missing docstring in public package
+    "D105", # Missing docstring in magic method
+    "D401", # First line should be in imperative mood
     "E501", # line too long
     "E741", # ambiguous variable name 'l' (lowercase L)
 ]
@@ -78,7 +86,15 @@ known-first-party = ["awkward"]
 [tool.ruff.format]
 quote-style = "preserve"
 indent-style = "space"
+docstring-code-format = true
 
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.docformatter]
+recursive = true
+wrap-summaries = 88
+wrap-descriptions = 88
 
 [[tool.mypy.overrides]]
 module = ["awkward.*", "pyarrow.*", "pandas.*"]

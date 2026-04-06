@@ -12,7 +12,7 @@ def numpy_array_contents(
     min_size: int = 0,
     max_size: int = 10,
 ) -> st.SearchStrategy[NumpyArray]:
-    '''Strategy for NumpyArray content.
+    """Strategy for NumpyArray content.
 
     Parameters
     ----------
@@ -31,7 +31,7 @@ def numpy_array_contents(
     >>> c = numpy_array_contents().example()
     >>> isinstance(c, NumpyArray)
     True
-    '''
+    """
     return st_ak.numpy_arrays(
         dtype=dtypes,
         allow_structured=False,

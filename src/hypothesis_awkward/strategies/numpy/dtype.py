@@ -10,24 +10,24 @@ from hypothesis_awkward.util import (
 
 
 def supported_dtype_names() -> st.SearchStrategy[str]:
-    '''Strategy for names of NumPy dtypes supported by Awkward Array.
+    """Strategy for names of NumPy dtypes supported by Awkward Array.
 
     Examples
     --------
     >>> supported_dtype_names().example()
     '...'
-    '''
+    """
     return st.sampled_from(SUPPORTED_DTYPE_NAMES)
 
 
 def supported_dtypes() -> st.SearchStrategy[np.dtype]:
-    '''Strategy for NumPy dtypes supported by Awkward Array.
+    """Strategy for NumPy dtypes supported by Awkward Array.
 
     Examples
     --------
     >>> supported_dtypes().example()
     dtype(...)
-    '''
+    """
     return st.sampled_from(SUPPORTED_DTYPES)
 
 
@@ -37,7 +37,7 @@ def numpy_dtypes(
     allow_array: bool = True,
     max_size: int = 5,
 ) -> st.SearchStrategy[np.dtype]:
-    '''Strategy for dtypes (simple or array) supported by Awkward Array.
+    """Strategy for dtypes (simple or array) supported by Awkward Array.
 
     Examples of simple dtypes are dtype('int32'), dtype('float64')
 
@@ -58,7 +58,7 @@ def numpy_dtypes(
     --------
     >>> numpy_dtypes().example()
     dtype(...)
-    '''
+    """
     if dtype is None:
         dtype = supported_dtypes()
     if not isinstance(dtype, st.SearchStrategy):

@@ -10,7 +10,7 @@ import hypothesis_awkward.strategies as st_ak
 
 @given(data=st.data())
 def test_record_draws(data: st.DataObject) -> None:
-    '''Test that st_ak.RecordDraws records drawn values.'''
+    """Test that st_ak.RecordDraws records drawn values."""
     recorder = st_ak.RecordDraws(st_ak.supported_dtypes())
     n = data.draw(st.integers(min_value=0, max_value=10), label='n')
     expected = []
@@ -20,14 +20,14 @@ def test_record_draws(data: st.DataObject) -> None:
 
 
 class NumpyTypesKwargs(TypedDict, total=False):
-    '''Options for `numpy_types()` strategy.'''
+    """Options for `numpy_types()` strategy."""
 
     dtypes: st.SearchStrategy[np.dtype] | None
     allow_datetime: bool
 
 
 def numpy_types_kwargs() -> st.SearchStrategy[NumpyTypesKwargs]:
-    '''Strategy for options for `numpy_types()` strategy.'''
+    """Strategy for options for `numpy_types()` strategy."""
     return st.fixed_dictionaries(
         {},
         optional={
@@ -43,7 +43,7 @@ def numpy_types_kwargs() -> st.SearchStrategy[NumpyTypesKwargs]:
 @settings(max_examples=200)
 @given(data=st.data())
 def test_numpy_types(data: st.DataObject) -> None:
-    '''Test that `numpy_types()` respects all its options.'''
+    """Test that `numpy_types()` respects all its options."""
     # Draw options
     kwargs = data.draw(numpy_types_kwargs(), label='kwargs')
 
@@ -69,7 +69,7 @@ def test_numpy_types(data: st.DataObject) -> None:
 
 
 def test_draw_integer_type() -> None:
-    '''Assert that integer NumpyType can be drawn.'''
+    """Assert that integer NumpyType can be drawn."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('int8', 'int16', 'int32', 'int64'),
@@ -78,7 +78,7 @@ def test_draw_integer_type() -> None:
 
 
 def test_draw_unsigned_integer_type() -> None:
-    '''Assert that unsigned integer NumpyType can be drawn.'''
+    """Assert that unsigned integer NumpyType can be drawn."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('uint8', 'uint16', 'uint32', 'uint64'),
@@ -87,7 +87,7 @@ def test_draw_unsigned_integer_type() -> None:
 
 
 def test_draw_float_type() -> None:
-    '''Assert that floating point NumpyType can be drawn.'''
+    """Assert that floating point NumpyType can be drawn."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('float16', 'float32', 'float64'),
@@ -96,7 +96,7 @@ def test_draw_float_type() -> None:
 
 
 def test_draw_complex_type() -> None:
-    '''Assert that complex NumpyType can be drawn.'''
+    """Assert that complex NumpyType can be drawn."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('complex64', 'complex128'),
@@ -105,7 +105,7 @@ def test_draw_complex_type() -> None:
 
 
 def test_draw_bool_type() -> None:
-    '''Assert that bool NumpyType can be drawn.'''
+    """Assert that bool NumpyType can be drawn."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive == 'bool',
@@ -114,7 +114,7 @@ def test_draw_bool_type() -> None:
 
 
 def test_draw_datetime64_type() -> None:
-    '''Assert that datetime64 NumpyType can be drawn by default.'''
+    """Assert that datetime64 NumpyType can be drawn by default."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive.startswith('datetime64'),
@@ -123,7 +123,7 @@ def test_draw_datetime64_type() -> None:
 
 
 def test_draw_timedelta64_type() -> None:
-    '''Assert that timedelta64 NumpyType can be drawn by default.'''
+    """Assert that timedelta64 NumpyType can be drawn by default."""
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive.startswith('timedelta64'),

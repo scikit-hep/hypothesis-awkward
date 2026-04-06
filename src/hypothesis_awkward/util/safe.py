@@ -5,7 +5,7 @@ T = TypeVar('T')
 
 
 def safe_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
-    '''The smallest item in `vals` that is not `None`.
+    """The smallest item in `vals` that is not `None`.
 
     Parameters
     ----------
@@ -34,12 +34,12 @@ def safe_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
 
     >>> safe_min([], default=-1)
     -1
-    '''
+    """
     return min((v for v in vals if v is not None), default=default)  # type: ignore
 
 
 def safe_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
-    '''The largest item in `vals` that is not `None`.
+    """The largest item in `vals` that is not `None`.
 
     Parameters
     ----------
@@ -68,12 +68,12 @@ def safe_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
 
     >>> safe_max([], default=-1)
     -1
-    '''
+    """
     return max((v for v in vals if v is not None), default=default)  # type: ignore
 
 
 class GreaterAndLessThanAny:
-    '''True for all inequality comparisons.
+    """True for all inequality comparisons.
 
     Examples
     --------
@@ -88,8 +88,7 @@ class GreaterAndLessThanAny:
 
     >>> GreaterAndLessThanAny() >= 1
     True
-
-    '''
+    """
 
     def __le__(self, _: Any) -> bool:
         return True
@@ -111,8 +110,7 @@ class GreaterAndLessThanAny:
 
 
 def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
-    '''The `value` itself if it is not `None`. Otherwise, an object
-    that returns True for all inequality comparisons.
+    """Return `value` if not `None`, else an object true for all comparisons.
 
     This function helps you concisely write assertions that compare
     values that may be `None`.
@@ -138,16 +136,15 @@ def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
     are `None`.
 
     >>> if min_ is not None:
-    ...   assert min_ <= val
+    ...     assert min_ <= val
 
     >>> if max_ is not None:
-    ...    assert val <= max_
+    ...     assert val <= max_
 
     This function lets you write the same assertion in one line:
 
     >>> assert safe_compare(min_) <= val <= safe_compare(max_)
-
-    '''
+    """
     if value is None:
         return GreaterAndLessThanAny()
     return value

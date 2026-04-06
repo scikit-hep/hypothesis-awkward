@@ -8,7 +8,7 @@ from awkward.contents import Content, UnmaskedArray
 
 
 class UnmaskedArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `unmasked_array_contents()` strategy.'''
+    """Options for `unmasked_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
 
@@ -18,7 +18,7 @@ def unmasked_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[UnmaskedArrayContentsKwargs]:
-    '''Strategy for options for `unmasked_array_contents()` strategy.'''
+    """Strategy for options for `unmasked_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
@@ -45,7 +45,7 @@ def unmasked_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_unmasked_array_contents(data: st.DataObject) -> None:
-    '''Test that `unmasked_array_contents()` respects all its options.'''
+    """Test that `unmasked_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(unmasked_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -71,7 +71,7 @@ def test_unmasked_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that UnmaskedArray can be the root node from `contents()`.'''
+    """Assert that UnmaskedArray can be the root node from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, UnmaskedArray),
@@ -80,7 +80,7 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_nonempty() -> None:
-    '''Assert that non-empty UnmaskedArray can be drawn.'''
+    """Assert that non-empty UnmaskedArray can be drawn."""
     find(
         st_ak.contents.unmasked_array_contents(),
         lambda c: len(c) > 0,
@@ -89,7 +89,7 @@ def test_draw_nonempty() -> None:
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty UnmaskedArray can be drawn.'''
+    """Assert that empty UnmaskedArray can be drawn."""
     find(
         st_ak.contents.unmasked_array_contents(),
         lambda c: len(c) == 0,

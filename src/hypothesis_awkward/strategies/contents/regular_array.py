@@ -21,7 +21,7 @@ def regular_array_contents(
     max_zeros_length: int = 5,
     max_length: int | None = None,
 ) -> RegularArray:
-    '''Strategy for RegularArray Content wrapping child Content.
+    """Strategy for RegularArray Content wrapping child Content.
 
     Parameters
     ----------
@@ -59,7 +59,7 @@ def regular_array_contents(
     >>> c = regular_array_contents(max_length=4).example()
     >>> len(c) <= 4
     True
-    '''
+    """
     match content:
         case None:
             content = draw(st_ak.contents.contents())
@@ -83,7 +83,7 @@ def _st_group_sizes(
     max_group_size: int,
     max_length: int | None = None,
 ) -> st.SearchStrategy[int]:
-    '''Strategy for the size parameter of a RegularArray.
+    """Strategy for the size parameter of a RegularArray.
 
     A RegularArray subdivides ``total_items`` into equal groups of ``group_size``, so
     ``group_size`` must be a divisor of ``total_items`` and at most ``max_group_size``.
@@ -97,7 +97,7 @@ def _st_group_sizes(
     When ``total_items > 0`` but no valid divisor exists (i.e., ``max_group_size == 0``
     or ``max_length`` is too small), returns ``0``. The caller uses this to fall back to
     the ``zeros_length`` path, producing a RegularArray whose elements are all empty.
-    '''
+    """
     if total_items == 0:
         return st.integers(min_value=0, max_value=max_group_size)
     max_group_size = min(total_items, max_group_size)
@@ -124,7 +124,7 @@ def regular_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> RegularArray:
-    '''Strategy that generates a regular (fixed-size) layout within a size limit.
+    """Strategy that generates a regular (fixed-size) layout within a size limit.
 
     Deducts the ``RegularArray.size`` overhead (1) from ``max_size`` and passes
     the remainder to ``content`` to generate the inner content.
@@ -142,8 +142,7 @@ def regular_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the number of groups, i.e., ``len(result)``.
-
-    '''
+    """
     max_content_size = max(max_size - 1, 0)
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
     result = draw(regular_array_contents(st_content, max_length=max_length))

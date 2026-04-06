@@ -9,10 +9,10 @@ def _inner_shapes(
     max_ndim: int = 3,
     max_side: int = 10,
 ) -> st.SearchStrategy[tuple[int, ...]]:
-    '''Strategy for inner_shape tuples.
+    """Strategy for inner_shape tuples.
 
     Generates empty tuples (common) and small non-empty tuples (rare).
-    '''
+    """
     return st.one_of(
         st.just(()),
         st.lists(
@@ -31,7 +31,7 @@ def numpy_forms(
     inner_shape: tuple[int, ...] | st.SearchStrategy[tuple[int, ...]] | None = None,
     allow_inner_shape: bool = True,
 ) -> st.SearchStrategy[ak.forms.NumpyForm]:
-    '''Strategy for NumpyForm (primitive/leaf forms).
+    """Strategy for NumpyForm (primitive/leaf forms).
 
     Parameters
     ----------
@@ -62,7 +62,7 @@ def numpy_forms(
     >>> f = st_ak.numpy_forms().example()
     >>> isinstance(f, ak.forms.NumpyForm)
     True
-    '''
+    """
     # Type mode: form is fully determined by the NumpyType
     if type_ is not None:
         if isinstance(type_, ak.types.NumpyType):

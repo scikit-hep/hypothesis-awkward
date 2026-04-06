@@ -21,7 +21,7 @@ def list_offset_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListOffsetArray:
-    '''Strategy for ListOffsetArray Content wrapping child Content.
+    """Strategy for ListOffsetArray Content wrapping child Content.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def list_offset_array_contents(
     >>> c = list_offset_array_contents(max_length=4).example()
     >>> len(c) <= 4
     True
-    '''
+    """
     match content:
         case None:
             content = draw(st_ak.contents.contents())
@@ -84,7 +84,7 @@ def list_offset_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:
-    '''Strategy that generates a variable-length list layout within a size limit.
+    """Strategy that generates a variable-length list layout within a size limit.
 
     Draws the number of lists ``n`` first and computes the offset array size
     (``n + 1``). The remainder of ``max_size`` after this deduction is passed
@@ -105,8 +105,7 @@ def list_offset_array_from_contents(
     max_length
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
         to ``max_size - 1`` when ``None``.
-
-    '''
+    """
     ml = max_length if max_length is not None else max_size - 1
     n = draw(st.integers(min_value=0, max_value=ml))
     overhead = n + 1

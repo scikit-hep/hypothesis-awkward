@@ -32,7 +32,7 @@ def arrays(
     max_length: int | None = None,
     allow_virtual: bool = True,
 ) -> ak.Array:
-    '''Strategy for Awkward Arrays.
+    """Strategy for Awkward Arrays.
 
     This is the main strategy in this package. It is under development. The aim is to
     generate fully general Awkward Arrays, with many options to control layout, data
@@ -144,8 +144,7 @@ def arrays(
     --------
     >>> arrays().example()
     <Array ... type='...'>
-
-    '''
+    """
     layout = draw(
         st_ak.contents.contents(
             dtypes=dtypes,

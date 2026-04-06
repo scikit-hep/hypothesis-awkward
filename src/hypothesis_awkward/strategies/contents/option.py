@@ -22,7 +22,7 @@ def option_contents(
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
 ) -> st.SearchStrategy[Content]:
-    '''Strategy for option-type content, selected by ``st.one_of``.
+    """Strategy for option-type content, selected by ``st.one_of``.
 
     Picks among ``IndexedOptionArray``, ``ByteMaskedArray``,
     ``BitMaskedArray``, and ``UnmaskedArray``.
@@ -48,7 +48,7 @@ def option_contents(
     >>> c = option_contents().example()
     >>> isinstance(c, Content)
     True
-    '''
+    """
     if not any(
         (allow_indexed_option, allow_byte_masked, allow_bit_masked, allow_unmasked)
     ):
@@ -67,7 +67,7 @@ def option_contents(
 
 
 class StOption(Protocol):
-    '''Callable that wraps content drawn from a ``StContent`` in an option type.'''
+    """Callable that wraps content drawn from a ``StContent`` in an option type."""
 
     def __call__(
         self,
@@ -90,7 +90,7 @@ def option_from_contents(
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
 ) -> Content:
-    '''Strategy that draws content and wraps it in an option type.
+    """Strategy that draws content and wraps it in an option type.
 
     Conforms to ``StOption`` when partially applied with ``allow_*`` flags.
 
@@ -111,8 +111,7 @@ def option_from_contents(
         Include ``BitMaskedArray`` if ``True``.
     allow_unmasked
         Include ``UnmaskedArray`` if ``True``.
-
-    '''
+    """
     child = draw(
         content(
             max_size=max_size,

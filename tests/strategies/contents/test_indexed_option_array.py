@@ -10,7 +10,7 @@ from hypothesis_awkward.util.safe import safe_compare as sc
 
 
 class IndexedOptionArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `indexed_option_array_contents()` strategy.'''
+    """Options for `indexed_option_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
     max_size: int
@@ -21,7 +21,7 @@ def indexed_option_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[IndexedOptionArrayContentsKwargs]:
-    '''Strategy for options for `indexed_option_array_contents()` strategy.'''
+    """Strategy for options for `indexed_option_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
@@ -49,7 +49,7 @@ def indexed_option_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_indexed_option_array_contents(data: st.DataObject) -> None:
-    '''Test that `indexed_option_array_contents()` respects all its options.'''
+    """Test that `indexed_option_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(indexed_option_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -85,7 +85,7 @@ def test_indexed_option_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_index_dtype_int32() -> None:
-    '''Assert that int32 index dtype can be drawn.'''
+    """Assert that int32 index dtype can be drawn."""
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: c.index.data.dtype == np.int32,
@@ -94,7 +94,7 @@ def test_draw_index_dtype_int32() -> None:
 
 
 def test_draw_index_dtype_int64() -> None:
-    '''Assert that int64 index dtype can be drawn.'''
+    """Assert that int64 index dtype can be drawn."""
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: c.index.data.dtype == np.int64,
@@ -103,7 +103,7 @@ def test_draw_index_dtype_int64() -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that IndexedOptionArray can be the root node from `contents()`.'''
+    """Assert that IndexedOptionArray can be the root node from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, IndexedOptionArray),
@@ -112,7 +112,7 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_with_none_values() -> None:
-    '''Assert that missing (-1) entries can appear.'''
+    """Assert that missing (-1) entries can appear."""
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > 0 and any(c.index.data[i] < 0 for i in range(len(c))),
@@ -121,7 +121,7 @@ def test_draw_with_none_values() -> None:
 
 
 def test_draw_all_valid() -> None:
-    '''Assert that all-valid arrays (no missing entries) can be drawn.'''
+    """Assert that all-valid arrays (no missing entries) can be drawn."""
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > 0 and all(c.index.data[i] >= 0 for i in range(len(c))),
@@ -130,7 +130,7 @@ def test_draw_all_valid() -> None:
 
 
 def test_draw_duplicate_indices() -> None:
-    '''Assert that duplicate index entries can appear.'''
+    """Assert that duplicate index entries can appear."""
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: (
@@ -143,7 +143,7 @@ def test_draw_duplicate_indices() -> None:
 
 
 def test_draw_index_longer_than_content() -> None:
-    '''Assert that the index can be longer than the content.'''
+    """Assert that the index can be longer than the content."""
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > len(c.content),

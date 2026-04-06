@@ -15,7 +15,7 @@ def unmasked_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
 ) -> UnmaskedArray:
-    '''Strategy for UnmaskedArray Content wrapping child Content.
+    """Strategy for UnmaskedArray Content wrapping child Content.
 
     ``UnmaskedArray`` is an option type with no actual nulls. It simply
     wraps content, adding option-type semantics without a mask buffer.
@@ -31,7 +31,7 @@ def unmasked_array_contents(
     >>> c = unmasked_array_contents().example()
     >>> isinstance(c, Content)
     True
-    '''
+    """
     match content:
         case None:
             content = draw(
@@ -55,7 +55,7 @@ def unmasked_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> UnmaskedArray:
-    '''Strategy that generates an unmasked layout within a size limit.
+    """Strategy that generates an unmasked layout within a size limit.
 
     Called by ``contents()`` during recursive tree generation.
 
@@ -70,8 +70,7 @@ def unmasked_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
-
-    '''
+    """
     max_content_size = max_size
     if max_length is not None:
         max_content_size = min(max_content_size, max_length)

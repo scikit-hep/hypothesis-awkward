@@ -9,7 +9,7 @@ from awkward.contents import ByteMaskedArray, Content
 
 
 class ByteMaskedArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `byte_masked_array_contents()` strategy.'''
+    """Options for `byte_masked_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
 
@@ -19,7 +19,7 @@ def byte_masked_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[ByteMaskedArrayContentsKwargs]:
-    '''Strategy for options for `byte_masked_array_contents()` strategy.'''
+    """Strategy for options for `byte_masked_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
@@ -46,7 +46,7 @@ def byte_masked_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_byte_masked_array_contents(data: st.DataObject) -> None:
-    '''Test that `byte_masked_array_contents()` respects all its options.'''
+    """Test that `byte_masked_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(byte_masked_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -81,7 +81,7 @@ def test_byte_masked_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_valid_when_true() -> None:
-    '''Assert that valid_when=True can be drawn.'''
+    """Assert that valid_when=True can be drawn."""
     find(
         st_ak.contents.byte_masked_array_contents(),
         lambda c: c.valid_when is True,
@@ -90,7 +90,7 @@ def test_draw_valid_when_true() -> None:
 
 
 def test_draw_valid_when_false() -> None:
-    '''Assert that valid_when=False can be drawn.'''
+    """Assert that valid_when=False can be drawn."""
     find(
         st_ak.contents.byte_masked_array_contents(),
         lambda c: c.valid_when is False,
@@ -99,7 +99,7 @@ def test_draw_valid_when_false() -> None:
 
 
 def test_draw_from_contents() -> None:
-    '''Assert that ByteMaskedArray can be the root node from `contents()`.'''
+    """Assert that ByteMaskedArray can be the root node from `contents()`."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, ByteMaskedArray),
@@ -108,7 +108,7 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_with_none_values() -> None:
-    '''Assert that masked (None) entries can appear.'''
+    """Assert that masked (None) entries can appear."""
     find(
         st_ak.contents.byte_masked_array_contents(),
         lambda c: (
@@ -119,7 +119,7 @@ def test_draw_with_none_values() -> None:
 
 
 def test_draw_all_valid() -> None:
-    '''Assert that all-valid arrays can be drawn.'''
+    """Assert that all-valid arrays can be drawn."""
     find(
         st_ak.contents.byte_masked_array_contents(),
         lambda c: (

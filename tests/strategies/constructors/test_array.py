@@ -12,7 +12,7 @@ from tests.strategies.contents.test_content import ContentsKwargs, contents_kwar
 
 
 class ArraysKwargs(ContentsKwargs, total=False):
-    '''Options for `arrays()` strategy.'''
+    """Options for `arrays()` strategy."""
 
     allow_virtual: bool
 
@@ -46,7 +46,7 @@ def arrays_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[ArraysKwargs]:
-    '''Strategy for options for `arrays()` strategy.'''
+    """Strategy for options for `arrays()` strategy."""
     opts = draw(contents_kwargs(chain=chain))
     extra = draw(
         st.fixed_dictionaries(
@@ -62,7 +62,7 @@ def arrays_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_arrays(data: st.DataObject) -> None:
-    '''Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`.'''
+    """Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`."""
     from hypothesis_awkward.strategies.constructors import array_ as array_module
 
     # Draw options
@@ -107,11 +107,11 @@ def test_arrays(data: st.DataObject) -> None:
 
 
 def assert_all_buffers_virtual(a: ak.Array) -> None:
-    '''Assert that all buffers that can remain virtual are not materialized.
+    """Assert that all buffers that can remain virtual are not materialized.
 
     Some buffers may not have ``is_materialized``. We skip those and
     verify the rest.
-    '''
+    """
     _form, _length, buffers = ak.to_buffers(a)
     for v in buffers.values():
         if hasattr(v, 'is_materialized'):
@@ -119,7 +119,7 @@ def assert_all_buffers_virtual(a: ak.Array) -> None:
 
 
 class ContentsSpy:
-    '''Wraps `contents()` to capture the drawn layout and any raised exception.'''
+    """Wraps `contents()` to capture the drawn layout and any raised exception."""
 
     def __init__(self) -> None:
         self.drawn_layout: Content | None = None
@@ -144,7 +144,7 @@ class ContentsSpy:
 
 
 def test_draw_virtual() -> None:
-    '''Assert that virtual arrays can be drawn by default.'''
+    """Assert that virtual arrays can be drawn by default."""
     find(
         st_ak.constructors.arrays(),
         lambda a: not ak.to_layout(a).is_all_materialized,
@@ -153,7 +153,7 @@ def test_draw_virtual() -> None:
 
 
 def test_draw_virtual_union() -> None:
-    '''Assert that a virtual array containing a UnionArray can be drawn.'''
+    """Assert that a virtual array containing a UnionArray can be drawn."""
 
     def _is_virtual_union(a: ak.Array) -> bool:
         layout = ak.to_layout(a)

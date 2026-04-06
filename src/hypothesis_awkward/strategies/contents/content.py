@@ -48,7 +48,7 @@ def contents(
     allow_union_root: bool = True,
     allow_option_root: bool = True,
 ) -> Content:
-    '''Strategy for Awkward Array content layouts.
+    """Strategy for Awkward Array content layouts.
 
     The current implementation generates the following layouts:
 
@@ -148,8 +148,7 @@ def contents(
     >>> c = contents().example()
     >>> isinstance(c, Content)
     True
-
-    '''
+    """
     st_leaf = functools.partial(
         leaf_contents,
         dtypes=dtypes,
@@ -296,7 +295,7 @@ def content_lists(
     all_option_or_none: bool = False,
     st_option: StOption | None = None,
 ) -> list[Content]:
-    '''Strategy for lists of contents within a size budget.
+    """Strategy for lists of contents within a size budget.
 
     Parameters
     ----------
@@ -317,8 +316,7 @@ def content_lists(
     st_option
         A callable conforming to ``StOption`` that wraps content in an option type.
         Required when ``all_option_or_none`` is ``True``.
-
-    '''
+    """
     remaining_leaf = max_leaf_size
     remaining_total = max_size
     contents_ = list[Content]()

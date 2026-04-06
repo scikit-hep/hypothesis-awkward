@@ -48,7 +48,7 @@ def test_items_from_dtype(data: st.DataObject) -> None:
 
 
 def test_builtin_safe_dtype_names_shrinks_to_bool() -> None:
-    '''Assert that builtin_safe_dtype_names() shrinks to bool.'''
+    """Assert that builtin_safe_dtype_names() shrinks to bool."""
     result = find(
         st_ak.builtin_safe_dtype_names(),
         lambda _: True,
@@ -58,7 +58,7 @@ def test_builtin_safe_dtype_names_shrinks_to_bool() -> None:
 
 
 def test_builtin_safe_dtypes_shrinks_to_bool() -> None:
-    '''Assert that builtin_safe_dtypes() shrinks to bool.'''
+    """Assert that builtin_safe_dtypes() shrinks to bool."""
     result = find(
         st_ak.builtin_safe_dtypes(),
         lambda _: True,
@@ -68,7 +68,7 @@ def test_builtin_safe_dtypes_shrinks_to_bool() -> None:
 
 
 def test_draw_nan() -> None:
-    '''Assert that NaN can be drawn by default.'''
+    """Assert that NaN can be drawn by default."""
     find(
         st_ak.items_from_dtype(np.dtype('float64')),
         lambda item: isinstance(item, float) and math.isnan(item),
@@ -77,7 +77,7 @@ def test_draw_nan() -> None:
 
 
 def test_draw_nat() -> None:
-    '''Assert that NaT can be drawn by default.'''
+    """Assert that NaT can be drawn by default."""
     find(
         st_ak.items_from_dtype(np.dtype('datetime64[us]')),
         lambda item: item is None,

@@ -15,12 +15,12 @@ DEFAULT_MAX_DRAWS = 100
 
 
 def _sized_lists(*, min_size: int, max_size: int) -> st.SearchStrategy[list[int]]:
-    '''A `_StWithMinMaxSize`-conforming callable for testing.'''
+    """A `_StWithMinMaxSize`-conforming callable for testing."""
     return st.lists(st.integers(), min_size=min_size, max_size=max_size)
 
 
 class CountdownDrawerKwargs(TypedDict, total=False):
-    '''Options for `CountdownDrawer()`.'''
+    """Options for `CountdownDrawer()`."""
 
     min_size_each: int
     max_size_each: int
@@ -31,7 +31,7 @@ class CountdownDrawerKwargs(TypedDict, total=False):
 
 @st.composite
 def countdown_drawer_kwargs(draw: st.DrawFn) -> CountdownDrawerKwargs:
-    '''Strategy for options for `CountdownDrawer()`.'''
+    """Strategy for options for `CountdownDrawer()`."""
     # Draw total bounds first so per-draw bounds can be constrained
     max_end = 50
     min_size_total, max_size_total = draw(
@@ -83,7 +83,7 @@ def countdown_drawer_kwargs(draw: st.DrawFn) -> CountdownDrawerKwargs:
 def _exhaust(
     draw: st.DrawFn, **kwargs: Unpack[CountdownDrawerKwargs]
 ) -> tuple[int, list[list[int]]]:
-    '''Draw from a `CountdownDrawer` until it returns `None`.'''
+    """Draw from a `CountdownDrawer` until it returns `None`."""
     draw_content = CountdownDrawer(draw, _sized_lists, **kwargs)
 
     total = 0
@@ -123,7 +123,7 @@ def test_countdown_drawer(data: st.DataObject) -> None:
 
 
 def test_draw_max_size_total() -> None:
-    '''Assert that the total can reach max_size_total.'''
+    """Assert that the total can reach max_size_total."""
     max_size_total = 10
     find(
         _exhaust(min_size_each=1, max_size_total=max_size_total),
@@ -133,7 +133,7 @@ def test_draw_max_size_total() -> None:
 
 
 def test_draw_min_size_each() -> None:
-    '''Assert that a draw can have exactly min_size_each elements.'''
+    """Assert that a draw can have exactly min_size_each elements."""
     min_size_each = 5
     find(
         _exhaust(min_size_each=min_size_each, max_size_total=50),
@@ -143,7 +143,7 @@ def test_draw_min_size_each() -> None:
 
 
 def test_draw_max_size_each() -> None:
-    '''Assert that a draw can reach max_size_each elements.'''
+    """Assert that a draw can reach max_size_each elements."""
     max_size_each = 5
     find(
         _exhaust(max_size_each=max_size_each, max_size_total=50),
@@ -153,7 +153,7 @@ def test_draw_max_size_each() -> None:
 
 
 def test_draw_min_size_total() -> None:
-    '''Assert that the total can reach min_size_total.'''
+    """Assert that the total can reach min_size_total."""
     min_size_total = 10
     find(
         _exhaust(min_size_total=min_size_total, max_size_total=50),
@@ -163,7 +163,7 @@ def test_draw_min_size_total() -> None:
 
 
 def test_draw_max_draws() -> None:
-    '''Assert that the number of draws can reach max_draws.'''
+    """Assert that the number of draws can reach max_draws."""
     max_draws = 200
     find(
         _exhaust(max_draws=max_draws),

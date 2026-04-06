@@ -22,7 +22,7 @@ def record_array_contents(
     allow_tuple: bool = True,
     max_length: int | None = None,
 ) -> RecordArray:
-    '''Strategy for RecordArray Content from a list of child Contents.
+    """Strategy for RecordArray Content from a list of child Contents.
 
     Parameters
     ----------
@@ -53,7 +53,7 @@ def record_array_contents(
     >>> c = record_array_contents(max_length=4).example()
     >>> len(c) <= 4
     True
-    '''
+    """
     match contents:
         case None:
             contents = draw(st_ak.contents.content_lists(max_len=max_fields))
@@ -100,7 +100,7 @@ def record_array_from_contents(
     max_length: 'int | None',
     st_option: 'StOption | None' = None,
 ) -> RecordArray:
-    '''Strategy that generates a record layout within a size limit.
+    """Strategy that generates a record layout within a size limit.
 
     Draws one or more children via ``content_lists()`` with ``min_len=1``,
     then wraps them in a ``RecordArray`` with generated or omitted field names.
@@ -118,8 +118,7 @@ def record_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the record length, i.e., ``len(result)``.
-
-    '''
+    """
     children = draw(
         st_ak.contents.content_lists(
             content, max_size=max_size, max_leaf_size=max_leaf_size, min_len=1

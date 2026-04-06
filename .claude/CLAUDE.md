@@ -86,8 +86,8 @@ changelog, creates the `v` tag, and publishes the release and package.
 
 ## Code Style
 
-- Use NumPy-style docstrings with single quotes (`'''`).
-- Prefer single quotes (`'`) for strings.
+- Use NumPy-style docstrings with double quotes (`"""`).
+- Prefer single quotes (`'`) for strings (except docstrings).
 - Use absolute imports for parent packages (e.g.,
   `from hypothesis_awkward.strategies.numpy import numpy_arrays`, not
   `from ..numpy import numpy_arrays`). Same-package relative imports (e.g.,
@@ -98,6 +98,6 @@ changelog, creates the `v` tag, and publishes the release and package.
   collections (e.g., `list[int]()` over `x: list[int] = []`).
 - Place private or supportive functions after the main public functions in a
   module.
-- Wrap docstring text to 90 columns (including indentation).
+- Wrap docstring text to 88 columns (enforced by docformatter).
 - Sort imports with `uv run ruff check --select I --fix src tests`.
 - Run `uv run mypy src tests` after making changes to verify type correctness.

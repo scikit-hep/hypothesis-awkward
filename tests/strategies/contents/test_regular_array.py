@@ -13,7 +13,7 @@ MAX_ZEROS_LENGTH = 5
 
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
-    '''Options for `regular_array_contents()` strategy.'''
+    """Options for `regular_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
     max_size: int
@@ -26,7 +26,7 @@ def regular_array_contents_kwargs(
     draw: st.DrawFn,
     chain: st_ak.OptsChain[Any] | None = None,
 ) -> st_ak.OptsChain[RegularArrayContentsKwargs]:
-    '''Strategy for options for `regular_array_contents()` strategy.'''
+    """Strategy for options for `regular_array_contents()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(st_ak.contents.contents())
@@ -52,7 +52,7 @@ def regular_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_regular_array_contents(data: st.DataObject) -> None:
-    '''Test that `regular_array_contents()` respects all its options.'''
+    """Test that `regular_array_contents()` respects all its options."""
     # Draw options
     opts = data.draw(regular_array_contents_kwargs(), label='opts')
     opts.reset()
@@ -93,7 +93,7 @@ def test_regular_array_contents(data: st.DataObject) -> None:
 
 
 def test_draw_max_size() -> None:
-    '''Assert that RegularArray with exactly max_size can be drawn.'''
+    """Assert that RegularArray with exactly max_size can be drawn."""
     max_size = 10
     find(
         st_ak.contents.regular_array_contents(max_size=max_size),
@@ -103,7 +103,7 @@ def test_draw_max_size() -> None:
 
 
 def test_draw_max_zeros_length() -> None:
-    '''Assert that zeros_length up to max_zeros_length can be drawn.'''
+    """Assert that zeros_length up to max_zeros_length can be drawn."""
     max_zeros_length = 20
     find(
         st_ak.contents.regular_array_contents(max_zeros_length=max_zeros_length),
@@ -113,7 +113,7 @@ def test_draw_max_zeros_length() -> None:
 
 
 def test_draw_max_length() -> None:
-    '''Assert that max_length constrains the RegularArray length.'''
+    """Assert that max_length constrains the RegularArray length."""
     max_length = 10
     find(
         st_ak.contents.regular_array_contents(max_length=max_length),
@@ -123,7 +123,7 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_from_contents_size_zero() -> None:
-    '''Assert that RegularArray with size=0 can be drawn from `contents()`.'''
+    """Assert that RegularArray with size=0 can be drawn from `contents()`."""
 
     def _has_regular_size_zero(c: Content) -> bool:
         return any(

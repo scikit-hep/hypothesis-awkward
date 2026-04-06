@@ -18,7 +18,7 @@ pd = cast(pandas, pytest.importorskip("pandas"))
 
 
 class DictsForDataFrameKwargs(TypedDict, total=False):
-    '''Options for `dicts_for_dataframe()` strategy.'''
+    """Options for `dicts_for_dataframe()` strategy."""
 
     max_columns: int
     min_rows: int
@@ -31,8 +31,7 @@ class DictsForDataFrameKwargs(TypedDict, total=False):
 
 @st.composite
 def dicts_for_dataframe_kwargs(draw: st.DrawFn) -> DictsForDataFrameKwargs:
-    '''Strategy for options for `dicts_for_dataframe()` strategy.'''
-
+    """Strategy for options for `dicts_for_dataframe()` strategy."""
     min_rows, max_rows = draw(st_ak.ranges(min_start=0, max_end=6))
 
     drawn = (('min_rows', min_rows), ('max_rows', max_rows))
