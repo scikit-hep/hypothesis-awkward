@@ -1,4 +1,4 @@
-'''Override site_url in zensical.toml for subdirectory deployment.'''
+"""Override site_url in zensical.toml for subdirectory deployment."""
 
 import sys
 from pathlib import Path
