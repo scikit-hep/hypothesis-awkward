@@ -115,7 +115,7 @@ def test_draw_from_contents_length_zero() -> None:
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, NumpyArray) and len(c) == 0,
-        settings=settings(phases=[Phase.generate]),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
