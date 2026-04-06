@@ -17,8 +17,8 @@ def regular_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
-    max_size: int = 5,
-    max_zeros_length: int = 5,
+    max_size: int | None = None,
+    max_zeros_length: int | None = None,
     max_length: int | None = None,
 ) -> RegularArray:
     """Strategy for ``RegularArray``.
@@ -29,10 +29,11 @@ def regular_array_contents(
         Child content. Can be a strategy for Content, a concrete Content instance, or
         ``None`` to draw from ``contents()``.
     max_size
-        Upper bound on the length of each element.
+        Upper bound on the length of each element. Defaults to ``len(content)``
+        when ``None``.
     max_zeros_length
         Upper bound on the number of elements when each element is empty, i.e., when
-        size is zero.
+        size is zero. Defaults to ``len(content)`` when ``None``.
     max_length
         Upper bound on the number of groups, i.e., ``len(result)``.
 
@@ -68,7 +69,12 @@ def regular_array_contents(
         case Content():
             pass
     assert isinstance(content, Content)
-    size = draw(_st_group_sizes(len(content), max_size, max_length))
+    content_len = len(content)
+    if max_size is None:
+        max_size = content_len
+    if max_zeros_length is None:
+        max_zeros_length = content_len
+    size = draw(_st_group_sizes(content_len, max_size, max_length))
     if size == 0:
         max_zl = max_zeros_length
         if max_length is not None:

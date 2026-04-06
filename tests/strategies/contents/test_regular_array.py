@@ -8,16 +8,13 @@ from awkward.contents import Content, RegularArray
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util.safe import safe_compare as sc
 
-MAX_REGULAR_SIZE = 5
-MAX_ZEROS_LENGTH = 5
-
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
     """Options for `regular_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
-    max_size: int
-    max_zeros_length: int
+    max_size: int | None
+    max_zeros_length: int | None
     max_length: int | None
 
 
@@ -39,8 +36,10 @@ def regular_array_contents_kwargs(
                     st_ak.contents.contents(),
                     st.just(st_content),
                 ),
-                'max_size': st.integers(min_value=0, max_value=50),
-                'max_zeros_length': st.integers(min_value=0, max_value=50),
+                'max_size': st_ak.none_or(st.integers(min_value=0, max_value=50)),
+                'max_zeros_length': st_ak.none_or(
+                    st.integers(min_value=0, max_value=50)
+                ),
                 'max_length': st.integers(min_value=0, max_value=50),
             },
         )
@@ -65,13 +64,13 @@ def test_regular_array_contents(data: st.DataObject) -> None:
     assert isinstance(result, RegularArray)
 
     # Assert the options were effective
-    max_size = opts.kwargs.get('max_size', MAX_REGULAR_SIZE)
-    assert result.size <= max_size
+    max_size = opts.kwargs.get('max_size')
+    assert result.size <= sc(max_size)
 
     # Assert zeros_length is within bounds
-    max_zeros_length = opts.kwargs.get('max_zeros_length', MAX_ZEROS_LENGTH)
+    max_zeros_length = opts.kwargs.get('max_zeros_length')
     if result.size == 0:
-        assert len(result) <= max_zeros_length
+        assert len(result) <= sc(max_zeros_length)
 
     # Assert length is within bounds
     max_length = opts.kwargs.get('max_length')
@@ -115,9 +114,30 @@ def test_draw_max_zeros_length() -> None:
 def test_draw_max_length() -> None:
     """Assert that max_length constrains the RegularArray length."""
     max_length = 10
+    content = st_ak.contents.numpy_array_contents(max_size=30)
     find(
-        st_ak.contents.regular_array_contents(max_length=max_length),
+        st_ak.contents.regular_array_contents(content, max_length=max_length),
         lambda c: c.size > 0 and len(c) == max_length,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_default_max_size() -> None:
+    """Assert that size can reach len(content) when max_size is not specified."""
+    content = st_ak.contents.numpy_array_contents(max_size=12)
+    find(
+        st_ak.contents.regular_array_contents(content),
+        lambda c: c.size == 12,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_default_max_zeros_length() -> None:
+    """Assert that zeros_length can reach len(content) when defaults are used."""
+    content = st_ak.contents.numpy_array_contents(max_size=10)
+    find(
+        st_ak.contents.regular_array_contents(content, max_size=0),
+        lambda c: c.size == 0 and len(c) == 10,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
