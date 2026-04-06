@@ -23,9 +23,9 @@ runs:
     # Create a worktree for gh-pages.
     - shell: bash
       run: |
-        git fetch origin gh-pages 2>/dev/null || true
-        if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
-          git worktree add /tmp/gh-pages gh-pages
+        if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+          git fetch origin gh-pages
+          git worktree add -B gh-pages /tmp/gh-pages origin/gh-pages
         else
           git worktree add --orphan -b gh-pages /tmp/gh-pages
         fi
