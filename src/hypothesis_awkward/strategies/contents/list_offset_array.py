@@ -80,7 +80,7 @@ def list_offset_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None',
+    max_leaf_size: 'int | None' = None,
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:

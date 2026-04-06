@@ -126,8 +126,8 @@ def regular_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None',
-    max_length: 'int | None',
+    max_leaf_size: 'int | None' = None,
+    max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> RegularArray:
     """Strategy for inner ``RegularArray`` to be drawn by an outer layout strategy.
