@@ -146,6 +146,25 @@ def regular_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the number of groups, i.e., ``len(result)``.
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = regular_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, Content)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
     max_content_size = max(max_size - 1, 0)
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
