@@ -110,8 +110,7 @@ class GreaterAndLessThanAny:
 
 
 def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
-    """The `value` itself if it is not `None`. Otherwise, an object that returns True
-    for all inequality comparisons.
+    """Return `value` if not `None`, else an object true for all comparisons.
 
     This function helps you concisely write assertions that compare
     values that may be `None`.
@@ -137,10 +136,10 @@ def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
     are `None`.
 
     >>> if min_ is not None:
-    ...   assert min_ <= val
+    ...     assert min_ <= val
 
     >>> if max_ is not None:
-    ...    assert val <= max_
+    ...     assert val <= max_
 
     This function lets you write the same assertion in one line:
 

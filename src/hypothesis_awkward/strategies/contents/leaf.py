@@ -47,7 +47,6 @@ def leaf_contents(
     ValueError
         If no content types are possible with the given options.
     """
-
     options: list[st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]] = []
 
     # Append strategies in optimal order for shrinking.

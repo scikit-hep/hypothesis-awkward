@@ -16,7 +16,6 @@ def any_nan_nat_in_numpy_array(n: np.ndarray, /) -> bool:
 
     Examples
     --------
-
     >>> n = np.array([1.0, 2.0, np.nan])
     >>> any_nan_nat_in_numpy_array(n)
     True
@@ -25,9 +24,10 @@ def any_nan_nat_in_numpy_array(n: np.ndarray, /) -> bool:
     >>> any_nan_nat_in_numpy_array(n)
     False
 
-    >>> n = np.array([(1, np.datetime64('2020-01-01')),
-    ...               (2, np.datetime64('NaT'))],
-    ...              dtype=[('a', 'i4'), ('b', 'M8[D]')])
+    >>> n = np.array(
+    ...     [(1, np.datetime64('2020-01-01')), (2, np.datetime64('NaT'))],
+    ...     dtype=[('a', 'i4'), ('b', 'M8[D]')],
+    ... )
     >>> any_nan_nat_in_numpy_array(n)
     True
     """
@@ -49,7 +49,6 @@ def any_nan_in_numpy_array(n: np.ndarray, /) -> bool:
 
     Examples
     --------
-
     >>> n = np.array([1.0, 2.0, np.nan])
     >>> any_nan_in_numpy_array(n)
     True
@@ -58,8 +57,7 @@ def any_nan_in_numpy_array(n: np.ndarray, /) -> bool:
     >>> any_nan_in_numpy_array(n)
     False
 
-    >>> n = np.array([(1, 2.0), (2, np.nan)],
-    ...              dtype=[('a', 'i4'), ('b', 'f8')])
+    >>> n = np.array([(1, 2.0), (2, np.nan)], dtype=[('a', 'i4'), ('b', 'f8')])
     >>> any_nan_in_numpy_array(n)
     True
     """
@@ -91,7 +89,6 @@ def any_nat_in_numpy_array(n: np.ndarray, /) -> bool:
 
     Examples
     --------
-
     >>> n = np.array(['2020-01-01', 'NaT'], dtype='datetime64[D]')
     >>> any_nat_in_numpy_array(n)
     True
@@ -100,9 +97,10 @@ def any_nat_in_numpy_array(n: np.ndarray, /) -> bool:
     >>> any_nat_in_numpy_array(n)
     False
 
-    >>> n = np.array([(1, np.datetime64('2020-01-01')),
-    ...               (2, np.datetime64('NaT'))],
-    ...              dtype=[('a', 'i4'), ('b', 'M8[D]')])
+    >>> n = np.array(
+    ...     [(1, np.datetime64('2020-01-01')), (2, np.datetime64('NaT'))],
+    ...     dtype=[('a', 'i4'), ('b', 'M8[D]')],
+    ... )
     >>> any_nat_in_numpy_array(n)
     True
     """

@@ -53,46 +53,48 @@ def _supported_dtype_names() -> tuple[str, ...]:
 
     As of this writing::
 
-        ('bool',
-         'int64',
-         'float64',
-         'complex128',
-         'datetime64[us]',
-         'timedelta64[us]',
-         'int8',
-         'int16',
-         'int32',
-         'uint8',
-         'uint16',
-         'uint32',
-         'uint64',
-         'float16',
-         'float32',
-         'complex64',
-         'datetime64[ms]',
-         'timedelta64[ms]',
-         'datetime64[ns]',
-         'timedelta64[ns]',
-         'datetime64[s]',
-         'timedelta64[s]',
-         'datetime64[ps]',
-         'timedelta64[ps]',
-         'datetime64[m]',
-         'timedelta64[m]',
-         'datetime64[fs]',
-         'timedelta64[fs]',
-         'datetime64[h]',
-         'timedelta64[h]',
-         'datetime64[as]',
-         'timedelta64[as]',
-         'datetime64[D]',
-         'timedelta64[D]',
-         'datetime64[W]',
-         'timedelta64[W]',
-         'datetime64[M]',
-         'timedelta64[M]',
-         'datetime64[Y]',
-         'timedelta64[Y]')
+        (
+            'bool',
+            'int64',
+            'float64',
+            'complex128',
+            'datetime64[us]',
+            'timedelta64[us]',
+            'int8',
+            'int16',
+            'int32',
+            'uint8',
+            'uint16',
+            'uint32',
+            'uint64',
+            'float16',
+            'float32',
+            'complex64',
+            'datetime64[ms]',
+            'timedelta64[ms]',
+            'datetime64[ns]',
+            'timedelta64[ns]',
+            'datetime64[s]',
+            'timedelta64[s]',
+            'datetime64[ps]',
+            'timedelta64[ps]',
+            'datetime64[m]',
+            'timedelta64[m]',
+            'datetime64[fs]',
+            'timedelta64[fs]',
+            'datetime64[h]',
+            'timedelta64[h]',
+            'datetime64[as]',
+            'timedelta64[as]',
+            'datetime64[D]',
+            'timedelta64[D]',
+            'datetime64[W]',
+            'timedelta64[W]',
+            'datetime64[M]',
+            'timedelta64[M]',
+            'datetime64[Y]',
+            'timedelta64[Y]',
+        )
     """
     # Ordered for optimal shrinking
     DATETIME_UNITS = tuple('us ms ns s ps m fs h as D W M Y'.split())
@@ -165,7 +167,6 @@ def simple_dtypes_in(d: np.dtype, /) -> set[np.dtype]:
     >>> sorted(simple_dtypes_in(np.dtype([('f0', 'i4'), ('f1', 'f8')])))
     [dtype('int32'), dtype('float64')]
     """
-
     match d.names, d.kind, d.subdtype, d.fields:
         case None, str(), None, None:
             # Simple dtype
@@ -205,7 +206,6 @@ def simple_dtype_kinds_in(d: np.dtype, /) -> set[str]:
     >>> sorted(simple_dtype_kinds_in(np.dtype([('f0', 'i4'), ('f1', 'f8')])))
     ['f', 'i']
     """
-
     return {t.kind for t in simple_dtypes_in(d)}
 
 
@@ -234,7 +234,6 @@ def n_scalars_in(d: np.dtype, /) -> int:
     >>> n_scalars_in(np.dtype([('f0', 'i4'), ('f1', ('f8', (2,)))]))
     3
     """
-
     match d.names, d.kind, d.subdtype, d.fields:
         case None, str(), None, None:
             # Simple dtype

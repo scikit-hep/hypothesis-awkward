@@ -37,7 +37,6 @@ def any_nan_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
 
     Examples
     --------
-
     >>> a = ak.Array([1.0, 2.0, np.nan])
     >>> any_nan_nat_in_awkward_array(a)
     True
@@ -68,7 +67,6 @@ def any_nan_in_awkward_array(a: ak.Array | Content, /) -> bool:
 
     Examples
     --------
-
     >>> a = ak.Array([1.0, 2.0, np.nan])
     >>> any_nan_in_awkward_array(a)
     True
@@ -102,7 +100,6 @@ def any_nat_in_awkward_array(a: ak.Array | Content, /) -> bool:
 
     Examples
     --------
-
     >>> a = ak.Array(np.array(['2020-01-01', 'NaT'], dtype='datetime64[D]'))
     >>> any_nat_in_awkward_array(a)
     True
@@ -296,7 +293,6 @@ def iter_numpy_arrays(
 
     Examples
     --------
-
     >>> a = ak.Array([[1.0, 2.0], [3.0]])
     >>> list(iter_numpy_arrays(a))
     [array([1., 2., 3.])]
@@ -332,7 +328,6 @@ def leaf_size(a: ak.Array | Content, /) -> int:
 
     Examples
     --------
-
     >>> a = ak.Array([1, 2, 3])
     >>> leaf_size(a)
     3
@@ -366,7 +361,6 @@ def content_size(a: ak.Array | Content, /) -> int:
 
     Examples
     --------
-
     A flat array has content_size equal to its length:
 
     >>> a = ak.Array([1, 2, 3])

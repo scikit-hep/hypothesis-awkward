@@ -117,7 +117,6 @@ def _st_shape(
     max_dims
         Maximum number of dimensions. If ``None``, derived from ``max_items``.
     """
-
     # Generate empty shape manually as `st_np.array_shapes()` doesn't.
     empty = draw(_st_empty(min_items, max_items))
     if empty:
@@ -209,7 +208,6 @@ def from_numpy(
     >>> from_numpy().example()
     <Array ... type='...'>
     """
-
     reg_array = st.booleans() if regulararray is None else st.just(regulararray)
 
     return st.builds(

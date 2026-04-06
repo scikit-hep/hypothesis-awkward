@@ -116,8 +116,7 @@ def test_draw_from_contents() -> None:
 
 
 def test_draw_from_contents_variable_length() -> None:
-    """Assert that ListArray with variable-length sublists can be drawn from
-    `contents()`."""
+    """Assert that ListArray with variable-length sublists can be drawn."""
 
     def _has_variable_length(c: Content) -> bool:
         return any(

@@ -36,7 +36,6 @@ def lists(
     >>> ak.Array(l)
     <Array ... type='...'>
     """
-
     if dtype is None:
         dtype = draw(builtin_safe_dtypes())
     if isinstance(dtype, st.SearchStrategy):

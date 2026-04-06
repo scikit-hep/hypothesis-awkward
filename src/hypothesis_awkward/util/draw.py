@@ -50,7 +50,6 @@ def CountdownDrawer(
     max_draws
         Maximum number of non-None draws.
     """
-
     if min_size_total > 0:
         if max_size_each is not None and max_size_each > 0:
             n_draws_needed = ceil(min_size_total / max_size_each)

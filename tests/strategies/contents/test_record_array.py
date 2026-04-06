@@ -135,8 +135,7 @@ def test_draw_named() -> None:
 
 
 def test_draw_max_fields() -> None:
-    """Assert that `record_array_contents()` can produce a record with max_fields
-    fields."""
+    """Assert that record_array_contents can produce max_fields fields."""
     max_fields = 3
     find(
         st_ak.contents.record_array_contents(max_fields=max_fields),

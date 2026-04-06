@@ -212,8 +212,7 @@ def test_shrink_leaf_contents_empty() -> None:
 
 
 def test_shrink_leaf_contents_one() -> None:
-    """Assert that leaf content with one element shrinks to a single empty
-    bytestring."""
+    """Assert that leaf content with one element shrinks to [b'']."""
     c = find(
         st_ak.contents.leaf_contents(),
         lambda c: len(c) == 1,

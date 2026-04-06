@@ -1,7 +1,7 @@
-"""Reproduce ak.from_buffers bug with virtual buffers + BitMaskedArray +
-RegularArray(size=0).
+"""Reproduce ak.from_buffers bug with virtual buffers + BitMaskedArray.
 
-Fixed on awkward dev after v2.9.0 (likely PR #3889).
+Specifically for RegularArray(size=0). Fixed on awkward dev after v2.9.0 (likely PR
+#3889).
 """
 
 import numpy as np
@@ -18,7 +18,7 @@ from awkward.contents import (
 
 @pytest.mark.xfail(reason='fails with awkward v2.9.0')
 def test_from_buffers_virtual_bitmask_regular_size0() -> None:
-    """This test fails with awkward v2.9.0, the latest version as of this writing.
+    """Fail with awkward v2.9.0, the latest version as of this writing.
 
     It will probably be fixed in the next release.
     It passes with the main branch with the head #85c39543.

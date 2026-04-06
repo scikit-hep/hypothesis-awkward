@@ -157,8 +157,7 @@ def test_opts_chain(data: st.DataObject) -> None:
 @settings(max_examples=200)
 @given(data=st.data())
 def test_extend_does_not_affect_parent(data: st.DataObject) -> None:
-    """Test that resetting a child does not lose parent-only recorders, and that
-    resetting a parent leaves child-only recorders untouched."""
+    """Test that resetting child/parent does not affect the other's recorders."""
     final, chain = data.draw(draw_opts_chain(), label='opts_chain')
 
     # Need at least depth >= 1 for this test
