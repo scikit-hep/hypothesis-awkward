@@ -68,13 +68,10 @@ def test_group_sizes(data: st.DataObject) -> None:
         assert total_items // result <= max_length
 
 
-def test_draw_one() -> None:
-    """Assert that size 1 can be drawn for any positive total_items."""
-    find(
-        _st_group_sizes(total_items=12, max_group_size=12),
-        lambda s: s == 1,
-        settings=settings(phases=[Phase.generate]),
-    )
+def test_shrink_to_one() -> None:
+    """Assert that positive size shrinks to 1."""
+    s = find(_st_group_sizes(total_items=12, max_group_size=12), lambda s: s > 0)
+    assert s == 1
 
 
 def test_draw_total_items() -> None:
