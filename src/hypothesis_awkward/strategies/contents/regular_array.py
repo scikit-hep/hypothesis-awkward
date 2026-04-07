@@ -74,7 +74,9 @@ def regular_array_contents(
         max_size = content_len
     if max_zeros_length is None:
         max_zeros_length = content_len
-    size = draw(_st_group_sizes(content_len, max_size, max_length))
+    size = draw(
+        _st_group_sizes(content_len, max_group_size=max_size, max_length=max_length)
+    )
     if size == 0:
         max_zl = max_zeros_length
         if max_length is not None:
@@ -86,8 +88,11 @@ def regular_array_contents(
 
 def _st_group_sizes(
     total_items: int,
-    max_group_size: int,
+    *,
+    min_group_size: int = 0,
+    max_group_size: int | None = None,
     max_length: int | None = None,
+    allow_non_divisors: bool = True,
 ) -> st.SearchStrategy[int]:
     """Strategy for the size parameter of a RegularArray.
 
@@ -103,18 +108,43 @@ def _st_group_sizes(
     When ``total_items > 0`` but no valid divisor exists (i.e., ``max_group_size == 0``
     or ``max_length`` is too small), returns ``0``. The caller uses this to fall back to
     the ``zeros_length`` path, producing a RegularArray whose elements are all empty.
+
+    Parameters
+    ----------
+    total_items
+        Total number of items in the content.
+    min_group_size
+        Lower bound on the group size. Defaults to ``0``.
+    max_group_size
+        Upper bound on the group size. ``None`` means no constraint beyond
+        ``total_items``.
+    allow_non_divisors
+        When ``False`` (the default), only divisors of ``total_items`` are
+        returned. When ``True``, non-divisors are also included but listed after
+        divisors so that shrinking prefers divisors (no unreachable data).
+    max_length
+        Upper bound on the number of groups. ``None`` means no constraint.
     """
+    if max_group_size is None:
+        max_group_size = total_items
     if total_items == 0:
-        return st.integers(min_value=0, max_value=max_group_size)
+        return st.integers(min_value=min_group_size, max_value=max_group_size)
     max_group_size = min(total_items, max_group_size)
     if max_length is not None and max_length == 0:
         return st.just(0)
-    min_group_size = 1
+    effective_min = max(min_group_size, 1)
     if max_length is not None:
-        min_group_size = -(-total_items // max_length)
-    group_sizes = [
-        d for d in range(min_group_size, max_group_size + 1) if total_items % d == 0
+        effective_min = max(effective_min, -(-total_items // max_length))
+    divisors = [
+        d for d in range(effective_min, max_group_size + 1) if total_items % d == 0
     ]
+    if not allow_non_divisors:
+        group_sizes = divisors
+    else:
+        non_divisors = [
+            d for d in range(effective_min, max_group_size + 1) if total_items % d != 0
+        ]
+        group_sizes = divisors + non_divisors
     if not group_sizes:
         return st.just(0)
     return st.sampled_from(group_sizes)
