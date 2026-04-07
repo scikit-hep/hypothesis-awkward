@@ -87,7 +87,11 @@ icon = "fontawesome/brands/python"
 link = "https://pypi.org/project/hypothesis-awkward/"
 
 [project.plugins.mkdocstrings.handlers.python]
-inventories = ["https://docs.python.org/3/objects.inv"]
+inventories = [
+    "https://docs.python.org/3/objects.inv",
+    "https://hypothesis.readthedocs.io/en/latest/objects.inv",
+    "https://numpy.org/doc/stable/objects.inv",
+]
 paths = ["src"]
 
 [project.plugins.mkdocstrings.handlers.python.options]
