@@ -136,13 +136,15 @@ def _st_group_sizes(
     if max_length is not None:
         effective_min = max(effective_min, -(-total_items // max_length))
     divisors = [
-        d for d in range(effective_min, max_group_size + 1) if total_items % d == 0
+        d for d in range(max_group_size, effective_min - 1, -1) if total_items % d == 0
     ]
     if not allow_non_divisors:
         group_sizes = divisors
     else:
         non_divisors = [
-            d for d in range(effective_min, max_group_size + 1) if total_items % d != 0
+            d
+            for d in range(max_group_size, effective_min - 1, -1)
+            if total_items % d != 0
         ]
         group_sizes = divisors + non_divisors
     if not group_sizes:
