@@ -59,7 +59,7 @@ def test_group_sizes(data: st.DataObject) -> None:
     min_group_size = kwargs.get('min_group_size', 0)
     max_group_size = kwargs.get('max_group_size')
     max_length = kwargs.get('max_length')
-    allow_non_divisors = kwargs.get('allow_non_divisors', False)
+    allow_non_divisors = kwargs.get('allow_non_divisors', True)
 
     # Result is bounded by min/max_group_size
     assert result >= 0

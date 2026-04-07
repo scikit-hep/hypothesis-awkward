@@ -92,7 +92,7 @@ def _st_group_sizes(
     min_group_size: int = 0,
     max_group_size: int | None = None,
     max_length: int | None = None,
-    allow_non_divisors: bool = False,
+    allow_non_divisors: bool = True,
 ) -> st.SearchStrategy[int]:
     """Strategy for the size parameter of a RegularArray.
 

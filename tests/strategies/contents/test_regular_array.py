@@ -1,10 +1,11 @@
 from typing import Any, TypedDict, cast
 
+import numpy as np
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
-from awkward.contents import Content, RegularArray
+from awkward.contents import Content, NumpyArray, RegularArray
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util.safe import safe_compare as sc
 
@@ -77,9 +78,10 @@ def test_regular_array_contents(data: st.DataObject) -> None:
     assert len(result) <= sc(max_length)
 
     # Assert size divides content length when size > 0
-    if result.size > 0:
-        assert len(result.content) % result.size == 0
-        assert len(result) == len(result.content) // result.size
+    # TODO: Re-enable when allow_unreachable option is added to regular_array_contents().
+    # if result.size > 0:
+    #     assert len(result.content) % result.size == 0
+    #     assert len(result) == len(result.content) // result.size
 
     # Assert content
     content = opts.kwargs.get('content', None)
@@ -140,6 +142,30 @@ def test_draw_default_max_zeros_length() -> None:
         lambda c: c.size == 0 and len(c) == 10,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
+
+
+def test_draw_unreachable() -> None:
+    """Assert that RegularArray with unreachable data can be drawn."""
+    content = NumpyArray(np.arange(15))
+    find(
+        st_ak.contents.regular_array_contents(content),
+        lambda c: c.size > 0 and len(c.content) % c.size != 0,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_shrink_no_unreachable() -> None:
+    """Assert that RegularArray shrinks to no unreachable data."""
+    # Content of length 15: divisors > 1 are [3, 5, 15],
+    # non-divisors > 1 are [2, 4, 6, 7, ...].
+    # Shrink should pick 3 (smallest divisor > 1), not 2 (non-divisor).
+    content = NumpyArray(np.arange(15))
+    c = find(
+        st_ak.contents.regular_array_contents(content),
+        lambda c: c.size > 1,
+    )
+    assert c.size == 3
+    assert len(c.content) % c.size == 0
 
 
 def test_draw_from_contents_size_zero() -> None:
