@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/pr/59/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/pr/59/strategies/constructors/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/pr/59/strategies/contents/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/pr/59/strategies/numpy/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/pr/59/strategies/builtins/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/pr/59/util/</loc>
+      </url>
+</urlset>
