@@ -92,6 +92,7 @@ def _st_group_sizes(
     min_group_size: int = 0,
     max_group_size: int | None = None,
     max_length: int | None = None,
+    allow_non_divisors: bool = False,
 ) -> st.SearchStrategy[int]:
     """Strategy for the size parameter of a RegularArray.
 
@@ -117,6 +118,10 @@ def _st_group_sizes(
     max_group_size
         Upper bound on the group size. ``None`` means no constraint beyond
         ``total_items``.
+    allow_non_divisors
+        When ``False`` (the default), only divisors of ``total_items`` are
+        returned. When ``True``, non-divisors are also included but listed after
+        divisors so that shrinking prefers divisors (no unreachable data).
     max_length
         Upper bound on the number of groups. ``None`` means no constraint.
     """
@@ -130,9 +135,16 @@ def _st_group_sizes(
     effective_min = max(min_group_size, 1)
     if max_length is not None:
         effective_min = max(effective_min, -(-total_items // max_length))
-    group_sizes = [
+    divisors = [
         d for d in range(effective_min, max_group_size + 1) if total_items % d == 0
     ]
+    if not allow_non_divisors:
+        group_sizes = divisors
+    else:
+        non_divisors = [
+            d for d in range(effective_min, max_group_size + 1) if total_items % d != 0
+        ]
+        group_sizes = divisors + non_divisors
     if not group_sizes:
         return st.just(0)
     return st.sampled_from(group_sizes)

@@ -14,6 +14,7 @@ class GroupSizesKwargs(TypedDict, total=False):
     min_group_size: int
     max_group_size: int | None
     max_length: int | None
+    allow_non_divisors: bool
 
 
 @st.composite
@@ -35,6 +36,7 @@ def group_sizes_kwargs(draw: st.DrawFn) -> GroupSizesKwargs:
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'max_length': st.integers(min_value=0, max_value=total_items),
+                'allow_non_divisors': st.booleans(),
             },
         )
     )
@@ -57,6 +59,7 @@ def test_group_sizes(data: st.DataObject) -> None:
     min_group_size = kwargs.get('min_group_size', 0)
     max_group_size = kwargs.get('max_group_size')
     max_length = kwargs.get('max_length')
+    allow_non_divisors = kwargs.get('allow_non_divisors', False)
 
     # Result is bounded by min/max_group_size
     assert result >= 0
@@ -71,8 +74,8 @@ def test_group_sizes(data: st.DataObject) -> None:
     if total_items > 0:
         assert result <= total_items
 
-    # Result divides total_items when both are positive
-    if total_items > 0 and result > 0:
+    # Result divides total_items when both are positive and non-divisors disallowed
+    if total_items > 0 and result > 0 and not allow_non_divisors:
         assert total_items % result == 0
 
     # max_length is respected when result > 0
@@ -108,5 +111,26 @@ def test_draw_total_items_zero() -> None:
     find(
         _st_group_sizes(0, max_group_size=max_group_size),
         lambda s: s == max_group_size,
+        settings=settings(phases=[Phase.generate]),
+    )
+
+
+def test_shrink_divisors_first() -> None:
+    """Assert that with allow_non_divisors, shrinking prefers divisors."""
+    # total_items=12, min_group_size=5: divisors >= 5 are [6, 12],
+    # non-divisors >= 5 are [5, 7, 8, 9, 10, 11].
+    # Shrink should pick 6 (first divisor), not 5 (smaller non-divisor).
+    s = find(
+        _st_group_sizes(12, min_group_size=5, allow_non_divisors=True),
+        lambda s: s > 0,
+    )
+    assert s == 6
+
+
+def test_draw_non_divisor() -> None:
+    """Assert that a non-divisor can be drawn when allow_non_divisors is True."""
+    find(
+        _st_group_sizes(12, allow_non_divisors=True),
+        lambda s: s > 0 and 12 % s != 0,
         settings=settings(phases=[Phase.generate]),
     )
