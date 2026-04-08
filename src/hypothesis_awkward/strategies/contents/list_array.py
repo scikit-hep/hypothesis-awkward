@@ -65,8 +65,12 @@ def _st_starts_stops(
     content_len: int,
     *,
     max_length: int | None = None,
+    allow_unreachable: bool = True,
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops of a ``ListArray``.
+
+    Shrinks toward no unreachable data (``starts[0] == 0`` and
+    ``stops[-1] == content_len``).
 
     Parameters
     ----------
@@ -74,7 +78,29 @@ def _st_starts_stops(
         Length of the content array.
     max_length
         Upper bound on the number of lists (i.e., ``len(starts)``).
+    allow_unreachable
+        No unreachable data is possible if ``False``.
     """
+    if content_len == 0 or not allow_unreachable:
+        return draw(_st_starts_stops_no_unreachable(content_len, max_length=max_length))
+    if max_length is not None and max_length == 0:
+        return [], []
+    return draw(
+        st.one_of(
+            _st_starts_stops_no_unreachable(content_len, max_length=max_length),
+            _st_starts_stops_unreachable(content_len, max_length=max_length),
+        )
+    )
+
+
+@st.composite
+def _st_starts_stops_no_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with no unreachable data."""
     ml = max_length if max_length is not None else content_len
     n = draw(st.integers(min_value=0, max_value=ml))
     if n == 0:
@@ -92,6 +118,30 @@ def _st_starts_stops(
             )
         )
         offsets_list = [0, *splits, content_len]
+    return offsets_list[:-1], offsets_list[1:]
+
+
+@st.composite
+def _st_starts_stops_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with unreachable data.
+
+    Guarantees at least unreachable tail.
+    """
+    max_size = None if max_length is None else max_length + 1
+    offsets_list = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len - 1),
+                min_size=2,
+                max_size=max_size,
+            )
+        )
+    )
     return offsets_list[:-1], offsets_list[1:]
 
 

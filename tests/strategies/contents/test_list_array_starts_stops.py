@@ -12,6 +12,7 @@ class StartsStopsKwargs(TypedDict, total=False):
 
     content_len: int
     max_length: int | None
+    allow_unreachable: bool
 
 
 @st.composite
@@ -26,6 +27,7 @@ def starts_stops_kwargs(draw: st.DrawFn) -> StartsStopsKwargs:
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'max_length': st.integers(min_value=0, max_value=content_len),
+                'allow_unreachable': st.booleans(),
             },
         )
     )
@@ -46,6 +48,7 @@ def test_starts_stops(data: st.DataObject) -> None:
     # Assert the options were effective
     content_len = kwargs['content_len']
     max_length = kwargs.get('max_length')
+    allow_unreachable = kwargs.get('allow_unreachable', True)
 
     # Starts and stops have the same length and respect max_length
     assert len(starts) == len(stops) <= sc(max_length)
@@ -58,10 +61,11 @@ def test_starts_stops(data: st.DataObject) -> None:
     assert all(0 <= s <= content_len for s in starts)
     assert all(0 <= s <= content_len for s in stops)
 
-    # starts[0] == 0 and stops[-1] == content_len (no unreachable data)
-    if len(starts) > 0:
-        assert starts[0] == 0
-        assert stops[-1] == content_len
+    if not allow_unreachable:
+        # No unreachable data: starts[0] == 0 and stops[-1] == content_len
+        if len(starts) > 0:
+            assert starts[0] == 0
+            assert stops[-1] == content_len
 
     # Contiguous: stops[i] == starts[i+1]
     for i in range(len(starts) - 1):
@@ -86,6 +90,32 @@ def test_draw_content_len_zero() -> None:
     )
     assert all(s == 0 for s in starts)
     assert all(s == 0 for s in stops)
+
+
+def test_draw_unreachable_head() -> None:
+    """Assert that starts/stops with unreachable head data can be drawn."""
+    find(
+        _st_starts_stops(10),
+        lambda ss: len(ss[0]) >= 1 and ss[0][0] > 0,
+    )
+
+
+def test_draw_unreachable_tail() -> None:
+    """Assert that starts/stops with unreachable tail data can be drawn."""
+    find(
+        _st_starts_stops(10),
+        lambda ss: len(ss[0]) >= 1 and ss[1][-1] < 10,
+    )
+
+
+def test_shrink_no_unreachable() -> None:
+    """Assert that starts/stops shrink toward no unreachable data."""
+    starts, stops = find(
+        _st_starts_stops(10),
+        lambda ss: len(ss[0]) >= 2,
+    )
+    assert starts[0] == 0
+    assert stops[-1] == 10
 
 
 def test_shrink_content_len_zero() -> None:
