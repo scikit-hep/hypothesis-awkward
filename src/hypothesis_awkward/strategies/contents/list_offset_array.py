@@ -52,25 +52,40 @@ def list_offset_array_contents(
             pass
     assert isinstance(content, Content)
     content_len = len(content)
-    ml = max_length if max_length is not None else content_len
-    n = draw(st.integers(min_value=0, max_value=ml))
-    if n == 0:
-        offsets_list = [0]
-    elif content_len == 0:
-        offsets_list = [0] * (n + 1)
-    else:
-        splits = sorted(
-            draw(
-                st.lists(
-                    st.integers(min_value=0, max_value=content_len),
-                    min_size=n - 1,
-                    max_size=n - 1,
-                )
-            )
-        )
-        offsets_list = [0, *splits, content_len]
+    offsets_list = draw(_st_offsets(content_len, max_length=max_length))
     offsets = np.array(offsets_list, dtype=np.int64)
     return ListOffsetArray(ak.index.Index64(offsets), content)
+
+
+@st.composite
+def _st_offsets(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> list[int]:
+    """Strategy for offsets of a ``ListOffsetArray``.
+
+    Parameters
+    ----------
+    content_len
+        Length of the content array.
+    max_length
+        Upper bound on the length of the ``ListOffsetArray`` (i.e., ``len(result)``). The
+        offsets (the return value) are longer by one.
+    """
+    if max_length is not None:
+        if max_length == 0:
+            return [0]
+        if max_length == 1:
+            return [0, content_len]
+    max_size = None if max_length is None else max_length - 1
+    middle = sorted(
+        draw(
+            st.lists(st.integers(min_value=0, max_value=content_len), max_size=max_size)
+        )
+    )
+    return [0, *middle, content_len]
 
 
 @st.composite

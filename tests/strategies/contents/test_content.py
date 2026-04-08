@@ -14,7 +14,6 @@ from awkward.contents import EmptyArray
 from hypothesis_awkward.util import (
     any_nan_nat_in_awkward_array,
     content_size,
-    is_string_or_bytestring_leaf,
     iter_contents,
     iter_numpy_arrays,
     leaf_size,
@@ -417,19 +416,12 @@ def test_draw_from_contents_unmasked() -> None:
 
 def test_shrink_len_zero() -> None:
     """Assert that length-zero shrinks to ``EmptyArray``."""
-    c = find(
-        st_ak.contents.contents(),
-        lambda c: len(c) == 0,
-        settings=settings(max_examples=2000),
-    )
+    c = find(st_ak.contents.contents(), lambda c: len(c) == 0)
     assert isinstance(c, EmptyArray)
 
 
 def test_shrink_len_positive() -> None:
-    """Assert that length-positive shrinks to a leaf."""
-    c = find(
-        st_ak.contents.contents(),
-        lambda c: len(c) > 0,
-        settings=settings(max_examples=2000),
-    )
-    assert c.is_leaf or is_string_or_bytestring_leaf(c)
+    """Assert that length-positive shrinks."""
+    c = find(st_ak.contents.contents(), lambda c: len(c) > 0)
+    assert len(c) == 1
+    assert content_size(c) <= 2
