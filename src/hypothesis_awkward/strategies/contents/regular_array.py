@@ -139,13 +139,21 @@ def _st_group_sizes(
     all_sizes = range(max_group_size, effective_min - 1, -1)
     divisors = [d for d in all_sizes if total_items % d == 0]
     if not allow_non_divisors:
-        group_sizes = divisors
-    else:
-        non_divisors = [d for d in all_sizes if total_items % d != 0]
-        group_sizes = divisors + non_divisors
-    if not group_sizes:
+        if not divisors:
+            return st.just(0)
+        return st.sampled_from(divisors)
+    non_divisors = [d for d in all_sizes if total_items % d != 0]
+    if not divisors and not non_divisors:
         return st.just(0)
-    return st.sampled_from(group_sizes)
+    if not non_divisors:
+        return st.sampled_from(divisors)
+    if not divisors:
+        return st.sampled_from(non_divisors)
+    # Use one_of so that divisor/non-divisor is a separate IR node from the
+    # specific size. This lets Hypothesis shrink the two decisions independently,
+    # which is more efficient for complex nested layouts where RegularArray is
+    # one node among many.
+    return st.one_of(st.sampled_from(divisors), st.sampled_from(non_divisors))
 
 
 @st.composite
