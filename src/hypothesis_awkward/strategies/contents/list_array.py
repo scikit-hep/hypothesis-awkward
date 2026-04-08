@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
 
@@ -52,7 +51,30 @@ def list_array_contents(
         case Content():
             pass
     assert isinstance(content, Content)
-    content_len = len(content)
+    starts_list, stops_list = draw(
+        _st_starts_stops(len(content), max_length=max_length)
+    )
+    starts = ak.index.Index64(starts_list)
+    stops = ak.index.Index64(stops_list)
+    return ListArray(starts, stops, content)
+
+
+@st.composite
+def _st_starts_stops(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops of a ``ListArray``.
+
+    Parameters
+    ----------
+    content_len
+        Length of the content array.
+    max_length
+        Upper bound on the number of lists (i.e., ``len(starts)``).
+    """
     ml = max_length if max_length is not None else content_len
     n = draw(st.integers(min_value=0, max_value=ml))
     if n == 0:
@@ -70,10 +92,7 @@ def list_array_contents(
             )
         )
         offsets_list = [0, *splits, content_len]
-    offsets = np.array(offsets_list, dtype=np.int64)
-    starts = ak.index.Index64(offsets[:-1])
-    stops = ak.index.Index64(offsets[1:])
-    return ListArray(starts, stops, content)
+    return offsets_list[:-1], offsets_list[1:]
 
 
 @st.composite
