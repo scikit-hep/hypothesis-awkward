@@ -92,6 +92,10 @@ def _st_starts_stops(
     ml = max_length if max_length is not None else content_len
     if ml >= 2:
         branches.append(_st_starts_stops_gaps(content_len, max_length=max_length))
+        if content_len >= 2:
+            branches.append(
+                _st_starts_stops_overlapping(content_len, max_length=max_length)
+            )
     return draw(st.one_of(branches))
 
 
@@ -172,6 +176,36 @@ def _st_starts_stops_gaps(
     starts = [values[2 * i] for i in range(n)]
     stops = [values[2 * i + 1] for i in range(n)]
     if not any(stops[i] < starts[i + 1] for i in range(n - 1)):
+        reject()
+    return starts, stops
+
+
+@st.composite
+def _st_starts_stops_overlapping(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with at least one overlapping pair.
+
+    Guarantees at least one ``starts[i + 1] < stops[i]``.
+    """
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=2, max_value=ml))
+    starts = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len),
+                min_size=n,
+                max_size=n,
+            )
+        )
+    )
+    stops = [
+        draw(st.integers(min_value=starts[i], max_value=content_len)) for i in range(n)
+    ]
+    if not any(starts[i + 1] < stops[i] for i in range(n - 1)):
         reject()
     return starts, stops
 

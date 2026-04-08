@@ -141,6 +141,24 @@ def test_shrink_no_gap() -> None:
         assert stops[i] == starts[i + 1]
 
 
+def test_draw_overlap() -> None:
+    """Assert that starts/stops with overlapping sublists can be drawn."""
+    find(
+        _st_starts_stops(10),
+        lambda ss: any(ss[0][i + 1] < ss[1][i] for i in range(len(ss[0]) - 1)),
+    )
+
+
+def test_shrink_no_overlap() -> None:
+    """Assert that starts/stops shrink toward no overlaps."""
+    starts, stops = find(
+        _st_starts_stops(10),
+        lambda ss: len(ss[0]) >= 2,
+    )
+    for i in range(len(starts) - 1):
+        assert starts[i + 1] >= stops[i]
+
+
 def test_shrink_content_len_zero() -> None:
     """Assert that starts/stops shrink to empty with zero content length."""
     starts, stops = find(
