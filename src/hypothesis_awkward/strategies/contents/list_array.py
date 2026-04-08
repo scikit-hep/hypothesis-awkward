@@ -96,6 +96,9 @@ def _st_starts_stops(
             branches.append(
                 _st_starts_stops_overlapping(content_len, max_length=max_length)
             )
+        branches.append(
+            _st_starts_stops_out_of_order(content_len, max_length=max_length)
+        )
     return draw(st.one_of(branches))
 
 
@@ -206,6 +209,34 @@ def _st_starts_stops_overlapping(
         draw(st.integers(min_value=starts[i], max_value=content_len)) for i in range(n)
     ]
     if not any(starts[i + 1] < stops[i] for i in range(n - 1)):
+        reject()
+    return starts, stops
+
+
+@st.composite
+def _st_starts_stops_out_of_order(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with non-monotonic starts.
+
+    Guarantees at least one ``starts[i] > starts[i + 1]``.
+    """
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=2, max_value=ml))
+    pairs = [
+        draw(
+            st.tuples(st.integers(0, content_len), st.integers(0, content_len)).filter(
+                lambda p: p[0] <= p[1]
+            )
+        )
+        for _ in range(n)
+    ]
+    starts = [p[0] for p in pairs]
+    stops = [p[1] for p in pairs]
+    if not any(starts[i] > starts[i + 1] for i in range(n - 1)):
         reject()
     return starts, stops
 
