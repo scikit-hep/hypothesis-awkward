@@ -20,7 +20,12 @@ def list_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListArray:
-    """Strategy for ListArray Content wrapping child Content.
+    """Strategy for ``ListArray``.
+
+    This strategy generates a ``ListArray`` with the given content. It produces all
+    valid ``ListArray`` layouts including unreachable data, gaps, overlapping sublists,
+    and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
+    unreachable data.
 
     Parameters
     ----------
