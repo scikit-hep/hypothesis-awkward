@@ -158,17 +158,18 @@ def _st_group_sizes(
         return 0
 
     reachable_only = reachable_allowed and not unreachable_allowed
-
-    # Instead of drawing from concatenated divisors and non-divisors, draw a boolean to
-    # introduce an explicit branch for efficient shrinking. ``not`` is for shrinking
-    # toward non unreachable data.
-    reachable = reachable_only or (reachable_allowed and not draw(st.booleans()))
-
-    if reachable:
+    if reachable_only:
         return draw(st.sampled_from(divisors))
 
     non_divisors = [d for d in all_sizes if d not in divisors]
-    return draw(st.sampled_from(non_divisors))
+
+    unreachable_only = unreachable_allowed and not reachable_allowed
+    if unreachable_only:
+        return draw(st.sampled_from(non_divisors))
+
+    # Instead of drawing from concatenated divisors and non-divisors, draw ``one_of`` to
+    # introduce an explicit branch for shrinking toward reachable data.
+    return draw(st.one_of(st.sampled_from(divisors), st.sampled_from(non_divisors)))
 
 
 @st.composite
