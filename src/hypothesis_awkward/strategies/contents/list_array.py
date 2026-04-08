@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from hypothesis import assume
+from hypothesis import assume, reject
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -85,12 +85,14 @@ def _st_starts_stops(
         return draw(_st_starts_stops_no_unreachable(content_len, max_length=max_length))
     if max_length is not None and max_length == 0:
         return [], []
-    return draw(
-        st.one_of(
-            _st_starts_stops_no_unreachable(content_len, max_length=max_length),
-            _st_starts_stops_unreachable(content_len, max_length=max_length),
-        )
-    )
+    branches = [
+        _st_starts_stops_no_unreachable(content_len, max_length=max_length),
+        _st_starts_stops_unreachable(content_len, max_length=max_length),
+    ]
+    ml = max_length if max_length is not None else content_len
+    if ml >= 2:
+        branches.append(_st_starts_stops_gaps(content_len, max_length=max_length))
+    return draw(st.one_of(branches))
 
 
 @st.composite
@@ -143,6 +145,35 @@ def _st_starts_stops_unreachable(
         )
     )
     return offsets_list[:-1], offsets_list[1:]
+
+
+@st.composite
+def _st_starts_stops_gaps(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with at least one gap between sublists.
+
+    Guarantees at least one ``stops[i] < starts[i + 1]``.
+    """
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=2, max_value=ml))
+    values = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len),
+                min_size=2 * n,
+                max_size=2 * n,
+            )
+        )
+    )
+    starts = [values[2 * i] for i in range(n)]
+    stops = [values[2 * i + 1] for i in range(n)]
+    if not any(stops[i] < starts[i + 1] for i in range(n - 1)):
+        reject()
+    return starts, stops
 
 
 @st.composite

@@ -67,9 +67,14 @@ def test_starts_stops(data: st.DataObject) -> None:
             assert starts[0] == 0
             assert stops[-1] == content_len
 
-    # Contiguous: stops[i] == starts[i+1]
+    # Monotonic starts
     for i in range(len(starts) - 1):
-        assert stops[i] == starts[i + 1]
+        assert starts[i] <= starts[i + 1]
+
+    if not allow_unreachable:
+        # Contiguous: stops[i] == starts[i+1]
+        for i in range(len(starts) - 1):
+            assert stops[i] == starts[i + 1]
 
 
 def test_draw_max_length() -> None:
@@ -116,6 +121,24 @@ def test_shrink_no_unreachable() -> None:
     )
     assert starts[0] == 0
     assert stops[-1] == 10
+
+
+def test_draw_gap() -> None:
+    """Assert that starts/stops with a gap between sublists can be drawn."""
+    find(
+        _st_starts_stops(10),
+        lambda ss: any(ss[1][i] < ss[0][i + 1] for i in range(len(ss[0]) - 1)),
+    )
+
+
+def test_shrink_no_gap() -> None:
+    """Assert that starts/stops shrink toward no gaps (contiguous)."""
+    starts, stops = find(
+        _st_starts_stops(10),
+        lambda ss: len(ss[0]) >= 2,
+    )
+    for i in range(len(starts) - 1):
+        assert stops[i] == starts[i + 1]
 
 
 def test_shrink_content_len_zero() -> None:
