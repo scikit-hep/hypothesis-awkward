@@ -1135,7 +1135,7 @@ constructors"</a>.</p>
               <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;list_array_contents&lt;/span&gt;" href="./#hypothesis_awkward.strategies.contents.list_array_contents">list_array_contents</a></code></td>
               <td>
                 <div class="doc-md-description">
-                  <p>Strategy for ListArray Content wrapping child Content.</p>
+                  <p>Strategy for <code>ListArray</code>.</p>
                 </div>
               </td>
             </tr>
@@ -2357,7 +2357,11 @@ effective when size is zero.</p>
 
     <div class="doc doc-contents ">
 
-        <p>Strategy for ListArray Content wrapping child Content.</p>
+        <p>Strategy for <code>ListArray</code>.</p>
+<p>This strategy generates a <code>ListArray</code> with the given content. It produces all
+valid <code>ListArray</code> layouts including unreachable data, gaps, overlapping sublists,
+and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
+unreachable data.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
