@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
-from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListOffsetArray
-from hypothesis_awkward.util.awkward import content_size
+from hypothesis_awkward.util.safe import safe_min
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -21,7 +20,7 @@ def list_offset_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListOffsetArray:
-    """Strategy for ListOffsetArray Content wrapping child Content.
+    """Strategy for ``ListOffsetArray``.
 
     Parameters
     ----------
@@ -84,14 +83,10 @@ def list_offset_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:
-    """Strategy that generates a variable-length list layout within a size limit.
+    """Strategy for inner ``ListOffsetArray`` to be drawn by an outer layout strategy.
 
-    Draws the number of lists ``n`` first and computes the offset array size
-    (``n + 1``). The remainder of ``max_size`` after this deduction is passed
-    to ``content`` to generate the inner content. The result is validated
-    against ``max_size`` via ``assume()``.
-
-    Called by ``contents()`` during recursive tree generation.
+    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    function that returns a strategy for the inner layout of the ``ListOffsetArray``.
 
     Parameters
     ----------
@@ -103,14 +98,32 @@ def list_offset_array_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``max_size - 1`` when ``None``.
+        Upper bound on ``len(result)``, i.e., ``len(result.offsets) - 1``.
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = list_offset_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, ListOffsetArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
-    ml = max_length if max_length is not None else max_size - 1
-    n = draw(st.integers(min_value=0, max_value=ml))
-    overhead = n + 1
-    max_content_size = max(max_size - overhead, 0)
+    max_length = safe_min((max_length, max_size - 1))
+    length = draw(st.integers(min_value=0, max_value=max_length))
+    offsets_size = length + 1
+    max_content_size = max_size - offsets_size
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
-    result = draw(list_offset_array_contents(st_content, max_length=n))
-    assume(content_size(result) <= max_size)
-    return result
+
+    # TODO: Add `min_length=length` when `min_length` is implemented.
+    return draw(list_offset_array_contents(st_content, max_length=length))
