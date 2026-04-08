@@ -116,7 +116,7 @@ def test_draw_max_zeros_length() -> None:
 def test_draw_max_length() -> None:
     """Assert that max_length constrains the RegularArray length."""
     max_length = 10
-    content = st_ak.contents.numpy_array_contents(max_size=30)
+    content = st_ak.contents.numpy_array_contents(min_size=10, max_size=30)
     find(
         st_ak.contents.regular_array_contents(content, max_length=max_length),
         lambda c: c.size > 0 and len(c) == max_length,
@@ -156,15 +156,15 @@ def test_draw_unreachable() -> None:
 
 def test_shrink_no_unreachable() -> None:
     """Assert that RegularArray shrinks to no unreachable data."""
-    # Content of length 15: divisors > 1 are [3, 5, 15],
-    # non-divisors > 1 are [2, 4, 6, 7, ...].
-    # Shrink should pick 3 (smallest divisor > 1), not 2 (non-divisor).
+    # Content of length 15: divisors in (1, 15) are [5, 3],
+    # non-divisors in (1, 15) are [14, 13, ..., 6, 4, 2].
+    # Shrink should pick 5 (largest divisor < 15), not 14 (largest non-divisor).
     content = NumpyArray(np.arange(15))
     c = find(
         st_ak.contents.regular_array_contents(content),
-        lambda c: c.size > 1,
+        lambda c: 1 < c.size < 15,
     )
-    assert c.size == 3
+    assert c.size == 5
     assert len(c.content) % c.size == 0
 
 

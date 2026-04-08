@@ -174,7 +174,7 @@ def test_draw_integer_primitive() -> None:
     find(
         st_ak.numpy_forms(),
         lambda f: f.primitive in ('int8', 'int16', 'int32', 'int64'),
-        settings=settings(phases=[Phase.generate]),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 

@@ -83,16 +83,16 @@ def test_group_sizes(data: st.DataObject) -> None:
         assert total_items // result <= max_length
 
 
-def test_shrink_to_one() -> None:
-    """Assert that positive size shrinks to 1."""
+def test_shrink_to_total_items() -> None:
+    """Assert that positive size shrinks to total_items (fewest partitions)."""
     s = find(_st_group_sizes(12, max_group_size=12), lambda s: s > 0)
-    assert s == 1
+    assert s == 12
 
 
-def test_shrink_to_min_group_size() -> None:
-    """Assert that positive size shrinks to the smallest divisor >= min_group_size."""
-    # total_items=12, min_group_size=5: divisors >= 5 are [6, 12]
-    s = find(_st_group_sizes(12, min_group_size=5), lambda s: s > 0)
+def test_shrink_to_max_divisor() -> None:
+    """Assert that positive size shrinks to the largest divisor <= max_group_size."""
+    # total_items=12, max_group_size=11: divisors <= 11 are [6, 4, 3, 2, 1]
+    s = find(_st_group_sizes(12, max_group_size=11), lambda s: s > 0)
     assert s == 6
 
 
@@ -117,11 +117,11 @@ def test_draw_total_items_zero() -> None:
 
 def test_shrink_divisors_first() -> None:
     """Assert that with allow_non_divisors, shrinking prefers divisors."""
-    # total_items=12, min_group_size=5: divisors >= 5 are [6, 12],
-    # non-divisors >= 5 are [5, 7, 8, 9, 10, 11].
-    # Shrink should pick 6 (first divisor), not 5 (smaller non-divisor).
+    # total_items=12, max_group_size=11: divisors <= 11 are [6, 4, 3, 2, 1],
+    # non-divisors <= 11 are [11, 10, 9, 8, 7, 5].
+    # Shrink should pick 6 (largest divisor), not 11 (largest non-divisor).
     s = find(
-        _st_group_sizes(12, min_group_size=5, allow_non_divisors=True),
+        _st_group_sizes(12, max_group_size=11, allow_non_divisors=True),
         lambda s: s > 0,
     )
     assert s == 6
