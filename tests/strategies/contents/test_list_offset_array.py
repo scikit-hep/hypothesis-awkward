@@ -122,6 +122,37 @@ def test_draw_empty_sublist() -> None:
     )
 
 
+def test_draw_unreachable() -> None:
+    """Assert that ListOffsetArray with unreachable data can be drawn."""
+    content = NumpyArray(np.arange(10))
+    find(
+        st_ak.contents.list_offset_array_contents(content),
+        lambda c: c.offsets[0] > 0 or c.offsets[-1] < len(c.content),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_shrink_no_unreachable() -> None:
+    """Assert that ListOffsetArray shrinks to no unreachable data."""
+    content = NumpyArray(np.arange(10))
+    c = find(
+        st_ak.contents.list_offset_array_contents(content),
+        lambda c: len(c) >= 2,
+    )
+    assert c.offsets[0] == 0
+    assert c.offsets[-1] == len(c.content)
+
+
+def test_shrink_content_len_zero() -> None:
+    """Assert that ListOffsetArray shrinks to zero lists with no content."""
+    content = NumpyArray(np.array([], dtype=np.int64))
+    c = find(
+        st_ak.contents.list_offset_array_contents(content),
+        lambda c: True,
+    )
+    assert len(c) == 0
+
+
 def test_draw_from_contents() -> None:
     """Assert that ListOffsetArray can be drawn from `contents()`."""
     find(
