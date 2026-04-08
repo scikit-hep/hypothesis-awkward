@@ -2203,6 +2203,8 @@ generates any scalar dtype supported by Awkward Array is used.</p>
     <div class="doc doc-contents ">
 
         <p>Strategy for <code>RegularArray</code>.</p>
+<p>This strategy generates a <code>RegularArray</code> with the given content. It shrinks toward
+a shorter length (larger <code>size</code>) with no unreachable data.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2225,8 +2227,7 @@ generates any scalar dtype supported by Awkward Array is used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Child content. Can be a strategy for Content, a concrete Content instance, or
-<code>None</code> to draw from <code>contents()</code>.</p>
+                <p>content or strategy for the content. If <code>None</code>, draw from <code>contents()</code>.</p>
               </div>
             </td>
             <td>
@@ -2242,8 +2243,8 @@ generates any scalar dtype supported by Awkward Array is used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the length of each element. Defaults to <code>len(content)</code>
-when <code>None</code>.</p>
+                <p>Upper bound on the size parameter of the <code>RegularArray</code>. If <code>None</code>,
+<code>len(content)</code> is the upper bound.</p>
               </div>
             </td>
             <td>
@@ -2259,8 +2260,8 @@ when <code>None</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the number of elements when each element is empty, i.e., when
-size is zero. Defaults to <code>len(content)</code> when <code>None</code>.</p>
+                <p>Upper bound on the <code>zeros_length</code> parameter of the <code>RegularArray</code>. Only
+effective when size is zero.</p>
               </div>
             </td>
             <td>
@@ -2276,11 +2277,34 @@ size is zero. Defaults to <code>len(content)</code> when <code>None</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the number of groups, i.e., <code>len(result)</code>.</p>
+                <p>Upper bound on the length of the <code>RegularArray</code> (i.e., <code>len(result)</code>).</p>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="awkward.contents.RegularArray">RegularArray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                
+              </div>
             </td>
           </tr>
       </tbody>
