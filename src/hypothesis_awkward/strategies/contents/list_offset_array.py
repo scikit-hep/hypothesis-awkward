@@ -1,13 +1,12 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
-from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListOffsetArray
-from hypothesis_awkward.util.awkward import content_size
+from hypothesis_awkward.util.safe import safe_min
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -21,7 +20,7 @@ def list_offset_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListOffsetArray:
-    """Strategy for ListOffsetArray Content wrapping child Content.
+    """Strategy for ``ListOffsetArray``.
 
     Parameters
     ----------
@@ -53,25 +52,90 @@ def list_offset_array_contents(
             pass
     assert isinstance(content, Content)
     content_len = len(content)
-    ml = max_length if max_length is not None else content_len
-    n = draw(st.integers(min_value=0, max_value=ml))
-    if n == 0:
-        offsets_list = [0]
-    elif content_len == 0:
-        offsets_list = [0] * (n + 1)
-    else:
-        splits = sorted(
-            draw(
-                st.lists(
-                    st.integers(min_value=0, max_value=content_len),
-                    min_size=n - 1,
-                    max_size=n - 1,
-                )
-            )
-        )
-        offsets_list = [0, *splits, content_len]
+    offsets_list = draw(_st_offsets(content_len, max_length=max_length))
     offsets = np.array(offsets_list, dtype=np.int64)
     return ListOffsetArray(ak.index.Index64(offsets), content)
+
+
+@st.composite
+def _st_offsets(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+    allow_unreachable: bool = True,
+) -> list[int]:
+    """Strategy for offsets of a ``ListOffsetArray``.
+
+    Shrinks toward no unreachable data (``offsets[0] == 0`` and
+    ``offsets[-1] == content_len``).
+
+    Parameters
+    ----------
+    content_len
+        Length of the content array.
+    max_length
+        Upper bound on the length of the ``ListOffsetArray`` (i.e.,
+        ``len(offsets) - 1``).
+    allow_unreachable
+        No unreachable data is possible if ``False``.
+    """
+    if content_len == 0 or not allow_unreachable:
+        return draw(_st_offsets_no_unreachable(content_len, max_length=max_length))
+    if max_length is not None and max_length == 0:
+        return [draw(st.integers(min_value=0, max_value=content_len))]
+    return draw(
+        st.one_of(
+            _st_offsets_no_unreachable(content_len, max_length=max_length),
+            _st_offsets_unreachable(content_len, max_length=max_length),
+        )
+    )
+
+
+@st.composite
+def _st_offsets_no_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> list[int]:
+    """Strategy for offsets with no unreachable data."""
+    if content_len == 0:
+        ml = None if max_length is None else max_length + 1
+        return draw(st.lists(st.just(0), min_size=1, max_size=ml))
+    if max_length is not None:
+        if max_length == 0:
+            return [0]
+        if max_length == 1:
+            return [0, content_len]
+    max_size = None if max_length is None else max_length - 1
+    middle = sorted(
+        draw(
+            st.lists(st.integers(min_value=0, max_value=content_len), max_size=max_size)
+        )
+    )
+    return [0, *middle, content_len]
+
+
+@st.composite
+def _st_offsets_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> list[int]:
+    """Strategy for offsets with unreachable data (at least unreachable tail)."""
+    max_size = None if max_length is None else max_length + 1
+    offsets = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len - 1),
+                min_size=1,
+                max_size=max_size,
+            )
+        )
+    )
+    return offsets
 
 
 @st.composite
@@ -84,14 +148,10 @@ def list_offset_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:
-    """Strategy that generates a variable-length list layout within a size limit.
+    """Strategy for inner ``ListOffsetArray`` to be drawn by an outer layout strategy.
 
-    Draws the number of lists ``n`` first and computes the offset array size
-    (``n + 1``). The remainder of ``max_size`` after this deduction is passed
-    to ``content`` to generate the inner content. The result is validated
-    against ``max_size`` via ``assume()``.
-
-    Called by ``contents()`` during recursive tree generation.
+    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    function that returns a strategy for the inner layout of the ``ListOffsetArray``.
 
     Parameters
     ----------
@@ -103,14 +163,32 @@ def list_offset_array_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``max_size - 1`` when ``None``.
+        Upper bound on ``len(result)``, i.e., ``len(result.offsets) - 1``.
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = list_offset_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, ListOffsetArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
-    ml = max_length if max_length is not None else max_size - 1
-    n = draw(st.integers(min_value=0, max_value=ml))
-    overhead = n + 1
-    max_content_size = max(max_size - overhead, 0)
+    max_length = safe_min((max_length, max_size - 1))
+    length = draw(st.integers(min_value=0, max_value=max_length))
+    offsets_size = length + 1
+    max_content_size = max_size - offsets_size
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
-    result = draw(list_offset_array_contents(st_content, max_length=n))
-    assume(content_size(result) <= max_size)
-    return result
+
+    # TODO: Add `min_length=length` when `min_length` is implemented.
+    return draw(list_offset_array_contents(st_content, max_length=length))

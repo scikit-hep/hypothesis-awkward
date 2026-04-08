@@ -93,14 +93,16 @@ def regular_array_contents(
     return RegularArray(content, size=size)
 
 
+@st.composite
 def _st_group_sizes(
+    draw: st.DrawFn,
     total_items: int,
     *,
     min_group_size: int = 0,
     max_group_size: int | None = None,
     max_length: int | None = None,
     allow_non_divisors: bool = True,
-) -> st.SearchStrategy[int]:
+) -> int:
     """Strategy for the size parameter of a ``RegularArray``.
 
     This strategy generates the size parameter for a ``RegularArray`` given the total
@@ -128,32 +130,46 @@ def _st_group_sizes(
     """
     if max_group_size is None:
         max_group_size = total_items
+
     if total_items == 0:
-        return st.integers(min_value=min_group_size, max_value=max_group_size)
-    max_group_size = min(total_items, max_group_size)
+        # Any size is possible without unreachable data.
+        return draw(st.integers(min_value=min_group_size, max_value=max_group_size))
+
     if max_length is not None and max_length == 0:
-        return st.just(0)
-    effective_min = max(min_group_size, 1)
+        return 0
+
+    # Finalize the bounds for finite return values.
+    max_group_size = min(total_items, max_group_size)
+    min_group_size = max(min_group_size, 1)
     if max_length is not None:
-        effective_min = max(effective_min, -(-total_items // max_length))
-    all_sizes = range(max_group_size, effective_min - 1, -1)
+        min_group_size = max(min_group_size, -(-total_items // max_length))
+
+    # Reversed for shrinking toward larger sizes (fewer groups).
+    all_sizes = range(max_group_size, min_group_size - 1, -1)
+    if not all_sizes:
+        return 0
+
+    # No unreachable data when the size is a divisor.
     divisors = [d for d in all_sizes if total_items % d == 0]
-    if not allow_non_divisors:
-        if not divisors:
-            return st.just(0)
-        return st.sampled_from(divisors)
-    non_divisors = [d for d in all_sizes if total_items % d != 0]
-    if not divisors and not non_divisors:
-        return st.just(0)
-    if not non_divisors:
-        return st.sampled_from(divisors)
-    if not divisors:
-        return st.sampled_from(non_divisors)
-    # Use one_of so that divisor/non-divisor is a separate IR node from the
-    # specific size. This lets Hypothesis shrink the two decisions independently,
-    # which is more efficient for complex nested layouts where RegularArray is
-    # one node among many.
-    return st.one_of(st.sampled_from(divisors), st.sampled_from(non_divisors))
+
+    reachable_allowed = len(divisors) > 0
+    unreachable_allowed = allow_non_divisors and len(divisors) != len(all_sizes)
+    if not (reachable_allowed or unreachable_allowed):
+        return 0
+
+    reachable_only = reachable_allowed and not unreachable_allowed
+    if reachable_only:
+        return draw(st.sampled_from(divisors))
+
+    non_divisors = [d for d in all_sizes if d not in divisors]
+
+    unreachable_only = unreachable_allowed and not reachable_allowed
+    if unreachable_only:
+        return draw(st.sampled_from(non_divisors))
+
+    # Instead of drawing from concatenated divisors and non-divisors, draw ``one_of`` to
+    # introduce an explicit branch for shrinking toward reachable data.
+    return draw(st.one_of(st.sampled_from(divisors), st.sampled_from(non_divisors)))
 
 
 @st.composite
