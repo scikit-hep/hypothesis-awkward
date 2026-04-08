@@ -102,6 +102,37 @@ def test_draw_default_max_length() -> None:
     )
 
 
+def test_draw_unreachable() -> None:
+    """Assert that ListArray with unreachable data can be drawn."""
+    content = NumpyArray(np.arange(10))
+    find(
+        st_ak.contents.list_array_contents(content),
+        lambda c: len(c) >= 1 and (c.starts[0] > 0 or c.stops[-1] < len(c.content)),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_shrink_no_unreachable() -> None:
+    """Assert that ListArray shrinks to no unreachable data."""
+    content = NumpyArray(np.arange(10))
+    c = find(
+        st_ak.contents.list_array_contents(content),
+        lambda c: len(c) >= 2,
+    )
+    assert c.starts[0] == 0
+    assert c.stops[-1] == len(c.content)
+
+
+def test_shrink_content_len_zero() -> None:
+    """Assert that ListArray shrinks to zero lists with no content."""
+    content = NumpyArray(np.array([], dtype=np.int64))
+    c = find(
+        st_ak.contents.list_array_contents(content),
+        lambda c: True,
+    )
+    assert len(c) == 0
+
+
 def test_draw_from_contents() -> None:
     """Assert that ListArray can be drawn from `contents()`."""
 

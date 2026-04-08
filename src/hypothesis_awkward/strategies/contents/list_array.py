@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
-import numpy as np
-from hypothesis import assume
+from hypothesis import assume, reject
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -21,7 +20,12 @@ def list_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListArray:
-    """Strategy for ListArray Content wrapping child Content.
+    """Strategy for ``ListArray``.
+
+    This strategy generates a ``ListArray`` with the given content. It produces all
+    valid ``ListArray`` layouts including unreachable data, gaps, overlapping sublists,
+    and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
+    unreachable data.
 
     Parameters
     ----------
@@ -52,7 +56,65 @@ def list_array_contents(
         case Content():
             pass
     assert isinstance(content, Content)
-    content_len = len(content)
+    starts_list, stops_list = draw(
+        _st_starts_stops(len(content), max_length=max_length)
+    )
+    starts = ak.index.Index64(starts_list)
+    stops = ak.index.Index64(stops_list)
+    return ListArray(starts, stops, content)
+
+
+@st.composite
+def _st_starts_stops(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+    allow_unreachable: bool = True,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops of a ``ListArray``.
+
+    Shrinks toward no unreachable data (``starts[0] == 0`` and
+    ``stops[-1] == content_len``).
+
+    Parameters
+    ----------
+    content_len
+        Length of the content array.
+    max_length
+        Upper bound on the number of lists (i.e., ``len(starts)``).
+    allow_unreachable
+        No unreachable data is possible if ``False``.
+    """
+    if content_len == 0 or not allow_unreachable:
+        return draw(_st_starts_stops_no_unreachable(content_len, max_length=max_length))
+    if max_length is not None and max_length == 0:
+        return [], []
+    branches = [
+        _st_starts_stops_no_unreachable(content_len, max_length=max_length),
+        _st_starts_stops_unreachable(content_len, max_length=max_length),
+    ]
+    ml = max_length if max_length is not None else content_len
+    if ml >= 2:
+        branches.append(_st_starts_stops_gaps(content_len, max_length=max_length))
+        if content_len >= 2:
+            branches.append(
+                _st_starts_stops_overlapping(content_len, max_length=max_length)
+            )
+        branches.append(
+            _st_starts_stops_out_of_order(content_len, max_length=max_length)
+        )
+    return draw(st.one_of(branches))
+
+
+@st.composite
+def _st_starts_stops_no_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with no unreachable data."""
     ml = max_length if max_length is not None else content_len
     n = draw(st.integers(min_value=0, max_value=ml))
     if n == 0:
@@ -70,10 +132,118 @@ def list_array_contents(
             )
         )
         offsets_list = [0, *splits, content_len]
-    offsets = np.array(offsets_list, dtype=np.int64)
-    starts = ak.index.Index64(offsets[:-1])
-    stops = ak.index.Index64(offsets[1:])
-    return ListArray(starts, stops, content)
+    return offsets_list[:-1], offsets_list[1:]
+
+
+@st.composite
+def _st_starts_stops_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with unreachable data.
+
+    Guarantees at least unreachable tail.
+    """
+    max_size = None if max_length is None else max_length + 1
+    offsets_list = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len - 1),
+                min_size=2,
+                max_size=max_size,
+            )
+        )
+    )
+    return offsets_list[:-1], offsets_list[1:]
+
+
+@st.composite
+def _st_starts_stops_gaps(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with at least one gap between sublists.
+
+    Guarantees at least one ``stops[i] < starts[i + 1]``.
+    """
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=2, max_value=ml))
+    values = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len),
+                min_size=2 * n,
+                max_size=2 * n,
+            )
+        )
+    )
+    starts = [values[2 * i] for i in range(n)]
+    stops = [values[2 * i + 1] for i in range(n)]
+    if not any(stops[i] < starts[i + 1] for i in range(n - 1)):
+        reject()
+    return starts, stops
+
+
+@st.composite
+def _st_starts_stops_overlapping(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with at least one overlapping pair.
+
+    Guarantees at least one ``starts[i + 1] < stops[i]``.
+    """
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=2, max_value=ml))
+    starts = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len),
+                min_size=n,
+                max_size=n,
+            )
+        )
+    )
+    stops = [
+        draw(st.integers(min_value=starts[i], max_value=content_len)) for i in range(n)
+    ]
+    if not any(starts[i + 1] < stops[i] for i in range(n - 1)):
+        reject()
+    return starts, stops
+
+
+@st.composite
+def _st_starts_stops_out_of_order(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> tuple[list[int], list[int]]:
+    """Strategy for starts and stops with non-monotonic starts.
+
+    Guarantees at least one ``starts[i] > starts[i + 1]``.
+    """
+    ml = max_length if max_length is not None else content_len
+    n = draw(st.integers(min_value=2, max_value=ml))
+    pairs = [
+        draw(
+            st.tuples(st.integers(0, content_len), st.integers(0, content_len)).filter(
+                lambda p: p[0] <= p[1]
+            )
+        )
+        for _ in range(n)
+    ]
+    starts = [p[0] for p in pairs]
+    stops = [p[1] for p in pairs]
+    if not any(starts[i] > starts[i + 1] for i in range(n - 1)):
+        reject()
+    return starts, stops
 
 
 @st.composite
