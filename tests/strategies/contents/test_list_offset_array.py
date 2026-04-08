@@ -6,7 +6,6 @@ from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListOffsetArray, NumpyArray
-from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util.safe import safe_compare as sc
 
 
@@ -101,49 +100,28 @@ def test_draw_default_max_length() -> None:
     )
 
 
+def test_draw_variable_length() -> None:
+    """Assert that variable-length sublists can be drawn."""
+    find(
+        st_ak.contents.list_offset_array_contents(),
+        lambda c: len(c) >= 2 and len(set(len(c[i]) for i in range(len(c)))) > 1,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_empty_sublist() -> None:
+    """Assert that empty sublists can be drawn."""
+    find(
+        st_ak.contents.list_offset_array_contents(),
+        lambda c: any(len(c[i]) == 0 for i in range(len(c))),
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
 def test_draw_from_contents() -> None:
     """Assert that ListOffsetArray can be drawn from `contents()`."""
-
-    def _has_list_offset(c: Content) -> bool:
-        return any(isinstance(n, ListOffsetArray) for n in iter_contents(c))
-
     find(
         st_ak.contents.contents(),
-        _has_list_offset,
+        lambda c: isinstance(c, ListOffsetArray),
         settings=settings(phases=[Phase.generate]),
-    )
-
-
-def test_draw_from_contents_variable_length() -> None:
-    """Assert that variable-length sublists can be drawn from `contents()`."""
-
-    def _has_variable_length(c: Content) -> bool:
-        return any(
-            isinstance(n, ListOffsetArray)
-            and len(n) >= 2
-            and len(set(len(n[i]) for i in range(len(n)))) > 1
-            for n in iter_contents(c)
-        )
-
-    find(
-        st_ak.contents.contents(),
-        _has_variable_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_from_contents_empty_sublist() -> None:
-    """Assert that empty sublists can be drawn from `contents()`."""
-
-    def _has_empty_sublist(c: Content) -> bool:
-        return any(
-            isinstance(n, ListOffsetArray)
-            and any(len(n[i]) == 0 for i in range(len(n)))
-            for n in iter_contents(c)
-        )
-
-    find(
-        st_ak.contents.contents(),
-        _has_empty_sublist,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
