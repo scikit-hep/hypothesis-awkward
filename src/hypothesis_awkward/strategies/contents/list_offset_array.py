@@ -63,17 +63,46 @@ def _st_offsets(
     content_len: int,
     *,
     max_length: int | None = None,
+    allow_unreachable: bool = True,
 ) -> list[int]:
     """Strategy for offsets of a ``ListOffsetArray``.
+
+    Shrinks toward no unreachable data (``offsets[0] == 0`` and
+    ``offsets[-1] == content_len``).
 
     Parameters
     ----------
     content_len
         Length of the content array.
     max_length
-        Upper bound on the length of the ``ListOffsetArray`` (i.e., ``len(result)``). The
-        offsets (the return value) are longer by one.
+        Upper bound on the length of the ``ListOffsetArray`` (i.e.,
+        ``len(offsets) - 1``).
+    allow_unreachable
+        No unreachable data is possible if ``False``.
     """
+    if content_len == 0 or not allow_unreachable:
+        return draw(_st_offsets_no_unreachable(content_len, max_length=max_length))
+    if max_length is not None and max_length == 0:
+        return [draw(st.integers(min_value=0, max_value=content_len))]
+    return draw(
+        st.one_of(
+            _st_offsets_no_unreachable(content_len, max_length=max_length),
+            _st_offsets_unreachable(content_len, max_length=max_length),
+        )
+    )
+
+
+@st.composite
+def _st_offsets_no_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> list[int]:
+    """Strategy for offsets with no unreachable data."""
+    if content_len == 0:
+        ml = None if max_length is None else max_length + 1
+        return draw(st.lists(st.just(0), min_size=1, max_size=ml))
     if max_length is not None:
         if max_length == 0:
             return [0]
@@ -86,6 +115,27 @@ def _st_offsets(
         )
     )
     return [0, *middle, content_len]
+
+
+@st.composite
+def _st_offsets_unreachable(
+    draw: st.DrawFn,
+    content_len: int,
+    *,
+    max_length: int | None = None,
+) -> list[int]:
+    """Strategy for offsets with unreachable data (at least unreachable tail)."""
+    max_size = None if max_length is None else max_length + 1
+    offsets = sorted(
+        draw(
+            st.lists(
+                st.integers(min_value=0, max_value=content_len - 1),
+                min_size=1,
+                max_size=max_size,
+            )
+        )
+    )
+    return offsets
 
 
 @st.composite

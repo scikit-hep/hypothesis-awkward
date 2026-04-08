@@ -66,8 +66,12 @@ def test_list_offset_array_contents(data: st.DataObject) -> None:
     for i in range(len(offsets) - 1):
         assert offsets[i] <= offsets[i + 1]
 
-    # Assert first offset is 0 and last offset does not exceed content length
-    assert offsets[0] == 0
+    # Assert offsets are within content bounds
+    # TODO: Re-enable when allow_unreachable option is added to
+    # list_offset_array_contents().
+    # assert offsets[0] == 0
+    # assert offsets[-1] == len(result.content)
+    assert offsets[0] >= 0
     assert offsets[-1] <= len(result.content)
 
     # Assert the options were effective
