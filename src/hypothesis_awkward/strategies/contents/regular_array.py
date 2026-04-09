@@ -1,11 +1,9 @@
 from typing import TYPE_CHECKING
 
-from hypothesis import assume
 from hypothesis import strategies as st
 
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, RegularArray
-from hypothesis_awkward.util.awkward import content_size
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -220,6 +218,4 @@ def regular_array_from_contents(
     """
     max_content_size = max(max_size - 1, 0)
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
-    result = draw(regular_array_contents(st_content, max_length=max_length))
-    assume(content_size(result) <= max_size)
-    return result
+    return draw(regular_array_contents(st_content, max_length=max_length))
