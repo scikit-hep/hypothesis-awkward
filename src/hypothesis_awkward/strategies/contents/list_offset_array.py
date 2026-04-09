@@ -22,6 +22,10 @@ def list_offset_array_contents(
 ) -> ListOffsetArray:
     """Strategy for ``ListOffsetArray``.
 
+    This strategy generates a ``ListOffsetArray`` with the given content. It produces
+    layouts with and without unreachable data. It shrinks toward no unreachable data
+    (``offsets[0] == 0`` and ``offsets[-1] == len(content)``).
+
     Parameters
     ----------
     content

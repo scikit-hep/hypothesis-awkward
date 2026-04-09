@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
-from hypothesis import assume, reject
+from hypothesis import reject
 from hypothesis import strategies as st
 
 import awkward as ak
 import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListArray
-from hypothesis_awkward.util.awkward import content_size
+from hypothesis_awkward.util.safe import safe_min
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -256,13 +256,10 @@ def list_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListArray:
-    """Strategy that generates a starts/stops list layout within a size limit.
+    """Strategy for inner ``ListArray`` to be drawn by an outer layout strategy.
 
-    Draws the number of lists ``n`` first and computes the starts/stops
-    overhead (``2 * n``). The remainder of ``max_size`` after this deduction
-    is passed to ``content`` to generate the inner content.
-
-    Called by ``contents()`` during recursive tree generation.
+    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    function that returns a strategy for the inner layout of the ``ListArray``.
 
     Parameters
     ----------
@@ -274,14 +271,32 @@ def list_array_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``max_size // 2`` when ``None``.
+        Upper bound on ``len(result)``, i.e., ``len(result.starts) = len(result.stops)``.
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = list_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, ListArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
-    ml = max_length if max_length is not None else max_size // 2
-    n = draw(st.integers(min_value=0, max_value=ml))
-    overhead = 2 * n
-    max_content_size = max(max_size - overhead, 0)
+    max_length = safe_min((max_length, max_size // 2))
+    length = draw(st.integers(min_value=0, max_value=max_length))
+    indices_size = 2 * length  # starts and stops
+    max_content_size = max_size - indices_size
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
-    result = draw(list_array_contents(st_content, max_length=n))
-    assume(content_size(result) <= max_size)
-    return result
+
+    # TODO: Add `min_length=length` when `min_length` is implemented.
+    return draw(list_array_contents(st_content, max_length=length))
