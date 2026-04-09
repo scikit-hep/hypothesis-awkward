@@ -2450,6 +2450,9 @@ to <code>len(content)</code> when <code>None</code>.</p>
     <div class="doc doc-contents ">
 
         <p>Strategy for <code>ListOffsetArray</code>.</p>
+<p>This strategy generates a <code>ListOffsetArray</code> with the given content. It produces
+layouts with and without unreachable data. It shrinks toward no unreachable data
+(<code>offsets[0] == 0</code> and <code>offsets[-1] == len(content)</code>).</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
