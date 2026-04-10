@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.14.0] - 2026-04-10
+
+### Features
+
+- Generate unreachable data in RegularArray ([#59](https://github.com/scikit-hep/hypothesis-awkward/pull/59))
+- Improve RegularArray shrink quality ([#61](https://github.com/scikit-hep/hypothesis-awkward/pull/61))
+- Unreachable data in RegularArray and ListOffsetArray ([#62](https://github.com/scikit-hep/hypothesis-awkward/pull/62))
+- Generalize ListArray starts/stops generation ([#63](https://github.com/scikit-hep/hypothesis-awkward/pull/63))
+
+### Documentation
+
+- Add NumPy and Hypothesis inventories for cross-references ([#60](https://github.com/scikit-hep/hypothesis-awkward/pull/60))
+- Add Guide tab and restructure into tabbed navigation ([#67](https://github.com/scikit-hep/hypothesis-awkward/pull/67))
+
+### Refactoring
+
+- Clean up from_contents and docstrings ([#65](https://github.com/scikit-hep/hypothesis-awkward/pull/65))
+
+
 ## [0.13.0] - 2026-04-06
 
 ### Features
