@@ -6,5 +6,11 @@ You can install the package from PyPI using pip:
 pip install hypothesis-awkward
 ```
 
-This also installs Hypothesis and Awkward Array as dependencies unless they are
-already installed.
+Or from conda-forge using conda:
+
+```bash
+conda install conda-forge::hypothesis-awkward
+```
+
+Hypothesis and Awkward Array will be installed as dependencies if not already
+present.
