@@ -4,18 +4,30 @@
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/constructors/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/contents/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/installation/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/numpy/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/getting-started/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/builtins/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/util/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/constructors/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/contents/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/numpy/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/builtins/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/util/</loc>
       </url>
 </urlset>
