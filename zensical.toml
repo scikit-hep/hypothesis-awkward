@@ -1,19 +1,27 @@
 [project]
-site_name = "hypothesis-awkward API reference"
+site_name = "hypothesis-awkward"
 site_description = "Hypothesis strategies for Awkward Array"
 site_author = "Tai Sakuma"
 site_url = "https://scikit-hep.github.io/hypothesis-awkward/"
 copyright = "Copyright &copy; 2026 Tai Sakuma"
 nav = [
     { "Home" = "index.md" },
-    { "Strategies" = [
-        { "Constructors" = "strategies/constructors.md" },
-        { "Contents" = "strategies/contents.md" },
-        { "NumPy" = "strategies/numpy.md" },
-        { "Builtins" = "strategies/builtins.md" },
+    { "Guide" = [
+        { "Overview" = "guide/index.md" },
+        { "Installation" = "guide/installation.md" },
+        { "Getting Started" = "guide/getting-started.md" },
     ] },
-    { "Util" = [
-        { "Util" = "util.md" },
+    { "API Reference" = [
+        { "Overview" = "reference/index.md" },
+        { "Strategies" = [
+            { "Constructors" = "reference/strategies/constructors.md" },
+            { "Contents" = "reference/strategies/contents.md" },
+            { "NumPy" = "reference/strategies/numpy.md" },
+            { "Builtins" = "reference/strategies/builtins.md" },
+        ] },
+        { "Util" = [
+            { "Util" = "reference/util.md" },
+        ] },
     ] },
 ]
 extra_css = ["stylesheets/extra.css"]
@@ -44,8 +52,8 @@ features = [
     "navigation.path",
     # "navigation.prune",
     "navigation.sections",
-    # "navigation.tabs",
-    # "navigation.tabs.sticky",
+    "navigation.tabs",
+    "navigation.tabs.sticky",
     "navigation.top",
     "navigation.tracking",
     "search.highlight",
