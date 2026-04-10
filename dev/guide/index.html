@@ -29,7 +29,7 @@
     
     
       
-        <title>hypothesis-awkward - hypothesis-awkward</title>
+        <title>Guide - hypothesis-awkward</title>
       
     
     
@@ -87,7 +87,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hypothesis-awkward" class="md-skip">
+        <a href="#guide" class="md-skip">
           Skip to content
         </a>
       
@@ -123,7 +123,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              hypothesis-awkward
+              Guide
             
           </span>
         </div>
@@ -898,28 +898,14 @@
                 
                   
 
-<h1 id="hypothesis-awkward">hypothesis-awkward<a class="headerlink" href="#hypothesis-awkward" title="Permanent link">&para;</a></h1>
-<p><em>Hypothesis strategies for Awkward Arrays.</em></p>
-<p><a href="https://github.com/HypothesisWorks/hypothesis">Hypothesis</a> is a <em>property-based testing</em> library. Its <a href="https://hypothesis.readthedocs.io/en/latest/reference/strategies.html"><em>strategies</em></a>
-are Python functions that strategically generate test data that can fail test
-cases in <em>pytest</em> and other testing frameworks. Once a test fails, Hypothesis
-searches for the simplest sample that causes the same error. Hypothesis
-automatically explores edge cases; developers do not need to craft test data
-manually.</p>
-<p>Property-based testing is useful for finding edge cases in <em>array</em> libraries and
-in code that uses them. In fact, Hypothesis strategies for <a href="https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#numpy">NumPy</a>
-and <a href="https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#pandas">pandas</a> data types are included in Hypothesis itself.
-<a href="https://xarray.dev/">Xarray</a> provides <a href="https://docs.xarray.dev/en/stable/user-guide/testing.html#hypothesis-testing">strategies for its data structure</a>. The <em>Apache
-Arrow</em> codebase has <a href="https://github.com/apache/arrow/blob/apache-arrow-22.0.0/python/pyarrow/tests/strategies.py">strategies for PyArrow</a>, which are not
-officially documented in its API reference.</p>
-<p>This package, <a href="https://github.com/scikit-hep/hypothesis-awkward">hypothesis-awkward</a>, is a collection of Hypothesis strategies for
-<a href="https://awkward-array.org/">Awkward Array</a>, which can represent a wide variety of layouts of
-nested, variable-length, and mixed-type data. The current version of this
-package includes strategies that generate samples with certain types of layouts.
-The goal is to develop strategies that can generate fully general Awkward Arrays
-with multiple options to control the layout, data types, missing values, masks,
-and other array attributes. These strategies can help close in on edge cases in
-tools that use Awkward Array, and Awkward Array itself.</p>
+<h1 id="guide">Guide<a class="headerlink" href="#guide" title="Permanent link">&para;</a></h1>
+<p>This guide covers how to install hypothesis-awkward and get started using its
+strategies for property-based testing with Awkward Arrays.</p>
+<ul>
+<li><a href="installation/">Installation</a> — how to install the package</li>
+<li><a href="getting-started/">Getting Started</a> — how to use the <code>arrays()</code> strategy
+  with examples</li>
+</ul>
 
 
 
