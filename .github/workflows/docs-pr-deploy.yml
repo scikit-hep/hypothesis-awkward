@@ -60,7 +60,7 @@ jobs:
 
       - name: Wait for deployment
         id: wait
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           DEPLOY_URL: ${{ steps.deploy.outputs.url }}
         with:
@@ -78,7 +78,7 @@ jobs:
             core.setOutput('live', 'false');
 
       - name: Post or update PR comment
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           DEPLOY_URL: ${{ steps.deploy.outputs.url }}
