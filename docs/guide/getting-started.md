@@ -63,4 +63,5 @@ shown as `??` in the output.
 ### The options of `arrays()`
 
 The strategy `arrays()` has many options to control the output arrays. You can
-find all options in the [API reference](../reference/strategies/constructors.md).
+find all options in the
+[API reference](../reference/strategies/constructors.md).
