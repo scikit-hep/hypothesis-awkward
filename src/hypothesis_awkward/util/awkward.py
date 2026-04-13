@@ -1,3 +1,4 @@
+import functools
 from collections.abc import Iterator
 from typing import Union
 
@@ -199,37 +200,20 @@ def iter_contents(
     Content
         Each content node in the layout.
     """
-    stack: list[ak.Array | Content] = [a]
+    stack = list[Content]()
+    if isinstance(a, ak.Array):
+        stack.append(a.layout)
+    else:
+        stack.append(a)
     while stack:
         item = stack.pop()
-        match item:
-            case ak.Array():
-                stack.append(item.layout)
-            case NumpyArray() | EmptyArray():
-                yield item
-            case RecordArray():
-                yield item
-                stack.extend(item.contents)
-            case ListArray() | ListOffsetArray() | RegularArray() if (
-                is_string_or_bytestring_leaf(item, string_as_leaf, bytestring_as_leaf)
-            ):
-                yield item
-            case (
-                BitMaskedArray()
-                | ByteMaskedArray()
-                | IndexedOptionArray()
-                | ListArray()
-                | ListOffsetArray()
-                | RegularArray()
-                | UnmaskedArray()
-            ):
-                yield item
-                stack.append(item.content)
-            case UnionArray():
-                yield item
-                stack.extend(item.contents)
-            case _:  # pragma: no cover
-                raise TypeError(f'Unexpected content type: {type(item)}')
+        yield item
+        contents = get_contents(
+            item,
+            string_as_leaf=string_as_leaf,
+            bytestring_as_leaf=bytestring_as_leaf,
+        )
+        stack.extend(contents)
 
 
 def iter_leaf_contents(
@@ -310,6 +294,132 @@ def iter_numpy_arrays(
             yield content.data
 
 
+@functools.singledispatch
+def get_contents(
+    c: Content,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> tuple[Content, ...]:
+    """Return the direct sub-contents of an Awkward ``Content`` node.
+
+    Dispatch is performed with [functools.singledispatch][] so support for a
+    new ``Content`` subclass can be added by calling ``get_contents.register``
+    without modifying this function.
+
+    Parameters
+    ----------
+    c
+        An Awkward ``Content`` node. ``ak.Array`` is not accepted — unwrap
+        with ``a.layout`` first.
+    string_as_leaf
+        If ``True`` (default), treat string ``ListOffsetArray``/``ListArray``/
+        ``RegularArray`` nodes as leaves — return ``()`` rather than
+        ``(c.content,)``.
+    bytestring_as_leaf
+        Same as ``string_as_leaf`` for bytestring nodes.
+
+    Returns
+    -------
+    tuple of Content
+        The direct sub-contents, in natural order (field order for
+        ``RecordArray``, member order for ``UnionArray``). Empty for
+        ``NumpyArray``, ``EmptyArray``, and list types configured as leaves.
+
+    Examples
+    --------
+    >>> c = NumpyArray(np.array([1, 2, 3]))
+    >>> get_contents(c)
+    ()
+
+    >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
+    >>> subs = get_contents(c)
+    >>> len(subs) == 1 and subs[0] is c.content
+    True
+    """
+    raise TypeError(f'Unexpected content type: {type(c)}')  # pragma: no cover
+
+
+@get_contents.register
+def _(c: NumpyArray, /, **_: bool) -> tuple[Content, ...]:
+    return ()
+
+
+@get_contents.register
+def _(c: EmptyArray, /, **_: bool) -> tuple[Content, ...]:
+    return ()
+
+
+@get_contents.register
+def _(
+    c: RegularArray,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> tuple[Content, ...]:
+    if is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf):
+        return ()
+    return (c.content,)
+
+
+@get_contents.register
+def _(
+    c: ListOffsetArray,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> tuple[Content, ...]:
+    if is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf):
+        return ()
+    return (c.content,)
+
+
+@get_contents.register
+def _(
+    c: ListArray,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> tuple[Content, ...]:
+    if is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf):
+        return ()
+    return (c.content,)
+
+
+@get_contents.register
+def _(c: RecordArray, /, **_: bool) -> tuple[Content, ...]:
+    return tuple(c.contents)
+
+
+@get_contents.register
+def _(c: UnionArray, /, **_: bool) -> tuple[Content, ...]:
+    return tuple(c.contents)
+
+
+@get_contents.register
+def _(c: BitMaskedArray, /, **_: bool) -> tuple[Content, ...]:
+    return (c.content,)
+
+
+@get_contents.register
+def _(c: ByteMaskedArray, /, **_: bool) -> tuple[Content, ...]:
+    return (c.content,)
+
+
+@get_contents.register
+def _(c: IndexedOptionArray, /, **_: bool) -> tuple[Content, ...]:
+    return (c.content,)
+
+
+@get_contents.register
+def _(c: UnmaskedArray, /, **_: bool) -> tuple[Content, ...]:
+    return (c.content,)
+
+
 def leaf_size(a: ak.Array | Content, /) -> int:
     """Count total leaf elements in an Awkward Array layout.
 
@@ -343,11 +453,16 @@ def leaf_size(a: ak.Array | Content, /) -> int:
     return sum(len(leaf) for leaf in iter_leaf_contents(a))
 
 
+@functools.singledispatch
 def content_size(a: ak.Array | Content, /) -> int:
     """Count total scalars stored in an Awkward Array layout.
 
     Counts data elements, offset/index buffer elements, and metadata values
     (``RegularArray.size``, ``RecordArray`` field names).
+
+    Dispatch is performed with [functools.singledispatch][] so support for a
+    new ``Content`` subclass can be added by calling ``content_size.register``
+    without modifying this function.
 
     Parameters
     ----------
@@ -379,35 +494,67 @@ def content_size(a: ak.Array | Content, /) -> int:
     >>> content_size(a)  # 3 offsets + 10 bytes = 13
     13
     """
-    match a:
-        case ak.Array():
-            return content_size(a.layout)
-        case NumpyArray():
-            return len(a.data)
-        case EmptyArray():
-            return 0
-        case RegularArray():
-            return 1 + content_size(a.content)
-        case RecordArray():
-            n_fields = 0 if a.is_tuple else len(a.fields)
-            return n_fields + sum(content_size(c) for c in a.contents)
-        case ListOffsetArray():
-            return len(a.offsets.data) + content_size(a.content)
-        case ListArray():
-            return len(a.starts.data) + len(a.stops.data) + content_size(a.content)
-        case UnionArray():
-            return (
-                len(a.tags.data)
-                + len(a.index.data)
-                + sum(content_size(c) for c in a.contents)
-            )
-        case BitMaskedArray():
-            return 2 + len(a.mask.data) + content_size(a.content)
-        case ByteMaskedArray():
-            return 1 + len(a.mask.data) + content_size(a.content)
-        case IndexedOptionArray():
-            return len(a.index.data) + content_size(a.content)
-        case UnmaskedArray():
-            return content_size(a.content)
-        case _:  # pragma: no cover
-            raise TypeError(f'Unexpected content type: {type(a)}')
+    raise TypeError(f'Unexpected content type: {type(a)}')  # pragma: no cover
+
+
+@content_size.register
+def _(a: ak.Array, /) -> int:
+    return content_size(a.layout)
+
+
+@content_size.register
+def _(a: NumpyArray, /) -> int:
+    return len(a.data)
+
+
+@content_size.register
+def _(a: EmptyArray, /) -> int:
+    return 0
+
+
+@content_size.register
+def _(a: RegularArray, /) -> int:
+    return 1 + content_size(a.content)
+
+
+@content_size.register
+def _(a: RecordArray, /) -> int:
+    n_fields = 0 if a.is_tuple else len(a.fields)
+    return n_fields + sum(content_size(c) for c in a.contents)
+
+
+@content_size.register
+def _(a: ListOffsetArray, /) -> int:
+    return len(a.offsets.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: ListArray, /) -> int:
+    return len(a.starts.data) + len(a.stops.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: UnionArray, /) -> int:
+    return (
+        len(a.tags.data) + len(a.index.data) + sum(content_size(c) for c in a.contents)
+    )
+
+
+@content_size.register
+def _(a: BitMaskedArray, /) -> int:
+    return 2 + len(a.mask.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: ByteMaskedArray, /) -> int:
+    return 1 + len(a.mask.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: IndexedOptionArray, /) -> int:
+    return len(a.index.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: UnmaskedArray, /) -> int:
+    return content_size(a.content)

@@ -151,3 +151,21 @@ def test_nested() -> None:
     # outer offsets: 3 + regular size: 1 + inner data: 4 = 8
     assert content_size(outer) == 8
     assert leaf_size(outer) == 4
+
+
+def test_content_size_is_extensible() -> None:
+    """Register a handler for a new type without modifying ``content_size``.
+
+    ``_Marker`` is local to this test, so the registration cannot influence
+    any other test's dispatch. ``singledispatch.registry`` is read-only, so no
+    cleanup is performed.
+    """
+
+    class _Marker:
+        pass
+
+    @content_size.register
+    def _(a: _Marker, /) -> int:
+        return 42
+
+    assert content_size(_Marker()) == 42
