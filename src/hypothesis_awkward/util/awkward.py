@@ -1,3 +1,4 @@
+import functools
 from collections.abc import Iterator
 from typing import Union
 
@@ -343,11 +344,16 @@ def leaf_size(a: ak.Array | Content, /) -> int:
     return sum(len(leaf) for leaf in iter_leaf_contents(a))
 
 
+@functools.singledispatch
 def content_size(a: ak.Array | Content, /) -> int:
     """Count total scalars stored in an Awkward Array layout.
 
     Counts data elements, offset/index buffer elements, and metadata values
     (``RegularArray.size``, ``RecordArray`` field names).
+
+    Dispatch is performed with [functools.singledispatch][] so support for a
+    new ``Content`` subclass can be added by calling ``content_size.register``
+    without modifying this function.
 
     Parameters
     ----------
@@ -379,35 +385,67 @@ def content_size(a: ak.Array | Content, /) -> int:
     >>> content_size(a)  # 3 offsets + 10 bytes = 13
     13
     """
-    match a:
-        case ak.Array():
-            return content_size(a.layout)
-        case NumpyArray():
-            return len(a.data)
-        case EmptyArray():
-            return 0
-        case RegularArray():
-            return 1 + content_size(a.content)
-        case RecordArray():
-            n_fields = 0 if a.is_tuple else len(a.fields)
-            return n_fields + sum(content_size(c) for c in a.contents)
-        case ListOffsetArray():
-            return len(a.offsets.data) + content_size(a.content)
-        case ListArray():
-            return len(a.starts.data) + len(a.stops.data) + content_size(a.content)
-        case UnionArray():
-            return (
-                len(a.tags.data)
-                + len(a.index.data)
-                + sum(content_size(c) for c in a.contents)
-            )
-        case BitMaskedArray():
-            return 2 + len(a.mask.data) + content_size(a.content)
-        case ByteMaskedArray():
-            return 1 + len(a.mask.data) + content_size(a.content)
-        case IndexedOptionArray():
-            return len(a.index.data) + content_size(a.content)
-        case UnmaskedArray():
-            return content_size(a.content)
-        case _:  # pragma: no cover
-            raise TypeError(f'Unexpected content type: {type(a)}')
+    raise TypeError(f'Unexpected content type: {type(a)}')  # pragma: no cover
+
+
+@content_size.register
+def _(a: ak.Array, /) -> int:
+    return content_size(a.layout)
+
+
+@content_size.register
+def _(a: NumpyArray, /) -> int:
+    return len(a.data)
+
+
+@content_size.register
+def _(a: EmptyArray, /) -> int:
+    return 0
+
+
+@content_size.register
+def _(a: RegularArray, /) -> int:
+    return 1 + content_size(a.content)
+
+
+@content_size.register
+def _(a: RecordArray, /) -> int:
+    n_fields = 0 if a.is_tuple else len(a.fields)
+    return n_fields + sum(content_size(c) for c in a.contents)
+
+
+@content_size.register
+def _(a: ListOffsetArray, /) -> int:
+    return len(a.offsets.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: ListArray, /) -> int:
+    return len(a.starts.data) + len(a.stops.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: UnionArray, /) -> int:
+    return (
+        len(a.tags.data) + len(a.index.data) + sum(content_size(c) for c in a.contents)
+    )
+
+
+@content_size.register
+def _(a: BitMaskedArray, /) -> int:
+    return 2 + len(a.mask.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: ByteMaskedArray, /) -> int:
+    return 1 + len(a.mask.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: IndexedOptionArray, /) -> int:
+    return len(a.index.data) + content_size(a.content)
+
+
+@content_size.register
+def _(a: UnmaskedArray, /) -> int:
+    return content_size(a.content)
