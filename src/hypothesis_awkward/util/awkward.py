@@ -200,37 +200,20 @@ def iter_contents(
     Content
         Each content node in the layout.
     """
-    stack: list[ak.Array | Content] = [a]
+    stack = list[Content]()
+    if isinstance(a, ak.Array):
+        stack.append(a.layout)
+    else:
+        stack.append(a)
     while stack:
         item = stack.pop()
-        match item:
-            case ak.Array():
-                stack.append(item.layout)
-            case NumpyArray() | EmptyArray():
-                yield item
-            case RecordArray():
-                yield item
-                stack.extend(item.contents)
-            case ListArray() | ListOffsetArray() | RegularArray() if (
-                is_string_or_bytestring_leaf(item, string_as_leaf, bytestring_as_leaf)
-            ):
-                yield item
-            case (
-                BitMaskedArray()
-                | ByteMaskedArray()
-                | IndexedOptionArray()
-                | ListArray()
-                | ListOffsetArray()
-                | RegularArray()
-                | UnmaskedArray()
-            ):
-                yield item
-                stack.append(item.content)
-            case UnionArray():
-                yield item
-                stack.extend(item.contents)
-            case _:  # pragma: no cover
-                raise TypeError(f'Unexpected content type: {type(item)}')
+        yield item
+        contents = get_contents(
+            item,
+            string_as_leaf=string_as_leaf,
+            bytestring_as_leaf=bytestring_as_leaf,
+        )
+        stack.extend(contents)
 
 
 def iter_leaf_contents(
