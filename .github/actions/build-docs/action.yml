@@ -1,9 +1,9 @@
-name: Build docs
-description: Build docs with site_url overridden for subdirectory deployment
+name: Build docs (PR preview)
+description: Build docs for a PR preview subdirectory, without the mike version selector
 
 inputs:
   subdir:
-    description: Subdirectory to deploy to (e.g., dev, 1.0.0, pr/3)
+    description: Subdirectory to deploy to (e.g., pr/3)
     required: true
   site-dir:
     description: Output directory for the built site
@@ -19,8 +19,8 @@ runs:
   steps:
     - shell: bash
       run: |
-        # Update the site url.
-        uv run --group docs python "${{ github.action_path }}/override_site_url.py" "${{ inputs.subdir }}"
+        # Update site_url and drop the mike version provider.
+        uv run --group docs python "${{ github.action_path }}/prepare_pr_build.py" "${{ inputs.subdir }}"
 
         # Build the docs.
         uv run --group docs zensical build --clean

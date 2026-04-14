@@ -20,23 +20,13 @@ jobs:
 
       - uses: astral-sh/setup-uv@v8.0.0
 
-      - uses: ./.github/actions/build-docs
-        id: build
-        with:
-          subdir: dev
-
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - uses: ./.github/actions/deploy-to-gh-pages
-        with:
-          site-dir: ${{ steps.build.outputs.site-dir }}
-          target: dev
-          commit-message: Deploy dev docs
+      - name: Fetch gh-pages
+        run: git fetch origin gh-pages
 
-      - uses: ./.github/actions/update-index
-        with:
-          repo-name: ${{ github.event.repository.name }}
-          repo-url: ${{ github.event.repository.html_url }}
+      - name: Deploy dev docs
+        run: uv run --group docs mike deploy --push --branch gh-pages dev
