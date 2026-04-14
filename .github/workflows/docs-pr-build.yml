@@ -22,7 +22,7 @@ jobs:
       - uses: astral-sh/setup-uv@v8.0.0
 
       # Reference the action from @main so the build scripts (action.yml and
-      # override_site_url.py) always come from the trusted main branch, not from
+      # prepare_pr_build.py) always come from the trusted main branch, not from
       # the PR's checkout.
       - uses: scikit-hep/hypothesis-awkward/.github/actions/build-docs@main
         id: build

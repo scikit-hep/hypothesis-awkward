@@ -58,15 +58,41 @@ that prevents one workflow from triggering another via tag push:
 
 ### Documentation Workflows
 
-- **`docs-dev.yml`** — Builds and deploys docs to the `dev/` path on gh-pages
-  when `main` is pushed.
-- **`docs-release.yml`** — Builds and deploys versioned docs on release.
-- **`docs-pr-build.yml`** — Builds docs preview for PRs (runs on
-  `pull_request`).
-- **`docs-pr-deploy.yml`** — Deploys the built docs preview to gh-pages (runs on
-  `workflow_run` after the build).
-- **`docs-pr-cleanup.yml`** — Removes the preview from gh-pages when a PR is
-  closed.
+Release and dev deploys use the Zensical-compatible fork of
+[`mike`](https://github.com/squidfunk/mike), pinned in the `docs` dependency
+group to tag `2.2.0+zensical-0.1.0`. `mike` writes per-version subdirectories
+plus a `versions.json` manifest and a root redirect on the `gh-pages` branch. PR
+previews are deployed outside `mike`'s manifest under `pr/<N>/` and are
+invisible to the version selector.
+
+- **`docs-dev.yml`** — Runs `mike deploy --push dev` on push to `main`,
+  refreshing the `dev/` subdirectory and its `versions.json` entry.
+- **`docs-release.yml`** — Runs
+  `mike deploy --push --update-aliases <version> latest` then
+  `mike set-default --push latest` on the `workflow_run` after changelog
+  generation.
+- **`docs-pr-build.yml`** — Builds a single-version preview with the mike
+  version provider stripped via
+  `.github/actions/build-docs/prepare_pr_build.py`. Uploads the built site as an
+  artifact (no write access to `gh-pages`).
+- **`docs-pr-deploy.yml`** — Downloads the artifact and writes it to `pr/<N>/`
+  on `gh-pages`, then comments the preview URL on the PR.
+- **`docs-pr-cleanup.yml`** — Removes `pr/<N>/` when the PR closes.
+
+#### Bootstrap
+
+`.github/scripts/bootstrap-mike-versions.sh` is a one-time script that seeds
+`versions.json` from the existing numeric subdirectories on `gh-pages`, rewrites
+`latest/` as a symlink to the newest version, and runs `mike set-default latest`
+to create the root redirect. Not wired to any workflow; run manually once per
+repository.
+
+#### Migration off the fork
+
+The `squidfunk/mike` fork is explicitly temporary. When Zensical ships native
+versioning, remove the `mike` dep, replace the workflow commands with the native
+equivalents, and delete the bootstrap script. Track
+<https://zensical.org/about/roadmap/#versioning>.
 
 ### PR Workflows
 

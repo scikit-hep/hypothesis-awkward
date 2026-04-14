@@ -14,6 +14,22 @@ Set up the pre-commit hooks (optional — CI enforces these on PRs):
 pre-commit install
 ```
 
+## Previewing Docs Locally
+
+For a live preview of the current working tree (single version, no version
+selector):
+
+```bash
+uv run --group docs zensical serve
+```
+
+For the multi-version site as published to `gh-pages` (uses
+[`mike`](https://github.com/squidfunk/mike), pinned in the `docs` dep group):
+
+```bash
+uv run --group docs mike serve --branch gh-pages
+```
+
 ## PR Title Convention
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/)
