@@ -6,20 +6,21 @@
 #   bash .github/scripts/bootstrap-mike-versions.sh [BRANCH]
 #
 # BRANCH defaults to "gh-pages". The script:
-#   1. Creates a temporary worktree for BRANCH at /tmp/<branch>-bootstrap.
-#   2. Writes versions.json listing all numeric version dirs on the branch
-#      (newest first), plus a "dev" entry; the newest numeric version gets
-#      the "latest" alias.
+#   1. Forces the local BRANCH to origin/BRANCH and checks it out in a
+#      temp worktree.
+#   2. Writes versions.json listing all numeric version dirs on the
+#      branch (newest first), plus a "dev" entry if the dir exists; the
+#      newest numeric version gets the "latest" alias.
 #   3. Replaces the existing "latest/" tree with a git symlink to the
 #      newest numeric version (matches mike's alias_type=symlink output).
-#   4. Runs `mike set-default --push latest` to rewrite the root
-#      index.html as a redirect and push the result upstream.
+#   4. Commits the manifest, then runs `mike set-default --push latest`
+#      to rewrite the root index.html and push both commits upstream.
 #
 # After the push, verify with:
 #   uv run --group docs mike list --branch gh-pages
 #
 # Requires:
-#   - `uv` with the `docs` dep group installed (see pyproject.toml)
+#   - `uv` with the `docs` dep group installed
 #   - push access to origin
 set -euo pipefail
 
@@ -27,19 +28,26 @@ set -euo pipefail
 export PRE_COMMIT_ALLOW_NO_CONFIG=1
 
 BRANCH="${1:-gh-pages}"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKTREE="$(mktemp -d)/${BRANCH//\//-}-bootstrap"
 
+# Resolve mike's absolute path via the project venv so we can invoke it
+# from any cwd. `uv run` requires the project dir as cwd.
+MIKE="$(cd "$PROJECT_DIR" && uv run --group docs -- which mike)"
+
 cleanup() {
-    git worktree remove --force "$WORKTREE" >/dev/null 2>&1 || true
+    git -C "$PROJECT_DIR" worktree remove --force "$WORKTREE" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
+cd "$PROJECT_DIR"
 git fetch origin "$BRANCH"
-git worktree add "$WORKTREE" "origin/$BRANCH"
+# -B forces a local branch to origin/$BRANCH so commits are reachable
+# via the branch ref, not just a detached HEAD.
+git worktree add -B "$BRANCH" "$WORKTREE" "origin/$BRANCH"
 
 cd "$WORKTREE"
 
-# Collect numeric version dirs (descending), and write versions.json.
 python3 - <<'PY'
 import json
 import re
@@ -90,7 +98,6 @@ if [[ -z "$NEWEST" ]]; then
     exit 1
 fi
 
-# Replace any existing latest/ tree with a symlink pointing at $NEWEST.
 if [[ -e latest || -L latest ]]; then
     git rm -rf --quiet latest
 fi
@@ -99,9 +106,10 @@ ln -s "$NEWEST" latest
 git add versions.json latest
 git commit -m "meta: bootstrap mike versions.json"
 
-# Generate the root redirect index.html via mike set-default and push.
-# --branch is a local ref; we're already on the branch in this worktree.
-uv run --group docs mike set-default --push --branch "$BRANCH" latest
+# Run mike from the project dir so it can read zensical.toml. mike
+# writes to the branch via git plumbing, independent of cwd.
+cd "$PROJECT_DIR"
+"$MIKE" set-default --push --branch "$BRANCH" latest
 
 echo
 echo "Bootstrap complete. Verify with:"
