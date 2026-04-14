@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.15.0] - 2026-04-14
+
+### Features
+
+- Add get_contents utility ([#71](https://github.com/scikit-hep/hypothesis-awkward/pull/71))
+- Add content_own_size utility ([#72](https://github.com/scikit-hep/hypothesis-awkward/pull/72))
+
+### Documentation
+
+- Move overview to home page and add conda install option ([#68](https://github.com/scikit-hep/hypothesis-awkward/pull/68))
+- Suppress outdated banner on /dev/ ([#75](https://github.com/scikit-hep/hypothesis-awkward/pull/75))
+
+### Build & CI
+
+- Bump actions/github-script from 8 to 9 ([#66](https://github.com/scikit-hep/hypothesis-awkward/pull/66))
+- Bump setup-uv to maintained tag scheme ([#69](https://github.com/scikit-hep/hypothesis-awkward/pull/69))
+- Migrate docs versioning to mike (zensical fork) ([#74](https://github.com/scikit-hep/hypothesis-awkward/pull/74))
+
+### Meta
+
+- Reorder README badges
+
+
 ## [0.14.0] - 2026-04-10
 
 ### Features
