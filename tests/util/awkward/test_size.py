@@ -14,7 +14,7 @@ from awkward.contents import (
     UnionArray,
     UnmaskedArray,
 )
-from hypothesis_awkward.util import content_size, leaf_size
+from hypothesis_awkward.util import content_own_size, content_size, leaf_size
 
 
 def test_numpy_array() -> None:
@@ -153,8 +153,8 @@ def test_nested() -> None:
     assert leaf_size(outer) == 4
 
 
-def test_content_size_is_extensible() -> None:
-    """Register a handler for a new type without modifying ``content_size``.
+def test_content_own_size_is_extensible() -> None:
+    """Register a handler for a new type without modifying ``content_own_size``.
 
     ``_Marker`` is local to this test, so the registration cannot influence
     any other test's dispatch. ``singledispatch.registry`` is read-only, so no
@@ -164,8 +164,8 @@ def test_content_size_is_extensible() -> None:
     class _Marker:
         pass
 
-    @content_size.register
-    def _(a: _Marker, /) -> int:
+    @content_own_size.register
+    def _(c: _Marker, /) -> int:
         return 42
 
-    assert content_size(_Marker()) == 42
+    assert content_own_size(_Marker()) == 42
