@@ -96,7 +96,7 @@ link = "https://pypi.org/project/hypothesis-awkward/"
 
 [project.extra.version]
 provider = "mike"
-default = "latest"
+default = ["latest", "dev"]
 
 [project.plugins.mkdocstrings.handlers.python]
 inventories = [
