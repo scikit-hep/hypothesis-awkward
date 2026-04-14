@@ -2,7 +2,7 @@
 
 _Hypothesis strategies for Awkward Arrays._
 
-[![pypi-badge]][pypi] [![pypi-python-badge]][pypi]
+[![pypi-python-badge]][pypi] [![pypi-badge]][pypi]
 [![conda-forge-badge]][conda-forge]
 
 [![test-badge]][test] [![codecov-badge]][codecov]
