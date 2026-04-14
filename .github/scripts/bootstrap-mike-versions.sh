@@ -104,7 +104,11 @@ fi
 ln -s "$NEWEST" latest
 
 git add versions.json latest
-git commit -m "meta: bootstrap mike versions.json"
+if git diff --cached --quiet; then
+    echo "versions.json and latest already up to date; skipping bootstrap commit."
+else
+    git commit -m "meta: bootstrap mike versions.json"
+fi
 
 # Run mike from the project dir so it can read zensical.toml. mike
 # writes to the branch via git plumbing, independent of cwd.
