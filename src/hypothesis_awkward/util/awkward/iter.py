@@ -106,7 +106,7 @@ def iter_contents(
             string_as_leaf=string_as_leaf,
             bytestring_as_leaf=bytestring_as_leaf,
         )
-        stack.extend(contents)
+        stack.extend(reversed(contents))
 
 
 def iter_leaf_contents(
