@@ -1,155 +1,34 @@
-import numpy as np
+from hypothesis import given
+from hypothesis import strategies as st
 
 import awkward as ak
-from awkward.contents import (
-    BitMaskedArray,
-    ByteMaskedArray,
-    EmptyArray,
-    IndexedOptionArray,
-    ListArray,
-    ListOffsetArray,
-    NumpyArray,
-    RecordArray,
-    RegularArray,
-    UnionArray,
-    UnmaskedArray,
+import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward.util import (
+    content_own_size,
+    content_size,
+    get_contents,
+    iter_contents,
 )
-from hypothesis_awkward.util import content_size
 
 
-def test_numpy_array() -> None:
-    c = NumpyArray(np.array([1, 2, 3]))
-    assert content_size(c) == 3
+@given(data=st.data())
+def test_content_size(data: st.DataObject) -> None:
+    """``content_size`` equals own size plus children's sizes at every node."""
+    content = data.draw(st_ak.contents.contents(), label='content')
+
+    # This pins the aggregation rule of `content_size` against
+    # `content_own_size` as a primitive. `content_own_size` is independently
+    # tested per type in `test_content_own_size.py`; together the two
+    # transitively pin `content_size` to the correct per-type formulas.
+    for c in iter_contents(content, string_as_leaf=False, bytestring_as_leaf=False):
+        inner = get_contents(c, string_as_leaf=False, bytestring_as_leaf=False)
+        inner_size = sum(content_size(i) for i in inner)
+        expected = content_own_size(c) + inner_size
+        actual = content_size(c)
+        assert actual == expected
 
 
-def test_empty_array() -> None:
-    c = EmptyArray()
-    assert content_size(c) == 0
-
-
-def test_regular_array() -> None:
-    c = RegularArray(NumpyArray(np.array([1, 2, 3, 4, 5, 6])), size=3)
-    # 1 (size) + 6 (child data) = 7
-    assert content_size(c) == 7
-
-
-def test_record_array_named() -> None:
-    c = RecordArray(
-        [NumpyArray(np.array([1, 2])), NumpyArray(np.array([3, 4]))],
-        fields=['x', 'y'],
-    )
-    # 2 (field names) + 2 (child x) + 2 (child y) = 6
-    assert content_size(c) == 6
-
-
-def test_record_array_tuple() -> None:
-    c = RecordArray(
-        [NumpyArray(np.array([1, 2])), NumpyArray(np.array([3, 4]))],
-        fields=None,
-    )
-    # 0 (no field names) + 2 + 2 = 4
-    assert content_size(c) == 4
-
-
-def test_list_offset_array() -> None:
-    c = ListOffsetArray(
-        ak.index.Index64(np.array([0, 2, 3])),
-        NumpyArray(np.array([1, 2, 3])),
-    )
-    # 3 (offsets: n+1 = 2+1) + 3 (child data) = 6
-    assert content_size(c) == 6
-
-
-def test_list_array() -> None:
-    c = ListArray(
-        ak.index.Index64(np.array([0, 2])),
-        ak.index.Index64(np.array([2, 3])),
-        NumpyArray(np.array([1, 2, 3])),
-    )
-    # 2 (starts) + 2 (stops) + 3 (child data) = 7
-    assert content_size(c) == 7
-
-
-def test_union_array() -> None:
-    c = UnionArray(
-        tags=ak.index.Index8(np.array([0, 1, 0], dtype=np.int8)),
-        index=ak.index.Index64(np.array([0, 0, 1])),
-        contents=[
-            NumpyArray(np.array([10, 20])),
-            NumpyArray(np.array([30])),
-        ],
-    )
-    # 3 (tags) + 3 (index) + 2 (child 0) + 1 (child 1) = 9
-    assert content_size(c) == 9
-
-
-def test_byte_masked_array() -> None:
-    c = ByteMaskedArray(
-        ak.index.Index8(np.array([1, 0, 1], dtype=np.int8)),
-        NumpyArray(np.array([10, 20, 30])),
-        valid_when=True,
-    )
-    # 1 (valid_when) + 3 (mask) + 3 (child data) = 7
-    assert content_size(c) == 7
-
-
-def test_bit_masked_array() -> None:
-    c = BitMaskedArray(
-        ak.index.IndexU8(np.array([0b101], dtype=np.uint8)),
-        NumpyArray(np.array([10, 20, 30])),
-        valid_when=True,
-        length=3,
-        lsb_order=True,
-    )
-    # 2 (valid_when + lsb_order) + 1 (mask byte) + 3 (child data) = 6
-    assert content_size(c) == 6
-
-
-def test_unmasked_array() -> None:
-    c = UnmaskedArray(NumpyArray(np.array([10, 20, 30])))
-    # 0 (no buffers) + 3 (child data) = 3
-    assert content_size(c) == 3
-
-
-def test_indexed_option_array() -> None:
-    c = IndexedOptionArray(
-        ak.index.Index64(np.array([-1, 0, 1])),
-        NumpyArray(np.array([10, 20])),
-    )
-    # 3 (index) + 2 (child data) = 5
-    assert content_size(c) == 5
-
-
-def test_string() -> None:
-    """Strings are treated as leaves; their UTF-8 bytes count as content."""
-    a = ak.Array(['hello', 'world'])
-    c = ak.to_layout(a)
-    # ListOffsetArray: 3 offsets (n+1=2+1) + NumpyArray: 10 bytes
-    assert content_size(c) == 13
-
-
-def test_bytestring() -> None:
-    """Bytestrings are treated as leaves; their bytes count as content."""
-    a = ak.Array([b'hello', b'world'])
-    c = ak.to_layout(a)
-    # ListOffsetArray: 3 offsets + NumpyArray: 10 bytes
-    assert content_size(c) == 13
-
-
-def test_nested() -> None:
-    """Test a nested structure: ListOffsetArray wrapping RegularArray wrapping NumpyArray."""
-    inner = NumpyArray(np.array([1, 2, 3, 4]))
-    regular = RegularArray(inner, size=2)
-    outer = ListOffsetArray(
-        ak.index.Index64(np.array([0, 1, 2])),
-        regular,
-    )
-    # outer offsets: 3 + regular size: 1 + inner data: 4 = 8
-    assert content_size(outer) == 8
-
-
-def test_accepts_array() -> None:
+@given(a=st_ak.constructors.arrays())
+def test_accepts_array(a: ak.Array) -> None:
     """``content_size`` accepts an ``ak.Array`` as well as a ``Content``."""
-    a = ak.Array([[1, 2], [3]])
-    # 3 offsets + 3 data = 6
-    assert content_size(a) == 6
+    assert content_size(a) == content_size(a.layout)
