@@ -3,7 +3,7 @@ import functools
 import awkward as ak
 from awkward.contents import Content
 
-from .iter import get_contents, iter_leaf_contents
+from .iter import iter_contents, iter_leaf_contents
 
 
 def leaf_size(a: ak.Array | Content, /) -> int:
@@ -75,19 +75,9 @@ def content_size(a: ak.Array | Content, /) -> int:
     >>> content_size(a)  # 3 offsets + 10 bytes = 13
     13
     """
-    match a:
-        case ak.Array():
-            return content_size(a.layout)
-        case Content():
-            return content_own_size(a) + _inner_contents_size(a)
-        case _:
-            raise TypeError(f'Unexpected content type: {type(a)}')  # pragma: no cover
-
-
-def _inner_contents_size(content: Content, /) -> int:
     return sum(
-        content_size(c)
-        for c in get_contents(content, string_as_leaf=False, bytestring_as_leaf=False)
+        content_own_size(c)
+        for c in iter_contents(a, string_as_leaf=False, bytestring_as_leaf=False)
     )
 
 
