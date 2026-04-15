@@ -1,23 +1,9 @@
 import functools
 
 import awkward as ak
-from awkward.contents import (
-    BitMaskedArray,
-    ByteMaskedArray,
-    Content,
-    EmptyArray,
-    IndexedOptionArray,
-    ListArray,
-    ListOffsetArray,
-    NumpyArray,
-    RecordArray,
-    RegularArray,
-    UnionArray,
-    UnmaskedArray,
-)
+from awkward.contents import Content
 
-from .contents import get_contents
-from .iter import iter_leaf_contents
+from .iter import get_contents, iter_leaf_contents
 
 
 def leaf_size(a: ak.Array | Content, /) -> int:
@@ -146,59 +132,3 @@ def content_own_size(c: Content, /) -> int:
     1
     """
     raise TypeError(f'Unexpected content type: {type(c)}')  # pragma: no cover
-
-
-@content_own_size.register
-def _(c: NumpyArray, /) -> int:
-    return len(c.data)
-
-
-@content_own_size.register
-def _(c: EmptyArray, /) -> int:
-    return 0
-
-
-@content_own_size.register
-def _(c: RegularArray, /) -> int:
-    return 1
-
-
-@content_own_size.register
-def _(c: RecordArray, /) -> int:
-    n_fields = 0 if c.is_tuple else len(c.fields)
-    return n_fields
-
-
-@content_own_size.register
-def _(c: ListOffsetArray, /) -> int:
-    return len(c.offsets.data)
-
-
-@content_own_size.register
-def _(c: ListArray, /) -> int:
-    return len(c.starts.data) + len(c.stops.data)
-
-
-@content_own_size.register
-def _(c: UnionArray, /) -> int:
-    return len(c.tags.data) + len(c.index.data)
-
-
-@content_own_size.register
-def _(c: BitMaskedArray, /) -> int:
-    return 2 + len(c.mask.data)
-
-
-@content_own_size.register
-def _(c: ByteMaskedArray, /) -> int:
-    return 1 + len(c.mask.data)
-
-
-@content_own_size.register
-def _(c: IndexedOptionArray, /) -> int:
-    return len(c.index.data)
-
-
-@content_own_size.register
-def _(c: UnmaskedArray, /) -> int:
-    return 0

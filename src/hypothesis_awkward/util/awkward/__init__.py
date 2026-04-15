@@ -15,9 +15,10 @@ __all__ = [
     'LeafContent',
 ]
 
-from .contents import get_contents
+from . import contents as _contents  # noqa: F401  # register dispatch overloads
 from .iter import (
     LeafContent,
+    get_contents,
     iter_contents,
     iter_leaf_contents,
     iter_numpy_arrays,

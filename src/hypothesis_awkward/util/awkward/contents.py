@@ -1,5 +1,3 @@
-import functools
-
 from awkward.contents import (
     BitMaskedArray,
     ByteMaskedArray,
@@ -15,56 +13,9 @@ from awkward.contents import (
     UnmaskedArray,
 )
 
+from .iter import get_contents
 from .leaf import is_string_or_bytestring_leaf
-
-
-@functools.singledispatch
-def get_contents(
-    c: Content,
-    /,
-    *,
-    string_as_leaf: bool = True,
-    bytestring_as_leaf: bool = True,
-) -> tuple[Content, ...]:
-    """Return the direct sub-contents of an Awkward ``Content`` node.
-
-    Dispatch is performed with [functools.singledispatch][] so support for a
-    new ``Content`` subclass can be added by calling ``get_contents.register``
-    without modifying this function.
-
-    Parameters
-    ----------
-    c
-        An Awkward ``Content`` node. ``ak.Array`` is not accepted — unwrap
-        with ``a.layout`` first.
-    string_as_leaf
-        If ``True`` (default), treat string ``ListOffsetArray``/``ListArray``/
-        ``RegularArray`` nodes as leaves — return ``()`` rather than
-        ``(c.content,)``.
-    bytestring_as_leaf
-        Same as ``string_as_leaf`` for bytestring nodes.
-
-    Returns
-    -------
-    tuple of Content
-        The direct sub-contents, in natural order (field order for
-        ``RecordArray``, member order for ``UnionArray``). Empty for
-        ``NumpyArray``, ``EmptyArray``, and list types configured as leaves.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from awkward.contents import NumpyArray, RegularArray
-    >>> c = NumpyArray(np.array([1, 2, 3]))
-    >>> get_contents(c)
-    ()
-
-    >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
-    >>> subs = get_contents(c)
-    >>> len(subs) == 1 and subs[0] is c.content
-    True
-    """
-    raise TypeError(f'Unexpected content type: {type(c)}')  # pragma: no cover
+from .size import content_own_size
 
 
 @get_contents.register
@@ -72,9 +23,19 @@ def _(c: NumpyArray, /, **_: bool) -> tuple[Content, ...]:
     return ()
 
 
+@content_own_size.register
+def _(c: NumpyArray, /) -> int:
+    return len(c.data)
+
+
 @get_contents.register
 def _(c: EmptyArray, /, **_: bool) -> tuple[Content, ...]:
     return ()
+
+
+@content_own_size.register
+def _(c: EmptyArray, /) -> int:
+    return 0
 
 
 @get_contents.register
@@ -90,6 +51,11 @@ def _(
     return (c.content,)
 
 
+@content_own_size.register
+def _(c: RegularArray, /) -> int:
+    return 1
+
+
 @get_contents.register
 def _(
     c: ListOffsetArray,
@@ -101,6 +67,11 @@ def _(
     if is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf):
         return ()
     return (c.content,)
+
+
+@content_own_size.register
+def _(c: ListOffsetArray, /) -> int:
+    return len(c.offsets.data)
 
 
 @get_contents.register
@@ -116,9 +87,20 @@ def _(
     return (c.content,)
 
 
+@content_own_size.register
+def _(c: ListArray, /) -> int:
+    return len(c.starts.data) + len(c.stops.data)
+
+
 @get_contents.register
 def _(c: RecordArray, /, **_: bool) -> tuple[Content, ...]:
     return tuple(c.contents)
+
+
+@content_own_size.register
+def _(c: RecordArray, /) -> int:
+    n_fields = 0 if c.is_tuple else len(c.fields)
+    return n_fields
 
 
 @get_contents.register
@@ -126,9 +108,19 @@ def _(c: UnionArray, /, **_: bool) -> tuple[Content, ...]:
     return tuple(c.contents)
 
 
+@content_own_size.register
+def _(c: UnionArray, /) -> int:
+    return len(c.tags.data) + len(c.index.data)
+
+
 @get_contents.register
 def _(c: BitMaskedArray, /, **_: bool) -> tuple[Content, ...]:
     return (c.content,)
+
+
+@content_own_size.register
+def _(c: BitMaskedArray, /) -> int:
+    return 2 + len(c.mask.data)
 
 
 @get_contents.register
@@ -136,11 +128,26 @@ def _(c: ByteMaskedArray, /, **_: bool) -> tuple[Content, ...]:
     return (c.content,)
 
 
+@content_own_size.register
+def _(c: ByteMaskedArray, /) -> int:
+    return 1 + len(c.mask.data)
+
+
 @get_contents.register
 def _(c: IndexedOptionArray, /, **_: bool) -> tuple[Content, ...]:
     return (c.content,)
 
 
+@content_own_size.register
+def _(c: IndexedOptionArray, /) -> int:
+    return len(c.index.data)
+
+
 @get_contents.register
 def _(c: UnmaskedArray, /, **_: bool) -> tuple[Content, ...]:
     return (c.content,)
+
+
+@content_own_size.register
+def _(c: UnmaskedArray, /) -> int:
+    return 0
