@@ -7,19 +7,19 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-- Add get_contents utility ([#71](https://github.com/scikit-hep/hypothesis-awkward/pull/71))
-- Add content_own_size utility ([#72](https://github.com/scikit-hep/hypothesis-awkward/pull/72))
+- Add `get_contents` utility ([#71](https://github.com/scikit-hep/hypothesis-awkward/pull/71))
+- Add `content_own_size` utility ([#72](https://github.com/scikit-hep/hypothesis-awkward/pull/72))
 
 ### Documentation
 
 - Move overview to home page and add conda install option ([#68](https://github.com/scikit-hep/hypothesis-awkward/pull/68))
-- Suppress outdated banner on /dev/ ([#75](https://github.com/scikit-hep/hypothesis-awkward/pull/75))
+- Suppress outdated banner on `/dev/` ([#75](https://github.com/scikit-hep/hypothesis-awkward/pull/75))
 
 ### Build & CI
 
-- Bump actions/github-script from 8 to 9 ([#66](https://github.com/scikit-hep/hypothesis-awkward/pull/66))
-- Bump setup-uv to maintained tag scheme ([#69](https://github.com/scikit-hep/hypothesis-awkward/pull/69))
-- Migrate docs versioning to mike (zensical fork) ([#74](https://github.com/scikit-hep/hypothesis-awkward/pull/74))
+- Bump `actions/github-script` from 8 to 9 ([#66](https://github.com/scikit-hep/hypothesis-awkward/pull/66))
+- Bump `setup-uv` to maintained tag scheme ([#69](https://github.com/scikit-hep/hypothesis-awkward/pull/69))
+- Migrate docs versioning to `mike` (`zensical` fork) ([#74](https://github.com/scikit-hep/hypothesis-awkward/pull/74))
 
 ### Meta
 
@@ -30,10 +30,10 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-- Generate unreachable data in RegularArray ([#59](https://github.com/scikit-hep/hypothesis-awkward/pull/59))
-- Improve RegularArray shrink quality ([#61](https://github.com/scikit-hep/hypothesis-awkward/pull/61))
-- Unreachable data in RegularArray and ListOffsetArray ([#62](https://github.com/scikit-hep/hypothesis-awkward/pull/62))
-- Generalize ListArray starts/stops generation ([#63](https://github.com/scikit-hep/hypothesis-awkward/pull/63))
+- Generate unreachable data in `RegularArray` ([#59](https://github.com/scikit-hep/hypothesis-awkward/pull/59))
+- Improve `RegularArray` shrink quality ([#61](https://github.com/scikit-hep/hypothesis-awkward/pull/61))
+- Unreachable data in `RegularArray` and `ListOffsetArray` ([#62](https://github.com/scikit-hep/hypothesis-awkward/pull/62))
+- Generalize `ListArray` `starts`/`stops` generation ([#63](https://github.com/scikit-hep/hypothesis-awkward/pull/63))
 
 ### Documentation
 
@@ -42,7 +42,7 @@ All notable changes to this project will be documented in this file.
 
 ### Refactoring
 
-- Clean up from_contents and docstrings ([#65](https://github.com/scikit-hep/hypothesis-awkward/pull/65))
+- Clean up `from_contents` and docstrings ([#65](https://github.com/scikit-hep/hypothesis-awkward/pull/65))
 
 
 ## [0.13.0] - 2026-04-06
@@ -50,20 +50,20 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Improve shrink quality for leaf contents, numpy arrays, and dtypes ([#52](https://github.com/scikit-hep/hypothesis-awkward/pull/52))
-- Improve regular_array defaults and docstrings ([#56](https://github.com/scikit-hep/hypothesis-awkward/pull/56))
+- Improve `regular_array` defaults and docstrings ([#56](https://github.com/scikit-hep/hypothesis-awkward/pull/56))
 
 ### Bug Fixes
 
-- Increase max_examples for rare find() condition in test ([#58](https://github.com/scikit-hep/hypothesis-awkward/pull/58))
+- Increase `max_examples` for rare `find()` condition in test ([#58](https://github.com/scikit-hep/hypothesis-awkward/pull/58))
 
 ### Testing
 
-- Add shrink quality tests for contents() ([#57](https://github.com/scikit-hep/hypothesis-awkward/pull/57))
+- Add shrink quality tests for `contents()` ([#57](https://github.com/scikit-hep/hypothesis-awkward/pull/57))
 
 ### Build & CI
 
 - Switch to double-quote docstrings and add docformatter ([#53](https://github.com/scikit-hep/hypothesis-awkward/pull/53))
-- Harden composite actions for gh-pages deployment ([#54](https://github.com/scikit-hep/hypothesis-awkward/pull/54))
+- Harden composite actions for `gh-pages` deployment ([#54](https://github.com/scikit-hep/hypothesis-awkward/pull/54))
 - Split docs-pr-preview into build and deploy workflows ([#55](https://github.com/scikit-hep/hypothesis-awkward/pull/55))
 
 ### Meta
@@ -75,40 +75,40 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-- Change max_depth default from 5 to None (unbounded) ([#50](https://github.com/scikit-hep/hypothesis-awkward/pull/50))
+- Change `max_depth` default from `5` to `None` (unbounded) ([#50](https://github.com/scikit-hep/hypothesis-awkward/pull/50))
 
 ### Bug Fixes
 
-- Reduce max_leaf_size in test_draw_max_leaf_size to fix flaky failure ([#49](https://github.com/scikit-hep/hypothesis-awkward/pull/49))
+- Reduce `max_leaf_size` in `test_draw_max_leaf_size` to fix flaky failure ([#49](https://github.com/scikit-hep/hypothesis-awkward/pull/49))
 
 ### Documentation
 
-- Fix docstring typos and reorder contents() parameters ([#48](https://github.com/scikit-hep/hypothesis-awkward/pull/48))
+- Fix docstring typos and reorder `contents()` parameters ([#48](https://github.com/scikit-hep/hypothesis-awkward/pull/48))
 
 
 ## [0.11.0] - 2026-03-31
 
 ### Features
 
-- Rename max_size to max_leaf_size in contents() and arrays() ([#37](https://github.com/scikit-hep/hypothesis-awkward/pull/37))
-- Rename content_lists() params for clarity ([#39](https://github.com/scikit-hep/hypothesis-awkward/pull/39))
-- Add max_size parameter to bound total content_size() ([#40](https://github.com/scikit-hep/hypothesis-awkward/pull/40))
-- Derive default max_length from size budgets ([#43](https://github.com/scikit-hep/hypothesis-awkward/pull/43))
+- Rename `max_size` to `max_leaf_size` in `contents()` and `arrays()` ([#37](https://github.com/scikit-hep/hypothesis-awkward/pull/37))
+- Rename `content_lists()` params for clarity ([#39](https://github.com/scikit-hep/hypothesis-awkward/pull/39))
+- Add `max_size` parameter to bound total `content_size()` ([#40](https://github.com/scikit-hep/hypothesis-awkward/pull/40))
+- Derive default `max_length` from size budgets ([#43](https://github.com/scikit-hep/hypothesis-awkward/pull/43))
 - Add option type strategies ([#44](https://github.com/scikit-hep/hypothesis-awkward/pull/44))
-- UnionArray all-or-none option coordination ([#46](https://github.com/scikit-hep/hypothesis-awkward/pull/46))
+- `UnionArray` all-or-none option coordination ([#46](https://github.com/scikit-hep/hypothesis-awkward/pull/46))
 
 ### Bug Fixes
 
-- Increase max_examples for flaky test_draw_nan ([#38](https://github.com/scikit-hep/hypothesis-awkward/pull/38))
+- Increase `max_examples` for flaky `test_draw_nan` ([#38](https://github.com/scikit-hep/hypothesis-awkward/pull/38))
 
 ### Documentation
 
-- Add util module to API reference ([#41](https://github.com/scikit-hep/hypothesis-awkward/pull/41))
-- Update arrays() and contents() docstrings ([#47](https://github.com/scikit-hep/hypothesis-awkward/pull/47))
+- Add `util` module to API reference ([#41](https://github.com/scikit-hep/hypothesis-awkward/pull/41))
+- Update `arrays()` and `contents()` docstrings ([#47](https://github.com/scikit-hep/hypothesis-awkward/pull/47))
 
 ### Refactoring
 
-- Extract case blocks from contents() into strategy modules ([#42](https://github.com/scikit-hep/hypothesis-awkward/pull/42))
+- Extract `case` blocks from `contents()` into strategy modules ([#42](https://github.com/scikit-hep/hypothesis-awkward/pull/42))
 
 ### Testing
 
@@ -124,11 +124,11 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-- Change allow_nan default from False to True ([#34](https://github.com/scikit-hep/hypothesis-awkward/pull/34))
+- Change `allow_nan` default from `False` to `True` ([#34](https://github.com/scikit-hep/hypothesis-awkward/pull/34))
 
 ### Bug Fixes
 
-- Add assert for dtype.names narrowing in structured dtype branches ([#32](https://github.com/scikit-hep/hypothesis-awkward/pull/32))
+- Add assert for `dtype.names` narrowing in structured dtype branches ([#32](https://github.com/scikit-hep/hypothesis-awkward/pull/32))
 
 ### Documentation
 
@@ -138,8 +138,8 @@ All notable changes to this project will be documented in this file.
 ### Build & CI
 
 - Bump codecov/codecov-action from 5 to 6 ([#30](https://github.com/scikit-hep/hypothesis-awkward/pull/30))
-- Add pre-commit with ruff hooks ([#31](https://github.com/scikit-hep/hypothesis-awkward/pull/31))
-- Replace dprint with prettier for markdown formatting ([#33](https://github.com/scikit-hep/hypothesis-awkward/pull/33))
+- Add `pre-commit` with `ruff` hooks ([#31](https://github.com/scikit-hep/hypothesis-awkward/pull/31))
+- Replace `dprint` with `prettier` for markdown formatting ([#33](https://github.com/scikit-hep/hypothesis-awkward/pull/33))
 
 ### Meta
 
@@ -171,7 +171,7 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
-- Add zensical docs setup ([#20](https://github.com/scikit-hep/hypothesis-awkward/pull/20))
+- Add `zensical` docs setup ([#20](https://github.com/scikit-hep/hypothesis-awkward/pull/20))
 - Improve docs pages, module docstrings, and README ([#22](https://github.com/scikit-hep/hypothesis-awkward/pull/22))
 
 ### Build & CI
@@ -197,7 +197,7 @@ All notable changes to this project will be documented in this file.
 
 ### Bug Fixes
 
-- Restore --prepend arg and add v0.7.2 changelog ([#15](https://github.com/scikit-hep/hypothesis-awkward/pull/15))
+- Restore `--prepend` arg and add v0.7.2 changelog ([#15](https://github.com/scikit-hep/hypothesis-awkward/pull/15))
 
 ## [0.7.2] - 2026-03-04
 
@@ -218,7 +218,7 @@ All notable changes to this project will be documented in this file.
 ### Build & CI
 
 - Switch changelog generation to prepend mode ([#11](https://github.com/scikit-hep/hypothesis-awkward/pull/11))
-- Bump pandas from 3.0.0 to 3.0.1 in /.github/deps/latest ([#8](https://github.com/scikit-hep/hypothesis-awkward/pull/8))
+- Bump `pandas` from 3.0.0 to 3.0.1 in `.github/deps/latest` ([#8](https://github.com/scikit-hep/hypothesis-awkward/pull/8))
 
 ## [0.7.0] - 2026-03-03
 
