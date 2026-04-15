@@ -86,6 +86,26 @@ def _children(c: Content) -> list[Content]:
             return []
 
 
+def _dfs_preorder(
+    c: Content, *, string_as_leaf: bool, bytestring_as_leaf: bool
+) -> list[Content]:
+    """Reference DFS preorder traversal honoring string/bytestring leaf flags."""
+    out = [c]
+    if string_as_leaf and c.parameter('__array__') == 'string':
+        return out
+    if bytestring_as_leaf and c.parameter('__array__') == 'bytestring':
+        return out
+    for child in _children(c):
+        out.extend(
+            _dfs_preorder(
+                child,
+                string_as_leaf=string_as_leaf,
+                bytestring_as_leaf=bytestring_as_leaf,
+            )
+        )
+    return out
+
+
 @given(data=st.data())
 def test_iter_contents(data: st.DataObject) -> None:
     """Verify iter_contents yields exactly the full Content tree."""
@@ -124,3 +144,11 @@ def test_iter_contents(data: st.DataObject) -> None:
             assert c.parameter('__array__') != 'char'
         if bytestring_as_leaf:
             assert c.parameter('__array__') != 'byte'
+
+    # 6. DFS preorder, natural left-to-right child order
+    expected = _dfs_preorder(
+        a.layout,
+        string_as_leaf=string_as_leaf,
+        bytestring_as_leaf=bytestring_as_leaf,
+    )
+    assert [id(c) for c in all_contents] == [id(c) for c in expected]
