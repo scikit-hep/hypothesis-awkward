@@ -6,6 +6,7 @@ import hypothesis_awkward.strategies as st_ak
 from awkward.contents import (
     BitMaskedArray,
     ByteMaskedArray,
+    Content,
     EmptyArray,
     IndexedOptionArray,
     ListArray,
@@ -16,7 +17,11 @@ from awkward.contents import (
     UnionArray,
     UnmaskedArray,
 )
-from hypothesis_awkward.util import get_contents, is_string_or_bytestring_leaf
+from hypothesis_awkward.util import (
+    get_contents,
+    is_bytestring_leaf,
+    is_string_leaf,
+)
 
 
 @given(data=st.data())
@@ -33,9 +38,13 @@ def test_get_contents(data: st.DataObject) -> None:
 
     match content:
         case NumpyArray() | EmptyArray():
-            expected: tuple = ()
+            expected: tuple[Content, ...] = ()
         case ListOffsetArray() | ListArray() | RegularArray() if (
-            is_string_or_bytestring_leaf(content, string_as_leaf, bytestring_as_leaf)
+            string_as_leaf and is_string_leaf(content)
+        ):
+            expected = ()
+        case ListOffsetArray() | ListArray() | RegularArray() if (
+            bytestring_as_leaf and is_bytestring_leaf(content)
         ):
             expected = ()
         case ListOffsetArray() | ListArray() | RegularArray():
@@ -77,7 +86,7 @@ def test_is_extensible() -> None:
         pass
 
     @get_contents.register
-    def _(c: _Marker, /, **_: bool) -> tuple:
+    def _(c: _Marker, /, **_: bool) -> tuple[Content, ...]:
         assert isinstance(c, _Marker)
         return ()
 
