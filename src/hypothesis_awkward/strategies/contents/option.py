@@ -24,8 +24,8 @@ def option_contents(
 ) -> st.SearchStrategy[Content]:
     """Strategy for option-type content, selected by ``st.one_of``.
 
-    Picks among ``IndexedOptionArray``, ``ByteMaskedArray``,
-    ``BitMaskedArray``, and ``UnmaskedArray``.
+    Picks among [`IndexedOptionArray`][ak.contents.IndexedOptionArray], [`ByteMaskedArray`][ak.contents.ByteMaskedArray],
+    [`BitMaskedArray`][ak.contents.BitMaskedArray], and [`UnmaskedArray`][ak.contents.UnmaskedArray].
 
     Parameters
     ----------
@@ -35,13 +35,17 @@ def option_contents(
         Forwarded to ``indexed_option_array_contents()`` to bound the
         index length. ``None`` means no constraint.
     allow_indexed_option
-        Include ``IndexedOptionArray`` if ``True``.
+        Include [`IndexedOptionArray`][ak.contents.IndexedOptionArray] if ``True``.
     allow_byte_masked
-        Include ``ByteMaskedArray`` if ``True``.
+        Include [`ByteMaskedArray`][ak.contents.ByteMaskedArray] if ``True``.
     allow_bit_masked
-        Include ``BitMaskedArray`` if ``True``.
+        Include [`BitMaskedArray`][ak.contents.BitMaskedArray] if ``True``.
     allow_unmasked
-        Include ``UnmaskedArray`` if ``True``.
+        Include [`UnmaskedArray`][ak.contents.UnmaskedArray] if ``True``.
+
+    Returns
+    -------
+    Content
 
     Examples
     --------
@@ -97,20 +101,24 @@ def option_from_contents(
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
-        a strategy for a single content.
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        for a single content.
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     allow_indexed_option
-        Include ``IndexedOptionArray`` if ``True``.
+        Include [`IndexedOptionArray`][ak.contents.IndexedOptionArray] if ``True``.
     allow_byte_masked
-        Include ``ByteMaskedArray`` if ``True``.
+        Include [`ByteMaskedArray`][ak.contents.ByteMaskedArray] if ``True``.
     allow_bit_masked
-        Include ``BitMaskedArray`` if ``True``.
+        Include [`BitMaskedArray`][ak.contents.BitMaskedArray] if ``True``.
     allow_unmasked
-        Include ``UnmaskedArray`` if ``True``.
+        Include [`UnmaskedArray`][ak.contents.UnmaskedArray] if ``True``.
+
+    Returns
+    -------
+    Content
     """
     child = draw(
         content(

@@ -22,12 +22,12 @@ def record_array_contents(
     allow_tuple: bool = True,
     max_length: int | None = None,
 ) -> RecordArray:
-    """Strategy for RecordArray Content from a list of child Contents.
+    """Strategy for [`ak.contents.RecordArray`][] instances.
 
     Parameters
     ----------
     contents
-        Child contents. Can be a strategy for a list of Content, a concrete list, or
+        Child contents. Can be a strategy for a list of [`Content`][ak.contents.Content], a concrete list, or
         ``None`` to draw random children.
     max_fields
         Maximum number of fields when ``contents`` is ``None``.
@@ -35,6 +35,10 @@ def record_array_contents(
         Allow tuple records (no field names) if ``True``.
     max_length
         Upper bound on the record length, i.e., ``len(result)``.
+
+    Returns
+    -------
+    RecordArray
 
     Examples
     --------
@@ -100,24 +104,29 @@ def record_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> RecordArray:
-    """Strategy that generates a record layout within a size limit.
+    """Strategy for [`ak.contents.RecordArray`][] instances within a size budget.
 
-    Draws one or more children via ``content_lists()`` with ``min_len=1``,
-    then wraps them in a ``RecordArray`` with generated or omitted field names.
+    Draws one or more children via ``content_lists()`` with ``min_len=1``, then wraps
+    them in a [`RecordArray`][ak.contents.RecordArray] with generated or omitted field
+    names.
 
     Called by ``contents()`` during recursive tree generation.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
-        a strategy for a single content.
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        for a single content.
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the record length, i.e., ``len(result)``.
+
+    Returns
+    -------
+    RecordArray
     """
     children = draw(
         st_ak.contents.content_lists(

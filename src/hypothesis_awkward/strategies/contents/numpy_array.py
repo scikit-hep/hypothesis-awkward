@@ -12,7 +12,7 @@ def numpy_array_contents(
     min_size: int = 0,
     max_size: int = 10,
 ) -> st.SearchStrategy[NumpyArray]:
-    """Strategy for NumpyArray content.
+    """Strategy for [`ak.contents.NumpyArray`][] instances.
 
     Parameters
     ----------
@@ -25,6 +25,10 @@ def numpy_array_contents(
         Minimum number of elements.
     max_size
         Maximum number of elements.
+
+    Returns
+    -------
+    NumpyArray
 
     Examples
     --------

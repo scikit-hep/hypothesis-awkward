@@ -20,20 +20,25 @@ def list_offset_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListOffsetArray:
-    """Strategy for ``ListOffsetArray``.
+    """Strategy for [`ak.contents.ListOffsetArray`][] instances.
 
-    This strategy generates a ``ListOffsetArray`` with the given content. It produces
-    layouts with and without unreachable data. It shrinks toward no unreachable data
-    (``offsets[0] == 0`` and ``offsets[-1] == len(content)``).
+    This strategy generates a [`ListOffsetArray`][ak.contents.ListOffsetArray] with the
+    given content. It produces layouts with and without unreachable data. It shrinks
+    toward no unreachable data (``offsets[0] == 0`` and ``offsets[-1] == len(content)``).
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for Content, a concrete Content instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``len(content)`` when ``None``.
+        Upper bound on the number of lists, i.e., ``len(result)``. Defaults to
+        ``len(content)`` when ``None``.
+
+    Returns
+    -------
+    ListOffsetArray
 
     Examples
     --------
@@ -69,7 +74,7 @@ def _st_offsets(
     max_length: int | None = None,
     allow_unreachable: bool = True,
 ) -> list[int]:
-    """Strategy for offsets of a ``ListOffsetArray``.
+    """Strategy for offsets of a [`ListOffsetArray`][ak.contents.ListOffsetArray].
 
     Shrinks toward no unreachable data (``offsets[0] == 0`` and
     ``offsets[-1] == content_len``).
@@ -79,7 +84,7 @@ def _st_offsets(
     content_len
         Length of the content array.
     max_length
-        Upper bound on the length of the ``ListOffsetArray`` (i.e.,
+        Upper bound on the length of the [`ListOffsetArray`][ak.contents.ListOffsetArray] (i.e.,
         ``len(offsets) - 1``).
     allow_unreachable
         No unreachable data is possible if ``False``.
@@ -152,10 +157,10 @@ def list_offset_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:
-    """Strategy for inner ``ListOffsetArray`` to be drawn by an outer layout strategy.
+    """Strategy for inner [`ak.contents.ListOffsetArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the ``ListOffsetArray``.
+    function that returns a strategy for the inner layout of the [`ListOffsetArray`][ak.contents.ListOffsetArray].
 
     Parameters
     ----------
@@ -168,6 +173,10 @@ def list_offset_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``, i.e., ``len(result.offsets) - 1``.
+
+    Returns
+    -------
+    ListOffsetArray
 
     Examples
     --------

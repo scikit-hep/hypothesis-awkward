@@ -13,7 +13,7 @@ def string_contents(
     min_size: int = 0,
     max_size: int = 10,
 ) -> ListOffsetArray:
-    """Strategy for ListOffsetArray string content.
+    """Strategy for string [`ak.contents.ListOffsetArray`][] instances.
 
     Parameters
     ----------
@@ -24,6 +24,10 @@ def string_contents(
         Minimum number of strings.
     max_size
         Maximum number of strings.
+
+    Returns
+    -------
+    ListOffsetArray
 
     Examples
     --------

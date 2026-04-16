@@ -103,6 +103,7 @@ inventories = [
     "https://docs.python.org/3/objects.inv",
     "https://hypothesis.readthedocs.io/en/latest/objects.inv",
     "https://numpy.org/doc/stable/objects.inv",
+    "https://awkward-array.org/doc/main/objects.inv",
 ]
 paths = ["src"]
 
