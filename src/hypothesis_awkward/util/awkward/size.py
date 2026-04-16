@@ -9,8 +9,8 @@ from .iter import iter_contents, iter_leaf_contents
 def leaf_size(a: ak.Array | Content, /) -> int:
     """Count total leaf elements in an Awkward Array layout.
 
-    Each ``NumpyArray`` element counts as one. Each string and bytestring
-    (not character or byte) counts as one. ``EmptyArray`` counts as zero.
+    Each [`NumpyArray`][ak.contents.NumpyArray] element counts as one. Each string and bytestring
+    (not character or byte) counts as one. [`EmptyArray`][ak.contents.EmptyArray] counts as zero.
 
     Parameters
     ----------
@@ -43,7 +43,7 @@ def content_size(a: ak.Array | Content, /) -> int:
     """Count total scalars stored in an Awkward Array layout.
 
     Counts data elements, offset/index buffer elements, and metadata values
-    (``RegularArray.size``, ``RecordArray`` field names).
+    (``RegularArray.size``, [`RecordArray`][ak.contents.RecordArray] field names).
 
     Parameters
     ----------
@@ -83,23 +83,23 @@ def content_size(a: ak.Array | Content, /) -> int:
 
 @functools.singledispatch
 def content_own_size(c: Content, /) -> int:
-    """Count the scalars owned directly by a ``Content`` node.
+    """Count the scalars owned directly by a [`Content`][ak.contents.Content] node.
 
     Counts the node's own buffer elements (offsets, starts/stops, mask, tags,
     index, numeric data) and metadata values (``RegularArray.size``,
-    ``RecordArray`` field names, ``BitMaskedArray``/``ByteMaskedArray`` flags).
+    [`RecordArray`][ak.contents.RecordArray] field names, [`BitMaskedArray`][ak.contents.BitMaskedArray]/[`ByteMaskedArray`][ak.contents.ByteMaskedArray] flags).
     Does **not** recurse into sub-contents — that is handled by
     [content_size][hypothesis_awkward.util.content_size] via
     [get_contents][hypothesis_awkward.util.get_contents].
 
     Dispatch is performed with [functools.singledispatch][] so support for a
-    new ``Content`` subclass can be added by calling
+    new [`Content`][ak.contents.Content] subclass can be added by calling
     ``content_own_size.register`` without modifying this function.
 
     Parameters
     ----------
     c
-        An Awkward ``Content`` node.
+        An Awkward [`Content`][ak.contents.Content] node.
 
     Returns
     -------
@@ -114,8 +114,8 @@ def content_own_size(c: Content, /) -> int:
     >>> content_own_size(c)
     3
 
-    The size metadata of a ``RegularArray`` counts as one; the inner
-    ``NumpyArray`` data is *not* included here:
+    The size metadata of a [`RegularArray`][ak.contents.RegularArray] counts as one; the inner
+    [`NumpyArray`][ak.contents.NumpyArray] data is *not* included here:
 
     >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
     >>> content_own_size(c)

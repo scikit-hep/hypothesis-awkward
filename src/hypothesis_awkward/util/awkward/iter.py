@@ -15,30 +15,30 @@ def get_contents(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> tuple[Content, ...]:
-    """Return the direct sub-contents of an Awkward ``Content`` node.
+    """Return the direct sub-contents of an [`ak.contents.Content`][] node.
 
     Dispatch is performed with [functools.singledispatch][] so support for a
-    new ``Content`` subclass can be added by calling ``get_contents.register``
+    new [`Content`][ak.contents.Content] subclass can be added by calling ``get_contents.register``
     without modifying this function.
 
     Parameters
     ----------
     c
-        An Awkward ``Content`` node. ``ak.Array`` is not accepted — unwrap
+        An Awkward [`Content`][ak.contents.Content] node. [`ak.Array`][ak.Array] is not accepted — unwrap
         with ``a.layout`` first.
     string_as_leaf
-        If ``True`` (default), treat string ``ListOffsetArray``/``ListArray``/
-        ``RegularArray`` nodes as leaves — return ``()`` rather than
+        If ``True`` (default), treat string [`ListOffsetArray`][ak.contents.ListOffsetArray]/[`ListArray`][ak.contents.ListArray]/
+        [`RegularArray`][ak.contents.RegularArray] nodes as leaves — return ``()`` rather than
         ``(c.content,)``.
     bytestring_as_leaf
         Same as ``string_as_leaf`` for bytestring nodes.
 
     Returns
     -------
-    tuple of Content
+    tuple[Content, ...]
         The direct sub-contents, in natural order (field order for
-        ``RecordArray``, member order for ``UnionArray``). Empty for
-        ``NumpyArray``, ``EmptyArray``, and list types configured as leaves.
+        [`RecordArray`][ak.contents.RecordArray], member order for [`UnionArray`][ak.contents.UnionArray]). Empty for
+        [`NumpyArray`][ak.contents.NumpyArray], [`EmptyArray`][ak.contents.EmptyArray], and list types configured as leaves.
 
     Examples
     --------
@@ -70,9 +70,10 @@ def iter_contents(
     a
         An Awkward Array or Content.
     string_as_leaf
-        If `True` (default), treat string `ListOffsetArray`/`ListArray`/
-        `RegularArray` nodes as leaves — do not descend into the inner
-        `NumpyArray(uint8)`.
+        If `True` (default), treat string
+        [`ListOffsetArray`][ak.contents.ListOffsetArray]/[`ListArray`][ak.contents.ListArray]/
+        [`RegularArray`][ak.contents.RegularArray] nodes as leaves — do not
+        descend into the inner [`NumpyArray`][ak.contents.NumpyArray]`(uint8)`.
     bytestring_as_leaf
         If `True` (default), treat bytestring nodes as leaves.
 
@@ -111,8 +112,9 @@ def iter_leaf_contents(
     a
         An Awkward Array or Content.
     string_as_leaf
-        If `True` (default), treat string `ListOffsetArray`/`ListArray`/
-        `RegularArray` nodes as leaves.
+        If `True` (default), treat string
+        [`ListOffsetArray`][ak.contents.ListOffsetArray]/[`ListArray`][ak.contents.ListArray]/
+        [`RegularArray`][ak.contents.RegularArray] nodes as leaves.
     bytestring_as_leaf
         If `True` (default), treat bytestring nodes as leaves.
 
@@ -140,25 +142,25 @@ def is_leaf(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> bool:
-    """Return ``True`` if a ``Content`` node is a leaf.
+    """Return ``True`` if an [`ak.contents.Content`][] is a leaf.
 
-    ``NumpyArray`` and ``EmptyArray`` are always leaves. String and
+    [`NumpyArray`][ak.contents.NumpyArray] and [`EmptyArray`][ak.contents.EmptyArray] are always leaves. String and
     bytestring list nodes are leaves only when the respective flag is
-    set. Wrappers (``RecordArray``, ``UnionArray``, option/masked types,
+    set. Wrappers ([`RecordArray`][ak.contents.RecordArray], [`UnionArray`][ak.contents.UnionArray], option/masked types,
     non-string list types) are never leaves. Unknown types fall back to
     ``False``.
 
     Dispatch is performed with [functools.singledispatch][] so support
-    for a new ``Content`` subclass can be added by calling
+    for a new [`Content`][ak.contents.Content] subclass can be added by calling
     ``is_leaf.register`` without modifying this function.
 
     Parameters
     ----------
     c
-        An Awkward ``Content`` node.
+        An Awkward [`Content`][ak.contents.Content] node.
     string_as_leaf
-        If ``True`` (default), treat string ``ListOffsetArray``/
-        ``ListArray``/``RegularArray`` nodes as leaves.
+        If ``True`` (default), treat string [`ListOffsetArray`][ak.contents.ListOffsetArray]/
+        [`ListArray`][ak.contents.ListArray]/[`RegularArray`][ak.contents.RegularArray] nodes as leaves.
     bytestring_as_leaf
         Same as ``string_as_leaf`` for bytestring nodes.
 
@@ -175,7 +177,7 @@ def is_leaf(
     >>> is_leaf(NumpyArray(np.array([1, 2, 3])))
     True
 
-    A non-string ``RegularArray`` is not a leaf:
+    A non-string [`RegularArray`][ak.contents.RegularArray] is not a leaf:
 
     >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
     >>> is_leaf(c)

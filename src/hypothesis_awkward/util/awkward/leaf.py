@@ -6,12 +6,12 @@ def is_string_or_bytestring_leaf(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> bool:
-    """Check whether an Awkward Content node is a string or bytestring leaf.
+    """Return ``True`` if an [`ak.contents.Content`][] is string or bytestring.
 
     Parameters
     ----------
     c
-        An Awkward Content node.
+        An Awkward [`Content`][ak.contents.Content] node.
     string_as_leaf
         If ``True`` (default), treat string content as a leaf.
     bytestring_as_leaf
@@ -28,12 +28,12 @@ def is_string_or_bytestring_leaf(
 
 
 def is_string_leaf(c: Content) -> bool:
-    """Check whether an Awkward Content node is a string leaf.
+    """Return ``True`` if an [`ak.contents.Content`][] is string.
 
     Parameters
     ----------
     c
-        An Awkward Content node.
+        An Awkward [`Content`][ak.contents.Content] node.
 
     Returns
     -------
@@ -45,12 +45,12 @@ def is_string_leaf(c: Content) -> bool:
 
 
 def is_bytestring_leaf(c: Content) -> bool:
-    """Check whether an Awkward Content node is a bytestring leaf.
+    """Return ``True`` if an [`ak.contents.Content`][] is bytestring.
 
     Parameters
     ----------
     c
-        An Awkward Content node.
+        An Awkward [`Content`][ak.contents.Content] node.
 
     Returns
     -------
