@@ -36,6 +36,10 @@ def record_array_contents(
     max_length
         Upper bound on the record length, i.e., ``len(result)``.
 
+    Returns
+    -------
+    RecordArray
+
     Examples
     --------
     >>> c = record_array_contents().example()
@@ -118,6 +122,10 @@ def record_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the record length, i.e., ``len(result)``.
+
+    Returns
+    -------
+    RecordArray
     """
     children = draw(
         st_ak.contents.content_lists(

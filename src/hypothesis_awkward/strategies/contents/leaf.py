@@ -46,6 +46,10 @@ def leaf_contents(
     ------
     ValueError
         If no content types are possible with the given options.
+
+    Returns
+    -------
+    NumpyArray | EmptyArray | ListOffsetArray
     """
     options: list[st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]] = []
 

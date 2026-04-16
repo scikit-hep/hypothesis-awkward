@@ -21,6 +21,10 @@ def bytestring_contents(
     max_size
         Maximum number of bytestrings.
 
+    Returns
+    -------
+    ListOffsetArray
+
     Examples
     --------
     >>> c = bytestring_contents().example()

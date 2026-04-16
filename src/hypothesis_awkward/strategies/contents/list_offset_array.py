@@ -35,6 +35,10 @@ def list_offset_array_contents(
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
         to ``len(content)`` when ``None``.
 
+    Returns
+    -------
+    ListOffsetArray
+
     Examples
     --------
     >>> c = list_offset_array_contents().example()
@@ -168,6 +172,10 @@ def list_offset_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``, i.e., ``len(result.offsets) - 1``.
+
+    Returns
+    -------
+    ListOffsetArray
 
     Examples
     --------

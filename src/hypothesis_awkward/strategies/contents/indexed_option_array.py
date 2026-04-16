@@ -36,6 +36,10 @@ def indexed_option_array_contents(
         Upper bound on the index length, i.e., ``len(result)``. When ``None``,
         defaults to twice the content length.
 
+    Returns
+    -------
+    IndexedOptionArray
+
     Examples
     --------
     >>> c = indexed_option_array_contents().example()
@@ -93,6 +97,10 @@ def indexed_option_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
+
+    Returns
+    -------
+    IndexedOptionArray
     """
     ml = max_length if max_length is not None else max_size
     n = draw(st.integers(min_value=0, max_value=ml))

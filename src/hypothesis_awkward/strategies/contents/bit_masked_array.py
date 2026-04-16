@@ -31,6 +31,10 @@ def bit_masked_array_contents(
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
         ``None`` to draw from ``contents()``.
 
+    Returns
+    -------
+    BitMaskedArray
+
     Examples
     --------
     >>> c = bit_masked_array_contents().example()
@@ -83,6 +87,10 @@ def bit_masked_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
+
+    Returns
+    -------
+    BitMaskedArray
     """
     max_content_size = max(max_size - 2, 0)
     if max_length is not None:

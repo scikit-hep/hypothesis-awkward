@@ -140,6 +140,10 @@ def arrays(
     allow_virtual
         No virtual arrays are generated if ``False``.
 
+    Returns
+    -------
+    ak.Array
+
     Examples
     --------
     >>> arrays().example()

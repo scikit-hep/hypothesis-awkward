@@ -43,6 +43,10 @@ def option_contents(
     allow_unmasked
         Include [`UnmaskedArray`][ak.contents.UnmaskedArray] if ``True``.
 
+    Returns
+    -------
+    Content
+
     Examples
     --------
     >>> c = option_contents().example()
@@ -111,6 +115,10 @@ def option_from_contents(
         Include [`BitMaskedArray`][ak.contents.BitMaskedArray] if ``True``.
     allow_unmasked
         Include [`UnmaskedArray`][ak.contents.UnmaskedArray] if ``True``.
+
+    Returns
+    -------
+    Content
     """
     child = draw(
         content(

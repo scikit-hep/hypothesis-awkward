@@ -26,6 +26,10 @@ def unmasked_array_contents(
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
         ``None`` to draw from ``contents()``.
 
+    Returns
+    -------
+    UnmaskedArray
+
     Examples
     --------
     >>> c = unmasked_array_contents().example()
@@ -70,6 +74,10 @@ def unmasked_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
+
+    Returns
+    -------
+    UnmaskedArray
     """
     max_content_size = max_size
     if max_length is not None:

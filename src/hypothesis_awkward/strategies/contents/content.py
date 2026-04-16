@@ -143,6 +143,10 @@ def contents(
         The outermost content node cannot be an option type if ``False``. Does not
         affect deeper levels. Prevents option-inside-option nesting.
 
+    Returns
+    -------
+    Content
+
     Examples
     --------
     >>> c = contents().example()
@@ -316,6 +320,10 @@ def content_lists(
     st_option
         A callable conforming to ``StOption`` that wraps content in an option type.
         Required when ``all_option_or_none`` is ``True``.
+
+    Returns
+    -------
+    list[Content]
     """
     remaining_leaf = max_leaf_size
     remaining_total = max_size

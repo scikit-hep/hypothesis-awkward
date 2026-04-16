@@ -40,7 +40,7 @@ def regular_array_contents(
 
     Returns
     -------
-    [`RegularArray`][ak.contents.RegularArray]
+    RegularArray
 
     Examples
     --------
@@ -196,6 +196,10 @@ def regular_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on the number of groups, i.e., ``len(result)``.
+
+    Returns
+    -------
+    RegularArray
 
     Examples
     --------

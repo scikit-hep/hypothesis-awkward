@@ -25,6 +25,10 @@ def string_contents(
     max_size
         Maximum number of strings.
 
+    Returns
+    -------
+    ListOffsetArray
+
     Examples
     --------
     >>> c = string_contents().example()

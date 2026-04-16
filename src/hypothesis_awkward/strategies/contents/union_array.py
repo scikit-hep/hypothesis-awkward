@@ -38,6 +38,10 @@ def union_array_contents(
         Upper bound on the union length, i.e., ``len(result)``. When ``None``, no
         constraint is applied.
 
+    Returns
+    -------
+    UnionArray
+
     Examples
     --------
     >>> c = union_array_contents().example()
@@ -138,6 +142,10 @@ def union_array_from_contents(
     st_option
         A callable conforming to ``StOption`` that wraps content in an option
         type. Used for all-or-none option coordination.
+
+    Returns
+    -------
+    UnionArray
     """
     children = draw(
         st_ak.contents.content_lists(

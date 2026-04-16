@@ -36,6 +36,10 @@ def list_array_contents(
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
         to ``len(content)`` when ``None``.
 
+    Returns
+    -------
+    ListArray
+
     Examples
     --------
     >>> c = list_array_contents().example()
@@ -272,6 +276,10 @@ def list_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``, i.e., ``len(result.starts) = len(result.stops)``.
+
+    Returns
+    -------
+    ListArray
 
     Examples
     --------

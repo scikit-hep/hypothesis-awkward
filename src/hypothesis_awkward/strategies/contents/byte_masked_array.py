@@ -30,6 +30,10 @@ def byte_masked_array_contents(
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
         ``None`` to draw from ``contents()``.
 
+    Returns
+    -------
+    ByteMaskedArray
+
     Examples
     --------
     >>> c = byte_masked_array_contents().example()
@@ -78,6 +82,10 @@ def byte_masked_array_from_contents(
         Upper bound on total leaf elements. ``None`` means no constraint.
     max_length
         Upper bound on ``len(result)``.
+
+    Returns
+    -------
+    ByteMaskedArray
     """
     if max_leaf_size is not None:
         max_content_size = max(max_size - 1 - max_leaf_size, 0)

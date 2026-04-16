@@ -26,6 +26,10 @@ def numpy_array_contents(
     max_size
         Maximum number of elements.
 
+    Returns
+    -------
+    NumpyArray
+
     Examples
     --------
     >>> c = numpy_array_contents().example()
