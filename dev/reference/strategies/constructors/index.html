@@ -1126,26 +1126,26 @@ generate fully general Awkward Arrays, with many options to control layout, data
 types, missing values, masks, and other array attributes.</p>
 <p>In constructing arrays, this strategy follows the Awkward Array User Guide section
 <a href="https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html">"Direct constructors"</a>. It constructs <em>layouts</em> and
-wraps them in an <code>ak.Array</code>. The layouts are instances of subclasses
-of <code>ak.contents.Content</code>.</p>
+wraps them in an <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.Array.html#ak.Array"><code>ak.Array</code></a>. The layouts are instances of subclasses of
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>.</p>
 <p>By default, when called with no arguments, <code>arrays()</code> generates the most general
 arrays currently implemented, subject to a finite maximum size. Arguments can be
 provided to exclude certain layouts or data types, or to constrain values and sizes.</p>
 <p>The current implementation generates arrays with the following layouts:</p>
 <ul>
-<li><code>EmptyArray</code></li>
-<li><code>NumpyArray</code></li>
-<li><code>RegularArray</code></li>
-<li><code>ListArray</code></li>
-<li><code>ListOffsetArray</code></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray"><code>RegularArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a></li>
 <li>Strings</li>
 <li>Bytestrings</li>
-<li><code>RecordArray</code></li>
-<li><code>IndexedOptionArray</code></li>
-<li><code>ByteMaskedArray</code></li>
-<li><code>BitMaskedArray</code></li>
-<li><code>UnmaskedArray</code></li>
-<li><code>UnionArray</code></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray"><code>IndexedOptionArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray"><code>ByteMaskedArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.BitMaskedArray.html#ak.contents.BitMaskedArray"><code>BitMaskedArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray"><code>UnmaskedArray</code></a></li>
+<li><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a></li>
 </ul>
 <p>Each type can be excluded separately with the corresponding <code>allow_*</code> argument.</p>
 <p>The <code>max_size</code> is the main argument for constraining the array size. It counts most
@@ -1176,9 +1176,10 @@ names, and parameters.  The array size can also be constrained with
             </td>
             <td>
               <div class="doc-md-description">
-                <p>A strategy for NumPy scalar dtypes used in <code>NumpyArray</code>. If <code>None</code>, the
-default strategy that generates any scalar dtype supported by Awkward Array is
-used. Does not affect string or bytestring content.</p>
+                <p>A strategy for NumPy scalar dtypes used in
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a>. If <code>None</code>, the default strategy that
+generates any scalar dtype supported by Awkward Array is used. Does not affect
+string or bytestring content.</p>
               </div>
             </td>
             <td>
@@ -1211,7 +1212,7 @@ elements, offsets, indices, field names, and parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>NaN</code>/<code>NaT</code> values are generated in <code>NumpyArray</code> if <code>False</code>.</p>
+                <p>No <code>NaN</code>/<code>NaT</code> values are generated in <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1227,7 +1228,7 @@ elements, offsets, indices, field names, and parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>NumpyArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1243,8 +1244,9 @@ elements, offsets, indices, field names, and parameters.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>EmptyArray</code> is generated if <code>False</code>. <code>EmptyArray</code> has Awkward type
-<code>unknown</code> and carries no data. Unlike <code>NumpyArray</code>, it is unaffected by
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a> is generated if <code>False</code>.
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a> has Awkward type <code>unknown</code> and carries
+no data. Unlike <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a>, it is unaffected by
 <code>dtypes</code> and <code>allow_nan</code>.</p>
               </div>
             </td>
@@ -1262,11 +1264,12 @@ elements, offsets, indices, field names, and parameters.</p>
             <td>
               <div class="doc-md-description">
                 <p>No string content is generated if <code>False</code>. A string is represented as a
-<code>ListOffsetArray</code> wrapping a <code>NumpyArray(uint8)</code>. Each character (uint8) and
-offset in the <code>ListOffsetArray</code> counts toward <code>max_size</code>. A string is
-considered a single leaf element in counting toward <code>max_leaf_size</code> and
-<code>max_depth</code>.  Each string (not character) counts toward <code>max_leaf_size</code>. A
-string does not count toward <code>max_depth</code>. Unaffected by <code>dtypes</code> and
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a> wrapping a
+<code>NumpyArray(uint8)</code>. Each character (uint8) and offset in the
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a> counts toward <code>max_size</code>. A
+string is considered a single leaf element in counting toward <code>max_leaf_size</code>
+and <code>max_depth</code>.  Each string (not character) counts toward <code>max_leaf_size</code>.
+A string does not count toward <code>max_depth</code>. Unaffected by <code>dtypes</code> and
 <code>allow_nan</code>.</p>
               </div>
             </td>
@@ -1284,12 +1287,13 @@ string does not count toward <code>max_depth</code>. Unaffected by <code>dtypes<
             <td>
               <div class="doc-md-description">
                 <p>No bytestring content is generated if <code>False</code>. A bytestring is represented as a
-<code>ListOffsetArray</code> wrapping a <code>NumpyArray(uint8)</code>. Each byte (uint8) and
-offset in the <code>ListOffsetArray</code> counts toward <code>max_size</code>. A bytestring is
-considered a single leaf element in counting toward <code>max_leaf_size</code> and
-<code>max_depth</code>. Each bytestring (not byte) counts toward <code>max_leaf_size</code>. A
-bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dtypes</code> and
-<code>allow_nan</code>.</p>
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a> wrapping a
+<code>NumpyArray(uint8)</code>. Each byte (uint8) and offset in the
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a> counts toward <code>max_size</code>. A
+bytestring is considered a single leaf element in counting toward
+<code>max_leaf_size</code> and <code>max_depth</code>. Each bytestring (not byte) counts toward
+<code>max_leaf_size</code>. A bytestring does not count toward <code>max_depth</code>. Unaffected
+by <code>dtypes</code> and <code>allow_nan</code>.</p>
               </div>
             </td>
             <td>
@@ -1305,7 +1309,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>RegularArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray"><code>RegularArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1321,7 +1325,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>ListOffsetArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1337,7 +1341,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>ListArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1353,7 +1357,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>RecordArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1369,7 +1373,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>UnionArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1385,7 +1389,8 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>IndexedOptionArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray"><code>IndexedOptionArray</code></a> is generated if
+<code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1401,7 +1406,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>ByteMaskedArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray"><code>ByteMaskedArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1417,7 +1422,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>BitMaskedArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.BitMaskedArray.html#ak.contents.BitMaskedArray"><code>BitMaskedArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1433,7 +1438,7 @@ bytestring does not count toward <code>max_depth</code>. Unaffected by <code>dty
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No <code>UnmaskedArray</code> is generated if <code>False</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray"><code>UnmaskedArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -1467,9 +1472,12 @@ value, including complex and datetime, counts as one. Each string and bytestring
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum nesting depth. Each <code>RegularArray</code>, <code>ListOffsetArray</code>, <code>ListArray</code>,
-<code>RecordArray</code>, and <code>UnionArray</code> layer adds one level, excluding those that
-form string or bytestring content. No constraint when <code>None</code> (the default).</p>
+                <p>Maximum nesting depth. Each <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray"><code>RegularArray</code></a>,
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a>,
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a>, <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a>,
+and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a> layer adds one level, excluding those
+that form string or bytestring content. No constraint when <code>None</code> (the
+default).</p>
               </div>
             </td>
             <td>
@@ -1507,6 +1515,29 @@ default).</p>
             </td>
             <td>
                   <code>True</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" title="awkward.Array" href="https://awkward-array.org/doc/main/reference/generated/ak.Array.html#awkward.Array">Array</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                
+              </div>
             </td>
           </tr>
       </tbody>
