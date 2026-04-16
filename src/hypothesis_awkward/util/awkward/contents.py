@@ -13,9 +13,14 @@ from awkward.contents import (
     UnmaskedArray,
 )
 
-from .iter import get_contents
+from .iter import get_contents, is_leaf
 from .leaf import is_string_or_bytestring_leaf
 from .size import content_own_size
+
+
+@is_leaf.register
+def _(c: NumpyArray, /, **_: bool) -> bool:
+    return True
 
 
 @get_contents.register
@@ -28,6 +33,11 @@ def _(c: NumpyArray, /) -> int:
     return len(c.data)
 
 
+@is_leaf.register
+def _(c: EmptyArray, /, **_: bool) -> bool:
+    return True
+
+
 @get_contents.register
 def _(c: EmptyArray, /, **_: bool) -> tuple[Content, ...]:
     return ()
@@ -36,6 +46,17 @@ def _(c: EmptyArray, /, **_: bool) -> tuple[Content, ...]:
 @content_own_size.register
 def _(c: EmptyArray, /) -> int:
     return 0
+
+
+@is_leaf.register
+def _(
+    c: RegularArray,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> bool:
+    return is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf)
 
 
 @get_contents.register
@@ -56,6 +77,17 @@ def _(c: RegularArray, /) -> int:
     return 1
 
 
+@is_leaf.register
+def _(
+    c: ListOffsetArray,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> bool:
+    return is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf)
+
+
 @get_contents.register
 def _(
     c: ListOffsetArray,
@@ -72,6 +104,17 @@ def _(
 @content_own_size.register
 def _(c: ListOffsetArray, /) -> int:
     return len(c.offsets.data)
+
+
+@is_leaf.register
+def _(
+    c: ListArray,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> bool:
+    return is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf)
 
 
 @get_contents.register
