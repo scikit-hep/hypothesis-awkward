@@ -35,13 +35,13 @@ def option_contents(
         Forwarded to ``indexed_option_array_contents()`` to bound the
         index length. ``None`` means no constraint.
     allow_indexed_option
-        Include [`IndexedOptionArray`][ak.contents.IndexedOptionArray] if ``True``.
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
     allow_byte_masked
-        Include [`ByteMaskedArray`][ak.contents.ByteMaskedArray] if ``True``.
+        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
     allow_bit_masked
-        Include [`BitMaskedArray`][ak.contents.BitMaskedArray] if ``True``.
+        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if ``False``.
     allow_unmasked
-        Include [`UnmaskedArray`][ak.contents.UnmaskedArray] if ``True``.
+        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if ``False``.
 
     Returns
     -------
@@ -108,13 +108,13 @@ def option_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. ``None`` means no constraint.
     allow_indexed_option
-        Include [`IndexedOptionArray`][ak.contents.IndexedOptionArray] if ``True``.
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
     allow_byte_masked
-        Include [`ByteMaskedArray`][ak.contents.ByteMaskedArray] if ``True``.
+        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
     allow_bit_masked
-        Include [`BitMaskedArray`][ak.contents.BitMaskedArray] if ``True``.
+        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if ``False``.
     allow_unmasked
-        Include [`UnmaskedArray`][ak.contents.UnmaskedArray] if ``True``.
+        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if ``False``.
 
     Returns
     -------
