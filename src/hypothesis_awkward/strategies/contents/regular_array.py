@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, RegularArray
+from hypothesis_awkward import strategies as st_ak
 
 if TYPE_CHECKING:
     from .content import StContent

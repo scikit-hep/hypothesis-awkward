@@ -5,10 +5,10 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import BitMaskedArray, Content
-from hypothesis_awkward.util.awkward import content_size
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import content_size
+from hypothesis_awkward.util import safe_compare as sc
 
 if TYPE_CHECKING:
     from .content import StContent
