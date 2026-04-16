@@ -115,8 +115,8 @@ def union_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.

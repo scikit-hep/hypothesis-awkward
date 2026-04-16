@@ -56,8 +56,8 @@ def unmasked_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> UnmaskedArray:
     """Strategy for [`ak.contents.UnmaskedArray`][] instances within a size budget.

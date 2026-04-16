@@ -76,8 +76,8 @@ def indexed_option_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> IndexedOptionArray:
     """Strategy for [`ak.contents.IndexedOptionArray`][] instances within a size budget.

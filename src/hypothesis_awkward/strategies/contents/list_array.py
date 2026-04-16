@@ -256,8 +256,8 @@ def list_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> ListArray:
     """Strategy for inner [`ak.contents.ListArray`][] within an outer layout.
