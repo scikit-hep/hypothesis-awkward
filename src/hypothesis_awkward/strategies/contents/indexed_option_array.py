@@ -23,18 +23,19 @@ def indexed_option_array_contents(
 ) -> IndexedOptionArray:
     """Strategy for [`ak.contents.IndexedOptionArray`][] instances.
 
-    The index length is drawn independently of the content length. Valid
-    entries can reference any content position (duplicates allowed).
-    Missing entries have ``index[i] = -1``.
+    The index length is drawn independently of the content length. Valid entries can
+    reference any content position (duplicates allowed). Missing entries have ``index[i]
+    = -1``.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
     max_size
-        Upper bound on the index length, i.e., ``len(result)``. When ``None``,
-        defaults to twice the content length.
+        Upper bound on the index length, i.e., ``len(result)``. When ``None``, defaults
+        to twice the content length.
 
     Returns
     -------

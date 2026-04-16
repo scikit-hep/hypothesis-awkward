@@ -22,18 +22,19 @@ def list_offset_array_contents(
 ) -> ListOffsetArray:
     """Strategy for [`ak.contents.ListOffsetArray`][] instances.
 
-    This strategy generates a [`ListOffsetArray`][ak.contents.ListOffsetArray] with the given content. It produces
-    layouts with and without unreachable data. It shrinks toward no unreachable data
-    (``offsets[0] == 0`` and ``offsets[-1] == len(content)``).
+    This strategy generates a [`ListOffsetArray`][ak.contents.ListOffsetArray] with the
+    given content. It produces layouts with and without unreachable data. It shrinks
+    toward no unreachable data (``offsets[0] == 0`` and ``offsets[-1] == len(content)``).
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``len(content)`` when ``None``.
+        Upper bound on the number of lists, i.e., ``len(result)``. Defaults to
+        ``len(content)`` when ``None``.
 
     Returns
     -------

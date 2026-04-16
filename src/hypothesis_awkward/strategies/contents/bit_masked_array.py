@@ -79,8 +79,8 @@ def bit_masked_array_from_contents(
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
-        a strategy for a single content.
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        for a single content.
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size

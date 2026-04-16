@@ -21,21 +21,24 @@ def regular_array_contents(
 ) -> RegularArray:
     """Strategy for [`ak.contents.RegularArray`][] instances.
 
-    This strategy generates a [`RegularArray`][ak.contents.RegularArray] with the given content. It shrinks toward
-    a shorter length (larger ``size``) with no unreachable data.
+    This strategy generates a [`RegularArray`][ak.contents.RegularArray] with the given
+    content. It shrinks toward a shorter length (larger ``size``) with no unreachable
+    data.
 
     Parameters
     ----------
     content
         content or strategy for the content. If ``None``, draw from ``contents()``.
     max_size
-        Upper bound on the size parameter of the [`RegularArray`][ak.contents.RegularArray]. If ``None``,
-        ``len(content)`` is the upper bound.
+        Upper bound on the size parameter of the
+        [`RegularArray`][ak.contents.RegularArray]. If ``None``, ``len(content)`` is the
+        upper bound.
     max_zeros_length
-        Upper bound on the ``zeros_length`` parameter of the [`RegularArray`][ak.contents.RegularArray]. Only
-        effective when size is zero.
+        Upper bound on the ``zeros_length`` parameter of the
+        [`RegularArray`][ak.contents.RegularArray]. Only effective when size is zero.
     max_length
-        Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray] (i.e., ``len(result)``).
+        Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray]
+        (i.e., ``len(result)``).
 
 
     Returns

@@ -17,14 +17,15 @@ def unmasked_array_contents(
 ) -> UnmaskedArray:
     """Strategy for [`ak.contents.UnmaskedArray`][] instances.
 
-    [`UnmaskedArray`][ak.contents.UnmaskedArray] is an option type with no actual nulls. It simply
-    wraps content, adding option-type semantics without a mask buffer.
+    [`UnmaskedArray`][ak.contents.UnmaskedArray] is an option type with no actual nulls.
+    It simply wraps content, adding option-type semantics without a mask buffer.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
 
     Returns
     -------

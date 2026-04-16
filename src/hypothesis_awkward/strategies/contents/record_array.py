@@ -106,16 +106,17 @@ def record_array_from_contents(
 ) -> RecordArray:
     """Strategy for [`ak.contents.RecordArray`][] instances within a size budget.
 
-    Draws one or more children via ``content_lists()`` with ``min_len=1``,
-    then wraps them in a [`RecordArray`][ak.contents.RecordArray] with generated or omitted field names.
+    Draws one or more children via ``content_lists()`` with ``min_len=1``, then wraps
+    them in a [`RecordArray`][ak.contents.RecordArray] with generated or omitted field
+    names.
 
     Called by ``contents()`` during recursive tree generation.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
-        a strategy for a single content.
+        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        for a single content.
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size

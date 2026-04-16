@@ -18,17 +18,20 @@ def leaf_contents(
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
     """Strategy for leaf content types.
 
-    This strategy generates [`EmptyArray`][ak.contents.EmptyArray], bytestring content, string content, and
-    [`NumpyArray`][ak.contents.NumpyArray] and shrinks in that order towards [`EmptyArray`][ak.contents.EmptyArray].
+    This strategy generates [`EmptyArray`][ak.contents.EmptyArray], bytestring content,
+    string content, and [`NumpyArray`][ak.contents.NumpyArray] and shrinks in that order
+    towards [`EmptyArray`][ak.contents.EmptyArray].
 
     Parameters
     ----------
     dtypes
-        A strategy for NumPy scalar dtypes used in [`NumpyArray`][ak.contents.NumpyArray]. If ``None``, the
-        default strategy that generates any scalar dtype supported by Awkward Array is
-        used. Does not affect string or bytestring content.
+        A strategy for NumPy scalar dtypes used in
+        [`NumpyArray`][ak.contents.NumpyArray]. If ``None``, the default strategy that
+        generates any scalar dtype supported by Awkward Array is used. Does not affect
+        string or bytestring content.
     allow_nan
-        No ``NaN``/``NaT`` values are generated in [`NumpyArray`][ak.contents.NumpyArray] if ``False``.
+        No ``NaN``/``NaT`` values are generated in [`NumpyArray`][ak.contents.NumpyArray]
+        if ``False``.
     min_size
         Minimum number of elements.
     max_size

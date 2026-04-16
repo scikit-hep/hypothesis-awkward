@@ -40,10 +40,11 @@ def arrays(
 
     In constructing arrays, this strategy follows the Awkward Array User Guide section
     ["Direct constructors"][ak-user-guide-constructors]. It constructs _layouts_ and
-    wraps them in an [`ak.Array`][ak.Array]. The layouts are instances of subclasses
-    of [`Content`][ak.contents.Content].
+    wraps them in an [`ak.Array`][ak.Array]. The layouts are instances of subclasses of
+    [`Content`][ak.contents.Content].
 
-    [ak-user-guide-constructors]: https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
+    [ak-user-guide-constructors]:
+    https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
 
     By default, when called with no arguments, ``arrays()`` generates the most general
     arrays currently implemented, subject to a finite maximum size. Arguments can be
@@ -78,9 +79,10 @@ def arrays(
     Parameters
     ----------
     dtypes
-        A strategy for NumPy scalar dtypes used in [`NumpyArray`][ak.contents.NumpyArray]. If ``None``, the
-        default strategy that generates any scalar dtype supported by Awkward Array is
-        used. Does not affect string or bytestring content.
+        A strategy for NumPy scalar dtypes used in
+        [`NumpyArray`][ak.contents.NumpyArray]. If ``None``, the default strategy that
+        generates any scalar dtype supported by Awkward Array is used. Does not affect
+        string or bytestring content.
     max_size
         Upper bound on the number of scalars in the generated content. Counts data
         elements, offsets, indices, field names, and parameters.
@@ -89,25 +91,28 @@ def arrays(
     allow_numpy
         No [`NumpyArray`][ak.contents.NumpyArray] is generated if ``False``.
     allow_empty
-        No [`EmptyArray`][ak.contents.EmptyArray] is generated if ``False``. [`EmptyArray`][ak.contents.EmptyArray] has Awkward type
-        ``unknown`` and carries no data. Unlike [`NumpyArray`][ak.contents.NumpyArray], it is unaffected by
+        No [`EmptyArray`][ak.contents.EmptyArray] is generated if ``False``.
+        [`EmptyArray`][ak.contents.EmptyArray] has Awkward type ``unknown`` and carries
+        no data. Unlike [`NumpyArray`][ak.contents.NumpyArray], it is unaffected by
         ``dtypes`` and ``allow_nan``.
     allow_string
         No string content is generated if ``False``. A string is represented as a
-        [`ListOffsetArray`][ak.contents.ListOffsetArray] wrapping a ``NumpyArray(uint8)``. Each character (uint8) and
-        offset in the [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A string is
-        considered a single leaf element in counting toward ``max_leaf_size`` and
-        ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``. A
-        string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] wrapping a
+        ``NumpyArray(uint8)``. Each character (uint8) and offset in the
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A
+        string is considered a single leaf element in counting toward ``max_leaf_size``
+        and ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``.
+        A string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
         ``allow_nan``.
     allow_bytestring
         No bytestring content is generated if ``False``. A bytestring is represented as a
-        [`ListOffsetArray`][ak.contents.ListOffsetArray] wrapping a ``NumpyArray(uint8)``. Each byte (uint8) and
-        offset in the [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A bytestring is
-        considered a single leaf element in counting toward ``max_leaf_size`` and
-        ``max_depth``. Each bytestring (not byte) counts toward ``max_leaf_size``. A
-        bytestring does not count toward ``max_depth``. Unaffected by ``dtypes`` and
-        ``allow_nan``.
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] wrapping a
+        ``NumpyArray(uint8)``. Each byte (uint8) and offset in the
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A
+        bytestring is considered a single leaf element in counting toward
+        ``max_leaf_size`` and ``max_depth``. Each bytestring (not byte) counts toward
+        ``max_leaf_size``. A bytestring does not count toward ``max_depth``. Unaffected
+        by ``dtypes`` and ``allow_nan``.
     allow_regular
         No [`RegularArray`][ak.contents.RegularArray] is generated if ``False``.
     allow_list_offset
@@ -119,7 +124,8 @@ def arrays(
     allow_union
         No [`UnionArray`][ak.contents.UnionArray] is generated if ``False``.
     allow_indexed_option
-        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
+        ``False``.
     allow_byte_masked
         No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
     allow_bit_masked
@@ -131,9 +137,12 @@ def arrays(
         value, including complex and datetime, counts as one. Each string and bytestring
         (not character or byte) counts as one.
     max_depth
-        Maximum nesting depth. Each [`RegularArray`][ak.contents.RegularArray], [`ListOffsetArray`][ak.contents.ListOffsetArray], [`ListArray`][ak.contents.ListArray],
-        [`RecordArray`][ak.contents.RecordArray], and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those that
-        form string or bytestring content. No constraint when ``None`` (the default).
+        Maximum nesting depth. Each [`RegularArray`][ak.contents.RegularArray],
+        [`ListOffsetArray`][ak.contents.ListOffsetArray],
+        [`ListArray`][ak.contents.ListArray], [`RecordArray`][ak.contents.RecordArray],
+        and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those
+        that form string or bytestring content. No constraint when ``None`` (the
+        default).
     max_length
         Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).
