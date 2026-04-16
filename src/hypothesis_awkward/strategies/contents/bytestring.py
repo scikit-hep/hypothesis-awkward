@@ -12,7 +12,7 @@ def bytestring_contents(
     min_size: int = 0,
     max_size: int = 10,
 ) -> ListOffsetArray:
-    """Strategy for ListOffsetArray bytestring content.
+    """Strategy for bytestring [`ak.contents.ListOffsetArray`][] instances.
 
     Parameters
     ----------

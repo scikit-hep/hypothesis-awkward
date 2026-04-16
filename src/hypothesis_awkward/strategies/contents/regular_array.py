@@ -19,9 +19,9 @@ def regular_array_contents(
     max_zeros_length: int | None = None,
     max_length: int | None = None,
 ) -> RegularArray:
-    """Strategy for ``RegularArray``.
+    """Strategy for [`ak.contents.RegularArray`][] instances.
 
-    This strategy generates a ``RegularArray`` with the given content. It shrinks toward
+    This strategy generates a [`RegularArray`][ak.contents.RegularArray] with the given content. It shrinks toward
     a shorter length (larger ``size``) with no unreachable data.
 
     Parameters
@@ -29,18 +29,18 @@ def regular_array_contents(
     content
         content or strategy for the content. If ``None``, draw from ``contents()``.
     max_size
-        Upper bound on the size parameter of the ``RegularArray``. If ``None``,
+        Upper bound on the size parameter of the [`RegularArray`][ak.contents.RegularArray]. If ``None``,
         ``len(content)`` is the upper bound.
     max_zeros_length
-        Upper bound on the ``zeros_length`` parameter of the ``RegularArray``. Only
+        Upper bound on the ``zeros_length`` parameter of the [`RegularArray`][ak.contents.RegularArray]. Only
         effective when size is zero.
     max_length
-        Upper bound on the length of the ``RegularArray`` (i.e., ``len(result)``).
+        Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray] (i.e., ``len(result)``).
 
 
     Returns
     -------
-    RegularArray
+    [`RegularArray`][ak.contents.RegularArray]
 
     Examples
     --------
@@ -101,9 +101,9 @@ def _st_group_sizes(
     max_length: int | None = None,
     allow_non_divisors: bool = True,
 ) -> int:
-    """Strategy for the size parameter of a ``RegularArray``.
+    """Strategy for the size parameter of a [`RegularArray`][ak.contents.RegularArray].
 
-    This strategy generates the size parameter for a ``RegularArray`` given the total
+    This strategy generates the size parameter for a [`RegularArray`][ak.contents.RegularArray] given the total
     number of items in the content and various constraints. It shrinks toward the
     divisors of ``total_items`` (no unreachable data) and a fewer groups (larger size).
     In other words, it shrinks toward the largest divisor of ``total_items`` that
@@ -180,10 +180,10 @@ def regular_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> RegularArray:
-    """Strategy for inner ``RegularArray`` to be drawn by an outer layout strategy.
+    """Strategy for inner [`ak.contents.RegularArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the ``RegularArray``.
+    function that returns a strategy for the inner layout of the [`RegularArray`][ak.contents.RegularArray].
 
     Parameters
     ----------

@@ -25,12 +25,12 @@ def union_array_contents(
     max_contents: int = 4,
     max_length: int | None = None,
 ) -> UnionArray:
-    """Strategy for UnionArray Content from a list of child Contents.
+    """Strategy for [`ak.contents.UnionArray`][] instances.
 
     Parameters
     ----------
     contents
-        Child contents. Can be a strategy for a list of Content, a concrete list, or
+        Child contents. Can be a strategy for a list of [`Content`][ak.contents.Content], a concrete list, or
         ``None`` to draw random children.
     max_contents
         Maximum number of child contents when ``contents`` is ``None``.
@@ -115,10 +115,10 @@ def union_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
-    """Strategy that generates a tagged union layout within a size limit.
+    """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
 
     Draws multiple children via ``content_lists()`` with ``min_len=2``, then
-    wraps them in a ``UnionArray`` with shuffled tags and index arrays. Prevents
+    wraps them in a [`UnionArray`][ak.contents.UnionArray] with shuffled tags and index arrays. Prevents
     nested unions by passing ``allow_union_root=False`` to child generation.
     Enforces the all-or-none option rule via ``all_option_or_none=True``.
 

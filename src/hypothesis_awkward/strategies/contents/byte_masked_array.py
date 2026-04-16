@@ -20,14 +20,14 @@ def byte_masked_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
 ) -> ByteMaskedArray:
-    """Strategy for ByteMaskedArray Content wrapping child Content.
+    """Strategy for [`ak.contents.ByteMaskedArray`][] instances.
 
     The mask length always equals ``len(content)``.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for Content, a concrete Content instance, or
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
         ``None`` to draw from ``contents()``.
 
     Examples
@@ -63,7 +63,7 @@ def byte_masked_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ByteMaskedArray:
-    """Strategy that generates a byte-masked layout within a size limit.
+    """Strategy for [`ak.contents.ByteMaskedArray`][] instances within a size budget.
 
     Called by ``contents()`` during recursive tree generation.
 

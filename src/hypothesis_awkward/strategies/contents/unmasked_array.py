@@ -15,15 +15,15 @@ def unmasked_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
 ) -> UnmaskedArray:
-    """Strategy for UnmaskedArray Content wrapping child Content.
+    """Strategy for [`ak.contents.UnmaskedArray`][] instances.
 
-    ``UnmaskedArray`` is an option type with no actual nulls. It simply
+    [`UnmaskedArray`][ak.contents.UnmaskedArray] is an option type with no actual nulls. It simply
     wraps content, adding option-type semantics without a mask buffer.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for Content, a concrete Content instance, or
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
         ``None`` to draw from ``contents()``.
 
     Examples
@@ -55,7 +55,7 @@ def unmasked_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> UnmaskedArray:
-    """Strategy that generates an unmasked layout within a size limit.
+    """Strategy for [`ak.contents.UnmaskedArray`][] instances within a size budget.
 
     Called by ``contents()`` during recursive tree generation.
 

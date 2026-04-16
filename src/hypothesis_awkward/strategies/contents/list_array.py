@@ -20,17 +20,17 @@ def list_array_contents(
     *,
     max_length: int | None = None,
 ) -> ListArray:
-    """Strategy for ``ListArray``.
+    """Strategy for [`ak.contents.ListArray`][] instances.
 
-    This strategy generates a ``ListArray`` with the given content. It produces all
-    valid ``ListArray`` layouts including unreachable data, gaps, overlapping sublists,
+    This strategy generates a [`ListArray`][ak.contents.ListArray] with the given content. It produces all
+    valid [`ListArray`][ak.contents.ListArray] layouts including unreachable data, gaps, overlapping sublists,
     and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
     unreachable data.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for Content, a concrete Content instance, or
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
         ``None`` to draw from ``contents()``.
     max_length
         Upper bound on the number of lists, i.e., ``len(result)``. Defaults
@@ -72,7 +72,7 @@ def _st_starts_stops(
     max_length: int | None = None,
     allow_unreachable: bool = True,
 ) -> tuple[list[int], list[int]]:
-    """Strategy for starts and stops of a ``ListArray``.
+    """Strategy for starts and stops of a [`ListArray`][ak.contents.ListArray].
 
     Shrinks toward no unreachable data (``starts[0] == 0`` and
     ``stops[-1] == content_len``).
@@ -256,10 +256,10 @@ def list_array_from_contents(
     max_length: 'int | None' = None,
     st_option: 'StOption | None' = None,
 ) -> ListArray:
-    """Strategy for inner ``ListArray`` to be drawn by an outer layout strategy.
+    """Strategy for inner [`ak.contents.ListArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the ``ListArray``.
+    function that returns a strategy for the inner layout of the [`ListArray`][ak.contents.ListArray].
 
     Parameters
     ----------

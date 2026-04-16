@@ -52,19 +52,19 @@ def contents(
 
     The current implementation generates the following layouts:
 
-    - ``EmptyArray``
-    - ``NumpyArray``
-    - ``RegularArray``
-    - ``ListArray``
-    - ``ListOffsetArray``
+    - [`EmptyArray`][ak.contents.EmptyArray]
+    - [`NumpyArray`][ak.contents.NumpyArray]
+    - [`RegularArray`][ak.contents.RegularArray]
+    - [`ListArray`][ak.contents.ListArray]
+    - [`ListOffsetArray`][ak.contents.ListOffsetArray]
     - Strings
     - Bytestrings
-    - ``RecordArray``
-    - ``IndexedOptionArray``
-    - ``ByteMaskedArray``
-    - ``BitMaskedArray``
-    - ``UnmaskedArray``
-    - ``UnionArray``
+    - [`RecordArray`][ak.contents.RecordArray]
+    - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
+    - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
+    - [`BitMaskedArray`][ak.contents.BitMaskedArray]
+    - [`UnmaskedArray`][ak.contents.UnmaskedArray]
+    - [`UnionArray`][ak.contents.UnionArray]
 
     Each type can be excluded separately with the corresponding ``allow_*`` argument.
 
@@ -76,69 +76,69 @@ def contents(
     Parameters
     ----------
     dtypes
-        A strategy for NumPy scalar dtypes used in ``NumpyArray``. If ``None``, the
+        A strategy for NumPy scalar dtypes used in [`NumpyArray`][ak.contents.NumpyArray]. If ``None``, the
         default strategy that generates any scalar dtype supported by Awkward Array is
         used. Does not affect string or bytestring content.
     max_size
         Upper bound on the number of scalars in the generated content. Counts data
         elements, offsets, indices, field names, and parameters.
     allow_nan
-        No ``NaN``/``NaT`` values are generated in ``NumpyArray`` if ``False``.
+        No ``NaN``/``NaT`` values are generated in [`NumpyArray`][ak.contents.NumpyArray] if ``False``.
     allow_numpy
-        No ``NumpyArray`` is generated if ``False``.
+        No [`NumpyArray`][ak.contents.NumpyArray] is generated if ``False``.
     allow_empty
-        No ``EmptyArray`` is generated if ``False``. ``EmptyArray`` has Awkward type
-        ``unknown`` and carries no data. Unlike ``NumpyArray``, it is unaffected by
+        No [`EmptyArray`][ak.contents.EmptyArray] is generated if ``False``. [`EmptyArray`][ak.contents.EmptyArray] has Awkward type
+        ``unknown`` and carries no data. Unlike [`NumpyArray`][ak.contents.NumpyArray], it is unaffected by
         ``dtypes`` and ``allow_nan``.
     allow_string
         No string content is generated if ``False``. A string is represented as a
-        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each character (uint8) and
-        offset in the ``ListOffsetArray`` counts toward ``max_size``. A string is
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] wrapping a ``NumpyArray(uint8)``. Each character (uint8) and
+        offset in the [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A string is
         considered a single leaf element in counting toward ``max_leaf_size`` and
         ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``. A
         string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
         ``allow_nan``.
     allow_bytestring
         No bytestring content is generated if ``False``. A bytestring is represented as a
-        ``ListOffsetArray`` wrapping a ``NumpyArray(uint8)``. Each byte (uint8) and
-        offset in the ``ListOffsetArray`` counts toward ``max_size``. A bytestring is
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] wrapping a ``NumpyArray(uint8)``. Each byte (uint8) and
+        offset in the [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A bytestring is
         considered a single leaf element in counting toward ``max_leaf_size`` and
         ``max_depth``. Each bytestring (not byte) counts toward ``max_leaf_size``. A
         bytestring does not count toward ``max_depth``. Unaffected by ``dtypes`` and
         ``allow_nan``.
     allow_regular
-        No ``RegularArray`` is generated if ``False``.
+        No [`RegularArray`][ak.contents.RegularArray] is generated if ``False``.
     allow_list_offset
-        No ``ListOffsetArray`` is generated if ``False``.
+        No [`ListOffsetArray`][ak.contents.ListOffsetArray] is generated if ``False``.
     allow_list
-        No ``ListArray`` is generated if ``False``.
+        No [`ListArray`][ak.contents.ListArray] is generated if ``False``.
     allow_record
-        No ``RecordArray`` is generated if ``False``.
+        No [`RecordArray`][ak.contents.RecordArray] is generated if ``False``.
     allow_union
-        No ``UnionArray`` is generated if ``False``.
+        No [`UnionArray`][ak.contents.UnionArray] is generated if ``False``.
     allow_indexed_option
-        No ``IndexedOptionArray`` is generated if ``False``.
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
     allow_byte_masked
-        No ``ByteMaskedArray`` is generated if ``False``.
+        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
     allow_bit_masked
-        No ``BitMaskedArray`` is generated if ``False``.
+        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if ``False``.
     allow_unmasked
-        No ``UnmaskedArray`` is generated if ``False``.
+        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if ``False``.
     max_leaf_size
         Maximum total number of leaf elements in the generated content. Each numerical
         value, including complex and datetime, counts as one. Each string and bytestring
         (not character or byte) counts as one.
     max_depth
-        Maximum nesting depth. Each ``RegularArray``, ``ListOffsetArray``, ``ListArray``,
-        ``RecordArray``, and ``UnionArray`` layer adds one level, excluding those that
+        Maximum nesting depth. Each [`RegularArray`][ak.contents.RegularArray], [`ListOffsetArray`][ak.contents.ListOffsetArray], [`ListArray`][ak.contents.ListArray],
+        [`RecordArray`][ak.contents.RecordArray], and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those that
         form string or bytestring content. No constraint when ``None`` (the default).
     max_length
         Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).
     allow_union_root
-        The outermost content node cannot be a ``UnionArray`` if ``False``. Unlike
-        ``allow_union``, this does not prevent ``UnionArray`` at deeper levels. Awkward
-        Array does not allow a ``UnionArray`` to directly contain another ``UnionArray``.
+        The outermost content node cannot be a [`UnionArray`][ak.contents.UnionArray] if ``False``. Unlike
+        ``allow_union``, this does not prevent [`UnionArray`][ak.contents.UnionArray] at deeper levels. Awkward
+        Array does not allow a [`UnionArray`][ak.contents.UnionArray] to directly contain another [`UnionArray`][ak.contents.UnionArray].
     allow_option_root
         The outermost content node cannot be an option type if ``False``. Does not
         affect deeper levels. Prevents option-inside-option nesting.

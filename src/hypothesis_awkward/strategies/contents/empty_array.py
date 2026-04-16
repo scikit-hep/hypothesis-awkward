@@ -4,5 +4,5 @@ from awkward.contents import EmptyArray
 
 
 def empty_array_contents() -> st.SearchStrategy[EmptyArray]:
-    """Strategy for EmptyArray content."""
+    """Strategy for [`ak.contents.EmptyArray`][] instances."""
     return st.just(EmptyArray())
