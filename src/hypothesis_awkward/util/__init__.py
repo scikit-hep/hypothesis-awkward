@@ -5,6 +5,7 @@ __all__ = [
     'any_nan_in_awkward_array',
     'any_nat_in_awkward_array',
     'get_contents',
+    'is_leaf',
     'is_string_or_bytestring_leaf',
     'is_string_leaf',
     'is_bytestring_leaf',
@@ -28,12 +29,10 @@ __all__ = [
     'BUILTIN_SAFE_DTYPES',
     'SUPPORTED_DTYPES',
     'SUPPORTED_DTYPE_NAMES',
-    'LeafContent',
     '_StWithMinMaxSize',
 ]
 
 from .awkward import (
-    LeafContent,
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
@@ -41,6 +40,7 @@ from .awkward import (
     content_size,
     get_contents,
     is_bytestring_leaf,
+    is_leaf,
     is_string_leaf,
     is_string_or_bytestring_leaf,
     iter_contents,

@@ -1,22 +1,10 @@
 import functools
 from collections.abc import Iterator
-from typing import Union
 
 import numpy as np
 
 import awkward as ak
-from awkward.contents import (
-    Content,
-    EmptyArray,
-    ListArray,
-    ListOffsetArray,
-    NumpyArray,
-    RegularArray,
-)
-
-from .leaf import is_string_or_bytestring_leaf
-
-LeafContent = Union[NumpyArray, EmptyArray, ListOffsetArray, ListArray, RegularArray]
+from awkward.contents import Content, NumpyArray
 
 
 @functools.singledispatch
@@ -115,7 +103,7 @@ def iter_leaf_contents(
     *,
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
-) -> Iterator[LeafContent]:
+) -> Iterator[Content]:
     """Iterate over all leaf contents in an Awkward Array layout.
 
     Parameters
@@ -130,19 +118,70 @@ def iter_leaf_contents(
 
     Yields
     ------
-    LeafContent
+    Content
         Each leaf content in the layout.
     """
     for content in iter_contents(
         a, string_as_leaf=string_as_leaf, bytestring_as_leaf=bytestring_as_leaf
     ):
-        if isinstance(content, (EmptyArray, NumpyArray)):
+        if is_leaf(
+            content,
+            string_as_leaf=string_as_leaf,
+            bytestring_as_leaf=bytestring_as_leaf,
+        ):
             yield content
-        elif isinstance(content, (ListOffsetArray, ListArray, RegularArray)):
-            if is_string_or_bytestring_leaf(
-                content, string_as_leaf, bytestring_as_leaf
-            ):
-                yield content
+
+
+@functools.singledispatch
+def is_leaf(
+    c: Content,
+    /,
+    *,
+    string_as_leaf: bool = True,
+    bytestring_as_leaf: bool = True,
+) -> bool:
+    """Return ``True`` if a ``Content`` node is a leaf.
+
+    ``NumpyArray`` and ``EmptyArray`` are always leaves. String and
+    bytestring list nodes are leaves only when the respective flag is
+    set. Wrappers (``RecordArray``, ``UnionArray``, option/masked types,
+    non-string list types) are never leaves. Unknown types fall back to
+    ``False``.
+
+    Dispatch is performed with [functools.singledispatch][] so support
+    for a new ``Content`` subclass can be added by calling
+    ``is_leaf.register`` without modifying this function.
+
+    Parameters
+    ----------
+    c
+        An Awkward ``Content`` node.
+    string_as_leaf
+        If ``True`` (default), treat string ``ListOffsetArray``/
+        ``ListArray``/``RegularArray`` nodes as leaves.
+    bytestring_as_leaf
+        Same as ``string_as_leaf`` for bytestring nodes.
+
+    Returns
+    -------
+    bool
+        ``True`` if ``c`` is a leaf under the given flags, else
+        ``False``.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from awkward.contents import NumpyArray, RegularArray
+    >>> is_leaf(NumpyArray(np.array([1, 2, 3])))
+    True
+
+    A non-string ``RegularArray`` is not a leaf:
+
+    >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
+    >>> is_leaf(c)
+    False
+    """
+    return False
 
 
 def iter_numpy_arrays(
