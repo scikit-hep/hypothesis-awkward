@@ -1,8 +1,8 @@
 import numpy as np
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import NumpyArray
+from hypothesis_awkward import strategies as st_ak
 
 
 def numpy_array_contents(

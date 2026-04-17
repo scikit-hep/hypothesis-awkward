@@ -1,8 +1,8 @@
 import numpy as np
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import EmptyArray, ListOffsetArray, NumpyArray
+from hypothesis_awkward import strategies as st_ak
 
 
 def leaf_contents(
@@ -72,6 +72,6 @@ def leaf_contents(
         options.append(s)
 
     if not options:
-        raise ValueError('no content types are possible with the given options.')
+        raise ValueError('no content types are possible with the given options')
 
     return st.one_of(options)

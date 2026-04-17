@@ -4,9 +4,9 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListOffsetArray
-from hypothesis_awkward.util.safe import safe_min
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import safe_min
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -33,8 +33,8 @@ def list_offset_array_contents(
         [`Content`][ak.contents.Content] instance, or ``None`` to draw from
         ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults to
-        ``len(content)`` when ``None``.
+        Upper bound on the number of lists, i.e., ``len(result)``. If ``None``,
+        ``len(content)`` is used.
 
     Returns
     -------
@@ -43,7 +43,7 @@ def list_offset_array_contents(
     Examples
     --------
     >>> c = list_offset_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, ListOffsetArray)
     True
 
     Limit the number of lists:
@@ -84,8 +84,8 @@ def _st_offsets(
     content_len
         Length of the content array.
     max_length
-        Upper bound on the length of the [`ListOffsetArray`][ak.contents.ListOffsetArray] (i.e.,
-        ``len(offsets) - 1``).
+        Upper bound on the length of the
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] (i.e., ``len(offsets) - 1``).
     allow_unreachable
         No unreachable data is possible if ``False``.
     """
@@ -153,14 +153,15 @@ def list_offset_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> ListOffsetArray:
     """Strategy for inner [`ak.contents.ListOffsetArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the [`ListOffsetArray`][ak.contents.ListOffsetArray].
+    function that returns a strategy for the inner layout of the
+    [`ListOffsetArray`][ak.contents.ListOffsetArray].
 
     Parameters
     ----------
@@ -170,9 +171,11 @@ def list_offset_array_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
-        Upper bound on ``len(result)``, i.e., ``len(result.offsets) - 1``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
+    st_option
+        Accepted for ``_StFromContents`` compatibility; unused in this variant.
 
     Returns
     -------
@@ -180,7 +183,7 @@ def list_offset_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = list_offset_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, max_length=5

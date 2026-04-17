@@ -6,9 +6,9 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, UnionArray
-from hypothesis_awkward.util.awkward import content_size
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import content_size
 
 from .option import option_from_contents
 
@@ -35,8 +35,8 @@ def union_array_contents(
     max_contents
         Maximum number of child contents when ``contents`` is ``None``.
     max_length
-        Upper bound on the union length, i.e., ``len(result)``. When ``None``, no
-        constraint is applied.
+        Upper bound on the union length, i.e., ``len(result)``. Unbounded if
+        ``None``.
 
     Returns
     -------
@@ -45,7 +45,7 @@ def union_array_contents(
     Examples
     --------
     >>> c = union_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, UnionArray)
     True
 
     Limit the union length:
@@ -115,15 +115,16 @@ def union_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
 
-    Draws multiple children via ``content_lists()`` with ``min_len=2``, then
-    wraps them in a [`UnionArray`][ak.contents.UnionArray] with shuffled tags and index arrays. Prevents
-    nested unions by passing ``allow_union_root=False`` to child generation.
+    Draws multiple children via ``content_lists()`` with ``min_len=2``, then wraps
+    them in a [`UnionArray`][ak.contents.UnionArray] with shuffled tags and index
+    arrays. Prevents nested unions by passing ``allow_union_root=False`` to child
+    generation.
     Enforces the all-or-none option rule via ``all_option_or_none=True``.
 
     Called by ``contents()`` during recursive tree generation.
@@ -136,9 +137,9 @@ def union_array_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
-        Upper bound on the union length, i.e., ``len(result)``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
         A callable conforming to ``StOption`` that wraps content in an option
         type. Used for all-or-none option coordination.
@@ -146,6 +147,29 @@ def union_array_from_contents(
     Returns
     -------
     UnionArray
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = union_array_from_contents(
+    ...     contents,
+    ...     max_size=20,
+    ...     max_leaf_size=10,
+    ...     max_length=5,
+    ...     st_option=option_from_contents,
+    ... ).example()
+    >>> isinstance(c, UnionArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
     children = draw(
         st_ak.contents.content_lists(

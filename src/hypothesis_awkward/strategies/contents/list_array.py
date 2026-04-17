@@ -4,9 +4,9 @@ from hypothesis import reject
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, ListArray
-from hypothesis_awkward.util.safe import safe_min
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import safe_min
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -22,19 +22,20 @@ def list_array_contents(
 ) -> ListArray:
     """Strategy for [`ak.contents.ListArray`][] instances.
 
-    This strategy generates a [`ListArray`][ak.contents.ListArray] with the given content. It produces all
-    valid [`ListArray`][ak.contents.ListArray] layouts including unreachable data, gaps, overlapping sublists,
-    and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
-    unreachable data.
+    This strategy generates a [`ListArray`][ak.contents.ListArray] with the given
+    content. It produces all valid [`ListArray`][ak.contents.ListArray] layouts including
+    unreachable data, gaps, overlapping sublists, and out-of-order starts. It shrinks
+    toward contiguous, monotonic starts with no unreachable data.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``len(content)`` when ``None``.
+        Upper bound on the number of lists, i.e., ``len(result)``. If ``None``,
+        ``len(content)`` is used.
 
     Returns
     -------
@@ -43,7 +44,7 @@ def list_array_contents(
     Examples
     --------
     >>> c = list_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, ListArray)
     True
 
     Limit the number of lists:
@@ -256,14 +257,15 @@ def list_array_from_contents(
     content: 'StContent',
     *,
     max_size: int,
-    max_leaf_size: 'int | None' = None,
-    max_length: 'int | None' = None,
+    max_leaf_size: int | None = None,
+    max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> ListArray:
     """Strategy for inner [`ak.contents.ListArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the [`ListArray`][ak.contents.ListArray].
+    function that returns a strategy for the inner layout of the
+    [`ListArray`][ak.contents.ListArray].
 
     Parameters
     ----------
@@ -273,9 +275,11 @@ def list_array_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
-        Upper bound on ``len(result)``, i.e., ``len(result.starts) = len(result.stops)``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
+    st_option
+        Accepted for ``_StFromContents`` compatibility; unused in this variant.
 
     Returns
     -------
@@ -283,7 +287,7 @@ def list_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = list_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, max_length=5

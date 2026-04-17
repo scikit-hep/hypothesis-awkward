@@ -6,8 +6,8 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content
-from hypothesis_awkward.util.awkward import content_size, leaf_size
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import content_size, leaf_size
+from hypothesis_awkward.util import safe_compare as sc
 
 from .bit_masked_array import bit_masked_array_from_contents
 from .byte_masked_array import byte_masked_array_from_contents
@@ -70,7 +70,7 @@ def contents(
 
     The ``max_size`` is the main argument for constraining the array size. It counts most
     of the scalar values in the layout, including data elements, offsets, indices, field
-    names, and parameters.  The array size can also be constrained with
+    names, and parameters. The array size can also be constrained with
     ``max_leaf_size``, ``max_depth``, and ``max_length``.
 
     Parameters
@@ -99,7 +99,7 @@ def contents(
         ``NumpyArray(uint8)``. Each character (uint8) and offset in the
         [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A
         string is considered a single leaf element in counting toward ``max_leaf_size``
-        and ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``.
+        and ``max_depth``. Each string (not character) counts toward ``max_leaf_size``.
         A string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
         ``allow_nan``.
     allow_bytestring
@@ -139,11 +139,9 @@ def contents(
         [`ListOffsetArray`][ak.contents.ListOffsetArray],
         [`ListArray`][ak.contents.ListArray], [`RecordArray`][ak.contents.RecordArray],
         and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those
-        that form string or bytestring content. No constraint when ``None`` (the
-        default).
+        that form string or bytestring content. Unbounded if ``None``.
     max_length
-        Maximum ``len()`` of the generated array. No constraint when ``None`` (the
-        default).
+        Maximum ``len()`` of the generated array. Unbounded if ``None``.
     allow_union_root
         The outermost content node cannot be a [`UnionArray`][ak.contents.UnionArray] if
         ``False``. Unlike ``allow_union``, this does not prevent
@@ -324,7 +322,7 @@ def content_lists(
     min_len
         Minimum number of contents in the list.
     max_len
-        Maximum number of contents in the list. By default there is no upper bound.
+        Maximum number of contents in the list. Unbounded if ``None``.
     all_option_or_none
         If ``True``, enforce all-or-none option typing: the first child decides
         whether all children are option-wrapped. Requires ``st_option``.
