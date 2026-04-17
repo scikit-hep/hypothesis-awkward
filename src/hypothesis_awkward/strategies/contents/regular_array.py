@@ -106,8 +106,9 @@ def _st_group_sizes(
 ) -> int:
     """Strategy for the size parameter of a [`RegularArray`][ak.contents.RegularArray].
 
-    This strategy generates the size parameter for a [`RegularArray`][ak.contents.RegularArray] given the total
-    number of items in the content and various constraints. It shrinks toward the
+    This strategy generates the size parameter for a
+    [`RegularArray`][ak.contents.RegularArray] given the total number of items in the
+    content and various constraints. It shrinks toward the
     divisors of ``total_items`` (no unreachable data) and a fewer groups (larger size).
     In other words, it shrinks toward the largest divisor of ``total_items`` that
     satisfies the constraints.
@@ -186,7 +187,8 @@ def regular_array_from_contents(
     """Strategy for inner [`ak.contents.RegularArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the [`RegularArray`][ak.contents.RegularArray].
+    function that returns a strategy for the inner layout of the
+    [`RegularArray`][ak.contents.RegularArray].
 
     Parameters
     ----------

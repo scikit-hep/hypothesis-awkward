@@ -264,7 +264,8 @@ def list_array_from_contents(
     """Strategy for inner [`ak.contents.ListArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the [`ListArray`][ak.contents.ListArray].
+    function that returns a strategy for the inner layout of the
+    [`ListArray`][ak.contents.ListArray].
 
     Parameters
     ----------

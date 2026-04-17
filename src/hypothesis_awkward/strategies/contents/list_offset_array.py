@@ -84,8 +84,8 @@ def _st_offsets(
     content_len
         Length of the content array.
     max_length
-        Upper bound on the length of the [`ListOffsetArray`][ak.contents.ListOffsetArray] (i.e.,
-        ``len(offsets) - 1``).
+        Upper bound on the length of the
+        [`ListOffsetArray`][ak.contents.ListOffsetArray] (i.e., ``len(offsets) - 1``).
     allow_unreachable
         No unreachable data is possible if ``False``.
     """
@@ -160,7 +160,8 @@ def list_offset_array_from_contents(
     """Strategy for inner [`ak.contents.ListOffsetArray`][] within an outer layout.
 
     This strategy is called by an outer layout strategy. The argument ``content`` is a
-    function that returns a strategy for the inner layout of the [`ListOffsetArray`][ak.contents.ListOffsetArray].
+    function that returns a strategy for the inner layout of the
+    [`ListOffsetArray`][ak.contents.ListOffsetArray].
 
     Parameters
     ----------

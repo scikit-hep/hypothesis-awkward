@@ -28,8 +28,9 @@ def bit_masked_array_contents(
     Parameters
     ----------
     content
-        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
 
     Returns
     -------

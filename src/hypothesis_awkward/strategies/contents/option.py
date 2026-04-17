@@ -24,8 +24,10 @@ def option_contents(
 ) -> st.SearchStrategy[Content]:
     """Strategy for option-type content, selected by ``st.one_of``.
 
-    Picks among [`IndexedOptionArray`][ak.contents.IndexedOptionArray], [`ByteMaskedArray`][ak.contents.ByteMaskedArray],
-    [`BitMaskedArray`][ak.contents.BitMaskedArray], and [`UnmaskedArray`][ak.contents.UnmaskedArray].
+    Picks among [`IndexedOptionArray`][ak.contents.IndexedOptionArray],
+    [`ByteMaskedArray`][ak.contents.ByteMaskedArray],
+    [`BitMaskedArray`][ak.contents.BitMaskedArray], and
+    [`UnmaskedArray`][ak.contents.UnmaskedArray].
 
     Parameters
     ----------
@@ -35,7 +37,8 @@ def option_contents(
         Forwarded to ``indexed_option_array_contents()`` to bound the
         index length. Unbounded if ``None``.
     allow_indexed_option
-        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
+        ``False``.
     allow_byte_masked
         No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
     allow_bit_masked
@@ -108,7 +111,8 @@ def option_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
     allow_indexed_option
-        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
+        ``False``.
     allow_byte_masked
         No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
     allow_bit_masked

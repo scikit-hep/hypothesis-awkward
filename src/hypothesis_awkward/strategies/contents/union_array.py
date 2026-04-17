@@ -121,9 +121,10 @@ def union_array_from_contents(
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
 
-    Draws multiple children via ``content_lists()`` with ``min_len=2``, then
-    wraps them in a [`UnionArray`][ak.contents.UnionArray] with shuffled tags and index arrays. Prevents
-    nested unions by passing ``allow_union_root=False`` to child generation.
+    Draws multiple children via ``content_lists()`` with ``min_len=2``, then wraps
+    them in a [`UnionArray`][ak.contents.UnionArray] with shuffled tags and index
+    arrays. Prevents nested unions by passing ``allow_union_root=False`` to child
+    generation.
     Enforces the all-or-none option rule via ``all_option_or_none=True``.
 
     Called by ``contents()`` during recursive tree generation.
