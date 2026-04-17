@@ -37,8 +37,8 @@ def offsets_kwargs(draw: st.DrawFn) -> OffsetsKwargs:
 
 @settings(max_examples=500)
 @given(data=st.data())
-def test_offsets(data: st.DataObject) -> None:
-    """Test that `_st_offsets()` respects all its options."""
+def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `_st_offsets()`."""
     # Draw options
     kwargs = data.draw(offsets_kwargs(), label='kwargs')
 

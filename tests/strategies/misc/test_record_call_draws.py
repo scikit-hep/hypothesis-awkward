@@ -8,7 +8,7 @@ from hypothesis_awkward.strategies import RecordCallDraws, RecordDraws
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_record_call_draws(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Calling a RecordCallDraws records every drawn value in order."""
     recorder = RecordCallDraws(st.integers)
 

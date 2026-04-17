@@ -8,7 +8,7 @@ from hypothesis_awkward.util import iter_contents
 
 
 @given(data=st.data())
-def test_iter_contents(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Verify iter_contents yields exactly the full Content tree."""
     a = data.draw(st_ak.constructors.arrays(), label='array')
     string_as_leaf = data.draw(st.booleans(), label='string_as_leaf')

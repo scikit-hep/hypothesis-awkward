@@ -61,8 +61,8 @@ def record_array_contents_kwargs(
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_record_array_contents(data: st.DataObject) -> None:
-    """Test that `record_array_contents()` respects all its options."""
+def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `record_array_contents()`."""
     # Draw options
     opts = data.draw(record_array_contents_kwargs(), label='opts')
     opts.reset()

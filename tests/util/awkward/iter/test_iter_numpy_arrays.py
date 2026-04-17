@@ -13,7 +13,7 @@ from hypothesis_awkward.util import iter_contents, iter_numpy_arrays
 
 
 @given(data=st.data())
-def test_iter_numpy_arrays(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Verify iter_numpy_arrays yields NumpyArray leaf data."""
     a = data.draw(st_ak.constructors.arrays(allow_virtual=False), label='array')
     exclude_string = data.draw(st.booleans(), label='exclude_string')

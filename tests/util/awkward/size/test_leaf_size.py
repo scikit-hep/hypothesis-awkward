@@ -11,7 +11,7 @@ from hypothesis_awkward.util import (
 
 
 @given(data=st.data())
-def test_leaf_size(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """``leaf_size`` equals the size of the leaf data at every node."""
     content = data.draw(st_ak.contents.contents(), label='content')
 

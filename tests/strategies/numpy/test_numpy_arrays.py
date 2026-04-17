@@ -75,7 +75,8 @@ def numpy_arrays_kwargs(
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_numpy_arrays(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `numpy_arrays()`."""
     # Draw options
     opts = data.draw(numpy_arrays_kwargs(), label='opts')
     opts.reset()
