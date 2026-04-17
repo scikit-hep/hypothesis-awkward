@@ -34,8 +34,8 @@ def indexed_option_array_contents(
         [`Content`][ak.contents.Content] instance, or ``None`` to draw from
         ``contents()``.
     max_size
-        Upper bound on the index length, i.e., ``len(result)``. When ``None``, defaults
-        to twice the content length.
+        Upper bound on the index length, i.e., ``len(result)``. If ``None``, twice the
+        content length is used.
 
     Returns
     -------

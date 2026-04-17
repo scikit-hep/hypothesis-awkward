@@ -31,14 +31,14 @@ def regular_array_contents(
         content or strategy for the content. If ``None``, draw from ``contents()``.
     max_size
         Upper bound on the size parameter of the
-        [`RegularArray`][ak.contents.RegularArray]. If ``None``, ``len(content)`` is the
-        upper bound.
+        [`RegularArray`][ak.contents.RegularArray]. If ``None``, ``len(content)`` is
+        used.
     max_zeros_length
         Upper bound on the ``zeros_length`` parameter of the
         [`RegularArray`][ak.contents.RegularArray]. Only effective when size is zero.
     max_length
         Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray]
-        (i.e., ``len(result)``).
+        (i.e., ``len(result)``). If ``None``, no constraint is applied.
 
 
     Returns

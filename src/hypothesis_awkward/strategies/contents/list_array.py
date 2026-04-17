@@ -22,19 +22,20 @@ def list_array_contents(
 ) -> ListArray:
     """Strategy for [`ak.contents.ListArray`][] instances.
 
-    This strategy generates a [`ListArray`][ak.contents.ListArray] with the given content. It produces all
-    valid [`ListArray`][ak.contents.ListArray] layouts including unreachable data, gaps, overlapping sublists,
-    and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
-    unreachable data.
+    This strategy generates a [`ListArray`][ak.contents.ListArray] with the given
+    content. It produces all valid [`ListArray`][ak.contents.ListArray] layouts including
+    unreachable data, gaps, overlapping sublists, and out-of-order starts. It shrinks
+    toward contiguous, monotonic starts with no unreachable data.
 
     Parameters
     ----------
     content
-        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete [`Content`][ak.contents.Content] instance, or
-        ``None`` to draw from ``contents()``.
+        Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
+        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
+        ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults
-        to ``len(content)`` when ``None``.
+        Upper bound on the number of lists, i.e., ``len(result)``. If ``None``,
+        ``len(content)`` is used.
 
     Returns
     -------

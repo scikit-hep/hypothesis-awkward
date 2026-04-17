@@ -33,8 +33,8 @@ def list_offset_array_contents(
         [`Content`][ak.contents.Content] instance, or ``None`` to draw from
         ``contents()``.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. Defaults to
-        ``len(content)`` when ``None``.
+        Upper bound on the number of lists, i.e., ``len(result)``. If ``None``,
+        ``len(content)`` is used.
 
     Returns
     -------
