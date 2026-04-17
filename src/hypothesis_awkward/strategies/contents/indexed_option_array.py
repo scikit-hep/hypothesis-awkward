@@ -102,6 +102,25 @@ def indexed_option_array_from_contents(
     Returns
     -------
     IndexedOptionArray
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = indexed_option_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, IndexedOptionArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
     ml = max_length if max_length is not None else max_size
     n = draw(st.integers(min_value=0, max_value=ml))

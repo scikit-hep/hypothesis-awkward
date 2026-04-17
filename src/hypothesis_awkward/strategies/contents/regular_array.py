@@ -206,7 +206,7 @@ def regular_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util.awkward import content_size, leaf_size
+    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = regular_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, max_length=5

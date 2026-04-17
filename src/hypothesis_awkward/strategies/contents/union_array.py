@@ -146,6 +146,29 @@ def union_array_from_contents(
     Returns
     -------
     UnionArray
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = union_array_from_contents(
+    ...     contents,
+    ...     max_size=20,
+    ...     max_leaf_size=10,
+    ...     max_length=5,
+    ...     st_option=option_from_contents,
+    ... ).example()
+    >>> isinstance(c, UnionArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
     children = draw(
         st_ak.contents.content_lists(

@@ -86,6 +86,25 @@ def byte_masked_array_from_contents(
     Returns
     -------
     ByteMaskedArray
+
+    Examples
+    --------
+    >>> from hypothesis_awkward.util import content_size, leaf_size
+    >>> contents = st_ak.contents.contents
+    >>> c = byte_masked_array_from_contents(
+    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ... ).example()
+    >>> isinstance(c, ByteMaskedArray)
+    True
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> leaf_size(c) <= 10
+    True
+
+    >>> len(c) <= 5
+    True
     """
     if max_leaf_size is not None:
         max_content_size = max(max_size - 1 - max_leaf_size, 0)
