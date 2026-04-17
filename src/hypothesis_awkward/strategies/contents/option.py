@@ -33,7 +33,7 @@ def option_contents(
         Forwarded to each per-type strategy.
     max_size
         Forwarded to ``indexed_option_array_contents()`` to bound the
-        index length. ``None`` means no constraint.
+        index length. Unbounded if ``None``.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
     allow_byte_masked
@@ -106,7 +106,7 @@ def option_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if ``False``.
     allow_byte_masked

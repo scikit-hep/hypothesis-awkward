@@ -79,9 +79,9 @@ def byte_masked_array_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
-        Upper bound on ``len(result)``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
 
     Returns
     -------

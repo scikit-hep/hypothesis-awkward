@@ -139,11 +139,9 @@ def contents(
         [`ListOffsetArray`][ak.contents.ListOffsetArray],
         [`ListArray`][ak.contents.ListArray], [`RecordArray`][ak.contents.RecordArray],
         and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those
-        that form string or bytestring content. No constraint when ``None`` (the
-        default).
+        that form string or bytestring content. Unbounded if ``None``.
     max_length
-        Maximum ``len()`` of the generated array. No constraint when ``None`` (the
-        default).
+        Maximum ``len()`` of the generated array. Unbounded if ``None``.
     allow_union_root
         The outermost content node cannot be a [`UnionArray`][ak.contents.UnionArray] if
         ``False``. Unlike ``allow_union``, this does not prevent
@@ -324,7 +322,7 @@ def content_lists(
     min_len
         Minimum number of contents in the list.
     max_len
-        Maximum number of contents in the list. By default there is no upper bound.
+        Maximum number of contents in the list. Unbounded if ``None``.
     all_option_or_none
         If ``True``, enforce all-or-none option typing: the first child decides
         whether all children are option-wrapped. Requires ``st_option``.

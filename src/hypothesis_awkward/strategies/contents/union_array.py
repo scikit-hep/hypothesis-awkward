@@ -35,8 +35,8 @@ def union_array_contents(
     max_contents
         Maximum number of child contents when ``contents`` is ``None``.
     max_length
-        Upper bound on the union length, i.e., ``len(result)``. When ``None``, no
-        constraint is applied.
+        Upper bound on the union length, i.e., ``len(result)``. Unbounded if
+        ``None``.
 
     Returns
     -------
@@ -136,9 +136,9 @@ def union_array_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
-        Upper bound on the union length, i.e., ``len(result)``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
         A callable conforming to ``StOption`` that wraps content in an option
         type. Used for all-or-none option coordination.

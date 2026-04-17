@@ -38,7 +38,7 @@ def regular_array_contents(
         [`RegularArray`][ak.contents.RegularArray]. Only effective when size is zero.
     max_length
         Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray]
-        (i.e., ``len(result)``). If ``None``, no constraint is applied.
+        (i.e., ``len(result)``). Unbounded if ``None``.
 
 
     Returns
@@ -122,10 +122,10 @@ def _st_group_sizes(
     min_group_size
         Lower bound on the group size. Defaults to ``0``.
     max_group_size
-        Upper bound on the group size. ``None`` means no constraint beyond
-        ``total_items``.
+        Upper bound on the group size. Unbounded beyond ``total_items`` if
+        ``None``.
     max_length
-        Upper bound on the number of groups. ``None`` means no constraint.
+        Upper bound on the number of groups. Unbounded if ``None``.
     allow_non_divisors
         No unreachable data is possible if ``False``.
     """
@@ -196,9 +196,9 @@ def regular_array_from_contents(
     max_size
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. ``None`` means no constraint.
+        Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
-        Upper bound on the number of groups, i.e., ``len(result)``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
 
     Returns
     -------
