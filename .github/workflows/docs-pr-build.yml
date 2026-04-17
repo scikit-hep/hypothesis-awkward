@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: astral-sh/setup-uv@v8.0.0
+      - uses: astral-sh/setup-uv@v8.1.0
 
       # Reference the action from @main so the build scripts (action.yml and
       # prepare_pr_build.py) always come from the trusted main branch, not from
