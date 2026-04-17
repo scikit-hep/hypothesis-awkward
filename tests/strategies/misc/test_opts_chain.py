@@ -7,7 +7,7 @@ from typing import Any
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from hypothesis_awkward.strategies.misc.record import OptsChain, RecordDraws
+from hypothesis_awkward.strategies import OptsChain, RecordDraws
 
 
 @st.composite

@@ -2,7 +2,6 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import (
     BitMaskedArray,
     ByteMaskedArray,
@@ -16,6 +15,7 @@ from awkward.contents import (
     UnionArray,
     UnmaskedArray,
 )
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import content_own_size
 
 

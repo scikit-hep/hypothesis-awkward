@@ -5,8 +5,8 @@ from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, UnionArray
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from tests.strategies.contents.test_content import ContentsKwargs, contents_kwargs
 

@@ -5,8 +5,8 @@ from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
-from hypothesis_awkward.strategies.numpy.dtype import SUPPORTED_DTYPE_NAMES
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import SUPPORTED_DTYPE_NAMES
 
 
 class NumpyFormsKwargs(TypedDict, total=False):

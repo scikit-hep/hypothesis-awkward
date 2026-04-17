@@ -3,7 +3,7 @@
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from hypothesis_awkward.strategies.misc.record import RecordCallDraws, RecordDraws
+from hypothesis_awkward.strategies import RecordCallDraws, RecordDraws
 
 
 @settings(max_examples=200)

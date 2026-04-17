@@ -1,7 +1,7 @@
 import numpy as np
 from hypothesis import given, note
 
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     SUPPORTED_DTYPES,
     n_scalars_in,

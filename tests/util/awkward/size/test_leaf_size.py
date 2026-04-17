@@ -2,7 +2,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     iter_contents,
     iter_leaf_contents,

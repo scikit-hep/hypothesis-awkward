@@ -4,9 +4,9 @@ from hypothesis import HealthCheck, Phase, find, given, settings
 from hypothesis import strategies as st
 from typing_extensions import Unpack
 
-import hypothesis_awkward.strategies as st_ak
-from hypothesis_awkward.util.draw import CountdownDrawer
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import CountdownDrawer
+from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MIN_SIZE_EACH = 0
 DEFAULT_MIN_SIZE_TOTAL = 0
