@@ -9,8 +9,8 @@ from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import EmptyArray
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_nat_in_awkward_array,
     content_size,
@@ -18,7 +18,7 @@ from hypothesis_awkward.util import (
     iter_numpy_arrays,
     leaf_size,
 )
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 50
 DEFAULT_MAX_DEPTH = None

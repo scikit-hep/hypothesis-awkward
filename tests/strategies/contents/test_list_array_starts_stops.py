@@ -4,7 +4,7 @@ from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies.contents.list_array import _st_starts_stops
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 
 class StartsStopsKwargs(TypedDict, total=False):

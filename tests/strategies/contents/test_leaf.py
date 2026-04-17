@@ -6,15 +6,15 @@ import pytest
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import EmptyArray, NumpyArray
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_numpy_array,
     is_bytestring_leaf,
     is_string_leaf,
 )
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 10
 
