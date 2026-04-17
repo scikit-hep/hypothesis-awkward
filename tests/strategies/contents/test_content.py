@@ -98,7 +98,7 @@ def contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Test that `contents()` respects all its options."""
+    """Assert the results of `contents()`."""
     # Draw options
     opts = data.draw(contents_kwargs(), label='opts')
     opts.reset()

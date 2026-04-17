@@ -52,7 +52,7 @@ def regular_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Test that `regular_array_contents()` respects all its options."""
+    """Assert the results of `regular_array_contents()`."""
     # Draw options
     opts = data.draw(regular_array_contents_kwargs(), label='opts')
     opts.reset()

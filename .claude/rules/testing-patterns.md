@@ -319,6 +319,7 @@ carries the strategy name, so the function name does not need to repeat it.
 @settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `numpy_arrays()`."""
     # Draw options
     opts = data.draw(numpy_arrays_kwargs(), label='opts')
     opts.reset()

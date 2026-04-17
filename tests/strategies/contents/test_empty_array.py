@@ -8,7 +8,7 @@ from hypothesis_awkward.util import iter_leaf_contents
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Test that `empty_array_contents()` produces an EmptyArray."""
+    """Assert the results of `empty_array_contents()`."""
     result = data.draw(st_ak.contents.empty_array_contents(), label='result')
     assert isinstance(result, ak.contents.EmptyArray)
     assert len(result) == 0

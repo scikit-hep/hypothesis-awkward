@@ -38,7 +38,7 @@ def starts_stops_kwargs(draw: st.DrawFn) -> StartsStopsKwargs:
 @settings(max_examples=500)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Test that `_st_starts_stops()` respects all its options."""
+    """Assert the results of `_st_starts_stops()`."""
     # Draw options
     kwargs = data.draw(starts_stops_kwargs(), label='kwargs')
 

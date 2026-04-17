@@ -43,7 +43,7 @@ def numpy_types_kwargs() -> st.SearchStrategy[NumpyTypesKwargs]:
 @settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Test that `numpy_types()` respects all its options."""
+    """Assert the results of `numpy_types()`."""
     # Draw options
     kwargs = data.draw(numpy_types_kwargs(), label='kwargs')
 

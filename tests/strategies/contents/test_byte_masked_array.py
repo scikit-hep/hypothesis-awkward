@@ -46,7 +46,7 @@ def byte_masked_array_contents_kwargs(
 @settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Test that `byte_masked_array_contents()` respects all its options."""
+    """Assert the results of `byte_masked_array_contents()`."""
     # Draw options
     opts = data.draw(byte_masked_array_contents_kwargs(), label='opts')
     opts.reset()
