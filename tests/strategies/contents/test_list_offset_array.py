@@ -156,9 +156,5 @@ def test_shrink_content_len_zero() -> None:
 
 
 def test_draw_from_contents() -> None:
-    """Assert that ListOffsetArray can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, ListOffsetArray),
-        settings=settings(phases=[Phase.generate]),
-    )
+    """Assert `contents()` can generate a `ListOffsetArray` as outermost."""
+    find(st_ak.contents.contents(), lambda c: isinstance(c, ListOffsetArray))

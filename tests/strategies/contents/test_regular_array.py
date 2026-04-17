@@ -168,6 +168,11 @@ def test_shrink_no_unreachable() -> None:
     assert len(c.content) % c.size == 0
 
 
+def test_draw_from_contents() -> None:
+    """Assert `contents()` can generate a `RegularArray` as outermost."""
+    find(st_ak.contents.contents(), lambda c: isinstance(c, RegularArray))
+
+
 def test_draw_from_contents_size_zero() -> None:
     """Assert that RegularArray with size=0 can be drawn from `contents()`."""
 

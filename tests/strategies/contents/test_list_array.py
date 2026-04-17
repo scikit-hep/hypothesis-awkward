@@ -136,16 +136,8 @@ def test_shrink_content_len_zero() -> None:
 
 
 def test_draw_from_contents() -> None:
-    """Assert that ListArray can be drawn from `contents()`."""
-
-    def _has_list(c: Content) -> bool:
-        return any(isinstance(n, ListArray) for n in iter_contents(c))
-
-    find(
-        st_ak.contents.contents(),
-        _has_list,
-        settings=settings(phases=[Phase.generate]),
-    )
+    """Assert `contents()` can generate a `ListArray` as outermost."""
+    find(st_ak.contents.contents(), lambda c: isinstance(c, ListArray))
 
 
 def test_draw_from_contents_variable_length() -> None:

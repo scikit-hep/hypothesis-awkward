@@ -5,7 +5,6 @@ from hypothesis import strategies as st
 
 from awkward.contents import Content, RecordArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MAX_FIELDS = 5
@@ -155,9 +154,9 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_from_contents() -> None:
-    """Assert that RecordArray can be drawn from `contents()`."""
+    """Assert `contents()` can generate a `RecordArray` as outermost."""
     find(
-        st_ak.contents.contents(max_leaf_size=20),
-        lambda c: any(isinstance(n, RecordArray) for n in iter_contents(c)),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, RecordArray),
+        settings=settings(max_examples=2000),
     )

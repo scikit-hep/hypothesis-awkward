@@ -164,14 +164,11 @@ def test_draw_max_length() -> None:
 
 
 def test_draw_from_contents() -> None:
-    """Assert that UnionArray can be drawn from `contents()`."""
+    """Assert `contents()` can generate a `UnionArray` as outermost."""
     find(
-        st_ak.contents.contents(max_leaf_size=20),
-        lambda c: (
-            isinstance(c, UnionArray)
-            or any(isinstance(n, UnionArray) for n in iter_contents(c))
-        ),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, UnionArray),
+        settings=settings(max_examples=2000),
     )
 
 
