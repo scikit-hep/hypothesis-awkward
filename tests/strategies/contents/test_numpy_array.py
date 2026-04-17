@@ -103,13 +103,7 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `NumpyArray` as outermost."""
-    # `phases` for https://github.com/HypothesisWorks/hypothesis/issues/4708
-    phases = set(Phase) - {Phase.explain}  # Except explain.
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, NumpyArray),
-        settings=settings(phases=phases),
-    )
+    find(st_ak.contents.contents(), lambda c: isinstance(c, NumpyArray))
 
 
 def test_draw_from_contents_length_zero() -> None:
