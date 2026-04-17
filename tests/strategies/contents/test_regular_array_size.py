@@ -46,7 +46,7 @@ def group_sizes_kwargs(draw: st.DrawFn) -> GroupSizesKwargs:
 
 @settings(max_examples=500)
 @given(data=st.data())
-def test_group_sizes(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Test that `_st_group_sizes()` respects all its options."""
     # Draw options
     kwargs = data.draw(group_sizes_kwargs(), label='kwargs')

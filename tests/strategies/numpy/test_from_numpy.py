@@ -59,7 +59,7 @@ def from_numpy_kwargs(
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_from_numpy(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     # Draw options
     opts = data.draw(from_numpy_kwargs(), label='opts')
     opts.reset()

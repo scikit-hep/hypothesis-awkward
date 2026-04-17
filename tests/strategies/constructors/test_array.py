@@ -61,7 +61,7 @@ def arrays_kwargs(
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_arrays(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`."""
     from hypothesis_awkward.strategies.constructors import array_ as array_module
 

@@ -13,7 +13,7 @@ from hypothesis_awkward.util import iter_leaf_contents
 
 
 @given(data=st.data())
-def test_iter_leaf_contents(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Verify all yielded items are leaf content types."""
     a = data.draw(st_ak.constructors.arrays(), label='array')
     string_as_leaf = data.draw(st.booleans(), label='string_as_leaf')

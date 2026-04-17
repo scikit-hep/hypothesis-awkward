@@ -55,7 +55,7 @@ def numpy_dtypes_kwargs() -> st.SearchStrategy[NumpyDtypesKwargs]:
 
 
 @given(data=st.data())
-def test_numpy_dtypes(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     # Draw options
     kwargs = data.draw(numpy_dtypes_kwargs(), label='kwargs')
 

@@ -35,7 +35,7 @@ def from_lists_kwargs() -> st.SearchStrategy[FromListsKwargs]:
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_from_list(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     # Draw options
     kwargs = data.draw(from_lists_kwargs(), label='kwargs')
 

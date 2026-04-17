@@ -20,7 +20,7 @@ from hypothesis_awkward.util import content_own_size
 
 
 @given(data=st.data())
-def test_content_own_size(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     content = data.draw(st_ak.contents.contents(), label='content')
 
     actual = content_own_size(content)

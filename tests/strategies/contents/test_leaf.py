@@ -75,7 +75,7 @@ def leaf_contents_kwargs(
 
 @settings(max_examples=200)
 @given(data=st.data())
-def test_leaf_contents(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     """Test that `leaf_contents()` respects all its options."""
     # Draw options
     opts = data.draw(leaf_contents_kwargs(), label='opts')

@@ -311,12 +311,14 @@ Key techniques:
 
 ## 3. Main property-based test
 
-Test that the strategy respects all its options:
+Test that the strategy respects all its options. By convention, the main
+property test in each file is named `test_properties` — the file name already
+carries the strategy name, so the function name does not need to repeat it.
 
 ```python
 @settings(max_examples=200)
 @given(data=st.data())
-def test_numpy_arrays(data: st.DataObject) -> None:
+def test_properties(data: st.DataObject) -> None:
     # Draw options
     opts = data.draw(numpy_arrays_kwargs(), label='opts')
     opts.reset()
