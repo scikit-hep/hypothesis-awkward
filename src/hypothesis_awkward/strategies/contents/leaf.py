@@ -72,6 +72,6 @@ def leaf_contents(
         options.append(s)
 
     if not options:
-        raise ValueError('no content types are possible with the given options.')
+        raise ValueError('no content types are possible with the given options')
 
     return st.one_of(options)

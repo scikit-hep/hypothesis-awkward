@@ -70,7 +70,7 @@ def contents(
 
     The ``max_size`` is the main argument for constraining the array size. It counts most
     of the scalar values in the layout, including data elements, offsets, indices, field
-    names, and parameters.  The array size can also be constrained with
+    names, and parameters. The array size can also be constrained with
     ``max_leaf_size``, ``max_depth``, and ``max_length``.
 
     Parameters
@@ -99,7 +99,7 @@ def contents(
         ``NumpyArray(uint8)``. Each character (uint8) and offset in the
         [`ListOffsetArray`][ak.contents.ListOffsetArray] counts toward ``max_size``. A
         string is considered a single leaf element in counting toward ``max_leaf_size``
-        and ``max_depth``.  Each string (not character) counts toward ``max_leaf_size``.
+        and ``max_depth``. Each string (not character) counts toward ``max_leaf_size``.
         A string does not count toward ``max_depth``. Unaffected by ``dtypes`` and
         ``allow_nan``.
     allow_bytestring
