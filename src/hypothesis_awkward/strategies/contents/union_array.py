@@ -45,7 +45,7 @@ def union_array_contents(
     Examples
     --------
     >>> c = union_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, UnionArray)
     True
 
     Limit the union length:

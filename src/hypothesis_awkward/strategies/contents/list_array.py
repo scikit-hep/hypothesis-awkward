@@ -44,7 +44,7 @@ def list_array_contents(
     Examples
     --------
     >>> c = list_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, ListArray)
     True
 
     Limit the number of lists:

@@ -43,7 +43,7 @@ def record_array_contents(
     Examples
     --------
     >>> c = record_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, RecordArray)
     True
 
     Limit the number of fields:

@@ -43,7 +43,7 @@ def list_offset_array_contents(
     Examples
     --------
     >>> c = list_offset_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, ListOffsetArray)
     True
 
     Limit the number of lists:

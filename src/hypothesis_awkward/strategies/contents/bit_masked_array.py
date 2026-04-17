@@ -38,7 +38,7 @@ def bit_masked_array_contents(
     Examples
     --------
     >>> c = bit_masked_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, BitMaskedArray)
     True
     """
     match content:

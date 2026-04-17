@@ -48,7 +48,7 @@ def regular_array_contents(
     Examples
     --------
     >>> c = regular_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, RegularArray)
     True
 
     Limit each element to at most 3 items:
@@ -211,7 +211,7 @@ def regular_array_from_contents(
     >>> c = regular_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, max_length=5
     ... ).example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, RegularArray)
     True
 
     >>> content_size(c) <= 20

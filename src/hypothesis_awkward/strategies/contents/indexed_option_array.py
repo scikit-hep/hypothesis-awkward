@@ -44,7 +44,7 @@ def indexed_option_array_contents(
     Examples
     --------
     >>> c = indexed_option_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, IndexedOptionArray)
     True
     """
     match content:

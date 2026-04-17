@@ -34,7 +34,7 @@ def unmasked_array_contents(
     Examples
     --------
     >>> c = unmasked_array_contents().example()
-    >>> isinstance(c, Content)
+    >>> isinstance(c, UnmaskedArray)
     True
     """
     match content:
