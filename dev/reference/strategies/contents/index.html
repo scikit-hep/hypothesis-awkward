@@ -1620,7 +1620,7 @@ constructors"</a>.</p>
 <p>Each type can be excluded separately with the corresponding <code>allow_*</code> argument.</p>
 <p>The <code>max_size</code> is the main argument for constraining the array size. It counts most
 of the scalar values in the layout, including data elements, offsets, indices, field
-names, and parameters.  The array size can also be constrained with
+names, and parameters. The array size can also be constrained with
 <code>max_leaf_size</code>, <code>max_depth</code>, and <code>max_length</code>.</p>
 
 
@@ -1737,7 +1737,7 @@ no data. Unlike <a class="autorefs autorefs-external" href="https://awkward-arra
 <code>NumpyArray(uint8)</code>. Each character (uint8) and offset in the
 <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a> counts toward <code>max_size</code>. A
 string is considered a single leaf element in counting toward <code>max_leaf_size</code>
-and <code>max_depth</code>.  Each string (not character) counts toward <code>max_leaf_size</code>.
+and <code>max_depth</code>. Each string (not character) counts toward <code>max_leaf_size</code>.
 A string does not count toward <code>max_depth</code>. Unaffected by <code>dtypes</code> and
 <code>allow_nan</code>.</p>
               </div>
@@ -1945,8 +1945,7 @@ value, including complex and datetime, counts as one. Each string and bytestring
 <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#ak.contents.ListOffsetArray"><code>ListOffsetArray</code></a>,
 <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a>, <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a>,
 and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a> layer adds one level, excluding those
-that form string or bytestring content. No constraint when <code>None</code> (the
-default).</p>
+that form string or bytestring content. Unbounded if <code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -1962,8 +1961,7 @@ default).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum <code>len()</code> of the generated array. No constraint when <code>None</code> (the
-default).</p>
+                <p>Maximum <code>len()</code> of the generated array. Unbounded if <code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -2156,7 +2154,7 @@ for a single content.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum number of contents in the list. By default there is no upper bound.</p>
+                <p>Maximum number of contents in the list. Unbounded if <code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -2700,8 +2698,8 @@ data.</p>
             <td>
               <div class="doc-md-description">
                 <p>Upper bound on the size parameter of the
-<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray"><code>RegularArray</code></a>. If <code>None</code>, <code>len(content)</code> is the
-upper bound.</p>
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray"><code>RegularArray</code></a>. If <code>None</code>, <code>len(content)</code> is
+used.</p>
               </div>
             </td>
             <td>
@@ -2735,7 +2733,7 @@ upper bound.</p>
             <td>
               <div class="doc-md-description">
                 <p>Upper bound on the length of the <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RegularArray.html#ak.contents.RegularArray"><code>RegularArray</code></a>
-(i.e., <code>len(result)</code>).</p>
+(i.e., <code>len(result)</code>). Unbounded if <code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -2771,7 +2769,7 @@ upper bound.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">regular_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">RegularArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
     <p>Limit each element to at most 3 items:</p>
@@ -2816,10 +2814,10 @@ upper bound.</p>
     <div class="doc doc-contents ">
 
         <p>Strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ak.contents.ListArray</code></a> instances.</p>
-<p>This strategy generates a <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a> with the given content. It produces all
-valid <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a> layouts including unreachable data, gaps, overlapping sublists,
-and out-of-order starts. It shrinks toward contiguous, monotonic starts with no
-unreachable data.</p>
+<p>This strategy generates a <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a> with the given
+content. It produces all valid <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListArray.html#ak.contents.ListArray"><code>ListArray</code></a> layouts including
+unreachable data, gaps, overlapping sublists, and out-of-order starts. It shrinks
+toward contiguous, monotonic starts with no unreachable data.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2842,8 +2840,9 @@ unreachable data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Child content. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or
-<code>None</code> to draw from <code>contents()</code>.</p>
+                <p>Child content. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or <code>None</code> to draw from
+<code>contents()</code>.</p>
               </div>
             </td>
             <td>
@@ -2859,8 +2858,8 @@ unreachable data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the number of lists, i.e., <code>len(result)</code>. Defaults
-to <code>len(content)</code> when <code>None</code>.</p>
+                <p>Upper bound on the number of lists, i.e., <code>len(result)</code>. If <code>None</code>,
+<code>len(content)</code> is used.</p>
               </div>
             </td>
             <td>
@@ -2896,7 +2895,7 @@ to <code>len(content)</code> when <code>None</code>.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">list_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">ListArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
     <p>Limit the number of lists:</p>
@@ -2974,8 +2973,8 @@ toward no unreachable data (<code>offsets[0] == 0</code> and <code>offsets[-1] =
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the number of lists, i.e., <code>len(result)</code>. Defaults to
-<code>len(content)</code> when <code>None</code>.</p>
+                <p>Upper bound on the number of lists, i.e., <code>len(result)</code>. If <code>None</code>,
+<code>len(content)</code> is used.</p>
               </div>
             </td>
             <td>
@@ -3011,7 +3010,7 @@ toward no unreachable data (<code>offsets[0] == 0</code> and <code>offsets[-1] =
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">list_offset_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">ListOffsetArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
     <p>Limit the number of lists:</p>
@@ -3289,8 +3288,8 @@ Unicode range is used.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Child contents. Can be a strategy for a list of <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete list, or
-<code>None</code> to draw random children.</p>
+                <p>Child contents. Can be a strategy for a list of <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>,
+a concrete list, or <code>None</code> to draw random children.</p>
               </div>
             </td>
             <td>
@@ -3374,7 +3373,7 @@ Unicode range is used.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">record_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">RecordArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
     <p>Limit the number of fields:</p>
@@ -3417,8 +3416,10 @@ Unicode range is used.</p>
     <div class="doc doc-contents ">
 
         <p>Strategy for option-type content, selected by <code>st.one_of</code>.</p>
-<p>Picks among <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray"><code>IndexedOptionArray</code></a>, <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray"><code>ByteMaskedArray</code></a>,
-<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.BitMaskedArray.html#ak.contents.BitMaskedArray"><code>BitMaskedArray</code></a>, and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray"><code>UnmaskedArray</code></a>.</p>
+<p>Picks among <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray"><code>IndexedOptionArray</code></a>,
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray"><code>ByteMaskedArray</code></a>,
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.BitMaskedArray.html#ak.contents.BitMaskedArray"><code>BitMaskedArray</code></a>, and
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray"><code>UnmaskedArray</code></a>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3458,7 +3459,7 @@ Unicode range is used.</p>
             <td>
               <div class="doc-md-description">
                 <p>Forwarded to <code>indexed_option_array_contents()</code> to bound the
-index length. <code>None</code> means no constraint.</p>
+index length. Unbounded if <code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -3474,7 +3475,8 @@ index length. <code>None</code> means no constraint.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Include <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray"><code>IndexedOptionArray</code></a> if <code>True</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.IndexedOptionArray.html#ak.contents.IndexedOptionArray"><code>IndexedOptionArray</code></a> is generated if
+<code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -3490,7 +3492,7 @@ index length. <code>None</code> means no constraint.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Include <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray"><code>ByteMaskedArray</code></a> if <code>True</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ByteMaskedArray.html#ak.contents.ByteMaskedArray"><code>ByteMaskedArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -3506,7 +3508,7 @@ index length. <code>None</code> means no constraint.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Include <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.BitMaskedArray.html#ak.contents.BitMaskedArray"><code>BitMaskedArray</code></a> if <code>True</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.BitMaskedArray.html#ak.contents.BitMaskedArray"><code>BitMaskedArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -3522,7 +3524,7 @@ index length. <code>None</code> means no constraint.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Include <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray"><code>UnmaskedArray</code></a> if <code>True</code>.</p>
+                <p>No <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnmaskedArray.html#ak.contents.UnmaskedArray"><code>UnmaskedArray</code></a> is generated if <code>False</code>.</p>
               </div>
             </td>
             <td>
@@ -3631,8 +3633,8 @@ reference any content position (duplicates allowed). Missing entries have <code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the index length, i.e., <code>len(result)</code>. When <code>None</code>, defaults
-to twice the content length.</p>
+                <p>Upper bound on the index length, i.e., <code>len(result)</code>. If <code>None</code>, twice the
+content length is used.</p>
               </div>
             </td>
             <td>
@@ -3668,7 +3670,7 @@ to twice the content length.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">indexed_option_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">IndexedOptionArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
 
@@ -3719,8 +3721,9 @@ to twice the content length.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Child content. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or
-<code>None</code> to draw from <code>contents()</code>.</p>
+                <p>Child content. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or <code>None</code> to draw from
+<code>contents()</code>.</p>
               </div>
             </td>
             <td>
@@ -3756,7 +3759,7 @@ to twice the content length.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">byte_masked_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">ByteMaskedArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
 
@@ -3808,8 +3811,9 @@ bit-packed into uint8 bytes.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Child content. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or
-<code>None</code> to draw from <code>contents()</code>.</p>
+                <p>Child content. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a concrete
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or <code>None</code> to draw from
+<code>contents()</code>.</p>
               </div>
             </td>
             <td>
@@ -3845,7 +3849,7 @@ bit-packed into uint8 bytes.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">bit_masked_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">BitMaskedArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
 
@@ -3935,7 +3939,7 @@ It simply wraps content, adding option-type semantics without a mask buffer.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">unmasked_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">UnmaskedArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
 
@@ -4021,8 +4025,8 @@ a concrete list, or <code>None</code> to draw random children.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on the union length, i.e., <code>len(result)</code>. When <code>None</code>, no
-constraint is applied.</p>
+                <p>Upper bound on the union length, i.e., <code>len(result)</code>. Unbounded if
+<code>None</code>.</p>
               </div>
             </td>
             <td>
@@ -4058,7 +4062,7 @@ constraint is applied.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">union_array_contents</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">Content</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">UnionArray</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
 </span></code></pre></div>
     <p>Limit the union length:</p>
