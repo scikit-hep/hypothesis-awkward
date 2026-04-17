@@ -1,12 +1,12 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
+import pytest
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, NumpyArray, RegularArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 
 
@@ -93,96 +93,86 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
-def test_draw_max_size() -> None:
-    """Assert that RegularArray with exactly max_size can be drawn."""
-    max_size = 10
+def test_draw_size_zero() -> None:
+    """Assert the size can be zero."""
+    find(
+        st_ak.contents.regular_array_contents(),
+        lambda c: isinstance(c, RegularArray) and c.size == 0,
+    )
+
+
+@pytest.mark.parametrize('max_size', [0, 1, 2, 50])
+def test_draw_max_size(max_size: int) -> None:
+    """Assert the size can reach `max_size`."""
     find(
         st_ak.contents.regular_array_contents(max_size=max_size),
         lambda c: c.size == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
-def test_draw_max_zeros_length() -> None:
-    """Assert that zeros_length up to max_zeros_length can be drawn."""
-    max_zeros_length = 20
+@pytest.mark.parametrize('max_length', [1, 2, 8])
+def test_draw_max_length(max_length: int) -> None:
+    """Assert the length can reach `max_length`."""
+    find(
+        st_ak.contents.regular_array_contents(max_length=max_length),
+        lambda c: c.size > 0 and len(c) == max_length,
+    )
+
+
+@pytest.mark.parametrize('max_zeros_length', [0, 1, 2, 50])
+def test_draw_max_zeros_length(max_zeros_length: int) -> None:
+    """Assert the length can reach `max_zeros_length` when size is zero."""
     find(
         st_ak.contents.regular_array_contents(max_zeros_length=max_zeros_length),
         lambda c: c.size == 0 and len(c) == max_zeros_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
-def test_draw_max_length() -> None:
-    """Assert that max_length constrains the RegularArray length."""
-    max_length = 10
-    content = st_ak.contents.numpy_array_contents(min_size=10, max_size=30)
-    find(
-        st_ak.contents.regular_array_contents(content, max_length=max_length),
-        lambda c: c.size > 0 and len(c) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_default_max_size() -> None:
-    """Assert that size can reach len(content) when max_size is not specified."""
-    content = st_ak.contents.numpy_array_contents(max_size=12)
+@pytest.mark.parametrize('max_length', [0, 1, 2, 10])
+def test_draw_default_max_size(max_length: int) -> None:
+    """Assert the size can reach `len(content)` when `max_size` is not specified."""
+    content = st_ak.contents.contents(max_length=max_length)
     find(
         st_ak.contents.regular_array_contents(content),
-        lambda c: c.size == 12,
+        lambda c: c.size == max_length,
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
-def test_draw_default_max_zeros_length() -> None:
-    """Assert that zeros_length can reach len(content) when defaults are used."""
-    content = st_ak.contents.numpy_array_contents(max_size=10)
+@pytest.mark.parametrize('max_length', [0, 1, 2, 10])
+def test_draw_default_max_zeros_length(max_length: int) -> None:
+    """Assert the length can reach `len(content)` when the size is zero."""
+    content = st_ak.contents.contents(max_length=max_length)
     find(
         st_ak.contents.regular_array_contents(content, max_size=0),
-        lambda c: c.size == 0 and len(c) == 10,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        lambda c: c.size == 0 and len(c) == max_length,
     )
 
 
 def test_draw_unreachable() -> None:
-    """Assert that RegularArray with unreachable data can be drawn."""
-    content = NumpyArray(np.arange(15))
+    """Assert data can be unreachable."""
     find(
-        st_ak.contents.regular_array_contents(content),
+        st_ak.contents.regular_array_contents(),
         lambda c: c.size > 0 and len(c.content) % c.size != 0,
-        settings=settings(phases=[Phase.generate]),
     )
 
 
-def test_shrink_no_unreachable() -> None:
-    """Assert that RegularArray shrinks to no unreachable data."""
+@pytest.mark.parametrize('n', [6, 8, 12, 15, 16])
+def test_shrink_no_unreachable(n: int) -> None:
+    """Assert reachable data only is the simplest."""
+    # E.g., n=15
     # Content of length 15: divisors in (1, 15) are [5, 3],
     # non-divisors in (1, 15) are [14, 13, ..., 6, 4, 2].
     # Shrink should pick 5 (largest divisor < 15), not 14 (largest non-divisor).
-    content = NumpyArray(np.arange(15))
+    content = NumpyArray(np.arange(n))
     c = find(
         st_ak.contents.regular_array_contents(content),
-        lambda c: 1 < c.size < 15,
+        lambda c: 1 < c.size < len(c.content),
     )
-    assert c.size == 5
-    assert len(c.content) % c.size == 0
+    assert len(c) == min(n // s for s in range(2, n) if n % s == 0)
+    assert len(c.content) == c.size * len(c)
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `RegularArray` as outermost."""
     find(st_ak.contents.contents(), lambda c: isinstance(c, RegularArray))
-
-
-def test_draw_from_contents_size_zero() -> None:
-    """Assert that RegularArray with size=0 can be drawn from `contents()`."""
-
-    def _has_regular_size_zero(c: Content) -> bool:
-        return any(
-            isinstance(n, RegularArray) and n.size == 0 for n in iter_contents(c)
-        )
-
-    find(
-        st_ak.contents.contents(),
-        _has_regular_size_zero,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
