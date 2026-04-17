@@ -98,6 +98,8 @@ def indexed_option_array_from_contents(
         Upper bound on total leaf elements. Unbounded if ``None``.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
+    st_option
+        Accepted for ``_StFromContents`` compatibility; unused in this variant.
 
     Returns
     -------
