@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.16.0] - 2026-04-17
+
+### Features
+
+- Add `is_leaf` `singledispatch` predicate for `Content` nodes ([#80](https://github.com/scikit-hep/hypothesis-awkward/pull/80))
+
+### Documentation
+
+- Backtick code-like terms in `CHANGELOG.md` ([#77](https://github.com/scikit-hep/hypothesis-awkward/pull/77))
+- Cross-reference Awkward types in docstrings ([#81](https://github.com/scikit-hep/hypothesis-awkward/pull/81))
+
+### Refactoring
+
+- Split `util/awkward` into submodules and tighten traversal ([#76](https://github.com/scikit-hep/hypothesis-awkward/pull/76))
+- Tighten conventions and docstrings across `contents/` ([#82](https://github.com/scikit-hep/hypothesis-awkward/pull/82))
+- Unify import style — `from`-style via top-level `hypothesis_awkward` paths ([#85](https://github.com/scikit-hep/hypothesis-awkward/pull/85))
+
+### Testing
+
+- Restructure `size`/`iter` tests into per-function modules ([#79](https://github.com/scikit-hep/hypothesis-awkward/pull/79))
+- Xfail flaky `test_shrink_no_unreachable` in `list_array`/`list_offset_array` ([#83](https://github.com/scikit-hep/hypothesis-awkward/pull/83))
+- Rename 37 main property-based tests to `test_properties` and unify their docstrings ([#86](https://github.com/scikit-hep/hypothesis-awkward/pull/86))
+- Standardize `test_draw_from_contents` across `contents/` ([#87](https://github.com/scikit-hep/hypothesis-awkward/pull/87))
+- Register Hypothesis profile excluding `Phase.explain` ([#88](https://github.com/scikit-hep/hypothesis-awkward/pull/88))
+- Parameterize `regular_array_contents` reachability tests ([#89](https://github.com/scikit-hep/hypothesis-awkward/pull/89))
+
+### Build & CI
+
+- Bump astral-sh/setup-uv from 8.0.0 to 8.1.0 ([#84](https://github.com/scikit-hep/hypothesis-awkward/pull/84))
+
+
 ## [0.15.0] - 2026-04-14
 
 ### Features
