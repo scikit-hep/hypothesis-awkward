@@ -71,11 +71,11 @@ def test_properties(data: st.DataObject) -> None:
 
 
 def test_draw_from_contents() -> None:
-    """Assert that UnmaskedArray can be the root node from `contents()`."""
+    """Assert `contents()` can generate an `UnmaskedArray` as outermost."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, UnmaskedArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 

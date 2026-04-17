@@ -103,11 +103,11 @@ def test_draw_index_dtype_int64() -> None:
 
 
 def test_draw_from_contents() -> None:
-    """Assert that IndexedOptionArray can be the root node from `contents()`."""
+    """Assert `contents()` can generate an `IndexedOptionArray` as outermost."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, IndexedOptionArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
