@@ -4,7 +4,7 @@ from typing import Protocol, TypeVar
 
 from hypothesis import strategies as st
 
-from hypothesis_awkward.util.safe import safe_min
+from .safe import safe_min
 
 _C_co = TypeVar('_C_co', covariant=True)
 _T = TypeVar('_T', bound=Sized)

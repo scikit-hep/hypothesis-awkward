@@ -3,8 +3,8 @@ from typing import Any, TypedDict, cast
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content, UnmaskedArray
+from hypothesis_awkward import strategies as st_ak
 
 
 class UnmaskedArrayContentsKwargs(TypedDict, total=False):

@@ -1,7 +1,6 @@
 from hypothesis import given
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import (
     EmptyArray,
     ListArray,
@@ -9,6 +8,7 @@ from awkward.contents import (
     NumpyArray,
     RegularArray,
 )
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_leaf_contents
 
 

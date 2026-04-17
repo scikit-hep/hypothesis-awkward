@@ -5,7 +5,7 @@ import numpy as np
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 
 
 def _is_nan(item: Any) -> bool:

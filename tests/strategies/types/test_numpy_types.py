@@ -5,7 +5,7 @@ from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 
 
 @given(data=st.data())

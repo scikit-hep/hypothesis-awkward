@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_numpy_array,
     any_nan_nat_in_numpy_array,
@@ -16,7 +16,7 @@ from hypothesis_awkward.util import (
     n_scalars_in,
     simple_dtype_kinds_in,
 )
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 10
 

@@ -3,7 +3,7 @@ from typing import TypedDict, cast
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.regular_array import _st_group_sizes
 
 

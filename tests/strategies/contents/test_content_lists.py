@@ -3,11 +3,11 @@ from typing import Any, Callable, TypedDict, cast
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import Content
-from hypothesis_awkward.strategies.misc.record import RecordCallDraws
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.strategies import RecordCallDraws
 from hypothesis_awkward.util import content_size, leaf_size
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 50
 DEFAULT_MIN_LEN = 0

@@ -4,7 +4,7 @@ from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies.contents.list_offset_array import _st_offsets
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 
 class OffsetsKwargs(TypedDict, total=False):

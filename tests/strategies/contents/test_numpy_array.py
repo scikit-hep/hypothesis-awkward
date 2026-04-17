@@ -5,8 +5,8 @@ from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import NumpyArray
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_numpy_array,
     any_nan_nat_in_numpy_array,

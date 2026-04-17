@@ -4,7 +4,6 @@ import pytest
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import (
     BitMaskedArray,
     ByteMaskedArray,
@@ -12,6 +11,7 @@ from awkward.contents import (
     IndexedOptionArray,
     UnmaskedArray,
 )
+from hypothesis_awkward import strategies as st_ak
 
 OPTION_TYPES = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 

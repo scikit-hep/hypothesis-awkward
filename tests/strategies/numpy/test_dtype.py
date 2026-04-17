@@ -5,9 +5,9 @@ from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import n_scalars_in, simple_dtype_kinds_in
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 
 @given(name=st_ak.supported_dtype_names())

@@ -5,8 +5,8 @@ import numpy as np
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import BitMaskedArray, Content
+from hypothesis_awkward import strategies as st_ak
 
 
 class BitMaskedArrayContentsKwargs(TypedDict, total=False):

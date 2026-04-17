@@ -5,9 +5,9 @@ from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
-import hypothesis_awkward.strategies as st_ak
 from awkward.contents import ListOffsetArray, NumpyArray
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import safe_compare as sc
 
 DEFAULT_MAX_SIZE = 10
 
