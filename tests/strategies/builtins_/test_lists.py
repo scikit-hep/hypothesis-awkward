@@ -36,6 +36,7 @@ def lists_kwargs() -> st.SearchStrategy[ListsKwargs]:
 @settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `lists()`."""
     # Draw options
     kwargs = data.draw(lists_kwargs(), label='kwargs')
 

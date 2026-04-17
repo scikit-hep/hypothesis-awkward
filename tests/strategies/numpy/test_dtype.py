@@ -56,6 +56,7 @@ def numpy_dtypes_kwargs() -> st.SearchStrategy[NumpyDtypesKwargs]:
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `numpy_dtypes()`."""
     # Draw options
     kwargs = data.draw(numpy_dtypes_kwargs(), label='kwargs')
 
