@@ -1,6 +1,7 @@
 from typing import Any, TypedDict, cast
 
-from hypothesis import Phase, find, given, settings
+import pytest
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, RecordArray
@@ -116,40 +117,30 @@ def test_properties(data: st.DataObject) -> None:
 
 
 def test_draw_tuple() -> None:
-    """Assert that `record_array_contents()` can produce a tuple record."""
-    find(
-        st_ak.contents.record_array_contents(),
-        lambda r: r.is_tuple,
-        settings=settings(phases=[Phase.generate]),
-    )
+    """Assert the record can be a tuple."""
+    find(st_ak.contents.record_array_contents(), lambda r: r.is_tuple)
 
 
 def test_draw_named() -> None:
-    """Assert that `record_array_contents()` can produce a named record."""
-    find(
-        st_ak.contents.record_array_contents(),
-        lambda r: not r.is_tuple,
-        settings=settings(phases=[Phase.generate]),
-    )
+    """Assert the record can be named."""
+    find(st_ak.contents.record_array_contents(), lambda r: not r.is_tuple)
 
 
-def test_draw_max_fields() -> None:
-    """Assert that record_array_contents can produce max_fields fields."""
-    max_fields = 3
+@pytest.mark.parametrize('max_fields', [0, 1, 2, 5])
+def test_draw_max_fields(max_fields: int) -> None:
+    """Assert the field count can reach `max_fields`."""
     find(
         st_ak.contents.record_array_contents(max_fields=max_fields),
         lambda r: len(r.contents) == max_fields,
-        settings=settings(phases=[Phase.generate]),
     )
 
 
-def test_draw_max_length() -> None:
-    """Assert that max_length constrains the RecordArray length."""
-    max_length = 10
+@pytest.mark.parametrize('max_length', [1, 2, 10])
+def test_draw_max_length(max_length: int) -> None:
+    """Assert the length can reach `max_length`."""
     find(
         st_ak.contents.record_array_contents(max_length=max_length),
         lambda r: len(r) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
