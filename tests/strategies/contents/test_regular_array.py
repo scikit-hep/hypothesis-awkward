@@ -37,10 +37,8 @@ def regular_array_contents_kwargs(
                     st_ak.contents.contents(),
                     st.just(st_content),
                 ),
-                'max_size': st_ak.none_or(st.integers(min_value=0, max_value=50)),
-                'max_zeros_length': st_ak.none_or(
-                    st.integers(min_value=0, max_value=50)
-                ),
+                'max_size': st.integers(min_value=0, max_value=50),
+                'max_zeros_length': st.integers(min_value=0, max_value=50),
                 'max_length': st.integers(min_value=0, max_value=50),
             },
         )
