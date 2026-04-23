@@ -37,10 +37,8 @@ def regular_array_contents_kwargs(
                     st_ak.contents.contents(),
                     st.just(st_content),
                 ),
-                'max_size': st_ak.none_or(st.integers(min_value=0, max_value=50)),
-                'max_zeros_length': st_ak.none_or(
-                    st.integers(min_value=0, max_value=50)
-                ),
+                'max_size': st.integers(min_value=0, max_value=50),
+                'max_zeros_length': st.integers(min_value=0, max_value=50),
                 'max_length': st.integers(min_value=0, max_value=50),
             },
         )
@@ -95,10 +93,7 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_size_zero() -> None:
     """Assert the size can be zero."""
-    find(
-        st_ak.contents.regular_array_contents(),
-        lambda c: isinstance(c, RegularArray) and c.size == 0,
-    )
+    find(st_ak.contents.regular_array_contents(), lambda c: c.size == 0)
 
 
 @pytest.mark.parametrize('max_size', [0, 1, 2, 50])

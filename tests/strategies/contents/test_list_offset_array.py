@@ -2,7 +2,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, ListOffsetArray, NumpyArray
@@ -85,23 +85,23 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
-def test_draw_max_length() -> None:
-    """Assert that max_length constrains the ListOffsetArray length."""
-    max_length = 10
+@pytest.mark.parametrize('max_length', [1, 2, 10])
+def test_draw_max_length(max_length: int) -> None:
+    """Assert the length can reach `max_length`."""
     find(
         st_ak.contents.list_offset_array_contents(max_length=max_length),
         lambda c: len(c) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
-def test_draw_default_max_length() -> None:
+@pytest.mark.parametrize('len_content', [0, 1, 2, 10])
+def test_draw_default_max_length(len_content: int) -> None:
     """Assert that len(result) can reach len(content) by default."""
-    content = NumpyArray(np.zeros(20, dtype=np.int64))
+    content = NumpyArray(np.zeros(len_content))
+    assert len(content) == len_content
     find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: len(c) == len(content),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -110,7 +110,6 @@ def test_draw_variable_length() -> None:
     find(
         st_ak.contents.list_offset_array_contents(),
         lambda c: len(c) >= 2 and len(set(len(c[i]) for i in range(len(c)))) > 1,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -119,23 +118,21 @@ def test_draw_empty_sublist() -> None:
     find(
         st_ak.contents.list_offset_array_contents(),
         lambda c: any(len(c[i]) == 0 for i in range(len(c))),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
 def test_draw_unreachable() -> None:
-    """Assert that ListOffsetArray with unreachable data can be drawn."""
+    """Assert data can be unreachable."""
     content = NumpyArray(np.arange(10))
     find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: c.offsets[0] > 0 or c.offsets[-1] < len(c.content),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
 @pytest.mark.xfail(reason='shrinker does not reliably reach no-unreachable layout')
 def test_shrink_no_unreachable() -> None:
-    """Assert that ListOffsetArray shrinks to no unreachable data."""
+    """Assert reachable data only is the simplest."""
     content = NumpyArray(np.arange(10))
     c = find(
         st_ak.contents.list_offset_array_contents(content),
@@ -146,12 +143,9 @@ def test_shrink_no_unreachable() -> None:
 
 
 def test_shrink_content_len_zero() -> None:
-    """Assert that ListOffsetArray shrinks to zero lists with no content."""
+    """Assert no sublists are the simplest for an empty content."""
     content = NumpyArray(np.array([], dtype=np.int64))
-    c = find(
-        st_ak.contents.list_offset_array_contents(content),
-        lambda c: True,
-    )
+    c = find(st_ak.contents.list_offset_array_contents(content), lambda c: True)
     assert len(c) == 0
 
 
