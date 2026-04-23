@@ -89,7 +89,6 @@ def test_draw_max_length() -> None:
     find(
         st_ak.contents.list_array_contents(max_length=max_length),
         lambda c: len(c) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -99,7 +98,6 @@ def test_draw_default_max_length() -> None:
     find(
         st_ak.contents.list_array_contents(content),
         lambda c: len(c) == len(content),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -109,7 +107,6 @@ def test_draw_unreachable() -> None:
     find(
         st_ak.contents.list_array_contents(content),
         lambda c: len(c) >= 1 and (c.starts[0] > 0 or c.stops[-1] < len(c.content)),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
