@@ -93,10 +93,7 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_size_zero() -> None:
     """Assert the size can be zero."""
-    find(
-        st_ak.contents.regular_array_contents(),
-        lambda c: isinstance(c, RegularArray) and c.size == 0,
-    )
+    find(st_ak.contents.regular_array_contents(), lambda c: c.size == 0)
 
 
 @pytest.mark.parametrize('max_size', [0, 1, 2, 50])
