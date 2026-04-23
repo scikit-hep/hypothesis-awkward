@@ -2,7 +2,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, ListOffsetArray, NumpyArray
@@ -91,7 +91,6 @@ def test_draw_max_length() -> None:
     find(
         st_ak.contents.list_offset_array_contents(max_length=max_length),
         lambda c: len(c) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -101,7 +100,6 @@ def test_draw_default_max_length() -> None:
     find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: len(c) == len(content),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -110,7 +108,6 @@ def test_draw_variable_length() -> None:
     find(
         st_ak.contents.list_offset_array_contents(),
         lambda c: len(c) >= 2 and len(set(len(c[i]) for i in range(len(c)))) > 1,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -119,7 +116,6 @@ def test_draw_empty_sublist() -> None:
     find(
         st_ak.contents.list_offset_array_contents(),
         lambda c: any(len(c[i]) == 0 for i in range(len(c))),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -129,7 +125,6 @@ def test_draw_unreachable() -> None:
     find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: c.offsets[0] > 0 or c.offsets[-1] < len(c.content),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
