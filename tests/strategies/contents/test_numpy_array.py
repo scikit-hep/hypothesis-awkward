@@ -111,7 +111,6 @@ def test_draw_from_contents_length_zero() -> None:
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, NumpyArray) and len(c) == 0,
-        settings=settings(max_examples=2000),
     )
 
 
@@ -133,7 +132,6 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.numpy_array_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
-        settings=settings(max_examples=2000),
     )
 
 
@@ -154,7 +152,6 @@ def test_draw_nan() -> None:
             dtypes=float_dtypes, allow_nan=True, min_size=1
         ),
         lambda c: any_nan_in_numpy_array(c.data),
-        settings=settings(max_examples=2000),
     )
 
 
@@ -166,5 +163,4 @@ def test_draw_nat() -> None:
             dtypes=datetime_dtypes, allow_nan=True, min_size=1
         ),
         lambda c: any_nat_in_numpy_array(c.data),
-        settings=settings(max_examples=2000),
     )

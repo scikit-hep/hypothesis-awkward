@@ -170,7 +170,6 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.leaf_contents(max_size=max_size),
         lambda c: len(c) == max_size,
-        settings=settings(max_examples=2000),
     )
 
 
@@ -190,7 +189,7 @@ def test_shrink_leaf_contents_empty() -> None:
     c = find(
         st_ak.contents.leaf_contents(),
         lambda c: len(c) == 0,
-        settings=settings(max_examples=2000, database=None),
+        settings=settings(database=None),
     )
     assert isinstance(c, EmptyArray)
 

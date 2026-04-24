@@ -96,7 +96,6 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.bytestring_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
-        settings=settings(max_examples=2000),
     )
 
 
@@ -105,7 +104,6 @@ def test_draw_empty_bytestring() -> None:
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: b'' in ak.Array(c).to_list(),
-        settings=settings(max_examples=2000),
     )
 
 
@@ -114,5 +112,4 @@ def test_draw_null_byte() -> None:
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: any(b'\x00' in b for b in ak.Array(c).to_list()),
-        settings=settings(max_examples=2000),
     )

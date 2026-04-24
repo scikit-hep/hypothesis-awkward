@@ -112,7 +112,6 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.string_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
-        settings=settings(max_examples=2000),
     )
 
 
@@ -121,7 +120,6 @@ def test_draw_empty_string() -> None:
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: '' in ak.Array(c).to_list(),
-        settings=settings(max_examples=2000),
     )
 
 
@@ -130,5 +128,4 @@ def test_draw_non_ascii() -> None:
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: any(not s.isascii() for s in ak.Array(c).to_list()),
-        settings=settings(max_examples=2000),
     )
