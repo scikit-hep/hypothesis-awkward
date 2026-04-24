@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.17.0] - 2026-04-24
+
+### Features
+
+- Drop optional `pandas` dep and `dicts_for_dataframe()` ([#97](https://github.com/scikit-hep/hypothesis-awkward/pull/97)) **BREAKING**
+
+### Documentation
+
+- Document env setup and Claude session-orientation check ([#96](https://github.com/scikit-hep/hypothesis-awkward/pull/96))
+
+### Build & CI
+
+- Label PRs whose title uses the `!` breaking-change marker ([#98](https://github.com/scikit-hep/hypothesis-awkward/pull/98))
+
+
 ## [0.16.1] - 2026-04-24
 
 ### Documentation
