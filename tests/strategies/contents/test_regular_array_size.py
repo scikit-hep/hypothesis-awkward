@@ -1,6 +1,6 @@
 from typing import TypedDict, cast
 
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from hypothesis_awkward import strategies as st_ak
@@ -85,33 +85,35 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_shrink_to_total_items() -> None:
     """Assert that positive size shrinks to total_items (fewest partitions)."""
-    s = find(_st_group_sizes(12, max_group_size=12), lambda s: s > 0)
+    s = find(
+        _st_group_sizes(12, max_group_size=12),
+        lambda s: s > 0,
+        settings=settings(database=None),
+    )
     assert s == 12
 
 
 def test_shrink_to_max_divisor() -> None:
     """Assert that positive size shrinks to the largest divisor <= max_group_size."""
     # total_items=12, max_group_size=11: divisors <= 11 are [6, 4, 3, 2, 1]
-    s = find(_st_group_sizes(12, max_group_size=11), lambda s: s > 0)
+    s = find(
+        _st_group_sizes(12, max_group_size=11),
+        lambda s: s > 0,
+        settings=settings(database=None),
+    )
     assert s == 6
 
 
 def test_draw_total_items() -> None:
     """Assert that size can equal total_items."""
-    find(
-        _st_group_sizes(7, max_group_size=7),
-        lambda s: s == 7,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(_st_group_sizes(7, max_group_size=7), lambda s: s == 7)
 
 
 def test_draw_total_items_zero() -> None:
     """Assert that any size up to max_group_size can be drawn when total_items is 0."""
     max_group_size = 10
     find(
-        _st_group_sizes(0, max_group_size=max_group_size),
-        lambda s: s == max_group_size,
-        settings=settings(phases=[Phase.generate]),
+        _st_group_sizes(0, max_group_size=max_group_size), lambda s: s == max_group_size
     )
 
 
@@ -123,14 +125,11 @@ def test_shrink_divisors_first() -> None:
     s = find(
         _st_group_sizes(12, max_group_size=11, allow_non_divisors=True),
         lambda s: s > 0,
+        settings=settings(database=None),
     )
     assert s == 6
 
 
 def test_draw_non_divisor() -> None:
     """Assert that a non-divisor can be drawn when allow_non_divisors is True."""
-    find(
-        _st_group_sizes(12, allow_non_divisors=True),
-        lambda s: s > 0 and 12 % s != 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(_st_group_sizes(12, allow_non_divisors=True), lambda s: s > 0 and 12 % s != 0)

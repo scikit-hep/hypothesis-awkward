@@ -141,6 +141,7 @@ def test_draw_default_max_zeros_length(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(content, max_size=0),
         lambda c: c.size == 0 and len(c) == max_length,
+        settings=settings(max_examples=2000),
     )
 
 
@@ -163,6 +164,7 @@ def test_shrink_no_unreachable(n: int) -> None:
     c = find(
         st_ak.contents.regular_array_contents(content),
         lambda c: 1 < c.size < len(c.content),
+        settings=settings(database=None),
     )
     assert len(c) == min(n // s for s in range(2, n) if n % s == 0)
     assert len(c.content) == c.size * len(c)

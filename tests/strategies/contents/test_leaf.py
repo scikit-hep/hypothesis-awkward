@@ -3,7 +3,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import EmptyArray, NumpyArray
@@ -146,48 +146,28 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_numpy_array() -> None:
     """Assert that NumpyArray can be drawn by default."""
-    find(
-        st_ak.contents.leaf_contents(),
-        lambda c: isinstance(c, NumpyArray),
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.leaf_contents(), lambda c: isinstance(c, NumpyArray))
 
 
 def test_draw_empty_array() -> None:
     """Assert that EmptyArray can be drawn by default."""
-    find(
-        st_ak.contents.leaf_contents(),
-        lambda c: isinstance(c, EmptyArray),
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.leaf_contents(), lambda c: isinstance(c, EmptyArray))
 
 
 def test_draw_string() -> None:
     """Assert that string content can be drawn by default."""
-    find(
-        st_ak.contents.leaf_contents(),
-        lambda c: is_string_leaf(c),
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.leaf_contents(), lambda c: is_string_leaf(c))
 
 
 def test_draw_bytestring() -> None:
     """Assert that bytestring content can be drawn by default."""
-    find(
-        st_ak.contents.leaf_contents(),
-        lambda c: is_bytestring_leaf(c),
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.leaf_contents(), lambda c: is_bytestring_leaf(c))
 
 
 def test_draw_max_size() -> None:
     """Assert that leaf content with max_size elements can be drawn."""
     max_size = 25
-    find(
-        st_ak.contents.leaf_contents(max_size=max_size),
-        lambda c: len(c) == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.contents.leaf_contents(max_size=max_size), lambda c: len(c) == max_size)
 
 
 def test_draw_nan() -> None:
@@ -206,7 +186,7 @@ def test_shrink_leaf_contents_empty() -> None:
     c = find(
         st_ak.contents.leaf_contents(),
         lambda c: len(c) == 0,
-        settings=settings(max_examples=2000, database=None),
+        settings=settings(database=None),
     )
     assert isinstance(c, EmptyArray)
 

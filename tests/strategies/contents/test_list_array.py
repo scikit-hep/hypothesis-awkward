@@ -97,10 +97,7 @@ def test_draw_default_max_length(len_content: int) -> None:
     """Assert that len(result) can reach len(content) by default."""
     content = NumpyArray(np.zeros(len_content))
     assert len(content) == len_content
-    find(
-        st_ak.contents.list_array_contents(content),
-        lambda c: len(c) == len(content),
-    )
+    find(st_ak.contents.list_array_contents(content), lambda c: len(c) == len(content))
 
 
 def test_draw_unreachable() -> None:
@@ -119,6 +116,7 @@ def test_shrink_no_unreachable() -> None:
     c = find(
         st_ak.contents.list_array_contents(content),
         lambda c: len(c) >= 2,
+        settings=settings(database=None),
     )
     assert c.starts[0] == 0
     assert c.stops[-1] == len(c.content)
@@ -127,7 +125,11 @@ def test_shrink_no_unreachable() -> None:
 def test_shrink_content_len_zero() -> None:
     """Assert no sublists are the simplest for an empty content."""
     content = NumpyArray(np.array([], dtype=np.int64))
-    c = find(st_ak.contents.list_array_contents(content), lambda c: True)
+    c = find(
+        st_ak.contents.list_array_contents(content),
+        lambda c: True,
+        settings=settings(database=None),
+    )
     assert len(c) == 0
 
 

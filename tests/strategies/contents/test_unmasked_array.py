@@ -1,6 +1,6 @@
 from typing import Any, TypedDict, cast
 
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, UnmaskedArray
@@ -70,28 +70,20 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
+def test_draw_nonempty() -> None:
+    """Assert the length can be positive."""
+    find(st_ak.contents.unmasked_array_contents(), lambda c: len(c) > 0)
+
+
+def test_draw_empty() -> None:
+    """Assert the length can be zero."""
+    find(st_ak.contents.unmasked_array_contents(), lambda c: len(c) == 0)
+
+
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate an `UnmaskedArray` as outermost."""
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, UnmaskedArray),
         settings=settings(max_examples=2000),
-    )
-
-
-def test_draw_nonempty() -> None:
-    """Assert that non-empty UnmaskedArray can be drawn."""
-    find(
-        st_ak.contents.unmasked_array_contents(),
-        lambda c: len(c) > 0,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_empty() -> None:
-    """Assert that empty UnmaskedArray can be drawn."""
-    find(
-        st_ak.contents.unmasked_array_contents(),
-        lambda c: len(c) == 0,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )

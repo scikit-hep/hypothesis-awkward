@@ -1,7 +1,8 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+import pytest
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, IndexedOptionArray
@@ -84,30 +85,12 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
-def test_draw_index_dtype_int32() -> None:
-    """Assert that int32 index dtype can be drawn."""
+@pytest.mark.parametrize('dtype', [np.int32, np.int64])
+def test_draw_index_dtype(dtype: np.dtype) -> None:
+    """Assert the given index dtype can be drawn."""
     find(
         st_ak.contents.indexed_option_array_contents(),
-        lambda c: c.index.data.dtype == np.int32,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_index_dtype_int64() -> None:
-    """Assert that int64 index dtype can be drawn."""
-    find(
-        st_ak.contents.indexed_option_array_contents(),
-        lambda c: c.index.data.dtype == np.int64,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_from_contents() -> None:
-    """Assert `contents()` can generate an `IndexedOptionArray` as outermost."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, IndexedOptionArray),
-        settings=settings(max_examples=2000),
+        lambda c: c.index.data.dtype == dtype,
     )
 
 
@@ -116,7 +99,6 @@ def test_draw_with_none_values() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > 0 and any(c.index.data[i] < 0 for i in range(len(c))),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -125,7 +107,6 @@ def test_draw_all_valid() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > 0 and all(c.index.data[i] >= 0 for i in range(len(c))),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -138,7 +119,6 @@ def test_draw_duplicate_indices() -> None:
             and len(set(i for i in c.index.data if i >= 0))
             < sum(1 for i in c.index.data if i >= 0)
         ),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -147,5 +127,13 @@ def test_draw_index_longer_than_content() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > len(c.content),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_from_contents() -> None:
+    """Assert `contents()` can generate an `IndexedOptionArray` as outermost."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, IndexedOptionArray),
+        settings=settings(max_examples=2000),
     )

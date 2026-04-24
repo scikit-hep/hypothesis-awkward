@@ -137,6 +137,7 @@ def test_shrink_no_unreachable() -> None:
     c = find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: len(c) >= 2,
+        settings=settings(database=None),
     )
     assert c.offsets[0] == 0
     assert c.offsets[-1] == len(c.content)
@@ -145,7 +146,11 @@ def test_shrink_no_unreachable() -> None:
 def test_shrink_content_len_zero() -> None:
     """Assert no sublists are the simplest for an empty content."""
     content = NumpyArray(np.array([], dtype=np.int64))
-    c = find(st_ak.contents.list_offset_array_contents(content), lambda c: True)
+    c = find(
+        st_ak.contents.list_offset_array_contents(content),
+        lambda c: True,
+        settings=settings(database=None),
+    )
     assert len(c) == 0
 
 

@@ -1,7 +1,8 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+import pytest
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import ByteMaskedArray, Content
@@ -80,30 +81,12 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
-def test_draw_valid_when_true() -> None:
-    """Assert that valid_when=True can be drawn."""
+@pytest.mark.parametrize('valid_when', [True, False])
+def test_draw_valid_when(valid_when: bool) -> None:
+    """Assert the given `valid_when` can be drawn."""
     find(
         st_ak.contents.byte_masked_array_contents(),
-        lambda c: c.valid_when is True,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_valid_when_false() -> None:
-    """Assert that valid_when=False can be drawn."""
-    find(
-        st_ak.contents.byte_masked_array_contents(),
-        lambda c: c.valid_when is False,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_from_contents() -> None:
-    """Assert `contents()` can generate a `ByteMaskedArray` as outermost."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, ByteMaskedArray),
-        settings=settings(max_examples=2000),
+        lambda c: c.valid_when is valid_when,
     )
 
 
@@ -114,7 +97,6 @@ def test_draw_with_none_values() -> None:
         lambda c: (
             len(c) > 0 and any(c.mask.data[i] != c.valid_when for i in range(len(c)))
         ),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -125,5 +107,13 @@ def test_draw_all_valid() -> None:
         lambda c: (
             len(c) > 0 and all(c.mask.data[i] == c.valid_when for i in range(len(c)))
         ),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_from_contents() -> None:
+    """Assert `contents()` can generate a `ByteMaskedArray` as outermost."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, ByteMaskedArray),
+        settings=settings(max_examples=2000),
     )

@@ -1,6 +1,6 @@
 from typing import Any, Callable, TypedDict, cast
 
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content
@@ -96,7 +96,6 @@ def test_draw_min_len() -> None:
             st_ak.contents.contents, max_leaf_size=50, min_len=2
         ),
         lambda cl: len(cl) == 2,
-        settings=settings(phases=[Phase.generate]),
     )
 
 
@@ -105,7 +104,6 @@ def test_draw_max_len() -> None:
     find(
         st_ak.contents.content_lists(max_leaf_size=50, max_len=3),
         lambda cl: len(cl) == 3,
-        settings=settings(phases=[Phase.generate]),
     )
 
 
@@ -116,5 +114,4 @@ def test_draw_empty_list() -> None:
             st_ak.contents.contents, max_leaf_size=50, min_len=0
         ),
         lambda cl: len(cl) == 0,
-        settings=settings(phases=[Phase.generate]),
     )

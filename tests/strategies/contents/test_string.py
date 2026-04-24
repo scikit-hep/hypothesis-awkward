@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -104,20 +104,12 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_empty() -> None:
     """Assert that empty arrays (zero strings) can be drawn."""
-    find(
-        st_ak.contents.string_contents(),
-        lambda c: len(c) == 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.string_contents(), lambda c: len(c) == 0)
 
 
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size strings can be drawn."""
-    find(
-        st_ak.contents.string_contents(),
-        lambda c: len(c) == DEFAULT_MAX_SIZE,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.contents.string_contents(), lambda c: len(c) == DEFAULT_MAX_SIZE)
 
 
 def test_draw_empty_string() -> None:
@@ -125,7 +117,6 @@ def test_draw_empty_string() -> None:
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: '' in ak.Array(c).to_list(),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -134,5 +125,4 @@ def test_draw_non_ascii() -> None:
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: any(not s.isascii() for s in ak.Array(c).to_list()),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )

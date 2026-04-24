@@ -2,7 +2,8 @@ import math
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+import pytest
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import BitMaskedArray, Content
@@ -82,40 +83,18 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
-def test_draw_valid_when_true() -> None:
-    """Assert that valid_when=True can be drawn."""
+@pytest.mark.parametrize('valid_when', [True, False])
+def test_draw_valid_when(valid_when: bool) -> None:
+    """Assert the given `valid_when` can be drawn."""
     find(
-        st_ak.contents.bit_masked_array_contents(),
-        lambda c: c.valid_when is True,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        st_ak.contents.bit_masked_array_contents(), lambda c: c.valid_when is valid_when
     )
 
 
-def test_draw_valid_when_false() -> None:
-    """Assert that valid_when=False can be drawn."""
-    find(
-        st_ak.contents.bit_masked_array_contents(),
-        lambda c: c.valid_when is False,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_lsb_order_true() -> None:
-    """Assert that lsb_order=True can be drawn."""
-    find(
-        st_ak.contents.bit_masked_array_contents(),
-        lambda c: c.lsb_order is True,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_lsb_order_false() -> None:
-    """Assert that lsb_order=False can be drawn."""
-    find(
-        st_ak.contents.bit_masked_array_contents(),
-        lambda c: c.lsb_order is False,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+@pytest.mark.parametrize('lsb_order', [True, False])
+def test_draw_lsb_order(lsb_order: bool) -> None:
+    """Assert the given `lsb_order` can be drawn."""
+    find(st_ak.contents.bit_masked_array_contents(), lambda c: c.lsb_order is lsb_order)
 
 
 def test_draw_from_contents() -> None:
@@ -142,7 +121,6 @@ def test_draw_with_none_values() -> None:
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.length > 0 and any(not _is_valid(c, j) for j in range(c.length)),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -151,5 +129,4 @@ def test_draw_all_valid() -> None:
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.length > 0 and all(_is_valid(c, j) for j in range(c.length)),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )

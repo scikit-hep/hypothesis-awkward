@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -108,11 +108,7 @@ def test_draw_from_contents() -> None:
 
 def test_draw_from_contents_length_zero() -> None:
     """Assert that NumpyArray with length 0 can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, NumpyArray) and len(c) == 0,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.contents.contents(), lambda c: isinstance(c, NumpyArray) and len(c) == 0)
 
 
 def test_draw_from_contents_max_size_1() -> None:
@@ -120,26 +116,17 @@ def test_draw_from_contents_max_size_1() -> None:
     find(
         st_ak.contents.contents(max_size=1),
         lambda c: isinstance(c, NumpyArray) and len(c) == 1,
-        settings=settings(phases=[Phase.generate]),
     )
 
 
 def test_draw_empty() -> None:
     """Assert that empty arrays can be drawn."""
-    find(
-        st_ak.contents.numpy_array_contents(),
-        lambda c: len(c) == 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.numpy_array_contents(), lambda c: len(c) == 0)
 
 
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size elements can be drawn."""
-    find(
-        st_ak.contents.numpy_array_contents(),
-        lambda c: len(c) == DEFAULT_MAX_SIZE,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.contents.numpy_array_contents(), lambda c: len(c) == DEFAULT_MAX_SIZE)
 
 
 def test_draw_min_size() -> None:
@@ -148,7 +135,6 @@ def test_draw_min_size() -> None:
     find(
         st_ak.contents.numpy_array_contents(min_size=min_size),
         lambda c: len(c) == min_size,
-        settings=settings(phases=[Phase.generate]),
     )
 
 
@@ -160,7 +146,6 @@ def test_draw_nan() -> None:
             dtypes=float_dtypes, allow_nan=True, min_size=1
         ),
         lambda c: any_nan_in_numpy_array(c.data),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
@@ -172,5 +157,4 @@ def test_draw_nat() -> None:
             dtypes=datetime_dtypes, allow_nan=True, min_size=1
         ),
         lambda c: any_nat_in_numpy_array(c.data),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
