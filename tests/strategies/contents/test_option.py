@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import (
@@ -109,37 +109,7 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
 
-def test_draw_indexed_option() -> None:
-    """Assert that IndexedOptionArray can be drawn."""
-    find(
-        st_ak.contents.option_contents(),
-        lambda c: isinstance(c, IndexedOptionArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_byte_masked() -> None:
-    """Assert that ByteMaskedArray can be drawn."""
-    find(
-        st_ak.contents.option_contents(),
-        lambda c: isinstance(c, ByteMaskedArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_bit_masked() -> None:
-    """Assert that BitMaskedArray can be drawn."""
-    find(
-        st_ak.contents.option_contents(),
-        lambda c: isinstance(c, BitMaskedArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
-
-
-def test_draw_unmasked() -> None:
-    """Assert that UnmaskedArray can be drawn."""
-    find(
-        st_ak.contents.option_contents(),
-        lambda c: isinstance(c, UnmaskedArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+@pytest.mark.parametrize('cls', OPTION_TYPES)
+def test_draw_option_type(cls: type[Content]) -> None:
+    """Assert the given option type can be drawn."""
+    find(st_ak.contents.option_contents(), lambda c: isinstance(c, cls))
