@@ -55,7 +55,7 @@ version:
 ```bash
 cd ../hypothesis-awkward-<topic>
 uv venv --python "$(awk '/^version_info/{print $3}' ../hypothesis-awkward/.venv/pyvenv.cfg)"
-uv pip install --python .venv/bin/python -e . --all-extras --group dev --group docs
+uv pip install --python .venv/bin/python -e . --group dev --group docs
 ```
 
 `--python .venv/bin/python` targets the new venv explicitly, bypassing any
@@ -67,7 +67,7 @@ inherited `VIRTUAL_ENV`.
 
 - **`strategies/`** — public Hypothesis strategies (imported as
   `hypothesis_awkward.strategies`). Subpackages: `numpy/`, `builtins_/`,
-  `contents/`, `constructors/`, `pandas/`, `forms/`, `types/`, `misc/`.
+  `contents/`, `constructors/`, `forms/`, `types/`, `misc/`.
 - **`util/`** — internal utilities for dtype handling, safe comparisons, layout
   iteration, and array introspection.
 

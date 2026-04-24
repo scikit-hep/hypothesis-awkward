@@ -19,7 +19,7 @@ source .venv/bin/activate
 Install the project in development mode:
 
 ```bash
-uv pip install -e . --all-extras --group dev --group docs
+uv pip install -e . --group dev --group docs
 ```
 
 Set up the pre-commit hooks (optional — CI enforces these on PRs):

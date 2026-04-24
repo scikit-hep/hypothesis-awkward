@@ -30,13 +30,10 @@ Runs on push to `main` and PRs targeting `main`. Tests a matrix of:
 
 - **Python**: 3.10, 3.11, 3.12, 3.13, 3.14
 - **Deps**: `default`, `latest`, `min`
-- **Optional deps**: none or `[all]` (pandas + pyarrow)
-
-The `[all]` extra only runs with `default` deps (excluded from `latest`/`min`).
 
 | Mode      | Install method                                                    |
 | --------- | ----------------------------------------------------------------- |
-| `default` | `uv pip install -e .[opt-deps] --group dev` (free resolution)     |
+| `default` | `uv pip install -e . --group dev` (free resolution)               |
 | `latest`  | Installs package, then overwrites with `latest/requirements.txt`  |
 | `min`     | Installs package, then downgrades with `minimum/requirements.txt` |
 
