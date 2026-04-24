@@ -2,10 +2,24 @@
 
 ## Development Setup
 
+Clone the repository:
+
+```bash
+git clone https://github.com/scikit-hep/hypothesis-awkward.git
+cd hypothesis-awkward
+```
+
+Create a virtual environment (Python ≥ 3.10):
+
+```bash
+uv venv
+source .venv/bin/activate
+```
+
 Install the project in development mode:
 
 ```bash
-uv pip install -e .[all] --group dev
+uv pip install -e . --all-extras --group dev --group docs
 ```
 
 Set up the pre-commit hooks (optional — CI enforces these on PRs):
@@ -20,14 +34,14 @@ For a live preview of the current working tree (single version, no version
 selector):
 
 ```bash
-uv run --group docs zensical serve
+zensical serve
 ```
 
 For the multi-version site as published to `gh-pages` (uses
 [`mike`](https://github.com/squidfunk/mike), pinned in the `docs` dep group):
 
 ```bash
-uv run --group docs mike serve --branch gh-pages
+mike serve --branch gh-pages
 ```
 
 ## PR Title Convention
