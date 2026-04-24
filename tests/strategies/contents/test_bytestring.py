@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -88,11 +88,7 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_empty() -> None:
     """Assert that empty arrays (zero bytestrings) can be drawn."""
-    find(
-        st_ak.contents.bytestring_contents(),
-        lambda c: len(c) == 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.contents.bytestring_contents(), lambda c: len(c) == 0)
 
 
 def test_draw_max_size() -> None:
@@ -100,7 +96,7 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.bytestring_contents(),
         lambda c: len(c) == DEFAULT_MAX_SIZE,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -109,7 +105,7 @@ def test_draw_empty_bytestring() -> None:
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: b'' in ak.Array(c).to_list(),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -118,5 +114,5 @@ def test_draw_null_byte() -> None:
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: any(b'\x00' in b for b in ak.Array(c).to_list()),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )

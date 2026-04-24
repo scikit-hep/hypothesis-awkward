@@ -5,7 +5,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -214,7 +214,7 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.contents(max_size=max_size, max_leaf_size=max_size),
         lambda c: content_size(c) == max_size,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -224,7 +224,7 @@ def test_draw_max_leaf_size() -> None:
     find(
         st_ak.contents.contents(max_size=200, max_leaf_size=max_leaf_size),
         lambda c: leaf_size(c) == max_leaf_size,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -234,7 +234,7 @@ def test_draw_max_depth() -> None:
     find(
         st_ak.contents.contents(max_size=200, max_depth=max_depth),
         lambda c: _nesting_depth(c) == max_depth,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -243,7 +243,7 @@ def test_draw_deep_without_max_depth() -> None:
     find(
         st_ak.contents.contents(max_size=200),
         lambda c: _nesting_depth(c) >= 8,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -252,7 +252,7 @@ def test_draw_nested() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=20),
         lambda c: _nesting_depth(c) >= 2,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -262,7 +262,7 @@ def test_draw_max_length() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=50, max_length=max_length),
         lambda c: len(c) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -272,7 +272,7 @@ def test_draw_max_length_not_recursed() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=50, max_length=max_length),
         lambda c: any(len(n) > max_length for n in iter_contents(c) if n is not c),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -383,7 +383,7 @@ def test_draw_from_contents_indexed_option() -> None:
     find(
         st_ak.contents.contents(),
         _has_indexed_option,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -392,7 +392,7 @@ def test_draw_from_contents_byte_masked() -> None:
     find(
         st_ak.contents.contents(),
         _has_byte_masked,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -401,7 +401,7 @@ def test_draw_from_contents_bit_masked() -> None:
     find(
         st_ak.contents.contents(),
         _has_bit_masked,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
@@ -410,7 +410,7 @@ def test_draw_from_contents_unmasked() -> None:
     find(
         st_ak.contents.contents(),
         _has_unmasked,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=settings(max_examples=2000),
     )
 
 
