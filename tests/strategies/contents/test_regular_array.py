@@ -141,6 +141,7 @@ def test_draw_default_max_zeros_length(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(content, max_size=0),
         lambda c: c.size == 0 and len(c) == max_length,
+        settings=settings(max_examples=2000),
     )
 
 
