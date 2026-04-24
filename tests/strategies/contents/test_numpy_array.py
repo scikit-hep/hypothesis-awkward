@@ -108,10 +108,7 @@ def test_draw_from_contents() -> None:
 
 def test_draw_from_contents_length_zero() -> None:
     """Assert that NumpyArray with length 0 can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, NumpyArray) and len(c) == 0,
-    )
+    find(st_ak.contents.contents(), lambda c: isinstance(c, NumpyArray) and len(c) == 0)
 
 
 def test_draw_from_contents_max_size_1() -> None:
@@ -129,10 +126,7 @@ def test_draw_empty() -> None:
 
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size elements can be drawn."""
-    find(
-        st_ak.contents.numpy_array_contents(),
-        lambda c: len(c) == DEFAULT_MAX_SIZE,
-    )
+    find(st_ak.contents.numpy_array_contents(), lambda c: len(c) == DEFAULT_MAX_SIZE)
 
 
 def test_draw_min_size() -> None:

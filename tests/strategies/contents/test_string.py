@@ -109,10 +109,7 @@ def test_draw_empty() -> None:
 
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size strings can be drawn."""
-    find(
-        st_ak.contents.string_contents(),
-        lambda c: len(c) == DEFAULT_MAX_SIZE,
-    )
+    find(st_ak.contents.string_contents(), lambda c: len(c) == DEFAULT_MAX_SIZE)
 
 
 def test_draw_empty_string() -> None:

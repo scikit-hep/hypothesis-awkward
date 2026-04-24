@@ -90,28 +90,19 @@ def test_draw_empty() -> None:
 
 def test_draw_content_len_zero() -> None:
     """Assert that starts/stops can be drawn with zero content length."""
-    starts, stops = find(
-        _st_starts_stops(0, max_length=5),
-        lambda ss: len(ss[0]) >= 2,
-    )
+    starts, stops = find(_st_starts_stops(0, max_length=5), lambda ss: len(ss[0]) >= 2)
     assert all(s == 0 for s in starts)
     assert all(s == 0 for s in stops)
 
 
 def test_draw_unreachable_head() -> None:
     """Assert that starts/stops with unreachable head data can be drawn."""
-    find(
-        _st_starts_stops(10),
-        lambda ss: len(ss[0]) >= 1 and ss[0][0] > 0,
-    )
+    find(_st_starts_stops(10), lambda ss: len(ss[0]) >= 1 and ss[0][0] > 0)
 
 
 def test_draw_unreachable_tail() -> None:
     """Assert that starts/stops with unreachable tail data can be drawn."""
-    find(
-        _st_starts_stops(10),
-        lambda ss: len(ss[0]) >= 1 and ss[1][-1] < 10,
-    )
+    find(_st_starts_stops(10), lambda ss: len(ss[0]) >= 1 and ss[1][-1] < 10)
 
 
 def test_shrink_no_unreachable() -> None:
@@ -185,9 +176,7 @@ def test_shrink_monotonic() -> None:
 def test_shrink_content_len_zero() -> None:
     """Assert that starts/stops shrink to empty with zero content length."""
     starts, stops = find(
-        _st_starts_stops(0),
-        lambda ss: True,
-        settings=settings(database=None),
+        _st_starts_stops(0), lambda ss: True, settings=settings(database=None)
     )
     assert starts == []
     assert stops == []

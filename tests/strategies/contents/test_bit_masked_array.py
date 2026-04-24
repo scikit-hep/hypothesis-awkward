@@ -87,18 +87,14 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_valid_when(valid_when: bool) -> None:
     """Assert the given `valid_when` can be drawn."""
     find(
-        st_ak.contents.bit_masked_array_contents(),
-        lambda c: c.valid_when is valid_when,
+        st_ak.contents.bit_masked_array_contents(), lambda c: c.valid_when is valid_when
     )
 
 
 @pytest.mark.parametrize('lsb_order', [True, False])
 def test_draw_lsb_order(lsb_order: bool) -> None:
     """Assert the given `lsb_order` can be drawn."""
-    find(
-        st_ak.contents.bit_masked_array_contents(),
-        lambda c: c.lsb_order is lsb_order,
-    )
+    find(st_ak.contents.bit_masked_array_contents(), lambda c: c.lsb_order is lsb_order)
 
 
 def test_draw_from_contents() -> None:

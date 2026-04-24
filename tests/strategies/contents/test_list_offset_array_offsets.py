@@ -92,9 +92,7 @@ def test_draw_unreachable_tail() -> None:
 def test_shrink_no_unreachable() -> None:
     """Assert that offsets shrink to no unreachable data."""
     offsets = find(
-        _st_offsets(10),
-        lambda o: len(o) >= 3,
-        settings=settings(database=None),
+        _st_offsets(10), lambda o: len(o) >= 3, settings=settings(database=None)
     )
     assert offsets[0] == 0
     assert offsets[-1] == 10
@@ -103,8 +101,6 @@ def test_shrink_no_unreachable() -> None:
 def test_shrink_content_len_zero() -> None:
     """Assert that offsets shrink to one element (empty array) with no content."""
     offsets = find(
-        _st_offsets(0),
-        lambda o: len(o) < 3,
-        settings=settings(database=None),
+        _st_offsets(0), lambda o: len(o) < 3, settings=settings(database=None)
     )
     assert offsets == [0]

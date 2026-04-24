@@ -113,8 +113,7 @@ def test_draw_total_items_zero() -> None:
     """Assert that any size up to max_group_size can be drawn when total_items is 0."""
     max_group_size = 10
     find(
-        _st_group_sizes(0, max_group_size=max_group_size),
-        lambda s: s == max_group_size,
+        _st_group_sizes(0, max_group_size=max_group_size), lambda s: s == max_group_size
     )
 
 
@@ -133,7 +132,4 @@ def test_shrink_divisors_first() -> None:
 
 def test_draw_non_divisor() -> None:
     """Assert that a non-divisor can be drawn when allow_non_divisors is True."""
-    find(
-        _st_group_sizes(12, allow_non_divisors=True),
-        lambda s: s > 0 and 12 % s != 0,
-    )
+    find(_st_group_sizes(12, allow_non_divisors=True), lambda s: s > 0 and 12 % s != 0)

@@ -237,18 +237,12 @@ def test_draw_max_depth() -> None:
 
 def test_draw_deep_without_max_depth() -> None:
     """Assert that deep content can be drawn without specifying max_depth."""
-    find(
-        st_ak.contents.contents(max_size=200),
-        lambda c: _nesting_depth(c) >= 8,
-    )
+    find(st_ak.contents.contents(max_size=200), lambda c: _nesting_depth(c) >= 8)
 
 
 def test_draw_nested() -> None:
     """Assert that nested content (depth >= 2) can be drawn."""
-    find(
-        st_ak.contents.contents(max_leaf_size=20),
-        lambda c: _nesting_depth(c) >= 2,
-    )
+    find(st_ak.contents.contents(max_leaf_size=20), lambda c: _nesting_depth(c) >= 2)
 
 
 def test_draw_max_length() -> None:
@@ -373,34 +367,22 @@ def _has_unmasked(c: ak.contents.Content) -> bool:
 
 def test_draw_from_contents_indexed_option() -> None:
     """Assert that IndexedOptionArray can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        _has_indexed_option,
-    )
+    find(st_ak.contents.contents(), _has_indexed_option)
 
 
 def test_draw_from_contents_byte_masked() -> None:
     """Assert that ByteMaskedArray can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        _has_byte_masked,
-    )
+    find(st_ak.contents.contents(), _has_byte_masked)
 
 
 def test_draw_from_contents_bit_masked() -> None:
     """Assert that BitMaskedArray can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        _has_bit_masked,
-    )
+    find(st_ak.contents.contents(), _has_bit_masked)
 
 
 def test_draw_from_contents_unmasked() -> None:
     """Assert that UnmaskedArray can be drawn from `contents()`."""
-    find(
-        st_ak.contents.contents(),
-        _has_unmasked,
-    )
+    find(st_ak.contents.contents(), _has_unmasked)
 
 
 def test_shrink_len_zero() -> None:

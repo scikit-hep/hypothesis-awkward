@@ -167,10 +167,7 @@ def test_draw_bytestring() -> None:
 def test_draw_max_size() -> None:
     """Assert that leaf content with max_size elements can be drawn."""
     max_size = 25
-    find(
-        st_ak.contents.leaf_contents(max_size=max_size),
-        lambda c: len(c) == max_size,
-    )
+    find(st_ak.contents.leaf_contents(max_size=max_size), lambda c: len(c) == max_size)
 
 
 def test_draw_nan() -> None:
