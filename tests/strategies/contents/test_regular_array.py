@@ -163,6 +163,7 @@ def test_shrink_no_unreachable(n: int) -> None:
     c = find(
         st_ak.contents.regular_array_contents(content),
         lambda c: 1 < c.size < len(c.content),
+        settings=settings(database=None),
     )
     assert len(c) == min(n // s for s in range(2, n) if n % s == 0)
     assert len(c.content) == c.size * len(c)

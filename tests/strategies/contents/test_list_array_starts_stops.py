@@ -119,6 +119,7 @@ def test_shrink_no_unreachable() -> None:
     starts, stops = find(
         _st_starts_stops(10),
         lambda ss: len(ss[0]) >= 2,
+        settings=settings(database=None),
     )
     assert starts[0] == 0
     assert stops[-1] == 10
@@ -137,6 +138,7 @@ def test_shrink_no_gap() -> None:
     starts, stops = find(
         _st_starts_stops(10),
         lambda ss: len(ss[0]) >= 2,
+        settings=settings(database=None),
     )
     for i in range(len(starts) - 1):
         assert stops[i] == starts[i + 1]
@@ -155,6 +157,7 @@ def test_shrink_no_overlap() -> None:
     starts, stops = find(
         _st_starts_stops(10),
         lambda ss: len(ss[0]) >= 2,
+        settings=settings(database=None),
     )
     for i in range(len(starts) - 1):
         assert starts[i + 1] >= stops[i]
@@ -173,6 +176,7 @@ def test_shrink_monotonic() -> None:
     starts, stops = find(
         _st_starts_stops(10),
         lambda ss: len(ss[0]) >= 2,
+        settings=settings(database=None),
     )
     for i in range(len(starts) - 1):
         assert starts[i] <= starts[i + 1]
@@ -183,6 +187,7 @@ def test_shrink_content_len_zero() -> None:
     starts, stops = find(
         _st_starts_stops(0),
         lambda ss: True,
+        settings=settings(database=None),
     )
     assert starts == []
     assert stops == []

@@ -405,12 +405,20 @@ def test_draw_from_contents_unmasked() -> None:
 
 def test_shrink_len_zero() -> None:
     """Assert that length-zero shrinks to ``EmptyArray``."""
-    c = find(st_ak.contents.contents(), lambda c: len(c) == 0)
+    c = find(
+        st_ak.contents.contents(),
+        lambda c: len(c) == 0,
+        settings=settings(database=None),
+    )
     assert isinstance(c, EmptyArray)
 
 
 def test_shrink_len_positive() -> None:
     """Assert that length-positive shrinks."""
-    c = find(st_ak.contents.contents(), lambda c: len(c) > 0)
+    c = find(
+        st_ak.contents.contents(),
+        lambda c: len(c) > 0,
+        settings=settings(database=None),
+    )
     assert len(c) == 1
     assert content_size(c) <= 2
