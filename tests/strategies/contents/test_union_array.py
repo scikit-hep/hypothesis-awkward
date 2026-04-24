@@ -1,6 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
+import pytest
 from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
@@ -134,32 +135,29 @@ def test_properties(data: st.DataObject) -> None:
     assert len(result) <= sc(max_length)
 
 
-def test_draw_multiple_contents() -> None:
-    """Assert that a union with max_contents contents can be drawn."""
-    max_contents = 4
+@pytest.mark.parametrize('max_contents', [2, 3, 4])
+def test_draw_max_contents(max_contents: int) -> None:
+    """Assert the content count can reach `max_contents`."""
     find(
         st_ak.contents.union_array_contents(max_contents=max_contents),
         lambda u: len(u.contents) == max_contents,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
 def test_draw_different_content_lengths() -> None:
-    """Assert that a union with different-length contents can be drawn."""
+    """Assert the contents can have different lengths."""
     find(
         st_ak.contents.union_array_contents(),
         lambda u: len({len(c) for c in u.contents}) > 1,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
-def test_draw_max_length() -> None:
-    """Assert that max_length constrains the UnionArray length."""
-    max_length = 10
+@pytest.mark.parametrize('max_length', [1, 2, 10])
+def test_draw_max_length(max_length: int) -> None:
+    """Assert the length can reach `max_length`."""
     find(
         st_ak.contents.union_array_contents(max_length=max_length),
         lambda u: len(u) == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
     )
 
 
