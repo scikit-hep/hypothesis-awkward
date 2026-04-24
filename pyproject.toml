@@ -30,15 +30,6 @@ dependencies = [
     "typing_extensions>=4.1; python_version < '3.11'",
 ]
 
-[project.optional-dependencies]
-pandas = [
-    "pandas>=2.3,<3; python_version < '3.11'",
-    "pandas>=2.3; python_version >= '3.11' and python_version < '3.14'",
-    "pandas>=2.3.3; python_version >= '3.14'",
-]
-arrow = ["pyarrow>=22.0"]
-all = ["hypothesis-awkward[pandas,arrow]"]
-
 [dependency-groups]
 dev = ["mypy", "pytest", "pytest-cov", "ruff"]
 docs = [
@@ -102,5 +93,5 @@ wrap-summaries = 88
 wrap-descriptions = 88
 
 [[tool.mypy.overrides]]
-module = ["awkward.*", "pyarrow.*", "pandas.*"]
+module = ["awkward.*"]
 ignore_missing_imports = true

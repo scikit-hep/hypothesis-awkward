@@ -17,7 +17,6 @@ __all__ = [
     'numpy_dtypes',
     'supported_dtype_names',
     'supported_dtypes',
-    'dicts_for_dataframe',
     'numpy_types',
     'numpy_forms',
 ]
@@ -46,5 +45,4 @@ from .numpy import (
     supported_dtype_names,
     supported_dtypes,
 )
-from .pandas import dicts_for_dataframe
 from .types import numpy_types

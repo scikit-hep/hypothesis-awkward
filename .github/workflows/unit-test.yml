@@ -22,20 +22,13 @@ jobs:
     name: >
       Py${{ matrix.python-version }}
       (${{ matrix.deps }} deps)
-      ${{ matrix.opt-deps }}
       on Linux
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        opt-deps: ["", "[all]"]
         deps: [default, latest, min]
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        exclude:
-          - opt-deps: "[all]"
-            deps: latest
-          - opt-deps: "[all]"
-            deps: min
 
     steps:
       - uses: actions/checkout@v6
@@ -51,7 +44,7 @@ jobs:
       - name: Install packages
         if: matrix.deps == 'default'
         run: |
-          uv pip install -e .${{ matrix.opt-deps }} --group dev
+          uv pip install -e . --group dev
 
       - name: Install packages (latest)
         # Latest versions of dependencies monitored by Dependabot
