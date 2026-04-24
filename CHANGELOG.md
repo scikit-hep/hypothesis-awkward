@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.16.1] - 2026-04-24
+
+### Documentation
+
+- Move theme overrides to `docs/.overrides` ([#95](https://github.com/scikit-hep/hypothesis-awkward/pull/95))
+
+### Testing
+
+- Trim redundant scaffolding in `contents/` tests ([#91](https://github.com/scikit-hep/hypothesis-awkward/pull/91))
+- Tidy `record_array_contents` test scaffolding ([#92](https://github.com/scikit-hep/hypothesis-awkward/pull/92))
+- Tidy test scaffolding across `contents/` ([#94](https://github.com/scikit-hep/hypothesis-awkward/pull/94))
+
+
 ## [0.16.0] - 2026-04-17
 
 ### Features
