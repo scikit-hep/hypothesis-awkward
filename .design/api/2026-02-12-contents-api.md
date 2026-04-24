@@ -43,6 +43,20 @@
 >   `max_length` and `max_size` constrain the same dimension; the effective
 >   limit is `min(max_size, max_length)`. See
 >   [max-length-api](./2026-02-23-max-length-api.md).
+>
+> **Update (2026-04-24):** Further drift from the `contents()` signature shown
+> below:
+>
+> - Option-type flags are now implemented: `allow_indexed_option`,
+>   `allow_byte_masked`, `allow_bit_masked`, `allow_unmasked` (all default
+>   `True`). See [option-contents-api](2026-03-27-option-contents-api.md) and
+>   [option-integration-api](2026-03-27-option-integration-api.md).
+> - `allow_option_root` internal flag was added (analogous to
+>   `allow_union_root`) to prevent option-inside-option nesting.
+> - `max_leaf_size` parameter was added alongside `max_size` (total
+>   `content_size()`). See [max-size-api](./2026-03-29-max-size-api.md).
+> - Defaults changed: `max_size=50` (was `10`), `allow_nan=True` (was `False`),
+>   `max_depth=None` (was `5`).
 
 ## Overview
 

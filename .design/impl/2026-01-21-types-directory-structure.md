@@ -147,7 +147,7 @@ src/hypothesis_awkward/strategies/
 
 - Clutters the `strategies/` directory
 - Doesn't group related functionality
-- Inconsistent with `numpy/`, `builtins_/`, `pandas/` pattern
+- Inconsistent with `numpy/`, `builtins_/` pattern
 
 ## Implementation Order
 

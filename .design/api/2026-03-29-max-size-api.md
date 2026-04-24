@@ -1,7 +1,9 @@
 # API Design: `max_size` and `max_leaf_size` Parameters
 
 - **Date:** 2026-03-29
-- **Status:** Proposed
+- **Status:** Implemented — `contents()` and `arrays()` carry both `max_size`
+  (default `50`) and `max_leaf_size` (default `None`), and `content_lists()`
+  uses `content_size()` for budget tracking.
 - **Author:** Claude (with developer collaboration)
 
 ## Overview

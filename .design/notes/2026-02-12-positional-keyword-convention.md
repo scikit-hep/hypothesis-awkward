@@ -101,7 +101,6 @@ These have no clear "what" parameter — everything is optional configuration:
 | `arrays`               | `(draw, dtypes=None, ...)`           | `(draw, *, dtypes=None, ...)`           |
 | `lists`                | `(draw, dtype=None, ...)`            | `(draw, *, dtype=None, ...)`            |
 | `from_list`            | `(dtype=None, ...)`                  | `(*, dtype=None, ...)`                  |
-| `dicts_for_dataframe`  | `(draw, max_columns=4, ...)`         | `(draw, *, max_columns=4, ...)`         |
 
 **Rationale:**
 

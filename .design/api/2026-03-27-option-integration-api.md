@@ -1,7 +1,9 @@
 # API Design: Option Type Integration into `contents()` and `arrays()`
 
 - **Date:** 2026-03-27
-- **Status:** Proposed
+- **Status:** Implemented — all four `allow_*` flags, `allow_option_root`, the
+  `*_from_contents` bridges, option-aware `UnionArray` coordination, and the
+  test/util updates described below are present in the current code.
 - **Author:** Claude (with developer collaboration)
 
 ## Overview

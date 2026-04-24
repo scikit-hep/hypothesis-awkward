@@ -13,6 +13,19 @@
 >   [top-down builder](../impl/2026-02-21-contents-top-down-builder.md).
 > - `max_length` parameter was added to `contents()` and `arrays()`. See
 >   [max-length-api](2026-02-23-max-length-api.md) for details.
+>
+> **Update (2026-04-24):** Further drift from the signature shown below:
+>
+> - Option-type flags are now implemented: `allow_indexed_option`,
+>   `allow_byte_masked`, `allow_bit_masked`, `allow_unmasked` (all default
+>   `True`). See [option-contents-api](2026-03-27-option-contents-api.md) and
+>   [option-integration-api](2026-03-27-option-integration-api.md).
+> - `max_leaf_size` parameter was added alongside `max_size` (total content
+>   size). See [max-size-api](2026-03-29-max-size-api.md).
+> - Defaults changed: `max_size=50` (was `10`), `allow_nan=True` (was `False`),
+>   `max_depth=None` (was `5`).
+> - The `pandas/` subpackage and `dicts_for_dataframe()` were dropped in
+>   v0.17.0; remove from mental model of directory structure.
 
 ## Overview
 
@@ -339,7 +352,6 @@ src/hypothesis_awkward/strategies/
 +-- forms/
 +-- misc/
 +-- numpy/
-+-- pandas/
 +-- types/
 +-- __init__.py               # Re-exports arrays via constructors namespace
 ```
