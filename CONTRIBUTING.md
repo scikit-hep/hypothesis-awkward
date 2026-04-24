@@ -72,11 +72,14 @@ type: description
 | `chore`    | Other changes that don't modify src or test files     |
 | `revert`   | Reverts a previous commit                             |
 
+Append `!` to the type (e.g. `feat!:`) to flag a breaking change.
+
 ### Examples
 
 - `feat: add user authentication`
 - `fix: handle empty input`
 - `docs: update installation instructions`
+- ``feat!: drop `dicts_for_dataframe()` ``
 
 ### Individual Commits
 

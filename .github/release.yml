@@ -4,6 +4,9 @@ changelog:
       - dependabot
       - dependabot[bot]
   categories:
+    - title: Breaking Changes
+      labels:
+        - breaking
     - title: Features
       labels:
         - feature
