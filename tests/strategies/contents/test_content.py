@@ -14,6 +14,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_nat_in_awkward_array,
     content_size,
+    is_leaf,
     iter_contents,
     iter_numpy_arrays,
     leaf_size,
@@ -245,21 +246,30 @@ def test_draw_nested() -> None:
     find(st_ak.contents.contents(max_leaf_size=20), lambda c: _nesting_depth(c) >= 2)
 
 
-def test_draw_max_length() -> None:
+@pytest.mark.parametrize('max_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_max_length(leaf: bool, max_length: int) -> None:
     """Assert that max_length constrains the content length."""
-    max_length = 5
     find(
-        st_ak.contents.contents(max_leaf_size=50, max_length=max_length),
-        lambda c: len(c) == max_length,
+        st_ak.contents.contents(max_length=max_length),
+        lambda c: is_leaf(c) == leaf and len(c) == max_length,
     )
 
 
-def test_draw_max_length_not_recursed() -> None:
+@pytest.mark.parametrize('max_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
     """Assert that max_length does not constrain nested content length."""
-    max_length = 2
+    # TODO: Pass a reachable-only option to `iter_contents` once supported,
+    # so the predicate counts only genuinely reachable inner contents. See
+    # the matching TODO in src/hypothesis_awkward/util/awkward/iter.py.
     find(
-        st_ak.contents.contents(max_leaf_size=50, max_length=max_length),
-        lambda c: any(len(n) > max_length for n in iter_contents(c) if n is not c),
+        st_ak.contents.contents(max_length=max_length),
+        lambda c: any(
+            len(n) > max_length and is_leaf(n) == leaf
+            for n in iter_contents(c)
+            if n is not c
+        ),
     )
 
 
