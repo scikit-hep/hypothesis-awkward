@@ -3,6 +3,7 @@ from typing import TypedDict, cast
 from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.list_offset_array import _st_offsets
 from hypothesis_awkward.util import safe_compare as sc
 
@@ -11,6 +12,7 @@ class OffsetsKwargs(TypedDict, total=False):
     """Options for `_st_offsets()`."""
 
     content_len: int
+    min_length: int
     max_length: int | None
     allow_unreachable: bool
 
@@ -19,14 +21,18 @@ class OffsetsKwargs(TypedDict, total=False):
 def offsets_kwargs(draw: st.DrawFn) -> OffsetsKwargs:
     """Strategy for options for `_st_offsets()`."""
     content_len = draw(st.integers(min_value=0, max_value=50))
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=content_len))
 
-    drawn = (('content_len', content_len),)
+    drawn = (
+        ('content_len', content_len),
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
-                'max_length': st.integers(min_value=0, max_value=content_len),
                 'allow_unreachable': st.booleans(),
             },
         )
@@ -47,6 +53,7 @@ def test_properties(data: st.DataObject) -> None:
 
     # Assert the options were effective
     content_len = kwargs['content_len']
+    min_length = kwargs.get('min_length', 0)
     max_length = kwargs.get('max_length')
     allow_unreachable = kwargs.get('allow_unreachable', True)
 
@@ -60,9 +67,9 @@ def test_properties(data: st.DataObject) -> None:
     for i in range(len(result) - 1):
         assert result[i] <= result[i + 1]
 
-    # Number of lists respects max_length
+    # Number of lists respects min_length / max_length
     n_lists = len(result) - 1
-    assert n_lists <= sc(max_length)
+    assert min_length <= n_lists <= sc(max_length)
 
     if not allow_unreachable:
         if sc(max_length) >= 1:
@@ -72,6 +79,16 @@ def test_properties(data: st.DataObject) -> None:
             # unreachable occurs when max_length == 0
             assert max_length == 0
             assert result == [0]
+
+
+def test_draw_min_length() -> None:
+    """Assert that offsets with exactly min_length lists can be drawn."""
+    find(_st_offsets(5, min_length=3), lambda o: len(o) - 1 == 3)
+
+
+def test_draw_min_length_content_len_zero() -> None:
+    """Assert that min_length is respected when content is empty."""
+    find(_st_offsets(0, min_length=3), lambda o: len(o) - 1 == 3)
 
 
 def test_draw_max_length() -> None:
