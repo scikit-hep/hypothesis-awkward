@@ -15,42 +15,126 @@ def get_contents(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> tuple[Content, ...]:
-    """Return the direct sub-contents of an [`ak.contents.Content`][] node.
+    """Return the direct inner contents of the given content.
 
-    Dispatch is performed with [functools.singledispatch][] so support for a
-    new [`Content`][ak.contents.Content] subclass can be added by calling ``get_contents.register``
-    without modifying this function.
+    This function receives an instance of a subclass of [`Content`][ak.contents.Content]
+    and returns a tuple of its direct inner contents based on the optional arguments.
+
+    This function is a [functools.singledispatch][]. Support for a new
+    [`Content`][ak.contents.Content] subclass can be added with
+    `get_contents.register()`.
 
     Parameters
     ----------
     c
-        An Awkward [`Content`][ak.contents.Content] node. [`ak.Array`][ak.Array] is not accepted — unwrap
-        with ``a.layout`` first.
+        An instance of a subclass of [`Content`][ak.contents.Content].
     string_as_leaf
-        If ``True`` (default), treat string [`ListOffsetArray`][ak.contents.ListOffsetArray]/[`ListArray`][ak.contents.ListArray]/
-        [`RegularArray`][ak.contents.RegularArray] nodes as leaves — return ``()`` rather than
-        ``(c.content,)``.
+        Whether to consider a string list as a leaf content. See Examples below.
     bytestring_as_leaf
-        Same as ``string_as_leaf`` for bytestring nodes.
+        Whether to consider a bytestring list as a leaf content. See Examples below.
 
     Returns
     -------
     tuple[Content, ...]
-        The direct sub-contents, in natural order (field order for
-        [`RecordArray`][ak.contents.RecordArray], member order for [`UnionArray`][ak.contents.UnionArray]). Empty for
-        [`NumpyArray`][ak.contents.NumpyArray], [`EmptyArray`][ak.contents.EmptyArray], and list types configured as leaves.
+        The direct inner contents, or an empty tuple if none.
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from awkward.contents import NumpyArray, RegularArray
-    >>> c = NumpyArray(np.array([1, 2, 3]))
+    [`EmptyArray`][ak.contents.EmptyArray] / [`NumpyArray`][ak.contents.NumpyArray]:
+    These are leaf contents and have no inner contents.
+    The `get_contents()` returns an empty tuple `()`.
+
+    >>> from awkward.contents import EmptyArray, NumpyArray
+    >>> c = EmptyArray()
+    >>> get_contents(c)
+    ()
+    >>> c = NumpyArray([1, 2, 3])
     >>> get_contents(c)
     ()
 
-    >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
-    >>> subs = get_contents(c)
-    >>> len(subs) == 1 and subs[0] is c.content
+    [`RegularArray`][ak.contents.RegularArray] / [`ListArray`][ak.contents.ListArray] /
+    [`ListOffsetArray`][ak.contents.ListOffsetArray]:
+    These have one inner content.
+    The `get_contents()` returns a tuple with one element of the inner content:
+
+    >>> from awkward.contents import RegularArray, ListArray, ListOffsetArray
+    >>> i = ak.from_iter([1, 2, 3, 4, 5, 6], highlevel=False)
+    >>> c = RegularArray(i, size=2)
+    >>> get_contents(c) == (i,)
+    True
+    >>> start = ak.index.Index64([0, 3, 3])
+    >>> stop = ak.index.Index64([3, 3, 5])
+    >>> c = ListArray(start, stop, i)
+    >>> get_contents(c) == (i,)
+    True
+    >>> offsets = ak.index.Index64([0, 3, 3, 5])
+    >>> c = ListOffsetArray(offsets, i)
+    >>> get_contents(c) == (i,)
+    True
+
+    Strings and bytestrings: An array of strings (bytestrings) are a
+    [`ListOffsetArray`][ak.contents.ListOffsetArray],
+    [`ListArray`][ak.contents.ListArray], or [`RegularArray`][ak.contents.RegularArray]
+    with an inner `NumpyArray`. However, by default,`get_contents()` considers them leaf
+    contents and returns an empty tuple `()`. With the option `string_as_leaf=False`
+    (`bytestring_as_leaf=False`), it returns a tuple with the single content of the
+    underlying `NumpyArray`:
+
+    >>> c = ak.from_iter(['abc', 'de'], highlevel=False)
+    >>> get_contents(c)
+    ()
+    >>> get_contents(c, string_as_leaf=False) == (c.content,)
+    True
+    >>> c = ak.from_iter([b'abc', b'de'], highlevel=False)
+    >>> get_contents(c)
+    ()
+    >>> get_contents(c, bytestring_as_leaf=False) == (c.content,)
+    True
+
+    [`RecordArray`][ak.contents.RecordArray] / [`UnionArray`][ak.contents.UnionArray]:
+    These have multiple inner contents.
+    The `get_contents()` returns a tuple of the inner contents:
+
+    >>> from awkward.contents import RecordArray, UnionArray
+    >>> c = ak.zip({"x": [1, 2, 3], "y": [4.0, 5.0, 6.0]}, highlevel=False)
+    >>> isinstance(c, RecordArray)
+    True
+    >>> get_contents(c) == tuple(c.contents)
+    True
+    >>> c = ak.from_iter([0.0, [1, 2], 'three', 4.4, [5]], highlevel=False)
+    >>> isinstance(c, UnionArray)
+    True
+    >>> get_contents(c) == tuple(c.contents)
+    True
+
+    [`IndexedOptionArray`][ak.contents.IndexedOptionArray] /
+    [`ByteMaskedArray`][ak.contents.ByteMaskedArray] /
+    [`BitMaskedArray`][ak.contents.BitMaskedArray] /
+    [`UnmaskedArray`][ak.contents.UnmaskedArray]:
+    These have one inner content. The
+    `get_contents()` returns a tuple with one element of the inner content:
+
+    >>> from awkward.contents import (
+    ...     IndexedOptionArray,
+    ...     ByteMaskedArray,
+    ...     BitMaskedArray,
+    ...     UnmaskedArray,
+    ... )
+    >>> i = ak.from_iter([1, 2, 3, 4, 5, 6], highlevel=False)
+    >>> index = ak.index.Index64([0, -1, 2, -1, 4, 5])
+    >>> c = IndexedOptionArray(index, i)
+    >>> get_contents(c) == (i,)
+    True
+    >>> mask = ak.index.Index8([1, 0, 1, 0, 1, 1])
+    >>> c = ByteMaskedArray(mask, i, valid_when=True)
+    >>> get_contents(c) == (i,)
+    True
+    >>> bitmask = ak.index.IndexU8(np.array([0b10101100], dtype=np.uint8))
+    >>> c = BitMaskedArray(bitmask, i, valid_when=True, length=6, lsb_order=False)
+    >>> get_contents(c) == (i,)
+    True
+    >>> c = UnmaskedArray(i)
+    >>> get_contents(c) == (i,)
     True
     """
     raise TypeError(f'Unexpected content type: {type(c)}')  # pragma: no cover
