@@ -16,6 +16,7 @@ class RegularArrayContentsKwargs(TypedDict, total=False):
     content: st.SearchStrategy[Content] | Content
     max_size: int | None
     max_zeros_length: int | None
+    min_length: int
     max_length: int | None
 
 
@@ -29,17 +30,25 @@ def regular_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_content = chain.register(st_ak.contents.contents())
 
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=20))
+
+    drawn = (
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(),
                     st.just(st_content),
                 ),
                 'max_size': st.integers(min_value=0, max_value=50),
-                'max_zeros_length': st.integers(min_value=0, max_value=50),
-                'max_length': st.integers(min_value=0, max_value=50),
+                'max_zeros_length': st.integers(
+                    min_value=min_length or 0, max_value=50
+                ),
             },
         )
     )
@@ -64,16 +73,16 @@ def test_properties(data: st.DataObject) -> None:
 
     # Assert the options were effective
     max_size = opts.kwargs.get('max_size')
+    max_zeros_length = opts.kwargs.get('max_zeros_length')
+    min_length = opts.kwargs.get('min_length', 0)
+    max_length = opts.kwargs.get('max_length')
+
     assert result.size <= sc(max_size)
 
-    # Assert zeros_length is within bounds
-    max_zeros_length = opts.kwargs.get('max_zeros_length')
     if result.size == 0:
         assert len(result) <= sc(max_zeros_length)
 
-    # Assert length is within bounds
-    max_length = opts.kwargs.get('max_length')
-    assert len(result) <= sc(max_length)
+    assert min_length <= len(result) <= sc(max_length)
 
     # Assert size divides content length when size > 0
     # TODO: Re-enable when allow_unreachable option is added to regular_array_contents().
@@ -102,6 +111,15 @@ def test_draw_max_size(max_size: int) -> None:
     find(
         st_ak.contents.regular_array_contents(max_size=max_size),
         lambda c: c.size == max_size,
+    )
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 8])
+def test_draw_min_length(min_length: int) -> None:
+    """Assert the length can reach `min_length` exactly."""
+    find(
+        st_ak.contents.regular_array_contents(min_length=min_length),
+        lambda c: c.size > 0 and len(c) == min_length,
     )
 
 

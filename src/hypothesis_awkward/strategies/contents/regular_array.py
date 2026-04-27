@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content, RegularArray
@@ -17,6 +18,7 @@ def regular_array_contents(
     *,
     max_size: int | None = None,
     max_zeros_length: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> RegularArray:
     """Strategy for [`ak.contents.RegularArray`][] instances.
@@ -36,6 +38,9 @@ def regular_array_contents(
     max_zeros_length
         Upper bound on the ``zeros_length`` parameter of the
         [`RegularArray`][ak.contents.RegularArray]. Only effective when size is zero.
+    min_length
+        Lower bound on the length of the [`RegularArray`][ak.contents.RegularArray]
+        (i.e., ``len(result)``).
     max_length
         Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray]
         (i.e., ``len(result)``). Unbounded if ``None``.
@@ -65,8 +70,8 @@ def regular_array_contents(
 
     Limit the number of groups:
 
-    >>> c = regular_array_contents(max_length=4).example()
-    >>> len(c) <= 4
+    >>> c = regular_array_contents(min_length=2, max_length=5).example()
+    >>> 2 <= len(c) <= 5
     True
     """
     match content:
@@ -83,13 +88,19 @@ def regular_array_contents(
     if max_zeros_length is None:
         max_zeros_length = content_len
     size = draw(
-        _st_group_sizes(content_len, max_group_size=max_size, max_length=max_length)
+        _st_group_sizes(
+            content_len,
+            max_group_size=max_size,
+            min_length=min_length,
+            max_length=max_length,
+        )
     )
     if size == 0:
         max_zl = max_zeros_length
         if max_length is not None:
             max_zl = min(max_zl, max_length)
-        zeros_length = draw(st.integers(min_value=0, max_value=max_zl))
+        assume(min_length <= max_zl)
+        zeros_length = draw(st.integers(min_value=min_length, max_value=max_zl))
         return RegularArray(content, size=0, zeros_length=zeros_length)
     return RegularArray(content, size=size)
 
@@ -101,6 +112,7 @@ def _st_group_sizes(
     *,
     min_group_size: int = 0,
     max_group_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     allow_non_divisors: bool = True,
 ) -> int:
@@ -125,6 +137,11 @@ def _st_group_sizes(
     max_group_size
         Upper bound on the group size. Unbounded beyond ``total_items`` if
         ``None``.
+    min_length
+        Lower bound on the number of groups. When positive and `total_items <
+        min_length`, no positive group size yields a long-enough result, so this strategy
+        returns `0` and defers length enforcement to the caller's `size == 0`
+        (zeros_length) branch.
     max_length
         Upper bound on the number of groups. Unbounded if ``None``.
     allow_non_divisors
@@ -134,6 +151,10 @@ def _st_group_sizes(
         max_group_size = total_items
 
     if total_items == 0:
+        if min_length > 0:
+            # Only the size=0 path can yield ``len(result) >= min_length``;
+            # defer to caller.
+            return 0
         # Any size is possible without unreachable data.
         return draw(st.integers(min_value=min_group_size, max_value=max_group_size))
 
@@ -145,6 +166,9 @@ def _st_group_sizes(
     min_group_size = max(min_group_size, 1)
     if max_length is not None:
         min_group_size = max(min_group_size, -(-total_items // max_length))
+    if min_length > 0:
+        # ``total_items // size >= min_length`` iff ``size <= total_items // min_length``.
+        max_group_size = min(max_group_size, total_items // min_length)
 
     # Reversed for shrinking toward larger sizes (fewer groups).
     all_sizes = range(max_group_size, min_group_size - 1, -1)
@@ -181,6 +205,7 @@ def regular_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> RegularArray:
@@ -199,6 +224,8 @@ def regular_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -229,4 +256,6 @@ def regular_array_from_contents(
     """
     max_content_size = max(max_size - 1, 0)
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
-    return draw(regular_array_contents(st_content, max_length=max_length))
+    return draw(
+        regular_array_contents(st_content, min_length=min_length, max_length=max_length)
+    )
