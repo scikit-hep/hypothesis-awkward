@@ -5,6 +5,7 @@ from hypothesis import strategies as st
 
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.regular_array import _st_group_sizes
+from hypothesis_awkward.util import safe_compare as sc
 
 
 class GroupSizesKwargs(TypedDict, total=False):
@@ -13,6 +14,7 @@ class GroupSizesKwargs(TypedDict, total=False):
     total_items: int
     min_group_size: int
     max_group_size: int | None
+    min_length: int
     max_length: int | None
     allow_non_divisors: bool
 
@@ -24,18 +26,20 @@ def group_sizes_kwargs(draw: st.DrawFn) -> GroupSizesKwargs:
     min_group_size, max_group_size = draw(
         st_ak.ranges(min_start=0, max_end=total_items)
     )
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=total_items))
 
     drawn = (
         ('total_items', total_items),
         ('min_group_size', min_group_size),
         ('max_group_size', max_group_size),
+        ('min_length', min_length),
+        ('max_length', max_length),
     )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
-                'max_length': st.integers(min_value=0, max_value=total_items),
                 'allow_non_divisors': st.booleans(),
             },
         )
@@ -58,6 +62,7 @@ def test_properties(data: st.DataObject) -> None:
     total_items = kwargs['total_items']
     min_group_size = kwargs.get('min_group_size', 0)
     max_group_size = kwargs.get('max_group_size')
+    min_length = kwargs.get('min_length', 0)
     max_length = kwargs.get('max_length')
     allow_non_divisors = kwargs.get('allow_non_divisors', True)
 
@@ -78,9 +83,10 @@ def test_properties(data: st.DataObject) -> None:
     if total_items > 0 and result > 0 and not allow_non_divisors:
         assert total_items % result == 0
 
-    # max_length is respected when result > 0
-    if max_length is not None and result > 0:
-        assert total_items // result <= max_length
+    # min_length / max_length are respected when result > 0;
+    # result == 0 defers length enforcement to the caller's size==0 branch.
+    if result > 0:
+        assert min_length <= total_items // result <= sc(max_length)
 
 
 def test_shrink_to_total_items() -> None:
@@ -133,3 +139,25 @@ def test_shrink_divisors_first() -> None:
 def test_draw_non_divisor() -> None:
     """Assert that a non-divisor can be drawn when allow_non_divisors is True."""
     find(_st_group_sizes(12, allow_non_divisors=True), lambda s: s > 0 and 12 % s != 0)
+
+
+def test_min_length_caps_size() -> None:
+    """Assert that min_length caps the resolved max_group_size."""
+    # total_items=12, min_length=3 → size <= 12 // 3 = 4.
+    # Largest divisor of 12 in [1, 4] is 4.
+    s = find(
+        _st_group_sizes(12, min_length=3),
+        lambda s: s > 0,
+        settings=settings(database=None),
+    )
+    assert s == 4
+
+
+def test_draw_min_length_zero_fallback() -> None:
+    """Assert size=0 fallback when `min_length > total_items`."""
+    find(_st_group_sizes(3, min_length=5), lambda s: s == 0)
+
+
+def test_draw_min_length_total_items_zero() -> None:
+    """Assert size=0 fallback when total_items=0 and min_length>0."""
+    find(_st_group_sizes(0, min_length=1), lambda s: s == 0)
