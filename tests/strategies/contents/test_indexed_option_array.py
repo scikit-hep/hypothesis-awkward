@@ -14,6 +14,7 @@ class IndexedOptionArrayContentsKwargs(TypedDict, total=False):
     """Options for `indexed_option_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
+    min_size: int
     max_size: int
 
 
@@ -29,9 +30,16 @@ def indexed_option_array_contents_kwargs(
         st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
     )
 
+    min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=50))
+
+    drawn = (
+        ('min_size', min_size),
+        ('max_size', max_size),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(
@@ -39,7 +47,6 @@ def indexed_option_array_contents_kwargs(
                     ),
                     st.just(st_content),
                 ),
-                'max_size': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -62,9 +69,10 @@ def test_properties(data: st.DataObject) -> None:
 
     assert isinstance(result, IndexedOptionArray)
 
-    # Assert max_size constrains index length
+    # Assert index length is within bounds
+    min_size = opts.kwargs.get('min_size', 0)
     max_size = opts.kwargs.get('max_size')
-    assert len(result) <= sc(max_size)
+    assert min_size <= len(result) <= sc(max_size)
 
     # Assert index dtype is int32 or int64
     assert result.index.data.dtype in (np.int32, np.int64)
@@ -83,6 +91,15 @@ def test_properties(data: st.DataObject) -> None:
         case st_ak.RecordDraws():
             assert len(content.drawn) == 1
             assert result.content is content.drawn[0]
+
+
+@pytest.mark.parametrize('min_size', [1, 2, 10])
+def test_draw_min_size(min_size: int) -> None:
+    """Assert the index length can reach `min_size`."""
+    find(
+        st_ak.contents.indexed_option_array_contents(min_size=min_size),
+        lambda c: len(c) == min_size,
+    )
 
 
 @pytest.mark.parametrize('dtype', [np.int32, np.int64])
