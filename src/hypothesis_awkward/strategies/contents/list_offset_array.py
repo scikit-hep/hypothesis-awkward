@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
 
 import numpy as np
+from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
 from awkward.contents import Content, ListOffsetArray
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import safe_compare as sc
 from hypothesis_awkward.util import safe_min
 
 if TYPE_CHECKING:
@@ -229,6 +231,7 @@ def list_offset_array_from_contents(
     True
     """
     max_length = safe_min((max_length, max_size - 1))
+    assume(min_length <= sc(max_length))
     length = draw(st.integers(min_value=min_length, max_value=max_length))
     offsets_size = length + 1
     max_content_size = max_size - offsets_size

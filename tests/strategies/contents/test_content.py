@@ -5,7 +5,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import find, given, settings
+from hypothesis import HealthCheck, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -46,6 +46,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_unmasked: bool
     max_leaf_size: int | None
     max_depth: int | None
+    min_length: int
     max_length: int | None
 
 
@@ -59,9 +60,16 @@ def contents_kwargs(
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+
+    drawn = (
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'dtypes': st.one_of(
                     st.none(),
@@ -88,7 +96,6 @@ def contents_kwargs(
                 'max_depth': st.one_of(
                     st.none(), st.integers(min_value=0, max_value=5)
                 ),
-                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -96,7 +103,10 @@ def contents_kwargs(
     return chain.extend(cast(ContentsKwargs, kwargs))
 
 
-@settings(max_examples=200)
+@settings(
+    max_examples=200,
+    suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
+)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `contents()`."""
@@ -104,26 +114,55 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(contents_kwargs(), label='opts')
     opts.reset()
 
-    # Assert that disabling all leaf types raises an error
+    # Assert that infeasible leaf-only configurations raise an error
     allow_numpy = opts.kwargs.get('allow_numpy', True)
     allow_empty = opts.kwargs.get('allow_empty', True)
     allow_string = opts.kwargs.get('allow_string', True)
     allow_bytestring = opts.kwargs.get('allow_bytestring', True)
+    allow_regular = opts.kwargs.get('allow_regular', True)
+    allow_list_offset = opts.kwargs.get('allow_list_offset', True)
+    allow_list = opts.kwargs.get('allow_list', True)
+    allow_record = opts.kwargs.get('allow_record', True)
+    allow_union = opts.kwargs.get('allow_union', True)
+    allow_indexed_option = opts.kwargs.get('allow_indexed_option', True)
+    allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
+    allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
+    allow_unmasked = opts.kwargs.get('allow_unmasked', True)
+    min_length = opts.kwargs.get('min_length', 0)
 
-    def _is_any_leaf_allowed() -> bool:
-        return any(
-            (
-                allow_numpy,
-                allow_empty,
-                allow_string,
-                allow_bytestring,
+    def _expect_raised() -> bool:
+        if not (allow_numpy or allow_empty or allow_string or allow_bytestring):
+            return True  # no leaves at all
+        if min_length > 0:
+            # Outermost is forced to be a leaf only when no wrapper/option is
+            # allowed. In that case, EmptyArray is excluded by min_length>0,
+            # and leaf_contents() raises if no other leaf type is allowed.
+            no_outer_wrapper = not any(
+                (
+                    allow_regular,
+                    allow_list_offset,
+                    allow_list,
+                    allow_record,
+                    allow_union,
+                )
             )
-        )
+            no_outer_option = not any(
+                (
+                    allow_indexed_option,
+                    allow_byte_masked,
+                    allow_bit_masked,
+                    allow_unmasked,
+                )
+            )
+            if no_outer_wrapper and no_outer_option:
+                if not (allow_numpy or allow_string or allow_bytestring):
+                    return True
+        return False
 
     # Call the test subject
     expect_raised = False
     with ExitStack() as stack:
-        if not _is_any_leaf_allowed():
+        if _expect_raised():
             expect_raised = True
             stack.enter_context(pytest.raises(ValueError))
         c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
@@ -138,19 +177,9 @@ def test_properties(data: st.DataObject) -> None:
     dtypes = opts.kwargs.get('dtypes', None)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     allow_nan = opts.kwargs.get('allow_nan', True)
-    allow_regular = opts.kwargs.get('allow_regular', True)
-    allow_list_offset = opts.kwargs.get('allow_list_offset', True)
-    allow_list = opts.kwargs.get('allow_list', True)
-    allow_record = opts.kwargs.get('allow_record', True)
-    allow_union = opts.kwargs.get('allow_union', True)
     max_leaf_size = opts.kwargs.get('max_leaf_size')
     max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
     max_length = opts.kwargs.get('max_length')
-
-    allow_indexed_option = opts.kwargs.get('allow_indexed_option', True)
-    allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
-    allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
-    allow_unmasked = opts.kwargs.get('allow_unmasked', True)
 
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
@@ -206,7 +235,7 @@ def test_properties(data: st.DataObject) -> None:
     if max_leaf_size is not None:
         assert leaf_size(c) <= max_leaf_size
     assert _nesting_depth(c) <= sc(max_depth)
-    assert len(c) <= sc(max_length)
+    assert min_length <= len(c) <= sc(max_length)
 
 
 def test_draw_max_size() -> None:
@@ -244,6 +273,32 @@ def test_draw_deep_without_max_depth() -> None:
 def test_draw_nested() -> None:
     """Assert that nested content (depth >= 2) can be drawn."""
     find(st_ak.contents.contents(max_leaf_size=20), lambda c: _nesting_depth(c) >= 2)
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_min_length(leaf: bool, min_length: int) -> None:
+    """Assert that min_length constrains the content length."""
+    find(
+        st_ak.contents.contents(min_length=min_length),
+        lambda c: is_leaf(c) == leaf and len(c) == min_length,
+    )
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_min_length_not_recursed(leaf: bool, min_length: int) -> None:
+    """Assert that min_length does not constrain nested content length."""
+    # Inner contents may be shorter than min_length (the bound is
+    # outer-only), mirroring the existing max_length-not-recursed test.
+    find(
+        st_ak.contents.contents(min_length=min_length),
+        lambda c: any(
+            len(n) < min_length and is_leaf(n) == leaf
+            for n in iter_contents(c)
+            if n is not c
+        ),
+    )
 
 
 @pytest.mark.parametrize('max_length', [1, 2, 5])

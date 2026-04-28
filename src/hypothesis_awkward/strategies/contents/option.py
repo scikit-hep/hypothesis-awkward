@@ -1,8 +1,11 @@
 from typing import TYPE_CHECKING, Protocol
 
+from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import safe_compare as sc
 
 from .bit_masked_array import bit_masked_array_contents
 from .byte_masked_array import byte_masked_array_contents
@@ -16,26 +19,33 @@ if TYPE_CHECKING:
 def option_contents(
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
+    min_size: int = 0,
     max_size: int | None = None,
     allow_indexed_option: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
 ) -> st.SearchStrategy[Content]:
-    """Strategy for option-type content, selected by ``st.one_of``.
+    """Strategy for option-type content.
 
     Picks among [`IndexedOptionArray`][ak.contents.IndexedOptionArray],
     [`ByteMaskedArray`][ak.contents.ByteMaskedArray],
     [`BitMaskedArray`][ak.contents.BitMaskedArray], and
     [`UnmaskedArray`][ak.contents.UnmaskedArray].
 
+    The bounds ``min_size`` and ``max_size`` apply to ``len(result)`` for all
+    branches: forwarded as-is for the indexed-option branch and used to filter
+    feasible branches for mask-controlled types (whose length equals the
+    content's length).
+
     Parameters
     ----------
     content
         Forwarded to each per-type strategy.
+    min_size
+        Lower bound on ``len(result)``.
     max_size
-        Forwarded to ``indexed_option_array_contents()`` to bound the
-        index length. Unbounded if ``None``.
+        Upper bound on ``len(result)``. Unbounded if ``None``.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
         ``False``.
@@ -61,16 +71,64 @@ def option_contents(
     ):
         raise ValueError('at least one option content type must be allowed')
 
+    return _option_contents(
+        content,
+        min_size=min_size,
+        max_size=max_size,
+        allow_indexed_option=allow_indexed_option,
+        allow_byte_masked=allow_byte_masked,
+        allow_bit_masked=allow_bit_masked,
+        allow_unmasked=allow_unmasked,
+    )
+
+
+@st.composite
+def _option_contents(
+    draw: st.DrawFn,
+    content: st.SearchStrategy[Content] | Content | None,
+    *,
+    min_size: int,
+    max_size: int | None,
+    allow_indexed_option: bool,
+    allow_byte_masked: bool,
+    allow_bit_masked: bool,
+    allow_unmasked: bool,
+) -> Content:
+    """Internal composite that drives ``option_contents``.
+
+    Resolves ``content`` to a concrete instance once so mask-controlled branches
+    can be gated on ``len(content)`` without triggering content redraws.
+    """
+    match content:
+        case None:
+            content_concrete = draw(
+                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+            )
+        case st.SearchStrategy():
+            content_concrete = draw(content)
+        case _:
+            content_concrete = content
+
+    content_len = len(content_concrete)
+    mask_in_bounds = min_size <= content_len <= sc(max_size)
+
     options: list[st.SearchStrategy[Content]] = []
     if allow_indexed_option:
-        options.append(indexed_option_array_contents(content, max_size=max_size))
-    if allow_byte_masked:
-        options.append(byte_masked_array_contents(content))
-    if allow_bit_masked:
-        options.append(bit_masked_array_contents(content))
-    if allow_unmasked:
-        options.append(unmasked_array_contents(content))
-    return st.one_of(options)
+        options.append(
+            indexed_option_array_contents(
+                content_concrete, min_size=min_size, max_size=max_size
+            )
+        )
+    if mask_in_bounds:
+        if allow_byte_masked:
+            options.append(byte_masked_array_contents(content_concrete))
+        if allow_bit_masked:
+            options.append(bit_masked_array_contents(content_concrete))
+        if allow_unmasked:
+            options.append(unmasked_array_contents(content_concrete))
+
+    assume(options)
+    return draw(st.one_of(options))
 
 
 class StOption(Protocol):
@@ -92,6 +150,7 @@ def option_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None,
+    min_length: int = 0,
     allow_indexed_option: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
@@ -110,6 +169,10 @@ def option_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``. Forwarded to the inner ``content(...)`` call
+        so the inner content meets the floor, and to ``option_contents`` as
+        ``min_size`` for the indexed-option pathway.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
         ``False``.
@@ -128,6 +191,7 @@ def option_from_contents(
         content(
             max_size=max_size,
             max_leaf_size=max_leaf_size,
+            min_length=min_length,
             allow_option_root=False,
             allow_union_root=False,
         )
@@ -135,6 +199,7 @@ def option_from_contents(
     return draw(
         option_contents(
             child,
+            min_size=min_length,
             max_size=max_size,
             allow_indexed_option=allow_indexed_option,
             allow_byte_masked=allow_byte_masked,

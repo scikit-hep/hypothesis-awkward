@@ -139,6 +139,7 @@ def indexed_option_array_from_contents(
     True
     """
     ml = max_length if max_length is not None else max_size
+    assume(min_length <= ml)
     n = draw(st.integers(min_value=min_length, max_value=ml))
     max_content_size = max(max_size - n, 0)
     child = draw(
