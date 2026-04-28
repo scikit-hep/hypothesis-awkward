@@ -3,6 +3,7 @@ from typing import TypedDict, cast
 from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
+from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.list_array import _st_starts_stops
 from hypothesis_awkward.util import safe_compare as sc
 
@@ -11,6 +12,7 @@ class StartsStopsKwargs(TypedDict, total=False):
     """Options for `_st_starts_stops()`."""
 
     content_len: int
+    min_length: int
     max_length: int | None
     allow_unreachable: bool
 
@@ -19,14 +21,18 @@ class StartsStopsKwargs(TypedDict, total=False):
 def starts_stops_kwargs(draw: st.DrawFn) -> StartsStopsKwargs:
     """Strategy for options for `_st_starts_stops()`."""
     content_len = draw(st.integers(min_value=0, max_value=50))
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=content_len))
 
-    drawn = (('content_len', content_len),)
+    drawn = (
+        ('content_len', content_len),
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
-                'max_length': st.integers(min_value=0, max_value=content_len),
                 'allow_unreachable': st.booleans(),
             },
         )
@@ -47,11 +53,12 @@ def test_properties(data: st.DataObject) -> None:
 
     # Assert the options were effective
     content_len = kwargs['content_len']
+    min_length = kwargs.get('min_length', 0)
     max_length = kwargs.get('max_length')
     allow_unreachable = kwargs.get('allow_unreachable', True)
 
-    # Starts and stops have the same length and respect max_length
-    assert len(starts) == len(stops) <= sc(max_length)
+    # Starts and stops have the same length and respect min_length / max_length
+    assert min_length <= len(starts) == len(stops) <= sc(max_length)
 
     # starts[i] <= stops[i] for all i
     for i in range(len(starts)):
@@ -76,6 +83,16 @@ def test_properties(data: st.DataObject) -> None:
         # Contiguous: stops[i] == starts[i+1]
         for i in range(len(starts) - 1):
             assert stops[i] == starts[i + 1]
+
+
+def test_draw_min_length() -> None:
+    """Assert that starts/stops with exactly min_length lists can be drawn."""
+    find(_st_starts_stops(5, min_length=3), lambda ss: len(ss[0]) == 3)
+
+
+def test_draw_min_length_content_len_zero() -> None:
+    """Assert that min_length is respected when content is empty."""
+    find(_st_starts_stops(0, min_length=3), lambda ss: len(ss[0]) == 3)
 
 
 def test_draw_max_length() -> None:

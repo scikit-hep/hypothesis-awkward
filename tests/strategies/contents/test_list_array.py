@@ -15,6 +15,7 @@ class ListArrayContentsKwargs(TypedDict, total=False):
     """Options for `list_array_contents()` strategy."""
 
     content: st.SearchStrategy[Content] | Content
+    min_length: int
     max_length: int | None
 
 
@@ -28,15 +29,21 @@ def list_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_content = chain.register(st_ak.contents.contents())
 
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=20))
+
+    drawn = (
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(),
                     st.just(st_content),
                 ),
-                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -60,8 +67,10 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result, ListArray)
 
     # Assert the options were effective
+    min_length = opts.kwargs.get('min_length', 0)
     max_length = opts.kwargs.get('max_length')
-    assert len(result) <= sc(max_length)
+
+    assert min_length <= len(result) <= sc(max_length)
 
     # Assert starts and stops have the same length
     starts = result.starts.data
@@ -81,6 +90,15 @@ def test_properties(data: st.DataObject) -> None:
         case st_ak.RecordDraws():
             assert len(content.drawn) == 1
             assert result.content is content.drawn[0]
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 10])
+def test_draw_min_length(min_length: int) -> None:
+    """Assert the length can reach `min_length`."""
+    find(
+        st_ak.contents.list_array_contents(min_length=min_length),
+        lambda c: len(c) == min_length,
+    )
 
 
 @pytest.mark.parametrize('max_length', [1, 2, 10])
