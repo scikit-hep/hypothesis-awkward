@@ -20,6 +20,7 @@ def record_array_contents(
     *,
     max_fields: int = 5,
     allow_tuple: bool = True,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> RecordArray:
     """Strategy for [`ak.contents.RecordArray`][] instances.
@@ -33,6 +34,8 @@ def record_array_contents(
         Maximum number of fields when ``contents`` is ``None``.
     allow_tuple
         Allow tuple records (no field names) if ``True``.
+    min_length
+        Lower bound on the record length, i.e., ``len(result)``.
     max_length
         Upper bound on the record length, i.e., ``len(result)``.
 
@@ -54,8 +57,8 @@ def record_array_contents(
 
     Limit the record length:
 
-    >>> c = record_array_contents(max_length=4).example()
-    >>> len(c) <= 4
+    >>> c = record_array_contents(min_length=2, max_length=4).example()
+    >>> 2 <= len(c) <= 4
     True
     """
     match contents:
@@ -85,10 +88,13 @@ def record_array_contents(
             )
         )
 
+    candidate_length = min((len(c) for c in contents), default=0)
+    assume(candidate_length >= min_length)
+
     if not contents:
         length = 0
     elif max_length is not None:
-        length = min(min(len(c) for c in contents), max_length)
+        length = min(candidate_length, max_length)
     else:
         length = None
     return RecordArray(contents, fields=fields, length=length)
@@ -101,6 +107,7 @@ def record_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> RecordArray:
@@ -121,6 +128,8 @@ def record_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -135,7 +144,7 @@ def record_array_from_contents(
     >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = record_array_from_contents(
-    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ...     contents, max_size=20, max_leaf_size=10, min_length=2, max_length=5
     ... ).example()
     >>> isinstance(c, RecordArray)
     True
@@ -146,7 +155,7 @@ def record_array_from_contents(
     >>> leaf_size(c) <= 10
     True
 
-    >>> len(c) <= 5
+    >>> 2 <= len(c) <= 5
     True
     """
     children = draw(
@@ -154,6 +163,8 @@ def record_array_from_contents(
             content, max_size=max_size, max_leaf_size=max_leaf_size, min_len=1
         )
     )
-    result = draw(record_array_contents(children, max_length=max_length))
+    result = draw(
+        record_array_contents(children, min_length=min_length, max_length=max_length)
+    )
     assume(content_size(result) <= max_size)
     return result
