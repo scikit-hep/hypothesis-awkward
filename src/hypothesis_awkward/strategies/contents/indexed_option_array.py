@@ -19,6 +19,7 @@ def indexed_option_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
+    min_size: int = 0,
     max_size: int | None = None,
 ) -> IndexedOptionArray:
     """Strategy for [`ak.contents.IndexedOptionArray`][] instances.
@@ -33,6 +34,8 @@ def indexed_option_array_contents(
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
         [`Content`][ak.contents.Content] instance, or ``None`` to draw from
         ``contents()``.
+    min_size
+        Lower bound on the index length, i.e., ``len(result)``.
     max_size
         Upper bound on the index length, i.e., ``len(result)``. If ``None``, twice the
         content length is used.
@@ -46,6 +49,12 @@ def indexed_option_array_contents(
     >>> c = indexed_option_array_contents().example()
     >>> isinstance(c, IndexedOptionArray)
     True
+
+    Limit the index length:
+
+    >>> c = indexed_option_array_contents(min_size=2, max_size=5).example()
+    >>> 2 <= len(c) <= 5
+    True
     """
     match content:
         case None:
@@ -58,9 +67,11 @@ def indexed_option_array_contents(
             pass
     assert isinstance(content, Content)
     content_len = len(content)
-    upper = max_size if max_size is not None else content_len * 2
+    upper = max_size if max_size is not None else max(content_len * 2, min_size)
     pool = [-1, *range(content_len)]
-    index_list = draw(st.lists(st.sampled_from(pool), max_size=upper))
+    index_list = draw(
+        st.lists(st.sampled_from(pool), min_size=min_size, max_size=upper)
+    )
     dtype = draw(st.sampled_from([np.int32, np.int64]))
     index_array = np.array(index_list, dtype=dtype)
     if dtype == np.int32:
@@ -77,6 +88,7 @@ def indexed_option_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> IndexedOptionArray:
@@ -96,6 +108,8 @@ def indexed_option_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``. Forwarded to ``min_size`` of the wrapper.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -110,7 +124,7 @@ def indexed_option_array_from_contents(
     >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = indexed_option_array_from_contents(
-    ...     contents, max_size=20, max_leaf_size=10, max_length=5
+    ...     contents, max_size=20, max_leaf_size=10, min_length=2, max_length=5
     ... ).example()
     >>> isinstance(c, IndexedOptionArray)
     True
@@ -121,11 +135,11 @@ def indexed_option_array_from_contents(
     >>> leaf_size(c) <= 10
     True
 
-    >>> len(c) <= 5
+    >>> 2 <= len(c) <= 5
     True
     """
     ml = max_length if max_length is not None else max_size
-    n = draw(st.integers(min_value=0, max_value=ml))
+    n = draw(st.integers(min_value=min_length, max_value=ml))
     max_content_size = max(max_size - n, 0)
     child = draw(
         content(
@@ -135,6 +149,6 @@ def indexed_option_array_from_contents(
             allow_union_root=False,
         )
     )
-    result = draw(indexed_option_array_contents(child, max_size=n))
+    result = draw(indexed_option_array_contents(child, min_size=n, max_size=n))
     assume(content_size(result) <= max_size)
     return result
