@@ -7,10 +7,8 @@ from awkward.contents import Content
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 
-from .bit_masked_array import bit_masked_array_contents
-from .byte_masked_array import byte_masked_array_contents
 from .indexed_option_array import indexed_option_array_contents
-from .unmasked_array import unmasked_array_contents
+from .masked import masked_contents
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -66,6 +64,9 @@ def option_contents(
     >>> isinstance(c, Content)
     True
     """
+    # Non-composite wrapper: `@st.composite` defers the body to draw time,
+    # which would delay this `ValueError` past the call site. The actual
+    # strategy lives in the private `_option_contents` composite below.
     if not any(
         (allow_indexed_option, allow_byte_masked, allow_bit_masked, allow_unmasked)
     ):
@@ -119,13 +120,15 @@ def _option_contents(
                 content_concrete, min_size=min_size, max_size=max_size
             )
         )
-    if mask_in_bounds:
-        if allow_byte_masked:
-            options.append(byte_masked_array_contents(content_concrete))
-        if allow_bit_masked:
-            options.append(bit_masked_array_contents(content_concrete))
-        if allow_unmasked:
-            options.append(unmasked_array_contents(content_concrete))
+    if mask_in_bounds and any((allow_byte_masked, allow_bit_masked, allow_unmasked)):
+        options.append(
+            masked_contents(
+                content_concrete,
+                allow_byte_masked=allow_byte_masked,
+                allow_bit_masked=allow_bit_masked,
+                allow_unmasked=allow_unmasked,
+            )
+        )
 
     assume(options)
     return draw(st.one_of(options))
