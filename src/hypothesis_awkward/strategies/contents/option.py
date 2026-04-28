@@ -31,7 +31,7 @@ def option_contents(
     [`BitMaskedArray`][ak.contents.BitMaskedArray], and
     [`UnmaskedArray`][ak.contents.UnmaskedArray].
 
-    The bounds ``min_size`` and ``max_size`` apply to ``len(result)`` for all
+    The bounds `min_size` and `max_size` apply to `len(result)` for all
     branches: forwarded as-is for the indexed-option branch and used to filter
     feasible branches for mask-controlled types (whose length equals the
     content's length).
@@ -41,18 +41,18 @@ def option_contents(
     content
         Forwarded to each per-type strategy.
     min_size
-        Lower bound on ``len(result)``.
+        Lower bound on `len(result)`.
     max_size
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
-        ``False``.
+        `False`.
     allow_byte_masked
-        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
+        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if `False`.
     allow_bit_masked
-        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if ``False``.
+        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if `False`.
     allow_unmasked
-        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if ``False``.
+        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
 
     Returns
     -------
@@ -95,10 +95,10 @@ def _option_contents(
     allow_bit_masked: bool,
     allow_unmasked: bool,
 ) -> Content:
-    """Internal composite that drives ``option_contents``.
+    """Internal composite that drives `option_contents`.
 
-    Resolves ``content`` to a concrete instance once so mask-controlled branches
-    can be gated on ``len(content)`` without triggering content redraws.
+    Resolves `content` to a concrete instance once so mask-controlled branches
+    can be gated on `len(content)` without triggering content redraws.
     """
     match content:
         case None:
@@ -135,7 +135,7 @@ def _option_contents(
 
 
 class StOption(Protocol):
-    """Callable that wraps content drawn from a ``StContent`` in an option type."""
+    """Callable that wraps content drawn from a `StContent` in an option type."""
 
     def __call__(
         self,
@@ -161,30 +161,30 @@ def option_from_contents(
 ) -> Content:
     """Strategy that draws content and wraps it in an option type.
 
-    Conforms to ``StOption`` when partially applied with ``allow_*`` flags.
+    Conforms to `StOption` when partially applied with `allow_*` flags.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``. Forwarded to the inner ``content(...)`` call
-        so the inner content meets the floor, and to ``option_contents`` as
-        ``min_size`` for the indexed-option pathway.
+        Lower bound on `len(result)`. Forwarded to the inner `content(...)` call
+        so the inner content meets the floor, and to `option_contents` as
+        `min_size` for the indexed-option pathway.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
-        ``False``.
+        `False`.
     allow_byte_masked
-        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
+        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if `False`.
     allow_bit_masked
-        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if ``False``.
+        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if `False`.
     allow_unmasked
-        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if ``False``.
+        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
 
     Returns
     -------

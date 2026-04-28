@@ -8,7 +8,7 @@ P = ParamSpec('P')
 
 
 class _DrawableData(Protocol):
-    """Protocol for the ``data`` argument of ``do_draw``."""
+    """Protocol for the `data` argument of `do_draw`."""
 
     def draw(self, strategy: st.SearchStrategy[T]) -> T: ...
 
@@ -38,8 +38,8 @@ class RecordDraws(st.SearchStrategy[T]):
 class RecordCallDraws(Generic[P, T]):
     """Wrap a callable returning a strategy to record all drawn values.
 
-    Each call creates a fresh ``RecordDraws`` whose draws are aggregated
-    into ``drawn``.  ``reset()`` clears all calls and their recorded values.
+    Each call creates a fresh `RecordDraws` whose draws are aggregated
+    into `drawn`.  `reset()` clears all calls and their recorded values.
 
     Examples
     --------
@@ -81,8 +81,8 @@ class RecordCallDraws(Generic[P, T]):
 class OptsChain(Generic[K]):
     """Drawn options with explicit recorder registration and kwargs merging.
 
-    Owns recorder creation via ``register()`` and supports kwargs merging
-    via ``extend()``.
+    Owns recorder creation via `register()` and supports kwargs merging
+    via `extend()`.
 
     Examples
     --------
@@ -117,7 +117,7 @@ class OptsChain(Generic[K]):
         return self._recorders
 
     def register(self, strategy: st.SearchStrategy[T]) -> RecordDraws[T]:
-        """Create a ``RecordDraws`` wrapper and track it for ``reset()``."""
+        """Create a `RecordDraws` wrapper and track it for `reset()`."""
         recorder = RecordDraws(strategy)
         self._recorders.append(recorder)
         return recorder
@@ -125,13 +125,13 @@ class OptsChain(Generic[K]):
     def register_callable(
         self, factory: Callable[P, st.SearchStrategy[T]]
     ) -> RecordCallDraws[P, T]:
-        """Create a ``RecordCallDraws`` wrapper and track it for ``reset()``."""
+        """Create a `RecordCallDraws` wrapper and track it for `reset()`."""
         recorder = RecordCallDraws(factory)
         self._callable_recorders.append(recorder)
         return recorder
 
     def extend(self, extra: Mapping[str, Any]) -> 'OptsChain[Any]':
-        """Return a new ``OptsChain`` with merged kwargs and a copy of recorders."""
+        """Return a new `OptsChain` with merged kwargs and a copy of recorders."""
         return OptsChain(
             {**self._kwargs, **extra},
             _recorders=list(self._recorders),

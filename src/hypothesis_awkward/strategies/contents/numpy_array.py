@@ -17,10 +17,10 @@ def numpy_array_contents(
     Parameters
     ----------
     dtypes
-        A strategy for NumPy scalar dtypes. If ``None``, the default strategy that
+        A strategy for NumPy scalar dtypes. If `None`, the default strategy that
         generates any scalar dtype supported by Awkward Array is used.
     allow_nan
-        No ``NaN``/``NaT`` values are generated if ``False``.
+        No `NaN`/`NaT` values are generated if `False`.
     min_size
         Minimum number of elements.
     max_size

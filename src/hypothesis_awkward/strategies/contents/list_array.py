@@ -33,13 +33,13 @@ def list_array_contents(
     ----------
     content
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
-        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
-        ``contents()``.
+        [`Content`][ak.contents.Content] instance, or `None` to draw from
+        `contents()`.
     min_length
-        Lower bound on the number of lists, i.e., ``len(result)``.
+        Lower bound on the number of lists, i.e., `len(result)`.
     max_length
-        Upper bound on the number of lists, i.e., ``len(result)``. If ``None``,
-        ``len(content)`` is used.
+        Upper bound on the number of lists, i.e., `len(result)`. If `None`,
+        `len(content)` is used.
 
     Returns
     -------
@@ -84,19 +84,19 @@ def _st_starts_stops(
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops of a [`ListArray`][ak.contents.ListArray].
 
-    Shrinks toward no unreachable data (``starts[0] == 0`` and
-    ``stops[-1] == content_len``).
+    Shrinks toward no unreachable data (`starts[0] == 0` and
+    `stops[-1] == content_len`).
 
     Parameters
     ----------
     content_len
         Length of the content array.
     min_length
-        Lower bound on the number of lists (i.e., ``len(starts)``).
+        Lower bound on the number of lists (i.e., `len(starts)`).
     max_length
-        Upper bound on the number of lists (i.e., ``len(starts)``).
+        Upper bound on the number of lists (i.e., `len(starts)`).
     allow_unreachable
-        No unreachable data is possible if ``False``.
+        No unreachable data is possible if `False`.
     """
     if content_len == 0 or not allow_unreachable:
         return draw(
@@ -200,7 +200,7 @@ def _st_starts_stops_gaps(
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with at least one gap between sublists.
 
-    Guarantees at least one ``stops[i] < starts[i + 1]``.
+    Guarantees at least one `stops[i] < starts[i + 1]`.
     """
     ml = max_length if max_length is not None else content_len
     n = draw(st.integers(min_value=max(2, min_length), max_value=ml))
@@ -230,7 +230,7 @@ def _st_starts_stops_overlapping(
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with at least one overlapping pair.
 
-    Guarantees at least one ``starts[i + 1] < stops[i]``.
+    Guarantees at least one `starts[i + 1] < stops[i]`.
     """
     ml = max_length if max_length is not None else content_len
     n = draw(st.integers(min_value=max(2, min_length), max_value=ml))
@@ -261,7 +261,7 @@ def _st_starts_stops_out_of_order(
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with non-monotonic starts.
 
-    Guarantees at least one ``starts[i] > starts[i + 1]``.
+    Guarantees at least one `starts[i] > starts[i + 1]`.
     """
     ml = max_length if max_length is not None else content_len
     n = draw(st.integers(min_value=max(2, min_length), max_value=ml))
@@ -293,25 +293,25 @@ def list_array_from_contents(
 ) -> ListArray:
     """Strategy for inner [`ak.contents.ListArray`][] within an outer layout.
 
-    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    This strategy is called by an outer layout strategy. The argument `content` is a
     function that returns a strategy for the inner layout of the
     [`ListArray`][ak.contents.ListArray].
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``.
+        Lower bound on `len(result)`.
     max_length
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     st_option
-        Accepted for ``_StFromContents`` compatibility; unused in this variant.
+        Accepted for `_StFromContents` compatibility; unused in this variant.
 
     Returns
     -------

@@ -21,14 +21,14 @@ def byte_masked_array_contents(
 ) -> ByteMaskedArray:
     """Strategy for [`ak.contents.ByteMaskedArray`][] instances.
 
-    The mask length always equals ``len(content)``.
+    The mask length always equals `len(content)`.
 
     Parameters
     ----------
     content
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
-        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
-        ``contents()``.
+        [`Content`][ak.contents.Content] instance, or `None` to draw from
+        `contents()`.
 
     Returns
     -------
@@ -70,24 +70,24 @@ def byte_masked_array_from_contents(
 ) -> ByteMaskedArray:
     """Strategy for [`ak.contents.ByteMaskedArray`][] instances within a size budget.
 
-    Called by ``contents()`` during recursive tree generation.
+    Called by `contents()` during recursive tree generation.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``. Forwarded to the inner ``content(...)`` call
+        Lower bound on `len(result)`. Forwarded to the inner `content(...)` call
         so the inner content meets the floor.
     max_length
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     st_option
-        Accepted for ``_StFromContents`` compatibility; unused in this variant.
+        Accepted for `_StFromContents` compatibility; unused in this variant.
 
     Returns
     -------

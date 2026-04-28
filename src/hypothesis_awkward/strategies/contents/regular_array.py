@@ -24,26 +24,26 @@ def regular_array_contents(
     """Strategy for [`ak.contents.RegularArray`][] instances.
 
     This strategy generates a [`RegularArray`][ak.contents.RegularArray] with the given
-    content. It shrinks toward a shorter length (larger ``size``) with no unreachable
+    content. It shrinks toward a shorter length (larger `size`) with no unreachable
     data.
 
     Parameters
     ----------
     content
-        content or strategy for the content. If ``None``, draw from ``contents()``.
+        content or strategy for the content. If `None`, draw from `contents()`.
     max_size
         Upper bound on the size parameter of the
-        [`RegularArray`][ak.contents.RegularArray]. If ``None``, ``len(content)`` is
+        [`RegularArray`][ak.contents.RegularArray]. If `None`, `len(content)` is
         used.
     max_zeros_length
-        Upper bound on the ``zeros_length`` parameter of the
+        Upper bound on the `zeros_length` parameter of the
         [`RegularArray`][ak.contents.RegularArray]. Only effective when size is zero.
     min_length
         Lower bound on the length of the [`RegularArray`][ak.contents.RegularArray]
-        (i.e., ``len(result)``).
+        (i.e., `len(result)`).
     max_length
         Upper bound on the length of the [`RegularArray`][ak.contents.RegularArray]
-        (i.e., ``len(result)``). Unbounded if ``None``.
+        (i.e., `len(result)`). Unbounded if `None`.
 
 
     Returns
@@ -121,38 +121,38 @@ def _st_group_sizes(
     This strategy generates the size parameter for a
     [`RegularArray`][ak.contents.RegularArray] given the total number of items in the
     content and various constraints. It shrinks toward the
-    divisors of ``total_items`` (no unreachable data) and a fewer groups (larger size).
-    In other words, it shrinks toward the largest divisor of ``total_items`` that
+    divisors of `total_items` (no unreachable data) and a fewer groups (larger size).
+    In other words, it shrinks toward the largest divisor of `total_items` that
     satisfies the constraints.
 
-    When ``total_items == 0``, any group size between ``min_group_size`` and
-    ``max_group_size`` is valid as zero items can be split into zero groups of any size.
+    When `total_items == 0`, any group size between `min_group_size` and
+    `max_group_size` is valid as zero items can be split into zero groups of any size.
 
     Parameters
     ----------
     total_items
         Total number of items in the content.
     min_group_size
-        Lower bound on the group size. Defaults to ``0``.
+        Lower bound on the group size. Defaults to `0`.
     max_group_size
-        Upper bound on the group size. Unbounded beyond ``total_items`` if
-        ``None``.
+        Upper bound on the group size. Unbounded beyond `total_items` if
+        `None`.
     min_length
         Lower bound on the number of groups. When positive and `total_items <
         min_length`, no positive group size yields a long-enough result, so this strategy
         returns `0` and defers length enforcement to the caller's `size == 0`
         (zeros_length) branch.
     max_length
-        Upper bound on the number of groups. Unbounded if ``None``.
+        Upper bound on the number of groups. Unbounded if `None`.
     allow_non_divisors
-        No unreachable data is possible if ``False``.
+        No unreachable data is possible if `False`.
     """
     if max_group_size is None:
         max_group_size = total_items
 
     if total_items == 0:
         if min_length > 0:
-            # Only the size=0 path can yield ``len(result) >= min_length``;
+            # Only the size=0 path can yield `len(result) >= min_length`;
             # defer to caller.
             return 0
         # Any size is possible without unreachable data.
@@ -167,7 +167,7 @@ def _st_group_sizes(
     if max_length is not None:
         min_group_size = max(min_group_size, -(-total_items // max_length))
     if min_length > 0:
-        # ``total_items // size >= min_length`` iff ``size <= total_items // min_length``.
+        # `total_items // size >= min_length` iff `size <= total_items // min_length`.
         max_group_size = min(max_group_size, total_items // min_length)
 
     # Reversed for shrinking toward larger sizes (fewer groups).
@@ -193,7 +193,7 @@ def _st_group_sizes(
     if unreachable_only:
         return draw(st.sampled_from(non_divisors))
 
-    # Instead of drawing from concatenated divisors and non-divisors, draw ``one_of`` to
+    # Instead of drawing from concatenated divisors and non-divisors, draw `one_of` to
     # introduce an explicit branch for shrinking toward reachable data.
     return draw(st.one_of(st.sampled_from(divisors), st.sampled_from(non_divisors)))
 
@@ -211,25 +211,25 @@ def regular_array_from_contents(
 ) -> RegularArray:
     """Strategy for inner [`ak.contents.RegularArray`][] within an outer layout.
 
-    This strategy is called by an outer layout strategy. The argument ``content`` is a
+    This strategy is called by an outer layout strategy. The argument `content` is a
     function that returns a strategy for the inner layout of the
     [`RegularArray`][ak.contents.RegularArray].
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``.
+        Lower bound on `len(result)`.
     max_length
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     st_option
-        Accepted for ``_StFromContents`` compatibility; unused in this variant.
+        Accepted for `_StFromContents` compatibility; unused in this variant.
 
     Returns
     -------

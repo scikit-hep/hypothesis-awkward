@@ -100,9 +100,8 @@ def _level_kwargs(
 ) -> dict[str, Any]:
     """Draw kwargs for a single level in the opts chain.
 
-    Values can be plain, registered recorders, or nested lists/dicts
-    containing recorders. Strategies are registered on *opts* via
-    ``opts.register()``.
+    Values can be plain, registered recorders, or nested lists/dicts containing
+    recorders. Strategies are registered on *opts* via `opts.register()`.
     """
     fresh_key = st.text(min_size=1, max_size=10).filter(lambda k: k not in opts.kwargs)
     keys = draw(

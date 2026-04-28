@@ -451,7 +451,7 @@ def test_draw_from_contents_unmasked() -> None:
 
 
 def test_shrink_len_zero() -> None:
-    """Assert that length-zero shrinks to ``EmptyArray``."""
+    """Assert that length-zero shrinks to `EmptyArray`."""
     c = find(
         st_ak.contents.contents(),
         lambda c: len(c) == 0,

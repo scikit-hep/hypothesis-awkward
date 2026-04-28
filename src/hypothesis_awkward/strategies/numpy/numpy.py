@@ -103,19 +103,19 @@ def _st_shape(
 ) -> tuple[int, ...]:
     """Strategy for a non-empty array shape.
 
-    A shape is a tuple of positive integers, e.g., ``(3, 5, 2)``, where each
+    A shape is a tuple of positive integers, e.g., `(3, 5, 2)`, where each
     value is the length of a dimension (called a "side").
 
     Parameters
     ----------
     min_items
-        Minimum number of elements, i.e., ``prod(shape) >= min_items``.
+        Minimum number of elements, i.e., `prod(shape) >= min_items`.
     max_items
-        Maximum number of elements, i.e., ``prod(shape) <= max_items``.
+        Maximum number of elements, i.e., `prod(shape) <= max_items`.
     min_dims
-        Minimum number of dimensions, i.e., ``len(shape) >= min_dims``.
+        Minimum number of dimensions, i.e., `len(shape) >= min_dims`.
     max_dims
-        Maximum number of dimensions. If ``None``, derived from ``max_items``.
+        Maximum number of dimensions. If `None`, derived from `max_items`.
     """
     # Generate empty shape manually as `st_np.array_shapes()` doesn't.
     empty = draw(_st_empty(min_items, max_items))

@@ -19,18 +19,18 @@ def masked_contents(
     Picks among [`ByteMaskedArray`][ak.contents.ByteMaskedArray],
     [`BitMaskedArray`][ak.contents.BitMaskedArray], and
     [`UnmaskedArray`][ak.contents.UnmaskedArray]. All three preserve the input
-    content's length, so ``len(result) == len(content)``.
+    content's length, so `len(result) == len(content)`.
 
     Parameters
     ----------
     content
         Forwarded to each per-type strategy.
     allow_byte_masked
-        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if ``False``.
+        No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if `False`.
     allow_bit_masked
-        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if ``False``.
+        No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if `False`.
     allow_unmasked
-        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if ``False``.
+        No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
 
     Returns
     -------
@@ -47,7 +47,7 @@ def masked_contents(
 
     # Append in shrink-preferred order (data simplicity): UnmaskedArray has no
     # mask data, ByteMaskedArray uses a straightforward int8 mask, BitMaskedArray
-    # uses a bit-packed mask plus extra metadata. ``st.one_of`` shrinks toward
+    # uses a bit-packed mask plus extra metadata. `st.one_of` shrinks toward
     # earlier entries.
     options = list[st.SearchStrategy[Content]]()
     if allow_unmasked:

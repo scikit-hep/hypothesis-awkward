@@ -5,8 +5,8 @@ Attributes
 BUILTIN_SAFE_DTYPE_NAMES
     Names of NumPy dtypes with corresponding Python built-in types. Sorted
     for optimal shrinking from simple to complex dtypes.
-    Note that ``datetime64[us]`` isn't entirely safe. For example, a value
-    with the year zero is coerced to ``int``.
+    Note that `datetime64[us]` isn't entirely safe. For example, a value
+    with the year zero is coerced to `int`.
 BUILTIN_SAFE_DTYPES
     NumPy dtypes with corresponding Python built-in types. Sorted for optimal shrinking
     from simple to complex dtypes.
@@ -45,10 +45,10 @@ def _supported_dtype_names() -> tuple[str, ...]:
     datetime, timedelta) and ordered smallest to largest within each.
 
     Datetime and timedelta units are interleaved and ordered by
-    proximity to microseconds (``us``), the built-in-safe unit.
+    proximity to microseconds (`us`), the built-in-safe unit.
 
     The set of supported dtypes is derived from Awkward Array's
-    internal ``_primitive_to_dtype_dict``; only the ordering is
+    internal `_primitive_to_dtype_dict`; only the ordering is
     controlled here.
 
     As of this writing::

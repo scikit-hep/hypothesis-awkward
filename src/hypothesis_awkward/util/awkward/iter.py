@@ -75,7 +75,7 @@ def get_contents(
     Strings and bytestrings: An array of strings (bytestrings) are a
     [`ListOffsetArray`][ak.contents.ListOffsetArray],
     [`ListArray`][ak.contents.ListArray], or [`RegularArray`][ak.contents.RegularArray]
-    with an inner `NumpyArray`. However, by default,`get_contents()` considers them leaf
+    with an inner `NumpyArray`. However, by default, `get_contents()` considers them leaf
     contents and returns an empty tuple `()`. With the option `string_as_leaf=False`
     (`bytestring_as_leaf=False`), it returns a tuple with the single content of the
     underlying `NumpyArray`:
@@ -232,33 +232,33 @@ def is_leaf(
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
 ) -> bool:
-    """Return ``True`` if an [`ak.contents.Content`][] is a leaf.
+    """Return `True` if an [`ak.contents.Content`][] is a leaf.
 
     [`NumpyArray`][ak.contents.NumpyArray] and [`EmptyArray`][ak.contents.EmptyArray] are always leaves. String and
     bytestring list nodes are leaves only when the respective flag is
     set. Wrappers ([`RecordArray`][ak.contents.RecordArray], [`UnionArray`][ak.contents.UnionArray], option/masked types,
     non-string list types) are never leaves. Unknown types fall back to
-    ``False``.
+    `False`.
 
     Dispatch is performed with [functools.singledispatch][] so support
     for a new [`Content`][ak.contents.Content] subclass can be added by calling
-    ``is_leaf.register`` without modifying this function.
+    `is_leaf.register` without modifying this function.
 
     Parameters
     ----------
     c
         An Awkward [`Content`][ak.contents.Content] node.
     string_as_leaf
-        If ``True`` (default), treat string [`ListOffsetArray`][ak.contents.ListOffsetArray]/
+        If `True` (default), treat string [`ListOffsetArray`][ak.contents.ListOffsetArray]/
         [`ListArray`][ak.contents.ListArray]/[`RegularArray`][ak.contents.RegularArray] nodes as leaves.
     bytestring_as_leaf
-        Same as ``string_as_leaf`` for bytestring nodes.
+        Same as `string_as_leaf` for bytestring nodes.
 
     Returns
     -------
     bool
-        ``True`` if ``c`` is a leaf under the given flags, else
-        ``False``.
+        `True` if `c` is a leaf under the given flags, else
+        `False`.
 
     Examples
     --------

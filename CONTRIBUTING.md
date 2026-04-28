@@ -44,6 +44,23 @@ For the multi-version site as published to `gh-pages` (uses
 mike serve --branch gh-pages
 ```
 
+## Docstring Style
+
+Docstrings follow the [NumPy style] and are rendered through [mkdocstrings]
+(Markdown via [griffe]).
+
+- Inline literals — parameter names, values like `True`/`False`/`None`, dtypes,
+  code snippets — use **single backticks**: `` `param_name` ``, `` `True` ``,
+  `` `np.float64` ``.
+- Cross-references to API objects use Markdown autorefs with single backticks
+  around the visible name: ``[`NumpyArray`][ak.contents.NumpyArray]``.
+- Avoid double backticks. They are an RST convention and render the same as
+  single backticks in this Markdown pipeline.
+
+[NumPy style]: https://numpydoc.readthedocs.io/en/latest/format.html
+[mkdocstrings]: https://mkdocstrings.github.io/
+[griffe]: https://mkdocstrings.github.io/griffe/
+
 ## PR Title Convention
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/)
