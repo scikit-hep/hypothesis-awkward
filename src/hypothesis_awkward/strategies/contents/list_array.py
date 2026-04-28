@@ -18,6 +18,7 @@ def list_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> ListArray:
     """Strategy for [`ak.contents.ListArray`][] instances.
@@ -33,6 +34,8 @@ def list_array_contents(
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
         [`Content`][ak.contents.Content] instance, or ``None`` to draw from
         ``contents()``.
+    min_length
+        Lower bound on the number of lists, i.e., ``len(result)``.
     max_length
         Upper bound on the number of lists, i.e., ``len(result)``. If ``None``,
         ``len(content)`` is used.
@@ -49,8 +52,8 @@ def list_array_contents(
 
     Limit the number of lists:
 
-    >>> c = list_array_contents(max_length=4).example()
-    >>> len(c) <= 4
+    >>> c = list_array_contents(min_length=2, max_length=4).example()
+    >>> 2 <= len(c) <= 4
     True
     """
     match content:
@@ -62,7 +65,7 @@ def list_array_contents(
             pass
     assert isinstance(content, Content)
     starts_list, stops_list = draw(
-        _st_starts_stops(len(content), max_length=max_length)
+        _st_starts_stops(len(content), min_length=min_length, max_length=max_length)
     )
     starts = ak.index.Index64(starts_list)
     stops = ak.index.Index64(stops_list)
@@ -74,6 +77,7 @@ def _st_starts_stops(
     draw: st.DrawFn,
     content_len: int,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
     allow_unreachable: bool = True,
 ) -> tuple[list[int], list[int]]:
@@ -86,28 +90,46 @@ def _st_starts_stops(
     ----------
     content_len
         Length of the content array.
+    min_length
+        Lower bound on the number of lists (i.e., ``len(starts)``).
     max_length
         Upper bound on the number of lists (i.e., ``len(starts)``).
     allow_unreachable
         No unreachable data is possible if ``False``.
     """
     if content_len == 0 or not allow_unreachable:
-        return draw(_st_starts_stops_no_unreachable(content_len, max_length=max_length))
-    if max_length is not None and max_length == 0:
+        return draw(
+            _st_starts_stops_no_unreachable(
+                content_len, min_length=min_length, max_length=max_length
+            )
+        )
+    if max_length is not None and max_length == 0 and min_length == 0:
         return [], []
     branches = [
-        _st_starts_stops_no_unreachable(content_len, max_length=max_length),
-        _st_starts_stops_unreachable(content_len, max_length=max_length),
+        _st_starts_stops_no_unreachable(
+            content_len, min_length=min_length, max_length=max_length
+        ),
+        _st_starts_stops_unreachable(
+            content_len, min_length=min_length, max_length=max_length
+        ),
     ]
     ml = max_length if max_length is not None else content_len
-    if ml >= 2:
-        branches.append(_st_starts_stops_gaps(content_len, max_length=max_length))
+    if ml >= max(2, min_length):
+        branches.append(
+            _st_starts_stops_gaps(
+                content_len, min_length=min_length, max_length=max_length
+            )
+        )
         if content_len >= 2:
             branches.append(
-                _st_starts_stops_overlapping(content_len, max_length=max_length)
+                _st_starts_stops_overlapping(
+                    content_len, min_length=min_length, max_length=max_length
+                )
             )
         branches.append(
-            _st_starts_stops_out_of_order(content_len, max_length=max_length)
+            _st_starts_stops_out_of_order(
+                content_len, min_length=min_length, max_length=max_length
+            )
         )
     return draw(st.one_of(branches))
 
@@ -117,11 +139,12 @@ def _st_starts_stops_no_unreachable(
     draw: st.DrawFn,
     content_len: int,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with no unreachable data."""
-    ml = max_length if max_length is not None else content_len
-    n = draw(st.integers(min_value=0, max_value=ml))
+    ml = max_length if max_length is not None else max(content_len, min_length)
+    n = draw(st.integers(min_value=min_length, max_value=ml))
     if n == 0:
         offsets_list = [0]
     elif content_len == 0:
@@ -145,6 +168,7 @@ def _st_starts_stops_unreachable(
     draw: st.DrawFn,
     content_len: int,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with unreachable data.
@@ -152,11 +176,12 @@ def _st_starts_stops_unreachable(
     Guarantees at least unreachable tail.
     """
     max_size = None if max_length is None else max_length + 1
+    min_size = max(2, min_length + 1)
     offsets_list = sorted(
         draw(
             st.lists(
                 st.integers(min_value=0, max_value=content_len - 1),
-                min_size=2,
+                min_size=min_size,
                 max_size=max_size,
             )
         )
@@ -169,6 +194,7 @@ def _st_starts_stops_gaps(
     draw: st.DrawFn,
     content_len: int,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with at least one gap between sublists.
@@ -176,7 +202,7 @@ def _st_starts_stops_gaps(
     Guarantees at least one ``stops[i] < starts[i + 1]``.
     """
     ml = max_length if max_length is not None else content_len
-    n = draw(st.integers(min_value=2, max_value=ml))
+    n = draw(st.integers(min_value=max(2, min_length), max_value=ml))
     values = sorted(
         draw(
             st.lists(
@@ -198,6 +224,7 @@ def _st_starts_stops_overlapping(
     draw: st.DrawFn,
     content_len: int,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with at least one overlapping pair.
@@ -205,7 +232,7 @@ def _st_starts_stops_overlapping(
     Guarantees at least one ``starts[i + 1] < stops[i]``.
     """
     ml = max_length if max_length is not None else content_len
-    n = draw(st.integers(min_value=2, max_value=ml))
+    n = draw(st.integers(min_value=max(2, min_length), max_value=ml))
     starts = sorted(
         draw(
             st.lists(
@@ -228,6 +255,7 @@ def _st_starts_stops_out_of_order(
     draw: st.DrawFn,
     content_len: int,
     *,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> tuple[list[int], list[int]]:
     """Strategy for starts and stops with non-monotonic starts.
@@ -235,7 +263,7 @@ def _st_starts_stops_out_of_order(
     Guarantees at least one ``starts[i] > starts[i + 1]``.
     """
     ml = max_length if max_length is not None else content_len
-    n = draw(st.integers(min_value=2, max_value=ml))
+    n = draw(st.integers(min_value=max(2, min_length), max_value=ml))
     pairs = [
         draw(
             st.tuples(st.integers(0, content_len), st.integers(0, content_len)).filter(
@@ -258,6 +286,7 @@ def list_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> ListArray:
@@ -276,6 +305,8 @@ def list_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -305,10 +336,9 @@ def list_array_from_contents(
     True
     """
     max_length = safe_min((max_length, max_size // 2))
-    length = draw(st.integers(min_value=0, max_value=max_length))
+    length = draw(st.integers(min_value=min_length, max_value=max_length))
     indices_size = 2 * length  # starts and stops
     max_content_size = max_size - indices_size
     st_content = content(max_size=max_content_size, max_leaf_size=max_leaf_size)
 
-    # TODO: Add `min_length=length` when `min_length` is implemented.
-    return draw(list_array_contents(st_content, max_length=length))
+    return draw(list_array_contents(st_content, min_length=length, max_length=length))
