@@ -32,15 +32,15 @@ def union_array_contents(
     ----------
     contents
         Child contents. Can be a strategy for a list of [`Content`][ak.contents.Content],
-        a concrete list, or ``None`` to draw random children.
+        a concrete list, or `None` to draw random children.
     max_contents
-        Maximum number of child contents when ``contents`` is ``None``.
+        Maximum number of child contents when `contents` is `None`.
     min_length
-        Lower bound on the union length, i.e., ``len(result)``. Constrains the
+        Lower bound on the union length, i.e., `len(result)`. Constrains the
         pre-truncation sum of children lengths; never satisfied by truncation.
     max_length
-        Upper bound on the union length, i.e., ``len(result)``. Unbounded if
-        ``None``.
+        Upper bound on the union length, i.e., `len(result)`. Unbounded if
+        `None`.
 
     Returns
     -------
@@ -129,29 +129,29 @@ def union_array_from_contents(
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
 
-    Draws multiple children via ``content_lists()`` with ``min_len=2``, then wraps
+    Draws multiple children via `content_lists()` with `min_len=2`, then wraps
     them in a [`UnionArray`][ak.contents.UnionArray] with shuffled tags and index
-    arrays. Prevents nested unions by passing ``allow_union_root=False`` to child
+    arrays. Prevents nested unions by passing `allow_union_root=False` to child
     generation.
-    Enforces the all-or-none option rule via ``all_option_or_none=True``.
+    Enforces the all-or-none option rule via `all_option_or_none=True`.
 
-    Called by ``contents()`` during recursive tree generation.
+    Called by `contents()` during recursive tree generation.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``.
+        Lower bound on `len(result)`.
     max_length
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     st_option
-        A callable conforming to ``StOption`` that wraps content in an option
+        A callable conforming to `StOption` that wraps content in an option
         type. Used for all-or-none option coordination.
 
     Returns

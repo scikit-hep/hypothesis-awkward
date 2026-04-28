@@ -25,19 +25,19 @@ def indexed_option_array_contents(
     """Strategy for [`ak.contents.IndexedOptionArray`][] instances.
 
     The index length is drawn independently of the content length. Valid entries can
-    reference any content position (duplicates allowed). Missing entries have ``index[i]
-    = -1``.
+    reference any content position (duplicates allowed). Missing entries have `index[i]
+    = -1`.
 
     Parameters
     ----------
     content
         Child content. Can be a strategy for [`Content`][ak.contents.Content], a concrete
-        [`Content`][ak.contents.Content] instance, or ``None`` to draw from
-        ``contents()``.
+        [`Content`][ak.contents.Content] instance, or `None` to draw from
+        `contents()`.
     min_size
-        Lower bound on the index length, i.e., ``len(result)``.
+        Lower bound on the index length, i.e., `len(result)`.
     max_size
-        Upper bound on the index length, i.e., ``len(result)``. If ``None``, twice the
+        Upper bound on the index length, i.e., `len(result)`. If `None`, twice the
         content length is used.
 
     Returns
@@ -97,23 +97,23 @@ def indexed_option_array_from_contents(
     Draws the index length first, then gives the remainder of the budget
     to the child content.
 
-    Called by ``contents()`` during recursive tree generation.
+    Called by `contents()` during recursive tree generation.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns
+        A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``. Forwarded to ``min_size`` of the wrapper.
+        Lower bound on `len(result)`. Forwarded to `min_size` of the wrapper.
     max_length
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     st_option
-        Accepted for ``_StFromContents`` compatibility; unused in this variant.
+        Accepted for `_StFromContents` compatibility; unused in this variant.
 
     Returns
     -------

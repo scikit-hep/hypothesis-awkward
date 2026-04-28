@@ -29,15 +29,15 @@ def record_array_contents(
     ----------
     contents
         Child contents. Can be a strategy for a list of [`Content`][ak.contents.Content],
-        a concrete list, or ``None`` to draw random children.
+        a concrete list, or `None` to draw random children.
     max_fields
-        Maximum number of fields when ``contents`` is ``None``.
+        Maximum number of fields when `contents` is `None`.
     allow_tuple
-        Allow tuple records (no field names) if ``True``.
+        Allow tuple records (no field names) if `True`.
     min_length
-        Lower bound on the record length, i.e., ``len(result)``.
+        Lower bound on the record length, i.e., `len(result)`.
     max_length
-        Upper bound on the record length, i.e., ``len(result)``.
+        Upper bound on the record length, i.e., `len(result)`.
 
     Returns
     -------
@@ -113,27 +113,27 @@ def record_array_from_contents(
 ) -> RecordArray:
     """Strategy for [`ak.contents.RecordArray`][] instances within a size budget.
 
-    Draws one or more children via ``content_lists()`` with ``min_len=1``, then wraps
+    Draws one or more children via `content_lists()` with `min_len=1`, then wraps
     them in a [`RecordArray`][ak.contents.RecordArray] with generated or omitted field
     names.
 
-    Called by ``contents()`` during recursive tree generation.
+    Called by `contents()` during recursive tree generation.
 
     Parameters
     ----------
     content
-        A callable that accepts ``max_size`` and ``max_leaf_size`` and returns a strategy
+        A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on ``content_size()`` of the result.
+        Upper bound on `content_size()` of the result.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if ``None``.
+        Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on ``len(result)``.
+        Lower bound on `len(result)`.
     max_length
-        Upper bound on ``len(result)``. Unbounded if ``None``.
+        Upper bound on `len(result)`. Unbounded if `None`.
     st_option
-        Accepted for ``_StFromContents`` compatibility; unused in this variant.
+        Accepted for `_StFromContents` compatibility; unused in this variant.
 
     Returns
     -------

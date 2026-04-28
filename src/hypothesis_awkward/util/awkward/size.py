@@ -43,7 +43,7 @@ def content_size(a: ak.Array | Content, /) -> int:
     """Count total scalars stored in an Awkward Array layout.
 
     Counts data elements, offset/index buffer elements, and metadata values
-    (``RegularArray.size``, [`RecordArray`][ak.contents.RecordArray] field names).
+    (`RegularArray.size`, [`RecordArray`][ak.contents.RecordArray] field names).
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ def content_own_size(c: Content, /) -> int:
     """Count the scalars owned directly by a [`Content`][ak.contents.Content] node.
 
     Counts the node's own buffer elements (offsets, starts/stops, mask, tags,
-    index, numeric data) and metadata values (``RegularArray.size``,
+    index, numeric data) and metadata values (`RegularArray.size`,
     [`RecordArray`][ak.contents.RecordArray] field names, [`BitMaskedArray`][ak.contents.BitMaskedArray]/[`ByteMaskedArray`][ak.contents.ByteMaskedArray] flags).
     Does **not** recurse into sub-contents — that is handled by
     [content_size][hypothesis_awkward.util.content_size] via
@@ -94,7 +94,7 @@ def content_own_size(c: Content, /) -> int:
 
     Dispatch is performed with [functools.singledispatch][] so support for a
     new [`Content`][ak.contents.Content] subclass can be added by calling
-    ``content_own_size.register`` without modifying this function.
+    `content_own_size.register` without modifying this function.
 
     Parameters
     ----------
@@ -104,7 +104,7 @@ def content_own_size(c: Content, /) -> int:
     Returns
     -------
     int
-        Number of scalars stored directly on ``c``, excluding sub-contents.
+        Number of scalars stored directly on `c`, excluding sub-contents.
 
     Examples
     --------
