@@ -13,7 +13,7 @@ from hypothesis_awkward.util import (
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """``content_size`` equals own size plus children's sizes at every node."""
+    """`content_size` equals own size plus children's sizes at every node."""
     content = data.draw(st_ak.contents.contents(), label='content')
 
     # This pins the aggregation rule of `content_size` against
@@ -30,5 +30,5 @@ def test_properties(data: st.DataObject) -> None:
 
 @given(a=st_ak.constructors.arrays())
 def test_accepts_array(a: ak.Array) -> None:
-    """``content_size`` accepts an ``ak.Array`` as well as a ``Content``."""
+    """`content_size` accepts an `ak.Array` as well as a `Content`."""
     assert content_size(a) == content_size(a.layout)

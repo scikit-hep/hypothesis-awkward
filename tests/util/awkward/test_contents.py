@@ -31,7 +31,7 @@ else:
 
 
 class GetContentsKwargs(TypedDict, total=False):
-    """Kwargs of ``get_contents()``."""
+    """Kwargs of `get_contents()`."""
 
     string_as_leaf: bool
     bytestring_as_leaf: bool
@@ -39,7 +39,7 @@ class GetContentsKwargs(TypedDict, total=False):
 
 @st.composite
 def get_contents_kwargs(draw: st.DrawFn) -> GetContentsKwargs:
-    """Strategy for kwargs of ``get_contents()``."""
+    """Strategy for kwargs of `get_contents()`."""
     kwargs = draw(
         st.fixed_dictionaries(
             {},
@@ -97,10 +97,10 @@ def test_get_contents(data: st.DataObject) -> None:
 
 
 def test_get_contents_is_extensible() -> None:
-    """Register a handler for a new type without modifying ``get_contents``.
+    """Register a handler for a new type without modifying `get_contents`.
 
-    ``_Marker`` is local to this test, so the registration cannot influence
-    any other test's dispatch. ``singledispatch.registry`` is read-only, so
+    `_Marker` is local to this test, so the registration cannot influence
+    any other test's dispatch. `singledispatch.registry` is read-only, so
     no cleanup is performed.
     """
 

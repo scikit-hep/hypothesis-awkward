@@ -110,7 +110,7 @@ def test_properties(data: st.DataObject) -> None:
 def assert_all_buffers_virtual(a: ak.Array) -> None:
     """Assert that all buffers that can remain virtual are not materialized.
 
-    Some buffers may not have ``is_materialized``. We skip those and
+    Some buffers may not have `is_materialized`. We skip those and
     verify the rest.
     """
     _form, _length, buffers = ak.to_buffers(a)

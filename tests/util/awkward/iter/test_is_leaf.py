@@ -59,7 +59,7 @@ def test_properties(data: st.DataObject) -> None:
 
 
 def test_unregistered_type_returns_false() -> None:
-    """Unknown types dispatch to the base function, which returns ``False``."""
+    """Unknown types dispatch to the base function, which returns `False`."""
 
     class _Unknown:
         pass
@@ -68,10 +68,10 @@ def test_unregistered_type_returns_false() -> None:
 
 
 def test_is_extensible() -> None:
-    """Register a handler for a new type without modifying ``is_leaf``.
+    """Register a handler for a new type without modifying `is_leaf`.
 
-    ``_Marker`` is local to this test, so the registration cannot influence
-    any other test's dispatch. ``singledispatch.registry`` is read-only, so no
+    `_Marker` is local to this test, so the registration cannot influence
+    any other test's dispatch. `singledispatch.registry` is read-only, so no
     cleanup is performed.
     """
 

@@ -12,7 +12,7 @@ from hypothesis_awkward.util import (
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """``leaf_size`` equals the size of the leaf data at every node."""
+    """`leaf_size` equals the size of the leaf data at every node."""
     content = data.draw(st_ak.contents.contents(), label='content')
 
     # At a leaf, `iter_leaf_contents(c)` yields `(c,)`, so the assertion
@@ -27,5 +27,5 @@ def test_properties(data: st.DataObject) -> None:
 
 @given(a=st_ak.constructors.arrays())
 def test_accepts_array(a: ak.Array) -> None:
-    """``leaf_size`` accepts an ``ak.Array`` as well as a ``Content``."""
+    """`leaf_size` accepts an `ak.Array` as well as a `Content`."""
     assert leaf_size(a) == leaf_size(a.layout)

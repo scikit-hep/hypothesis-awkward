@@ -190,8 +190,8 @@ def test_draw_from_contents() -> None:
 def test_draw_nested_union() -> None:
     """Assert that a UnionArray with a descendant UnionArray can be drawn.
 
-    Direct children of a union must not be unions (no ``Union[Union[...]]``),
-    but deeper descendants may be, e.g. ``Union[Record[Union[...], ...], ...]``.
+    Direct children of a union must not be unions (no `Union[Union[...]]`),
+    but deeper descendants may be, e.g. `Union[Record[Union[...], ...], ...]`.
     """
     find(
         st_ak.contents.union_array_contents(),
@@ -203,8 +203,8 @@ def test_draw_nested_union() -> None:
 def test_draw_from_contents_nested_union() -> None:
     """Assert that a UnionArray with a descendant UnionArray can be drawn.
 
-    Direct children of a union must not be unions (no ``Union[Union[...]]``),
-    but deeper descendants may be, e.g. ``Union[Record[Union[...], ...], ...]``.
+    Direct children of a union must not be unions (no `Union[Union[...]]`),
+    but deeper descendants may be, e.g. `Union[Record[Union[...], ...], ...]`.
     """
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
@@ -229,7 +229,7 @@ def test_draw_from_contents_option_deep_inside_union() -> None:
     """Assert that option types can appear deep inside non-option union branches.
 
     The direct children of the union are not option types, but deeper
-    descendants are, e.g., ``Union[ListOffset[ByteMasked[...]], ...]``.
+    descendants are, e.g., `Union[ListOffset[ByteMasked[...]], ...]`.
     """
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
