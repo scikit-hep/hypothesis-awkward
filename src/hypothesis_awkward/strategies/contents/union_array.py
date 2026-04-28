@@ -23,6 +23,7 @@ def union_array_contents(
     contents: list[Content] | st.SearchStrategy[list[Content]] | None = None,
     *,
     max_contents: int = 4,
+    min_length: int = 0,
     max_length: int | None = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances.
@@ -34,6 +35,9 @@ def union_array_contents(
         a concrete list, or ``None`` to draw random children.
     max_contents
         Maximum number of child contents when ``contents`` is ``None``.
+    min_length
+        Lower bound on the union length, i.e., ``len(result)``. Constrains the
+        pre-truncation sum of children lengths; never satisfied by truncation.
     max_length
         Upper bound on the union length, i.e., ``len(result)``. Unbounded if
         ``None``.
@@ -50,8 +54,8 @@ def union_array_contents(
 
     Limit the union length:
 
-    >>> c = union_array_contents(max_length=4).example()
-    >>> len(c) <= 4
+    >>> c = union_array_contents(min_length=2, max_length=4).example()
+    >>> 2 <= len(c) <= 4
     True
     """
     match contents:
@@ -76,6 +80,9 @@ def union_array_contents(
         case list():
             pass
     assert isinstance(contents, list)
+
+    # min_length applies to all branches; pre-truncation sum floor.
+    assume(sum(len(c) for c in contents) >= min_length)
 
     # Build tags and index arrays
     tags_parts: list[np.ndarray] = []
@@ -116,6 +123,7 @@ def union_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
@@ -138,6 +146,8 @@ def union_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -156,6 +166,7 @@ def union_array_from_contents(
     ...     contents,
     ...     max_size=20,
     ...     max_leaf_size=10,
+    ...     min_length=2,
     ...     max_length=5,
     ...     st_option=option_from_contents,
     ... ).example()
@@ -168,7 +179,7 @@ def union_array_from_contents(
     >>> leaf_size(c) <= 10
     True
 
-    >>> len(c) <= 5
+    >>> 2 <= len(c) <= 5
     True
     """
     children = draw(
@@ -181,6 +192,8 @@ def union_array_from_contents(
             st_option=st_option,
         )
     )
-    result = draw(union_array_contents(children, max_length=max_length))
+    result = draw(
+        union_array_contents(children, min_length=min_length, max_length=max_length)
+    )
     assume(content_size(result) <= max_size)
     return result

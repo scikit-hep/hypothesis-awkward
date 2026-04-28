@@ -18,6 +18,7 @@ class UnionArrayContentsKwargs(TypedDict, total=False):
 
     contents: list[Content] | st.SearchStrategy[list[Content]]
     max_contents: int
+    min_length: int
     max_length: int
 
 
@@ -50,16 +51,22 @@ def union_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_contents = chain.register(_contents_list())
 
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+
+    drawn = (
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'contents': st.one_of(
                     _contents_list(),
                     st.just(st_contents),
                 ),
                 'max_contents': st.integers(min_value=2, max_value=10),
-                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -131,8 +138,9 @@ def test_properties(data: st.DataObject) -> None:
             assert len(indices_for_tag) == content_len
             assert set(indices_for_tag.tolist()) == set(range(content_len))
 
-    # Assert max_length constraint
-    assert len(result) <= sc(max_length)
+    # Assert length is within bounds
+    min_length = opts.kwargs.get('min_length', 0)
+    assert min_length <= len(result) <= sc(max_length)
 
 
 @pytest.mark.parametrize('max_contents', [2, 3, 4])
@@ -149,6 +157,15 @@ def test_draw_different_content_lengths() -> None:
     find(
         st_ak.contents.union_array_contents(),
         lambda u: len({len(c) for c in u.contents}) > 1,
+    )
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 10])
+def test_draw_min_length(min_length: int) -> None:
+    """Assert the length can reach `min_length`."""
+    find(
+        st_ak.contents.union_array_contents(min_length=min_length),
+        lambda u: len(u) == min_length,
     )
 
 
