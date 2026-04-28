@@ -17,6 +17,7 @@ class RecordArrayContentsKwargs(TypedDict, total=False):
     contents: list[Content] | st.SearchStrategy[list[Content]]
     max_fields: int
     allow_tuple: bool
+    min_length: int
     max_length: int
 
 
@@ -41,9 +42,16 @@ def record_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_contents = chain.register(_contents_list())
 
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=5))
+
+    drawn = (
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'contents': st.one_of(
                     _contents_list(),
@@ -51,7 +59,6 @@ def record_array_contents_kwargs(
                 ),
                 'max_fields': st.integers(min_value=0, max_value=10),
                 'allow_tuple': st.booleans(),
-                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -104,9 +111,10 @@ def test_properties(data: st.DataObject) -> None:
         assert len(result.fields) == len(result.contents)
         assert len(set(result.fields)) == len(result.fields)
 
-    # Assert max_length constraint
+    # Assert length is within bounds
+    min_length = opts.kwargs.get('min_length', 0)
     max_length = opts.kwargs.get('max_length')
-    assert len(result) <= sc(max_length)
+    assert min_length <= len(result) <= sc(max_length)
 
     # Non-empty records: length equals the minimum content length, capped by max_length
     if result.contents:
@@ -132,6 +140,15 @@ def test_draw_max_fields(max_fields: int) -> None:
     find(
         st_ak.contents.record_array_contents(max_fields=max_fields),
         lambda r: len(r.contents) == max_fields,
+    )
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 10])
+def test_draw_min_length(min_length: int) -> None:
+    """Assert the length can reach `min_length`."""
+    find(
+        st_ak.contents.record_array_contents(min_length=min_length),
+        lambda r: len(r) == min_length,
     )
 
 
