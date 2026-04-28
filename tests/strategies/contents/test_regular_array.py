@@ -129,6 +129,7 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(max_length=max_length),
         lambda c: c.size > 0 and len(c) == max_length,
+        settings=settings(max_examples=2000),
     )
 
 
