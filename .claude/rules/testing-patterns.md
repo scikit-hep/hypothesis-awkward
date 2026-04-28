@@ -42,6 +42,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_unmasked: bool
     max_leaf_size: int | None
     max_depth: int | None
+    min_length: int
     max_length: int | None
 ```
 
@@ -63,9 +64,16 @@ def contents_kwargs(
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
+    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+
+    drawn = (
+        ('min_length', min_length),
+        ('max_length', max_length),
+    )
+
     kwargs = draw(
         st.fixed_dictionaries(
-            {},
+            {k: st.just(v) for k, v in drawn if v is not None},
             optional={
                 'dtypes': st.one_of(
                     st.none(),
@@ -92,7 +100,6 @@ def contents_kwargs(
                 'max_depth': st.one_of(
                     st.none(), st.integers(min_value=0, max_value=5)
                 ),
-                'max_length': st.integers(min_value=0, max_value=50),
             },
         )
     )
@@ -358,7 +365,7 @@ When an option like `max_size` or `min_size` may be `None`, use
 `safe_compare as sc` to write concise range assertions:
 
 ```python
-from hypothesis_awkward.util.safe import safe_compare as sc
+from hypothesis_awkward.util import safe_compare as sc
 
 assert sc(min_size) <= len(result) <= sc(max_size)
 ```

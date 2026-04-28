@@ -1,9 +1,22 @@
 # API Design: Option Content Strategies
 
 - **Date:** 2026-03-27
-- **Status:** Partially implemented — `option_contents()` is missing the
-  `max_leaf_size` parameter specified here; size/union constraints are forwarded
-  only via `contents()`, not the standalone selector.
+- **Status:** Implemented with divergence — the per-type strategies and
+  `option_contents()` shipped, but the length / size plumbing differs from the
+  signatures below:
+  - Per-type strategies (`indexed_option_array_contents`,
+    `byte_masked_array_contents`, `bit_masked_array_contents`,
+    `unmasked_array_contents`) do **not** take `max_length`. The mask-controlled
+    types take no length parameter (length matches the inner content); only
+    `indexed_option_array_contents()` exposes `min_size` / `max_size` over its
+    index length.
+  - `option_contents()` exposes `min_size` / `max_size` over `len(result)`
+    rather than `max_size` (total content size), `max_leaf_size`, `max_length`,
+    and `allow_union_root`. The size budget is kept on the `*_from_contents`
+    bridges instead.
+  - A separate `masked_contents()` selector (over `ByteMaskedArray`,
+    `BitMaskedArray`, `UnmaskedArray`) was added in 2026-04-28; it is
+    length-preserving and complements `option_contents()`.
 - **Author:** Claude (with developer collaboration)
 
 ## Overview

@@ -26,6 +26,11 @@
 >   `max_depth=None` (was `5`).
 > - The `pandas/` subpackage and `dicts_for_dataframe()` were dropped in
 >   v0.17.0; remove from mental model of directory structure.
+>
+> **Update (2026-04-28):**
+>
+> - `min_length` parameter was added to `arrays()`, forwarded to `contents()`.
+>   See [min-length-api](2026-04-24-min-length-api.md).
 
 ## Overview
 

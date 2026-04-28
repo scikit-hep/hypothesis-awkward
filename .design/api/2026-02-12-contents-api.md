@@ -57,6 +57,15 @@
 >   `content_size()`). See [max-size-api](./2026-03-29-max-size-api.md).
 > - Defaults changed: `max_size=50` (was `10`), `allow_nan=True` (was `False`),
 >   `max_depth=None` (was `5`).
+>
+> **Update (2026-04-28):**
+>
+> - `min_length` parameter was added to `contents()` (and to the wrapper /
+>   option strategies it composes), pinning a lower bound on `len(result)`. See
+>   [min-length-api](2026-04-24-min-length-api.md).
+> - `masked_contents()` was added as a public selector over `ByteMaskedArray`,
+>   `BitMaskedArray`, and `UnmaskedArray`. It is the length-preserving sibling
+>   of `option_contents()` (whose indexed-option branch chooses its own length).
 
 ## Overview
 

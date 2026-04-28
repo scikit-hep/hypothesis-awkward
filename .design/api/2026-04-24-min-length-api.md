@@ -1,7 +1,10 @@
 # API Design: `min_length` Parameter
 
 - **Date:** 2026-04-24
-- **Status:** Proposed
+- **Status:** Implemented — `min_length` is exposed on `arrays()`, `contents()`,
+  and the wrapper/option strategies; `min_size` is on
+  `indexed_option_array_contents()`; the `*_from_contents` bridges forward the
+  floor and the two list-strategy TODOs are retired.
 - **Author:** Claude (with developer collaboration)
 
 ## Overview
