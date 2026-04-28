@@ -57,6 +57,7 @@ def unmasked_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> UnmaskedArray:
@@ -73,6 +74,9 @@ def unmasked_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``. Forwarded to the inner ``content(...)`` call
+        so the inner content meets the floor.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -108,6 +112,8 @@ def unmasked_array_from_contents(
         content(
             max_size=max_content_size,
             max_leaf_size=max_leaf_size,
+            min_length=min_length,
+            max_length=max_length,
             allow_option_root=False,
             allow_union_root=False,
         )

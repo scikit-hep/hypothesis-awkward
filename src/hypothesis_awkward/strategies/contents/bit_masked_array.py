@@ -8,7 +8,6 @@ import awkward as ak
 from awkward.contents import BitMaskedArray, Content
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import content_size
-from hypothesis_awkward.util import safe_compare as sc
 
 if TYPE_CHECKING:
     from .content import StContent
@@ -70,6 +69,7 @@ def bit_masked_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
 ) -> BitMaskedArray:
@@ -86,6 +86,9 @@ def bit_masked_array_from_contents(
         Upper bound on ``content_size()`` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if ``None``.
+    min_length
+        Lower bound on ``len(result)``. Forwarded to the inner ``content(...)`` call
+        so the inner content meets the floor.
     max_length
         Upper bound on ``len(result)``. Unbounded if ``None``.
     st_option
@@ -120,10 +123,11 @@ def bit_masked_array_from_contents(
     st_content = content(
         max_size=max_content_size,
         max_leaf_size=max_leaf_size,
+        min_length=min_length,
+        max_length=max_length,
         allow_option_root=False,
         allow_union_root=False,
     )
     result = draw(bit_masked_array_contents(st_content))
     assume(content_size(result) <= max_size)
-    assume(len(result) <= sc(max_length))
     return result

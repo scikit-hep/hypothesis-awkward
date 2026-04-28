@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING
 
-from hypothesis import reject
+from hypothesis import assume, reject
 from hypothesis import strategies as st
 
 import awkward as ak
 from awkward.contents import Content, ListArray
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import safe_compare as sc
 from hypothesis_awkward.util import safe_min
 
 if TYPE_CHECKING:
@@ -336,6 +337,7 @@ def list_array_from_contents(
     True
     """
     max_length = safe_min((max_length, max_size // 2))
+    assume(min_length <= sc(max_length))
     length = draw(st.integers(min_value=min_length, max_value=max_length))
     indices_size = 2 * length  # starts and stops
     max_content_size = max_size - indices_size

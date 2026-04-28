@@ -44,6 +44,7 @@ def contents(
     allow_unmasked: bool = True,
     max_leaf_size: int | None = None,
     max_depth: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     allow_union_root: bool = True,
     allow_option_root: bool = True,
@@ -71,7 +72,7 @@ def contents(
     The ``max_size`` is the main argument for constraining the array size. It counts most
     of the scalar values in the layout, including data elements, offsets, indices, field
     names, and parameters. The array size can also be constrained with
-    ``max_leaf_size``, ``max_depth``, and ``max_length``.
+    ``max_leaf_size``, ``max_depth``, ``min_length`` and ``max_length``.
 
     Parameters
     ----------
@@ -140,6 +141,8 @@ def contents(
         [`ListArray`][ak.contents.ListArray], [`RecordArray`][ak.contents.RecordArray],
         and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those
         that form string or bytestring content. Unbounded if ``None``.
+    min_length
+        Minimum ``len()`` of the generated array.
     max_length
         Maximum ``len()`` of the generated array. Unbounded if ``None``.
     allow_union_root
@@ -199,11 +202,30 @@ def contents(
         assume(content_size(c) <= max_size)
         return c
 
-    if leaf_only:
-        return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
+    leaf_feasible = min_length <= leaf_max_size
+    # Leaf can satisfy min_length only when at least one non-empty leaf type is
+    # allowed (Empty has length 0 and is excluded by min_size > 0 inside
+    # leaf_contents).
+    leaf_can_satisfy_min = leaf_feasible and (
+        min_length == 0 or allow_numpy or allow_string or allow_bytestring
+    )
 
-    if max_depth is not None and max_depth <= 0 or not draw(st.booleans()):
-        return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
+    if leaf_only:
+        # No wrapper/option available; the leaf path must produce the result.
+        # Filter when bounds are inconsistent; let leaf_contents raise when
+        # only Empty is allowed but min_length>0.
+        assume(leaf_feasible)
+        return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
+
+    if max_depth is not None and max_depth <= 0:
+        # Depth limit forces a leaf.
+        assume(leaf_feasible)
+        return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
+
+    # Random choice between leaf and wrapper. Skip the leaf branch when it
+    # cannot satisfy min_length (always go to wrapper instead).
+    if leaf_can_satisfy_min and not draw(st.booleans()):
+        return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
 
     recurse = functools.partial(
         contents,
@@ -247,7 +269,7 @@ def contents(
         candidates.append(unmasked_array_from_contents)
 
     if not candidates:
-        return _check(draw(st_leaf(min_size=0, max_size=leaf_max_size)))
+        return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
 
     st_option_: StOption | None = (
         functools.partial(
@@ -267,6 +289,7 @@ def contents(
             recurse,
             max_size=max_size,
             max_leaf_size=max_leaf_size,
+            min_length=min_length,
             max_length=max_length,
             st_option=st_option_,
         )
@@ -279,6 +302,8 @@ class StContent(Protocol):
         *,
         max_size: int,
         max_leaf_size: int | None,
+        min_length: int = ...,
+        max_length: int | None = ...,
         allow_union_root: bool = ...,
         allow_option_root: bool = ...,
     ) -> st.SearchStrategy[Content]: ...
@@ -291,6 +316,7 @@ class _StFromContents(Protocol):
         *,
         max_size: int,
         max_leaf_size: int | None = ...,
+        min_length: int = ...,
         max_length: int | None = ...,
         st_option: StOption | None = ...,
     ) -> st.SearchStrategy[Content]: ...

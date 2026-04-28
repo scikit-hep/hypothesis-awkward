@@ -29,6 +29,7 @@ def arrays(
     allow_unmasked: bool = True,
     max_leaf_size: int | None = None,
     max_depth: int | None = None,
+    min_length: int = 0,
     max_length: int | None = None,
     allow_virtual: bool = True,
 ) -> ak.Array:
@@ -143,6 +144,8 @@ def arrays(
         and [`UnionArray`][ak.contents.UnionArray] layer adds one level, excluding those
         that form string or bytestring content. No constraint when ``None`` (the
         default).
+    min_length
+        Minimum ``len()`` of the generated array.
     max_length
         Maximum ``len()`` of the generated array. No constraint when ``None`` (the
         default).
@@ -178,6 +181,7 @@ def arrays(
             allow_bit_masked=allow_bit_masked,
             allow_unmasked=allow_unmasked,
             max_depth=max_depth,
+            min_length=min_length,
             max_length=max_length,
         )
     )

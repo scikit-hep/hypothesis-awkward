@@ -36,6 +36,7 @@ DEFAULTS = ArraysKwargs(
     allow_unmasked=True,
     max_leaf_size=None,
     max_depth=None,
+    min_length=0,
     max_length=None,
     allow_virtual=True,
 )
