@@ -38,7 +38,8 @@ zensical serve
 ```
 
 For the multi-version site as published to `gh-pages` (uses
-[`mike`](https://github.com/squidfunk/mike), pinned in the `docs` dep group):
+[`mike`](https://github.com/squidfunk/mike), pinned in the `docs` dependency
+group):
 
 ```bash
 mike serve --branch gh-pages
@@ -75,33 +76,65 @@ type: description
 
 ### Allowed Types
 
-| Type       | Purpose                                               |
-| ---------- | ----------------------------------------------------- |
-| `feat`     | A new feature                                         |
-| `fix`      | A bug fix                                             |
-| `docs`     | Documentation only                                    |
-| `style`    | Code style (formatting, semicolons, etc.)             |
-| `refactor` | Code change that neither fixes a bug nor adds feature |
-| `perf`     | Performance improvement                               |
-| `test`     | Adding or updating tests                              |
-| `build`    | Build system or external dependencies                 |
-| `ci`       | CI configuration                                      |
-| `chore`    | Other changes that don't modify src or test files     |
-| `revert`   | Reverts a previous commit                             |
+| Type       | Purpose                                                      |
+| ---------- | ------------------------------------------------------------ |
+| `feat`     | New user-visible capability (new strategy, new public kwarg) |
+| `fix`      | User-visible bug in production behavior                      |
+| `docs`     | Documentation only                                           |
+| `style`    | Code style (formatting, semicolons, etc.)                    |
+| `refactor` | Code change that neither fixes a bug nor adds feature        |
+| `perf`     | Performance improvement                                      |
+| `test`     | Test-side change, even when fixing a flaky or incorrect test |
+| `build`    | Build system or external dependencies                        |
+| `ci`       | CI configuration                                             |
+| `chore`    | Other changes that don't modify src or test files            |
+| `revert`   | Reverts a previous commit                                    |
 
-Append `!` to the type (e.g. `feat!:`) to flag a breaking change.
+Append `!` to the type (e.g. `feat!:` or `fix!:`) to flag a breaking change.
+Don't pair `!` with behavior-preserving types like `refactor`, `docs`, `style`,
+or `test` — by definition they don't introduce breaking changes.
+
+`fix:` and `feat:` are reserved for changes to production code's observable
+behavior. If a test was failing but production behavior didn't change, use
+`test:` instead (or `docs:` / `refactor:` as appropriate).
+
+### Audience
+
+PR titles render verbatim into `CHANGELOG.md` and release notes. The reader is a
+library user skimming what changed, not a contributor who has read the diff.
+Start with the user-facing name — the public strategy or kwarg the change
+affects — rather than internal helpers, predicates, or test closures. The PR
+body remains technical (file:line, internal names, the rationale); only the
+title needs to consider its audience.
+
+For example, ``fix: handle `max_depth=0` in `_expect_raised()` `` mentions a
+private test closure no library user would recognize.
+``test: cover `contents()` raise when `max_depth=0` and `min_length>0` ``
+describes the same change in terms of `contents()` and the kwargs a release-note
+reader scanning the changelog would look for.
+
+### Title Style
+
+- **Backticks for code-like terms.** Wrap module paths, file paths,
+  function/class names, and other identifiers in backticks. The project's
+  release tooling (`git-cliff`) preserves PR titles verbatim into
+  `CHANGELOG.md`, where backticks render as inline code.
+- **≤ 70 characters.** Long titles are truncated in GitHub's PR list view,
+  notifications, and the changelog. If the title needs "and" to cover the
+  changes, this typically indicates the PR should be split.
 
 ### Examples
 
-- `feat: add user authentication`
-- `fix: handle empty input`
-- `docs: update installation instructions`
+- ``feat: add `min_length` to `regular_array_contents` ``
+- `fix: restrict changelog link parser to commit subject line`
+- `docs: cross-reference Awkward types in docstrings`
 - ``feat!: drop `dicts_for_dataframe()` ``
+- ``test: cover `contents()` raise when `max_depth=0` and `min_length>0` ``
 
 ### Individual Commits
 
-Individual commit messages within a PR are free-form. Only the PR title is
-enforced.
+Individual commit messages within a PR have no required format. Only the PR
+title is enforced.
 
 ## For Maintainers
 
@@ -115,8 +148,8 @@ in the changelog or release notes, such as changes to:
 
 ### Releasing
 
-Releases use a two-tag flow. The `u` tag triggers changelog generation, which in
-turn creates the `v` tag and GitHub Release.
+Releases use a two-tag flow. The `u` tag triggers changelog generation, which
+then creates the `v` tag and GitHub Release.
 
 #### Steps
 
