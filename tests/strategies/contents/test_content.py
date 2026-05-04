@@ -129,6 +129,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
     allow_unmasked = opts.kwargs.get('allow_unmasked', True)
     min_length = opts.kwargs.get('min_length', 0)
+    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
     def _expect_raised() -> bool:
         if not (allow_numpy or allow_empty or allow_string or allow_bytestring):
@@ -137,7 +138,11 @@ def test_properties(data: st.DataObject) -> None:
             # Outermost is forced to be a leaf only when no wrapper/option is
             # allowed. In that case, EmptyArray is excluded by min_length>0,
             # and leaf_contents() raises if no other leaf type is allowed.
-            no_outer_wrapper = not any(
+            # max_depth<=0 also short-circuits to the leaf-only path in
+            # contents() (see content.py:220-223), making wrapper/option
+            # allowances irrelevant at the outermost level.
+            forced_leaf_only = max_depth is not None and max_depth <= 0
+            no_outer_wrapper = forced_leaf_only or not any(
                 (
                     allow_regular,
                     allow_list_offset,
@@ -146,7 +151,7 @@ def test_properties(data: st.DataObject) -> None:
                     allow_union,
                 )
             )
-            no_outer_option = not any(
+            no_outer_option = forced_leaf_only or not any(
                 (
                     allow_indexed_option,
                     allow_byte_masked,
@@ -178,7 +183,6 @@ def test_properties(data: st.DataObject) -> None:
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
     allow_nan = opts.kwargs.get('allow_nan', True)
     max_leaf_size = opts.kwargs.get('max_leaf_size')
-    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
     max_length = opts.kwargs.get('max_length')
 
     allow_any_nesting = any(
