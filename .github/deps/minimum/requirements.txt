@@ -2,7 +2,7 @@
 # Used in GitHub Actions for testing compatibility.
 # Must be manually updated to align with `pyproject.toml`.
 awkward==2.9.0
-hypothesis==6.147.0
+hypothesis==6.152.4
 typing_extensions==4.1.0; python_version < '3.11'
 
 # In the future, `pip` may install minimum versions from
