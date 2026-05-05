@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from contextlib import ExitStack
 from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import HealthCheck, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -18,6 +17,7 @@ from hypothesis_awkward.util import (
     iter_contents,
     iter_numpy_arrays,
     leaf_size,
+    safe_max,
 )
 from hypothesis_awkward.util import safe_compare as sc
 
@@ -61,26 +61,48 @@ def contents_kwargs(
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
     min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+    max_size = draw(st.integers(min_value=safe_max([min_length, 0]), max_value=200))
+
+    non_empty_leaves = {'numpy', 'string', 'bytestring'}
+    all_leaves = non_empty_leaves | {'empty'}
+    if min_length:
+        # At least one non-empty leaf must be allowed.
+        allowed = draw(
+            st.sets(
+                st.sampled_from(list(non_empty_leaves)),
+                min_size=1,
+                max_size=len(non_empty_leaves),
+            )
+        )
+        if draw(st.booleans()):
+            allowed.add('empty')
+    else:
+        # The length zero is possible.
+        # At least any one leaf must be allowed.
+        allowed = draw(
+            st.sets(
+                st.sampled_from(list(all_leaves)),
+                min_size=1,
+                max_size=len(all_leaves),
+            )
+        )
 
     drawn = (
         ('min_length', min_length),
         ('max_length', max_length),
+        ('max_size', max_size),
+        ('allow_numpy', 'numpy' in allowed),
+        ('allow_empty', 'empty' in allowed),
+        ('allow_string', 'string' in allowed),
+        ('allow_bytestring', 'bytestring' in allowed),
     )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
-                'dtypes': st.one_of(
-                    st.none(),
-                    st.just(st_dtypes),
-                ),
-                'max_size': st.integers(min_value=0, max_value=200),
+                'dtypes': st.just(st_dtypes),
                 'allow_nan': st.booleans(),
-                'allow_numpy': st.booleans(),
-                'allow_empty': st.booleans(),
-                'allow_string': st.booleans(),
-                'allow_bytestring': st.booleans(),
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
@@ -90,12 +112,8 @@ def contents_kwargs(
                 'allow_byte_masked': st.booleans(),
                 'allow_bit_masked': st.booleans(),
                 'allow_unmasked': st.booleans(),
-                'max_leaf_size': st.one_of(
-                    st.none(), st.integers(min_value=0, max_value=50)
-                ),
-                'max_depth': st.one_of(
-                    st.none(), st.integers(min_value=0, max_value=5)
-                ),
+                'max_leaf_size': st.integers(min_value=0, max_value=50),
+                'max_depth': st.integers(min_value=0, max_value=5),
             },
         )
     )
@@ -103,10 +121,7 @@ def contents_kwargs(
     return chain.extend(cast(ContentsKwargs, kwargs))
 
 
-@settings(
-    max_examples=200,
-    suppress_health_check=[HealthCheck.too_slow, HealthCheck.filter_too_much],
-)
+@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `contents()`."""
@@ -114,7 +129,16 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(contents_kwargs(), label='opts')
     opts.reset()
 
-    # Assert that infeasible leaf-only configurations raise an error
+    # Call the test subject
+    c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
+
+    # Assert the result is always an ak.contents.Content
+    assert isinstance(c, ak.contents.Content)
+
+    # Assert the options were effective
+    dtypes = opts.kwargs.get('dtypes', None)
+    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
+    allow_nan = opts.kwargs.get('allow_nan', True)
     allow_numpy = opts.kwargs.get('allow_numpy', True)
     allow_empty = opts.kwargs.get('allow_empty', True)
     allow_string = opts.kwargs.get('allow_string', True)
@@ -128,62 +152,10 @@ def test_properties(data: st.DataObject) -> None:
     allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
     allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
     allow_unmasked = opts.kwargs.get('allow_unmasked', True)
-    min_length = opts.kwargs.get('min_length', 0)
-    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
-
-    def _expect_raised() -> bool:
-        if not (allow_numpy or allow_empty or allow_string or allow_bytestring):
-            return True  # no leaves at all
-        if min_length > 0:
-            # Outermost is forced to be a leaf only when no wrapper/option is
-            # allowed. In that case, EmptyArray is excluded by min_length>0,
-            # and leaf_contents() raises if no other leaf type is allowed.
-            # max_depth<=0 also short-circuits to the leaf-only path in
-            # contents() (see content.py:220-223), making wrapper/option
-            # allowances irrelevant at the outermost level.
-            forced_leaf_only = max_depth is not None and max_depth <= 0
-            no_outer_wrapper = forced_leaf_only or not any(
-                (
-                    allow_regular,
-                    allow_list_offset,
-                    allow_list,
-                    allow_record,
-                    allow_union,
-                )
-            )
-            no_outer_option = forced_leaf_only or not any(
-                (
-                    allow_indexed_option,
-                    allow_byte_masked,
-                    allow_bit_masked,
-                    allow_unmasked,
-                )
-            )
-            if no_outer_wrapper and no_outer_option:
-                if not (allow_numpy or allow_string or allow_bytestring):
-                    return True
-        return False
-
-    # Call the test subject
-    expect_raised = False
-    with ExitStack() as stack:
-        if _expect_raised():
-            expect_raised = True
-            stack.enter_context(pytest.raises(ValueError))
-        c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
-
-    if expect_raised:
-        return
-
-    # Assert the result is always an ak.contents.Content
-    assert isinstance(c, ak.contents.Content)
-
-    # Assert the options were effective
-    dtypes = opts.kwargs.get('dtypes', None)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    allow_nan = opts.kwargs.get('allow_nan', True)
     max_leaf_size = opts.kwargs.get('max_leaf_size')
+    min_length = opts.kwargs.get('min_length', 0)
     max_length = opts.kwargs.get('max_length')
+    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
 
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
