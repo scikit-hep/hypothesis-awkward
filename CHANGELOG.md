@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.18.0] - 2026-05-05
+
+### Features
+
+- Add `min_length` to `regular_array_contents` ([#101](https://github.com/scikit-hep/hypothesis-awkward/pull/101))
+- Add `min_length` to `list_offset_array_contents` ([#102](https://github.com/scikit-hep/hypothesis-awkward/pull/102))
+- Add `min_length` to `list_array_contents` ([#104](https://github.com/scikit-hep/hypothesis-awkward/pull/104))
+- Add `min_length` to `record_array_contents` ([#105](https://github.com/scikit-hep/hypothesis-awkward/pull/105))
+- Add `min_length` to `union_array_contents` ([#107](https://github.com/scikit-hep/hypothesis-awkward/pull/107))
+- Add `min_size` to `indexed_option_array_contents` ([#108](https://github.com/scikit-hep/hypothesis-awkward/pull/108))
+- Add `min_length` to `contents()` and propagate end-to-end ([#109](https://github.com/scikit-hep/hypothesis-awkward/pull/109))
+- Add `masked_contents()` strategy ([#110](https://github.com/scikit-hep/hypothesis-awkward/pull/110))
+
+### Documentation
+
+- Expand `get_contents()` docstring with per-layout examples ([#100](https://github.com/scikit-hep/hypothesis-awkward/pull/100))
+- Standardize on single backticks in docstrings ([#111](https://github.com/scikit-hep/hypothesis-awkward/pull/111))
+- Document PR title audience and style guidance ([#113](https://github.com/scikit-hep/hypothesis-awkward/pull/113))
+
+### Testing
+
+- Add leaf axis to `max_length` reachability tests ([#99](https://github.com/scikit-hep/hypothesis-awkward/pull/99))
+- Add `min_length` coverage to `_st_offsets` unit tests ([#103](https://github.com/scikit-hep/hypothesis-awkward/pull/103))
+- Stabilize `test_draw_max_length` against CI flake ([#106](https://github.com/scikit-hep/hypothesis-awkward/pull/106))
+- Cover `contents()` raise when `max_depth=0` and `min_length>0` ([#112](https://github.com/scikit-hep/hypothesis-awkward/pull/112))
+- Generate only valid kwargs in `contents()` property test ([#115](https://github.com/scikit-hep/hypothesis-awkward/pull/115))
+
+### Build & CI
+
+- Bump `hypothesis>=6.152.4` and add `Phase.explain` ([#114](https://github.com/scikit-hep/hypothesis-awkward/pull/114))
+
+### Meta
+
+- Refresh `.design/` docs to match current code
+- Add `min_length` research and API notes
+- Refresh `.claude/` and `.design/` docs to match current code
+
+
 ## [0.17.0] - 2026-04-24
 
 ### Features
