@@ -269,6 +269,7 @@ def contents(
         candidates.append(unmasked_array_from_contents)
 
     if not candidates:
+        assume(leaf_feasible)
         return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
 
     st_option_: StOption | None = (
