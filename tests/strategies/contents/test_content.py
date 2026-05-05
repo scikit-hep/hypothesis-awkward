@@ -4,7 +4,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import find, given, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -301,6 +301,35 @@ def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
             for n in iter_contents(c)
             if n is not c
         ),
+    )
+
+
+def test_draw_min_length_gt_leaf_max_size() -> None:
+    """Assert that `contents()` does not raise when `min_length > max_leaf_size`.
+
+    Regression test. When an option wrapper that forwards `min_length`
+    (e.g. byte/bit-masked or unmasked) recurses with `allow_option_root=False`
+    and `allow_union_root=False`, the inner call can have empty `candidates`
+    while `leaf_max_size < min_length`. The fallback must `assume(...)` the
+    leaf bound rather than raise `InvalidArgument`.
+    """
+    find(
+        st_ak.contents.contents(
+            max_size=3,
+            max_leaf_size=1,
+            min_length=2,
+            allow_numpy=False,
+            allow_empty=False,
+            allow_bytestring=False,
+            allow_regular=False,
+            allow_list_offset=False,
+            allow_list=False,
+            allow_record=False,
+            allow_bit_masked=False,
+            allow_unmasked=False,
+        ),
+        lambda _: True,
+        settings=settings(phases=[Phase.generate], derandomize=True),
     )
 
 
