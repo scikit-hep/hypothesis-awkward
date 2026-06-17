@@ -114,13 +114,8 @@ array=<Array [None, -768614336404561008-11, ..., None] type='6 * ?datetime64[M]'
 array=<Array [??, ??] type='2 * option[var * 1 * string]'>
 ```
 
-The current version generates arrays with `NumpyArray`, `EmptyArray`, string,
-and bytestring as leaf contents that can be nested multiple levels deep in
-`RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, and `UnionArray`.
-Option types (`IndexedOptionArray`, `ByteMaskedArray`, `BitMaskedArray`,
-`UnmaskedArray`) add nullable values shown as `None` in the output. The `?` in
-type strings (e.g., `?int64`) indicates option types. Arrays might be virtual,
-shown as `??` in the output.
+In the type strings above, a `?` marks an option type (e.g., `?int64`), whose
+missing values print as `None`. Virtual arrays print as `??`.
 
 ### The options of `arrays()`
 
