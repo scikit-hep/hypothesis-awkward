@@ -1,6 +1,6 @@
-# hypothesis-awkward
+# Hypothesis-awkward
 
-_Hypothesis strategies for Awkward Arrays._
+_Hypothesis strategies for Awkward Array._
 
 [![pypi-python-badge]][pypi] [![pypi-badge]][pypi]
 [![conda-forge-badge]][conda-forge]
@@ -22,40 +22,32 @@ _Hypothesis strategies for Awkward Arrays._
   https://codecov.io/gh/scikit-hep/hypothesis-awkward/graph/badge.svg?token=cffic9D2b3
 [codecov]: https://codecov.io/gh/scikit-hep/hypothesis-awkward
 
-[Hypothesis] is a _property-based testing_ library. Its [_strategies_][hyp-st]
-are Python functions that strategically generate test data that can fail test
-cases in _pytest_ and other testing frameworks. Once a test fails, Hypothesis
-searches for the simplest sample that causes the same error. Hypothesis
-automatically explores edge cases; developers do not need to craft test data
-manually.
+[Awkward Array][awkward-array] represents deeply nested, variable-length, and
+mixed-type data — the kind of irregular structure common in scientific datasets.
+Its valid arrays therefore span a vast combinatorial space, and test data
+written by hand covers only a small corner of it. The edge cases that break code
+tend to hide in the parts no one thought to write down.
 
-Property-based testing is useful for finding edge cases in _array_ libraries and
-in code that uses them. In fact, Hypothesis strategies for [NumPy][hyp-st-numpy]
-and [pandas][hyp-st-pandas] data types are included in Hypothesis itself.
-[Xarray] provides [strategies for its data structure][xarray-st]. The _Apache
-Arrow_ codebase has [strategies for PyArrow][pyarrow-st], which are not
-officially documented in its API reference.
+_Property-based testing_ addresses this. Instead of asserting specific outputs
+for hand-picked inputs, you assert properties that should hold for any valid
+input and let the framework generate the inputs. [Hypothesis] is a
+property-based testing library for Python: its [_strategies_][hyp-st] are
+composable objects that describe how to build test data, and when a test fails
+Hypothesis _shrinks_ it, searching for a minimal sample that still triggers the
+failure.
 
-This package, [hypothesis-awkward], is a collection of Hypothesis strategies for
-[Awkward Array][awkward-array], which can represent a wide variety of layouts of
-nested, variable-length, and mixed-type data. The current version of this
-package includes strategies that generate samples with certain types of layouts.
-The goal is to develop strategies that can generate fully general Awkward Arrays
-with multiple options to control the layout, data types, missing values, masks,
-and other array attributes. These strategies can help close in on edge cases in
-tools that use Awkward Array, and Awkward Array itself.
+This package, [hypothesis-awkward], brings property-based testing to Awkward
+Array with a collection of strategies for generating Awkward Arrays. Its main
+strategy, [`arrays()`][api-ref-arrays], generates nearly fully general Awkward
+Arrays: called with no arguments, it produces nested, variable-length, record,
+and union layouts; leaf values of any NumPy dtype Awkward Array supports, as
+well as strings and bytestrings; optional, masked, and missing values; and
+virtual arrays — with options to constrain any of these. The goal is full
+generality, so these strategies can surface edge cases in tools that use Awkward
+Array, and in Awkward Array itself.
 
 [hypothesis]: https://github.com/HypothesisWorks/hypothesis
 [hyp-st]: https://hypothesis.readthedocs.io/en/latest/reference/strategies.html
-[hyp-st-numpy]:
-  https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#numpy
-[hyp-st-pandas]:
-  https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#pandas
-[xarray]: https://xarray.dev/
-[xarray-st]:
-  https://docs.xarray.dev/en/stable/user-guide/testing.html#hypothesis-testing
-[pyarrow-st]:
-  https://github.com/apache/arrow/blob/apache-arrow-22.0.0/python/pyarrow/tests/strategies.py
 [hypothesis-awkward]: https://github.com/scikit-hep/hypothesis-awkward
 [awkward-array]: https://awkward-array.org/
 
