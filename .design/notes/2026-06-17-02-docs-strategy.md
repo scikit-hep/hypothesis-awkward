@@ -45,7 +45,7 @@ deliberately one consolidated note; sections will be split out later (see
 - **Symptom to fix**: the README intro is duplicated nearly verbatim in
   [`docs/index.md`](../../docs/index.md). Hand-written prose goes out of date
   and gets duplicated, while the generated reference never does. See
-  [`2026-06-17-readme-intro-persona-review.md`](./2026-06-17-readme-intro-persona-review.md).
+  [`2026-06-17-01-readme-intro-persona-review.md`](./2026-06-17-01-readme-intro-persona-review.md).
 
 ## Tooling findings (Zensical)
 
@@ -104,7 +104,7 @@ each also rates how relevant the page is to them. A page is written well when
 the personas it serves find it relevant and useful, and the personas it does not
 serve can tell early in the page that it is not for them, while still seeing
 that it is useful to other readers. See
-[`2026-06-17-readme-intro-persona-review.md`](./2026-06-17-readme-intro-persona-review.md).
+[`2026-06-17-01-readme-intro-persona-review.md`](./2026-06-17-01-readme-intro-persona-review.md).
 
 | Persona                      | Reads as                                                                                                                                                                  | Owns (lens)                                                                                                                |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -196,13 +196,14 @@ durable link targets (glossary, supported-types table).
 - Page-plan edited every release (a living backlog) → extract to its own
   `notes/` file.
 - Exemplars section grows or more sites are added → promote to
-  `.design/research/2026-06-17-docs-exemplars-research.md` (its proper bucket).
+  `.design/research/2026-06-17-01-docs-exemplars-research.md` (its proper
+  bucket).
 - Docs-initiative files exceed ~4 → promote to a `.design/docs/` subdirectory
   and add it to `.design/README.md`.
 
 ## Related
 
-- [`2026-06-17-readme-intro-persona-review.md`](./2026-06-17-readme-intro-persona-review.md)
+- [`2026-06-17-01-readme-intro-persona-review.md`](./2026-06-17-01-readme-intro-persona-review.md)
   — first worked example of the narrative-track workflow.
 - [`.claude/rules/ci.md`](../../.claude/rules/ci.md) — docs build & deploy
   workflows (Zensical + `mike`).

@@ -11,7 +11,7 @@ This document describes the API for `string_contents()` and
 `contents()` / `arrays()` pipeline.
 
 See
-[string-bytestring-research](../research/2026-02-12-string-bytestring-research.md)
+[string-bytestring-research](../research/2026-02-12-01-string-bytestring-research.md)
 for background on Awkward Array's string representation.
 
 ## Background

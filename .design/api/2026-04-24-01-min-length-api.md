@@ -14,10 +14,10 @@ This document specifies the API for a lower-bound counterpart to the existing
 callers can constrain the immediate `len(result)` to a range — and, by setting
 both bounds equal, pin the result to an exact length.
 
-See [min-length-research](../research/2026-04-24-min-length-research.md) for
+See [min-length-research](../research/2026-04-24-01-min-length-research.md) for
 motivation and the per-strategy survey. See
-[max-length-api](./2026-02-23-max-length-api.md) for the symmetric upper-bound
-contract that this design mirrors.
+[max-length-api](./2026-02-23-01-max-length-api.md) for the symmetric
+upper-bound contract that this design mirrors.
 
 ## Per-strategy contract
 

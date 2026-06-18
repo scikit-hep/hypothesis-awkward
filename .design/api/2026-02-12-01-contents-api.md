@@ -13,7 +13,7 @@
 >   prevents `UnionArray` at the outermost level only, without affecting deeper
 >   nesting. Not forwarded to `arrays()`.
 > - The bottom-up tree builder referenced in this document was replaced by a
->   [top-down builder](../impl/2026-02-21-contents-top-down-builder.md).
+>   [top-down builder](../impl/2026-02-21-01-contents-top-down-builder.md).
 >   `contents()` is now self-recursive (no inner `_build()` or
 >   `CountdownDrawer`).
 > - `UnionArray` support is fully implemented.
@@ -25,36 +25,36 @@
 >   selection is now in a `_st_group_sizes()` helper. See the updated section
 >   below.
 > - Research on a `max_length` parameter (immediate `len()` cap) is documented
->   in [max-length-research](../research/2026-02-23-max-length-research.md).
+>   in [max-length-research](../research/2026-02-23-01-max-length-research.md).
 > - `regular_array_contents()` gained `max_length` parameter to cap the number
->   of groups. See [max-length-api](./2026-02-23-max-length-api.md).
+>   of groups. See [max-length-api](./2026-02-23-01-max-length-api.md).
 > - `list_offset_array_contents()` and `list_array_contents()` gained
 >   `max_length` parameter to cap the number of lists, replacing the
 >   module-level `MAX_LIST_LENGTH` constant. See
->   [max-length-api](./2026-02-23-max-length-api.md).
+>   [max-length-api](./2026-02-23-01-max-length-api.md).
 > - `record_array_contents()` gained `max_length` parameter to cap the record
->   length. See [max-length-api](./2026-02-23-max-length-api.md).
+>   length. See [max-length-api](./2026-02-23-01-max-length-api.md).
 > - `union_array_contents()` gained `max_length` parameter to cap the union
 >   length. When the total content length exceeds `max_length`, non-compact
 >   indexing is used (tags/index are truncated after shuffling). See
->   [max-length-api](./2026-02-23-max-length-api.md).
+>   [max-length-api](./2026-02-23-01-max-length-api.md).
 > - `numpy_array_contents()`, `string_contents()`, `bytestring_contents()`, and
 >   `leaf_contents()` gained `max_length` parameter. For leaf strategies,
 >   `max_length` and `max_size` constrain the same dimension; the effective
 >   limit is `min(max_size, max_length)`. See
->   [max-length-api](./2026-02-23-max-length-api.md).
+>   [max-length-api](./2026-02-23-01-max-length-api.md).
 >
 > **Update (2026-04-24):** Further drift from the `contents()` signature shown
 > below:
 >
 > - Option-type flags are now implemented: `allow_indexed_option`,
 >   `allow_byte_masked`, `allow_bit_masked`, `allow_unmasked` (all default
->   `True`). See [option-contents-api](2026-03-27-option-contents-api.md) and
->   [option-integration-api](2026-03-27-option-integration-api.md).
+>   `True`). See [option-contents-api](2026-03-27-01-option-contents-api.md) and
+>   [option-integration-api](2026-03-27-02-option-integration-api.md).
 > - `allow_option_root` internal flag was added (analogous to
 >   `allow_union_root`) to prevent option-inside-option nesting.
 > - `max_leaf_size` parameter was added alongside `max_size` (total
->   `content_size()`). See [max-size-api](./2026-03-29-max-size-api.md).
+>   `content_size()`). See [max-size-api](./2026-03-29-01-max-size-api.md).
 > - Defaults changed: `max_size=50` (was `10`), `allow_nan=True` (was `False`),
 >   `max_depth=None` (was `5`).
 >
@@ -62,7 +62,7 @@
 >
 > - `min_length` parameter was added to `contents()` (and to the wrapper /
 >   option strategies it composes), pinning a lower bound on `len(result)`. See
->   [min-length-api](2026-04-24-min-length-api.md).
+>   [min-length-api](2026-04-24-01-min-length-api.md).
 > - `masked_contents()` was added as a public selector over `ByteMaskedArray`,
 >   `BitMaskedArray`, and `UnmaskedArray`. It is the length-preserving sibling
 >   of `option_contents()` (whose indexed-option branch chooses its own length).
@@ -75,13 +75,13 @@ The `contents/` package is the layout generation layer: it produces Awkward
 Array internal structures (`NumpyArray`, `EmptyArray`, `RegularArray`,
 `ListOffsetArray`, `ListArray`, `RecordArray`, `UnionArray`) that the
 `constructors/` package wraps in `ak.Array`. See
-[arrays-api.md](./2026-02-04-arrays-api.md) for the `arrays()` strategy that
+[arrays-api.md](./2026-02-04-01-arrays-api.md) for the `arrays()` strategy that
 consumes `contents()`.
 
 ## Background
 
-From the [arrays API design](./2026-02-04-arrays-api.md) and
-[direct constructors research](./../research/2026-02-04-direct-constructors-research.md):
+From the [arrays API design](./2026-02-04-01-arrays-api.md) and
+[direct constructors research](./../research/2026-02-04-01-direct-constructors-research.md):
 
 - The generation pipeline is: Content layout -> `ak.Array` (single step)
 - Direct constructors validate inputs at construction time
@@ -106,7 +106,7 @@ From the [arrays API design](./2026-02-04-arrays-api.md) and
 ## API
 
 > **Note:** Signatures below show the current code. See
-> [positional-keyword-convention](../notes/2026-02-12-positional-keyword-convention.md)
+> [positional-keyword-convention](../notes/2026-02-12-01-positional-keyword-convention.md)
 > for the keyword-only convention adopted after this document was written.
 > `contents()`, `numpy_array_contents()`, and `leaf_contents()` fall in Group B
 > (all keyword-only). The wrapper strategies (`regular_array_contents`,
@@ -144,7 +144,7 @@ def contents(
 - **`dtypes`** — Strategy for NumPy scalar dtypes used in `NumpyArray` leaves.
   If `None` (default), uses `supported_dtypes()`. Follows the same convention as
   `arrays(dtypes=...)`. Note: only a strategy or `None`, not a plain `np.dtype`
-  (see [arrays-api.md](./2026-02-04-arrays-api.md), Design Decision 5).
+  (see [arrays-api.md](./2026-02-04-01-arrays-api.md), Design Decision 5).
 
 - **`max_size`** — Maximum total number of scalar values across all leaf
   `NumpyArray` nodes. Default: `10`. Controls the total scalar budget, not just
@@ -181,7 +181,7 @@ def contents(
   `RecordArray` can appear at any depth and may have one or more children. When
   enabled, the tree builder can produce multi-child nodes (named or tuple
   records). See
-  [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for
+  [contents-tree-builder](../impl/2026-02-17-01-contents-tree-builder.md) for
   algorithm details.
 
 - **`allow_union`** — Generate `UnionArray` nodes. Default: `True`. `UnionArray`
@@ -190,13 +190,13 @@ def contents(
   to records. Direct children of a `UnionArray` cannot themselves be
   `UnionArray` (no nested unions); indirect nesting via list or record nodes is
   valid. See
-  [union-array-research](../research/2026-02-17-union-array-research.md).
+  [union-array-research](../research/2026-02-17-02-union-array-research.md).
 
 - **`max_depth`** — Maximum nesting depth for structural wrappers. Default: `5`.
   `max_depth=0` forces leaf-only arrays. At each level, a coin flip decides
   whether to go deeper or produce a leaf. See
-  [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) for the
-  bottom-up tree builder algorithm.
+  [contents-tree-builder](../impl/2026-02-17-01-contents-tree-builder.md) for
+  the bottom-up tree builder algorithm.
 
 #### No `min_size`
 
@@ -244,7 +244,7 @@ def leaf_contents(
   Default: `None` (no constraint). For leaf strategies, `max_length` and
   `max_size` constrain the same dimension, so the effective limit is
   `min(max_size, max_length)`. Forwarded to each leaf sub-strategy. See
-  [max-length-api](./2026-02-23-max-length-api.md).
+  [max-length-api](./2026-02-23-01-max-length-api.md).
 
 - **`allow_numpy`** — Generate `NumpyArray`. Default: `True`. At least one of
   `allow_numpy` or `allow_empty` must be `True`; disabling both raises
@@ -299,7 +299,7 @@ def numpy_array_contents(
 - **`max_length`** — Upper bound on the immediate `len()` of the result.
   Default: `None` (no constraint). The effective limit is
   `min(max_size, max_length)`. See
-  [max-length-api](./2026-02-23-max-length-api.md).
+  [max-length-api](./2026-02-23-01-max-length-api.md).
 
 #### Implementation
 
@@ -351,7 +351,7 @@ def regular_array_contents(
 
 - **`max_length`** — Upper bound on the number of groups, i.e., `len(result)`.
   Default: `None` (no constraint). See
-  [max-length-api](./2026-02-23-max-length-api.md).
+  [max-length-api](./2026-02-23-01-max-length-api.md).
 
 #### Behavior
 
@@ -388,7 +388,7 @@ def list_offset_array_contents(
 - **`content`** — Same three-form dispatch as `regular_array_contents()`.
 
 - **`max_length`** — Upper bound on the number of lists, i.e., `len(result)`.
-  Default: `5`. See [max-length-api](./2026-02-23-max-length-api.md).
+  Default: `5`. See [max-length-api](./2026-02-23-01-max-length-api.md).
 
 #### Behavior
 
@@ -417,7 +417,7 @@ def list_array_contents(
 - **`content`** — Same three-form dispatch as `regular_array_contents()`.
 
 - **`max_length`** — Upper bound on the number of lists, i.e., `len(result)`.
-  Default: `5`. See [max-length-api](./2026-02-23-max-length-api.md).
+  Default: `5`. See [max-length-api](./2026-02-23-01-max-length-api.md).
 
 #### Behavior
 
@@ -458,7 +458,7 @@ def record_array_contents(
 
 - **`max_length`** — Upper bound on the record length, i.e., `len(result)`.
   Default: `None` (no constraint). See
-  [max-length-api](./2026-02-23-max-length-api.md).
+  [max-length-api](./2026-02-23-01-max-length-api.md).
 
 #### Behavior
 
@@ -498,7 +498,7 @@ def union_array_contents(
 
 - **`max_length`** — Upper bound on the union length, i.e., `len(result)`.
   Default: `None` (no constraint). See
-  [max-length-api](./2026-02-23-max-length-api.md).
+  [max-length-api](./2026-02-23-01-max-length-api.md).
 
 #### Behavior
 
@@ -562,7 +562,7 @@ randomly choosing wrappers.
 - `Strategy` enables composition (e.g., `contents()` passes `st.just(content)`)
 - Concrete `Content` enables deterministic wrapping in tests
 - `contents()` implements the composition via a bottom-up tree builder; see
-  [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md)
+  [contents-tree-builder](../impl/2026-02-17-01-contents-tree-builder.md)
 
 ### 3. Polymorphic `content` Parameter (Three-Form Dispatch)
 
@@ -589,7 +589,7 @@ match content:
 ### 4. `content` Is Positional
 
 **Decision:** `content` is a positional parameter in wrapper strategies, per the
-[positional-keyword-convention](../notes/2026-02-12-positional-keyword-convention.md)
+[positional-keyword-convention](../notes/2026-02-12-01-positional-keyword-convention.md)
 (Group A).
 
 **Rationale:**
@@ -874,8 +874,8 @@ values.
    wrapper chain to a bottom-up tree builder. The `_build(depth)` recursive
    function draws "deeper?" and "another edge?" coin flips to produce
    multi-child nodes. See
-   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md). Option
-   types remain an open question.
+   [contents-tree-builder](../impl/2026-02-17-01-contents-tree-builder.md).
+   Option types remain an open question.
 
 ## Completed
 
@@ -892,14 +892,14 @@ values.
 ## Next Steps
 
 1. ~~Add `RecordArray` support (`record_array_contents()`)~~ ✓ — see
-   [contents-tree-builder](../impl/2026-02-17-contents-tree-builder.md) and
-   [record-array-research](../research/2026-02-17-record-array-research.md)
+   [contents-tree-builder](../impl/2026-02-17-01-contents-tree-builder.md) and
+   [record-array-research](../research/2026-02-17-01-record-array-research.md)
 2. Add option type support (`indexed_option_array_contents()`,
    `byte_masked_array_contents()`, etc.)
 3. ~~Add `UnionArray` support (`union_array_contents()`)~~ ✓ — see
-   [union-array-research](../research/2026-02-17-union-array-research.md)
+   [union-array-research](../research/2026-02-17-02-union-array-research.md)
 4. ~~Add string/bytestring support~~ ✓ — see
-   [string-bytestring-api](./2026-02-13-string-bytestring-api.md)
+   [string-bytestring-api](./2026-02-13-01-string-bytestring-api.md)
 5. ~~Consider exposing `MAX_REGULAR_SIZE` / `MAX_LIST_LENGTH` as parameters~~
    Done — `regular_array_contents()` exposes `max_size` and `max_zeros_length`;
    `list_offset_array_contents()` and `list_array_contents()` expose

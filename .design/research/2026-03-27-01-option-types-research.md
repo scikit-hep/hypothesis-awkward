@@ -188,7 +188,7 @@ scalars regardless of how many entries are masked as None.
 
 However, option types with buffers (index, mask) are **not** transparent to
 total `content_size()` (`max_size`). See
-[option-integration-api](../api/2026-03-27-option-integration-api.md#max_size--deduct-buffer-overhead)
+[option-integration-api](../api/2026-03-27-02-option-integration-api.md#max_size--deduct-buffer-overhead)
 for `content_size()` formulas.
 
 For `IndexedOptionArray`, the index can reference content elements multiple

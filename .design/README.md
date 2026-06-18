@@ -31,8 +31,14 @@ hypothesis-awkward.
 
 ## Naming Convention
 
-- Research files: `YYYY-MM-DD-<topic>-research.md` (e.g.,
-  `2026-02-02-numpy-form-research.md`). UX interviews use
-  `YYYY-MM-DD-ux-interview-NN.md`.
-- API design files: `YYYY-MM-DD-<feature>-api.md`
-- Implementation files: `YYYY-MM-DD-<topic>.md`
+Every file is prefixed with its date and a two-digit intra-day sequence:
+`YYYY-MM-DD-NN-<topic>.md`. The `NN` orders files created on the same day within
+a directory (`01`, `02`, …); use `01` when a file is the only one that day. This
+keeps a directory listing in chronological order. Per-type topic conventions:
+
+- Research files: `YYYY-MM-DD-NN-<topic>-research.md` (e.g.,
+  `2026-02-02-01-numpy-form-research.md`). UX interviews use
+  `YYYY-MM-DD-NN-ux-interview-MM.md`, where `MM` is the interview number.
+- API design files: `YYYY-MM-DD-NN-<feature>-api.md`
+- Implementation files: `YYYY-MM-DD-NN-<topic>.md`
+- Notes: `YYYY-MM-DD-NN-<topic>.md`

@@ -126,8 +126,8 @@ everything together:
 
 ## Status
 
-In progress. See [max-length-api](../api/2026-02-23-max-length-api.md) for the
-API design.
+In progress. See [max-length-api](../api/2026-02-23-01-max-length-api.md) for
+the API design.
 
 ### Completed
 

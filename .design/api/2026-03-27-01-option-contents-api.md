@@ -25,8 +25,8 @@ This document describes the API for the per-type option content strategies and
 the combined `option_contents()` selector. A separate document covers
 integration into `contents()` and `arrays()`.
 
-See [option-types-research](../research/2026-03-27-option-types-research.md) for
-background on Awkward Array's option-type Content classes.
+See [option-types-research](../research/2026-03-27-01-option-types-research.md)
+for background on Awkward Array's option-type Content classes.
 
 ## Design Goals
 
