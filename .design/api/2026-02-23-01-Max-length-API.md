@@ -11,7 +11,7 @@ This document describes the API for adding a `max_length` parameter to the
 content at a single level, independent of `max_size` (total scalar budget across
 all leaves).
 
-See [max-length-research](../research/2026-02-23-01-max-length-research.md) for
+See [max-length-research](../research/2026-02-23-01-Max-length-research.md) for
 background on the two length concepts and motivation.
 
 ## Background
@@ -310,7 +310,7 @@ the shuffled tags/index arrays are truncated rather than rejected via
 
 ## Implementation Order
 
-See [max-length-research](../research/2026-02-23-01-max-length-research.md) for
+See [max-length-research](../research/2026-02-23-01-Max-length-research.md) for
 the bottom-up implementation order. Wrapper strategies are implemented first
 (they receive `max_length`), then leaves, then the entry points that wire
 everything together.

@@ -12,9 +12,9 @@ This document describes how option types are integrated into the `contents()`
 tree builder and the `arrays()` public API. It covers the new flags, depth/size
 semantics, and the UnionArray coordination.
 
-See [option-contents-api](2026-03-27-01-option-contents-api.md) for the per-type
+See [option-contents-api](2026-03-27-01-Option-contents-API.md) for the per-type
 option strategies. See
-[option-types-research](../research/2026-03-27-01-option-types-research.md) for
+[option-types-research](../research/2026-03-27-01-Option-types-research.md) for
 background.
 
 ## Changes to `contents()`
@@ -144,7 +144,7 @@ determined by their parent.
 ## UnionArray Coordination
 
 Per the "all or none" rule (see
-[option-types-research](../research/2026-03-27-01-option-types-research.md#unionarray-all-or-none-rule)),
+[option-types-research](../research/2026-03-27-01-Option-types-research.md#unionarray-all-or-none-rule)),
 `UnionArray` requires either all or none of its contents to be option types.
 
 When `contents()` generates a `UnionArray`, it flips a coin to decide whether

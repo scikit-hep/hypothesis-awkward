@@ -106,7 +106,7 @@ And `RecordArray` can contain any content type as field values:
 - String/bytestring content (leaf-like `ListOffsetArray` with `__array__`)
 
 (From the nesting constraint table in
-[direct-constructors-research](./2026-02-04-01-direct-constructors-research.md#content-nesting-constraints).)
+[direct-constructors-research](./2026-02-04-01-Direct-constructors-research.md#content-nesting-constraints).)
 
 ## Length Coordination
 
@@ -350,5 +350,5 @@ RecordArray([
 
 - [How to create arrays — Direct constructors](https://awkward-array.org/doc/main/user-guide/how-to-create-constructors.html)
 - [ak.contents.RecordArray reference](https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html)
-- [Direct constructors research](./2026-02-04-01-direct-constructors-research.md)
-- [String/bytestring research](./2026-02-12-01-string-bytestring-research.md)
+- [Direct constructors research](./2026-02-04-01-Direct-constructors-research.md)
+- [String/bytestring research](./2026-02-12-01-String-bytestring-research.md)

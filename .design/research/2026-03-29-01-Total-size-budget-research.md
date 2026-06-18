@@ -101,7 +101,7 @@ above.
 
 ## Proposed API
 
-See [max-size-api](../api/2026-03-29-01-max-size-api.md) for the API design:
+See [max-size-api](../api/2026-03-29-01-Max-size-API.md) for the API design:
 `content_size()` definition, `max_size` and `max_leaf_size` parameters, default
 values, signatures, and design decisions.
 
@@ -287,7 +287,7 @@ def _content_size(c: Content) -> int:
 
 3. **Should option types also have their mask buffers counted?** Option types
    are not yet implemented (see
-   `.design/research/2026-03-27-01-option-types-research.md`).
+   `.design/research/2026-03-27-01-Option-types-research.md`).
    `IndexedOptionArray` has an int64 index, `ByteMaskedArray` has an int8 mask,
    `BitMaskedArray` has a uint8 mask. These should be counted for consistency
    when implemented.

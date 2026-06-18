@@ -2,7 +2,7 @@
 
 - **Date:** 2026-02-17
 - **Status:** Superseded by
-  [top-down tree builder](2026-02-21-01-contents-top-down-builder.md)
+  [top-down tree builder](2026-02-21-01-Contents-top-down-builder.md)
 - **Author:** Claude (with developer collaboration)
 
 ## Overview
@@ -12,7 +12,7 @@ from a linear wrapper chain to a recursive bottom-up tree builder. This enables
 `RecordArray` support (and future `UnionArray`) by allowing multi-child nodes in
 the content tree.
 
-See [record-array-research](../research/2026-02-17-01-record-array-research.md)
+See [record-array-research](../research/2026-02-17-01-Record-array-research.md)
 for background on `RecordArray`.
 
 ## Motivation

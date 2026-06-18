@@ -34,11 +34,13 @@ hypothesis-awkward.
 Every file is prefixed with its date and a two-digit intra-day sequence:
 `YYYY-MM-DD-NN-<topic>.md`. The `NN` orders files created on the same day within
 a directory (`01`, `02`, …); use `01` when a file is the only one that day. This
-keeps a directory listing in chronological order. Per-type topic conventions:
+keeps a directory listing in chronological order. Topic words use sentence case
+(capitalize the first word); acronyms and proper nouns keep their canonical
+casing (README, API, UX, NumPy, PBT). Per-type topic conventions:
 
 - Research files: `YYYY-MM-DD-NN-<topic>-research.md` (e.g.,
-  `2026-02-02-01-numpy-form-research.md`). UX interviews use
-  `YYYY-MM-DD-NN-ux-interview-MM.md`, where `MM` is the interview number.
-- API design files: `YYYY-MM-DD-NN-<feature>-api.md`
+  `2026-02-02-01-NumPy-form-research.md`). UX interviews use
+  `YYYY-MM-DD-NN-UX-interview-MM.md`, where `MM` is the interview number.
+- API design files: `YYYY-MM-DD-NN-<feature>-API.md`
 - Implementation files: `YYYY-MM-DD-NN-<topic>.md`
 - Notes: `YYYY-MM-DD-NN-<topic>.md`

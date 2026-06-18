@@ -262,10 +262,10 @@ RecordArray
 ## Current Status in hypothesis-awkward
 
 - **No string/bytestring strategy exists** in the codebase.
-- Listed as "next steps" item 4 in `.design/api/2026-02-12-01-contents-api.md`
+- Listed as "next steps" item 4 in `.design/api/2026-02-12-01-Contents-API.md`
   (line 642).
 - Planned `allow_string`/`allow_bytestring` flags in
-  `.design/api/2026-01-21-01-types-api.md`.
+  `.design/api/2026-01-21-01-Types-API.md`.
 - Existing `list_offset_array_contents()` and `list_array_contents()` do not
   accept `parameters` arguments.
 

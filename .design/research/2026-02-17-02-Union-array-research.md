@@ -446,6 +446,6 @@ unions gain an index on conversion to Awkward.
 
 - [ak.contents.UnionArray reference](https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html)
 - [How to create arrays — Direct constructors](https://awkward-array.org/doc/main/user-guide/how-to-create-constructors.html)
-- [Direct constructors research](./2026-02-04-01-direct-constructors-research.md)
-- [Record array research](./2026-02-17-01-record-array-research.md)
-- [Bottom-up tree builder](../impl/2026-02-17-01-contents-tree-builder.md)
+- [Direct constructors research](./2026-02-04-01-Direct-constructors-research.md)
+- [Record array research](./2026-02-17-01-Record-array-research.md)
+- [Bottom-up tree builder](../impl/2026-02-17-01-Contents-tree-builder.md)

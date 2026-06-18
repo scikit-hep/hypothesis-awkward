@@ -3,7 +3,7 @@
 - **Date:** 2026-02-21
 - **Status:** Implemented
 - **Supersedes:**
-  [Bottom-up tree builder](2026-02-17-01-contents-tree-builder.md)
+  [Bottom-up tree builder](2026-02-17-01-Contents-tree-builder.md)
 
 > **Note (2026-02-22):** The implementation differs from the pseudocode below:
 >

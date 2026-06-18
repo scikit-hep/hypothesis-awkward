@@ -2,7 +2,7 @@
 
 - **Date:** 2026-02-02
 - **Status:** Draft
-- **Related:** [forms-api.md](./../api/2026-02-02-01-forms-api.md)
+- **Related:** [forms-api.md](./../api/2026-02-02-01-Forms-API.md)
 
 ## Overview
 

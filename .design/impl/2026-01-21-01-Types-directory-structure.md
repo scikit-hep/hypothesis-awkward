@@ -2,7 +2,7 @@
 
 - **Date:** 2026-01-21
 - **Status:** Draft
-- **Related:** [types-api.md](./../api/2026-01-21-01-types-api.md)
+- **Related:** [types-api.md](./../api/2026-01-21-01-Types-API.md)
 
 ## Overview
 

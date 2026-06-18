@@ -8,9 +8,9 @@
 
 Previous work explored two intermediate approaches:
 
-1. **Types** (`.design/research/2026-01-21-01-type-system-research.md`) -- 8
+1. **Types** (`.design/research/2026-01-21-01-Type-system-research.md`) -- 8
    Type classes describing what data looks like; lossy (many Forms per Type)
-2. **Forms** (`.design/research/2026-02-03-01-form-system-research.md`) -- 12
+2. **Forms** (`.design/research/2026-02-03-01-Form-system-research.md`) -- 12
    Form classes describing structure; requires `ak.from_buffers()` to produce
    arrays
 
