@@ -11,6 +11,7 @@ nav = [
         { "Installation" = "guide/installation.md" },
         { "Getting Started" = "guide/getting-started.md" },
         { "Testing Awkward Array" = "guide/testing-awkward-array.md" },
+        { "Generating and Shrinking Samples" = "guide/generating-and-shrinking-samples.md" },
     ] },
     { "API Reference" = [
         { "Overview" = "reference/index.md" },
