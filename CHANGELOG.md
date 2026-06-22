@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.18.1] - 2026-06-22
+
+### Bug Fixes
+
+- `contents()` could raise when `min_length > max_leaf_size` ([#116](https://github.com/scikit-hep/hypothesis-awkward/pull/116))
+
+### Documentation
+
+- Rewrite README intro ([#119](https://github.com/scikit-hep/hypothesis-awkward/pull/119))
+- Add Testing Awkward Array guide page ([#121](https://github.com/scikit-hep/hypothesis-awkward/pull/121))
+- Explain how samples are generated and shrink ([#123](https://github.com/scikit-hep/hypothesis-awkward/pull/123))
+
+### Testing
+
+- Fix `--doctest-glob` so markdown doctests run ([#122](https://github.com/scikit-hep/hypothesis-awkward/pull/122))
+
+### Build & CI
+
+- Bump astral-sh/setup-uv from 8.1.0 to 8.2.0 ([#117](https://github.com/scikit-hep/hypothesis-awkward/pull/117))
+- Bump codecov/codecov-action from 6 to 7 ([#118](https://github.com/scikit-hep/hypothesis-awkward/pull/118))
+- Bump actions/checkout from 6 to 7 ([#120](https://github.com/scikit-hep/hypothesis-awkward/pull/120))
+
+### Meta
+
+- Add documentation strategy note
+- Revise documentation strategy note
+- Number `.design` files by intra-day sequence
+- Capitalize `.design` topic names (CHEP-style)
+- Split `update-docs` into `update-dot-claude` and `audit-dot-design`
+- Retitle docs note "Documentation Strategy" → "Documentation Plan"
+- Add `write-docs-page` skill and docs rules
+
+
 ## [0.18.0] - 2026-05-05
 
 ### Features
