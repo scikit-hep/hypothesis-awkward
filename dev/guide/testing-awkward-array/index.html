@@ -12,36 +12,36 @@
         <meta name="author" content="Tai Sakuma">
       
       
-        <link rel="canonical" href="https://scikit-hep.github.io/hypothesis-awkward/dev/guide/">
+        <link rel="canonical" href="https://scikit-hep.github.io/hypothesis-awkward/dev/guide/testing-awkward-array/">
       
       
-        <link rel="prev" href="./..">
+        <link rel="prev" href="../getting-started/">
       
       
-        <link rel="next" href="./installation/">
+        <link rel="next" href="../../reference/">
       
       
         
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="zensical-0.0.46">
     
     
       
-        <title>Guide - hypothesis-awkward</title>
+        <title>Testing Awkward Array - hypothesis-awkward</title>
       
     
     
       
         
       
-      <link rel="stylesheet" href="../assets/stylesheets/modern/main.19d3147f.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.19d3147f.min.css">
       
         
           
         
-        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.dfe2e883.min.css">
       
       
 
@@ -60,9 +60,9 @@
       
     
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
     
       
 
@@ -87,7 +87,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#guide" class="md-skip">
+        <a href="#testing-awkward-array" class="md-skip">
           Skip to content
         </a>
       
@@ -102,12 +102,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="../..">
+  <a href="../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -119,7 +119,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="./.." title="hypothesis-awkward" class="md-header__button md-logo" aria-label="hypothesis-awkward" data-md-component="logo">
+    <a href="../.." title="hypothesis-awkward" class="md-header__button md-logo" aria-label="hypothesis-awkward" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -139,7 +139,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Guide
+              Testing Awkward Array
             
           </span>
         </div>
@@ -217,7 +217,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="./.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   Home
@@ -252,7 +252,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="././" class="md-tabs__link">
+        <a href="../" class="md-tabs__link">
           
   
   Guide
@@ -284,7 +284,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../reference/" class="md-tabs__link">
+        <a href="../../reference/" class="md-tabs__link">
           
   
   API Reference
@@ -323,7 +323,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="./.." title="hypothesis-awkward" class="md-nav__button md-logo" aria-label="hypothesis-awkward" data-md-component="logo">
+    <a href="../.." title="hypothesis-awkward" class="md-nav__button md-logo" aria-label="hypothesis-awkward" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
@@ -341,7 +341,7 @@
   
   
     <li class="md-nav__item">
-      <a href="./.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -401,7 +401,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="././" class="md-nav__link md-nav__link--active">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -418,7 +418,7 @@
             </a>
             
               
-              <label class="md-nav__link md-nav__link--active" for="__nav_2" id="__nav_2_label" tabindex="">
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
@@ -443,7 +443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="./installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -470,7 +470,7 @@
   
   
     <li class="md-nav__item">
-      <a href="./getting-started/" class="md-nav__link">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   
@@ -494,10 +494,36 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="./testing-awkward-array/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Testing Awkward Array
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
@@ -512,6 +538,88 @@
   
 
       </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-hypothesis-awkward-tests-awkward-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How hypothesis-awkward tests Awkward Array
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bugs-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Bugs found
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bugs found">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#awkward-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Awkward Array
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hypothesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Hypothesis
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outlook" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Outlook
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -558,7 +666,7 @@
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../reference/" class="md-nav__link ">
+            <a href="../../reference/" class="md-nav__link ">
               
   
   
@@ -660,7 +768,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/strategies/constructors/" class="md-nav__link">
+      <a href="../../reference/strategies/constructors/" class="md-nav__link">
         
   
   
@@ -687,7 +795,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/strategies/contents/" class="md-nav__link">
+      <a href="../../reference/strategies/contents/" class="md-nav__link">
         
   
   
@@ -714,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/strategies/numpy/" class="md-nav__link">
+      <a href="../../reference/strategies/numpy/" class="md-nav__link">
         
   
   
@@ -741,7 +849,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/strategies/builtins/" class="md-nav__link">
+      <a href="../../reference/strategies/builtins/" class="md-nav__link">
         
   
   
@@ -830,7 +938,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../reference/util/" class="md-nav__link">
+      <a href="../../reference/util/" class="md-nav__link">
         
   
   
@@ -882,6 +990,11 @@
                       
                     
                     
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
                   
                   <div class="md-sidebar__inner">
                     
@@ -893,6 +1006,75 @@
   
     
   
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-hypothesis-awkward-tests-awkward-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How hypothesis-awkward tests Awkward Array
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bugs-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Bugs found
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Bugs found">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#awkward-array" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Awkward Array
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hypothesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Hypothesis
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outlook" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Outlook
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -917,7 +1099,7 @@
   
   
     <li class="md-path__item">
-      <a href="./.." class="md-path__link">
+      <a href="../.." class="md-path__link">
         
   
   <span class="md-ellipsis">
@@ -951,7 +1133,7 @@
     
     
       <li class="md-path__item">
-        <a href="././" class="md-path__link">
+        <a href="../" class="md-path__link">
           
   
   <span class="md-ellipsis">
@@ -972,15 +1154,103 @@
                 
                   
 
-<h1 id="guide">Guide<a class="headerlink" href="#guide" title="Permanent link">&para;</a></h1>
-<p>This guide contains the following pages:</p>
+<h1 id="testing-awkward-array">Testing Awkward Array<a class="headerlink" href="#testing-awkward-array" title="Permanent link">&para;</a></h1>
+<p><a href="https://awkward-array.org/">Awkward Array</a> represents nested, variable-length,
+and mixed-type data, so its valid arrays span a large combinatorial space of
+layouts. Test data written by hand covers only a small part of that space, and
+failures often occur on input shapes that are absent from hand-written test
+cases. This makes Awkward Array hard to test thoroughly.</p>
+<p>This page is for Awkward Array contributors and for readers assessing the
+project. If you want to use the strategies in your own tests, start with
+<a href="../getting-started/">Getting Started</a>.</p>
+<h2 id="how-hypothesis-awkward-tests-awkward-array">How hypothesis-awkward tests Awkward Array<a class="headerlink" href="#how-hypothesis-awkward-tests-awkward-array" title="Permanent link">&para;</a></h2>
+<p>This package addresses that problem with property-based testing: running one
+test against many automatically generated inputs instead of a fixed list. Its
+main strategy, <code>constructors.arrays()</code>, generates nearly fully general Awkward
+Arrays, including virtual arrays (arrays whose buffers are not yet
+materialized). See <a href="../getting-started/">Getting Started</a> for what it produces.</p>
+<p>These strategies are integrated into Awkward Array's continuous integration
+(CI). The first property-based tests were added in
+<a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a> and now run on every
+change. Two kinds of properties are checked so far:</p>
+<p><strong>Round-trip.</strong> Converting an array to buffers with <code>ak.to_buffers()</code> and back
+with <code>ak.from_buffers()</code> reconstructs an equal array
+(<a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a>).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">given</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nd">@given</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_roundtrip</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">sent</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">to_buffers</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">returned</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_buffers</span><span class="p">(</span><span class="o">*</span><span class="n">sent</span><span class="p">)</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="k">assert</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">returned</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>Equality.</strong> <code>ak.array_equal()</code> is reflexive (an array equals itself) and
+symmetric (if <code>a</code> equals <code>b</code>, then <code>b</code> equals <code>a</code>)
+(<a href="https://github.com/scikit-hep/awkward/pull/3891">#3891</a>).</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@given</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_reflexivity</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">assert</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nd">@given</span><span class="p">(</span><span class="n">a1</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">(),</span> <span class="n">a2</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_symmetry</span><span class="p">(</span><span class="n">a1</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">,</span> <span class="n">a2</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="n">forward</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">backward</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">assert</span> <span class="n">forward</span> <span class="o">==</span> <span class="n">backward</span>
+</span></code></pre></div>
+<p><code>equal_nan=True</code> treats two <code>NaN</code> values as equal, which the generated
+floating-point arrays require. When a property fails, Hypothesis shrinks the
+input to a minimal failing array, which is why the reports below reduce to
+small, reproducible cases.</p>
+<p>The goal is to cover all testable properties of Awkward Array, including
+operations, slicing, reducers, and kernels.</p>
+<h2 id="bugs-found">Bugs found<a class="headerlink" href="#bugs-found" title="Permanent link">&para;</a></h2>
+<p>These tests have found bugs in both Awkward Array and Hypothesis.</p>
+<h3 id="awkward-array">Awkward Array<a class="headerlink" href="#awkward-array" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="installation/">Installation</a> — how to install the package</li>
-<li><a href="getting-started/">Getting Started</a> — how to use the <code>arrays()</code> strategy
-  with examples</li>
-<li><a href="testing-awkward-array/">Testing Awkward Array</a> — how the package tests
-  Awkward Array, and the bugs it has found</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/3888">#3888</a> (fixed) —
+  <code>ak.array_equal()</code> raises an error on virtual arrays and returns the wrong
+  result for empty unions.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3921">#3921</a> (fixed) —
+  <code>ak.array_equal()</code> returned the wrong result for datetimes and timedeltas
+  containing <code>NaT</code> (not-a-time).</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3962">#3962</a> (fixed) —
+  <code>ak.almost_equal()</code>, which backs <code>ak.array_equal()</code>, compared record-array
+  fields incorrectly.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4126">#4126</a> (open) —
+  <code>IndexedOptionArray.to_ByteMaskedArray</code> raises a <code>TypeError</code> when its content
+  is an empty <code>EmptyArray</code>.</li>
 </ul>
+<p>The test suite also reproduces or accounts for two known Awkward Array issues. A
+test in
+<a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/constructors/test_from_buffers.py"><code>test_from_buffers.py</code></a>
+reproduces an <code>ak.from_buffers()</code> bug with virtual buffers and a
+<code>RegularArray(size=0)</code> inside a <code>BitMaskedArray</code>; it raised an <code>AssertionError</code>
+on Awkward Array v2.9.0, is marked <code>xfail</code> for that version, and was fixed by
+<a href="https://github.com/scikit-hep/awkward/pull/3889">#3889</a>. A NumPy property test
+in
+<a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/numpy/test_numpy_arrays.py"><code>test_numpy_arrays.py</code></a>
+accounts for <a href="https://github.com/scikit-hep/awkward/issues/3690">#3690</a> (open):
+<code>ak.to_numpy()</code> does not support structured arrays whose fields are not
+one-dimensional.</p>
+<h3 id="hypothesis">Hypothesis<a class="headerlink" href="#hypothesis" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://github.com/HypothesisWorks/hypothesis/issues/4708">#4708</a> (fixed) —
+  an <code>AssertionError</code> in <code>Shrinker.explain()</code> for unstable span labels. Fixed in
+  <a href="https://github.com/HypothesisWorks/hypothesis/pull/4717">#4717</a> and released
+  in Hypothesis 6.152.4.</li>
+</ul>
+<h2 id="outlook">Outlook<a class="headerlink" href="#outlook" title="Permanent link">&para;</a></h2>
+<p>Broad, automatically generated test inputs raise confidence that a change is
+correct across the full range of valid arrays, not only the cases a developer
+wrote by hand. This supports iterative development and test-driven development
+(TDD) with artificial-intelligence (AI) coding assistants. The plan is to extend
+coverage to all testable properties of Awkward Array.</p>
+<!-- Living log: review the "Bugs found" section each release. -->
 
 
 
@@ -1020,7 +1290,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="./.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home">
+          <a href="../getting-started/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting Started">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
@@ -1030,20 +1300,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Home
+                Getting Started
               </div>
             </div>
           </a>
         
         
           
-          <a href="./installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Installation">
+          <a href="../../reference/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Installation
+                Overview
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1113,12 +1383,12 @@
     
       
       
-      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["announce.dismiss","content.code.annotate","content.code.copy","content.code.select","content.footnote.tooltips","content.tabs.link","content.tooltips","navigation.footer","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.instant.progress","navigation.path","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.top","navigation.tracking","search.highlight","toc.follow"],"search":"../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":["latest","dev"],"provider":"mike"}}</script>
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["announce.dismiss","content.code.annotate","content.code.copy","content.code.select","content.footnote.tooltips","content.tabs.link","content.tooltips","navigation.footer","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.instant.progress","navigation.path","navigation.sections","navigation.tabs","navigation.tabs.sticky","navigation.top","navigation.tracking","search.highlight","toc.follow"],"search":"../../assets/javascripts/workers/search.b6b7e04f.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":["latest","dev"],"provider":"mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.ee611ef6.min.js"></script>
+      <script src="../../assets/javascripts/bundle.ee611ef6.min.js"></script>
       
-        <script src="../javascripts/extra.js"></script>
+        <script src="../../javascripts/extra.js"></script>
       
     
   </body>
