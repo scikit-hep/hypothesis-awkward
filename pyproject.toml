@@ -48,7 +48,7 @@ check_dirty = false
 tag_sign = false
 
 [tool.pytest]
-addopts = ["--doctest-modules", "--doctest-glob='*.md'"]
+addopts = ["--doctest-modules", "--doctest-glob=*.md"]
 doctest_optionflags = ["ELLIPSIS"]
 filterwarnings = ["ignore::hypothesis.errors.NonInteractiveExampleWarning"]
 
