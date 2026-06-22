@@ -12,9 +12,13 @@
         <meta name="author" content="Tai Sakuma">
       
       
-        <link rel="canonical" href="https://scikit-hep.github.io/hypothesis-awkward/dev/strategies/builtins/">
+        <link rel="canonical" href="https://scikit-hep.github.io/hypothesis-awkward/dev/guide/generating-and-shrinking-samples/">
       
       
+        <link rel="prev" href="../testing-awkward-array/">
+      
+      
+        <link rel="next" href="../../reference/">
       
       
         
@@ -25,7 +29,7 @@
     
     
       
-        <title>Builtins - hypothesis-awkward</title>
+        <title>Generating and Shrinking Samples - hypothesis-awkward</title>
       
     
     
@@ -83,7 +87,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#builtins" class="md-skip">
+        <a href="#generating-and-shrinking-samples" class="md-skip">
           Skip to content
         </a>
       
@@ -135,7 +139,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Builtins
+              Generating and Shrinking Samples
             
           </span>
         </div>
@@ -227,6 +231,8 @@
   
   
   
+    
+  
   
     
       
@@ -247,8 +253,8 @@
     
     
     
-      <li class="md-tabs__item">
-        <a href="../../guide/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   Guide
@@ -360,6 +366,8 @@
       
   
   
+    
+  
   
   
     
@@ -381,20 +389,23 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../guide/" class="md-nav__link ">
+            <a href="../" class="md-nav__link ">
               
   
   
@@ -411,13 +422,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -436,7 +447,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guide/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -463,7 +474,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guide/getting-started/" class="md-nav__link">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   
@@ -490,7 +501,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../guide/testing-awkward-array/" class="md-nav__link">
+      <a href="../testing-awkward-array/" class="md-nav__link">
         
   
   
@@ -514,10 +525,36 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../guide/generating-and-shrinking-samples/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Generating and Shrinking Samples
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
         
   
   
@@ -532,6 +569,99 @@
   
 
       </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#generating-a-sample" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Generating a sample
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-hypothesis-shrinks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How Hypothesis shrinks
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shrinking-toward-simpler-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Shrinking toward simpler data
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Shrinking toward simpler data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-each-strategy-shrinks-toward" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What each strategy shrinks toward
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-shrink-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Verifying shrink quality
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Limitations
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -926,10 +1056,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#hypothesis_awkward.strategies.builtins_.builtin_safe_dtype_names" class="md-nav__link">
+  <a href="#generating-a-sample" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        builtin_safe_dtype_names
+        Generating a sample
       </span>
     </span>
   </a>
@@ -937,10 +1067,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hypothesis_awkward.strategies.builtins_.builtin_safe_dtypes" class="md-nav__link">
+  <a href="#how-hypothesis-shrinks" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        builtin_safe_dtypes
+        How Hypothesis shrinks
       </span>
     </span>
   </a>
@@ -948,10 +1078,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hypothesis_awkward.strategies.builtins_.items_from_dtype" class="md-nav__link">
+  <a href="#shrinking-toward-simpler-data" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        items_from_dtype
+        Shrinking toward simpler data
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Shrinking toward simpler data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-each-strategy-shrinks-toward" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What each strategy shrinks toward
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifying-shrink-quality" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Verifying shrink quality
       </span>
     </span>
   </a>
@@ -959,21 +1117,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hypothesis_awkward.strategies.builtins_.lists" class="md-nav__link">
+  <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        lists
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hypothesis_awkward.strategies.builtins_.from_list" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        from_list
+        Limitations
       </span>
     </span>
   </a>
@@ -998,430 +1145,211 @@
   
 
 
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  
+  <span class="md-ellipsis">
+    Guide
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
               
               <article class="md-content__inner md-typeset">
                 
                   
 
-<h1 id="builtins">Builtins<a class="headerlink" href="#builtins" title="Permanent link">&para;</a></h1>
-<!-- prettier-ignore -->
-
-
-<div class="doc doc-object doc-module">
-
-
-
-
-    <div class="doc doc-contents first">
-
-        <p>Strategies for built-in Python objects in the context of Awkward Array.</p>
-<p>These strategies are related to the section of Awkward Array User Guide <a href="https://awkward-array.org/doc/stable/user-guide/how-to-convert-python.html">"How to convert
-to/from Python objects"</a>.</p>
-
-
-
-
-
-
-
-
-
-
-
-<p><span class="doc-section-title">Functions:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;builtin_safe_dtype_names&lt;/span&gt;" href="./#hypothesis_awkward.strategies.builtins_.builtin_safe_dtype_names">builtin_safe_dtype_names</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Strategy for names of NumPy dtypes with corresponding Python built-in types.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;builtin_safe_dtypes&lt;/span&gt;" href="./#hypothesis_awkward.strategies.builtins_.builtin_safe_dtypes">builtin_safe_dtypes</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Strategy for NumPy dtypes with corresponding Python built-in types.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;items_from_dtype&lt;/span&gt;" href="./#hypothesis_awkward.strategies.builtins_.items_from_dtype">items_from_dtype</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Strategy for Python built-in type values for a given NumPy dtype.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;lists&lt;/span&gt;" href="./#hypothesis_awkward.strategies.builtins_.lists">lists</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Strategy for nested Python lists for which Awkward Arrays can be created.</p>
-                </div>
-              </td>
-            </tr>
-            <tr class="doc-section-item">
-              <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;from_list&lt;/span&gt;" href="./#hypothesis_awkward.strategies.builtins_.from_list">from_list</a></code></td>
-              <td>
-                <div class="doc-md-description">
-                  <p>Strategy for Awkward Arrays created from Python lists.</p>
-                </div>
-              </td>
-            </tr>
-      </tbody>
-    </table>
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="hypothesis_awkward.strategies.builtins_.builtin_safe_dtype_names" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">builtin_safe_dtype_names</span>
-
-
-<a href="#hypothesis_awkward.strategies.builtins_.builtin_safe_dtype_names" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">builtin_safe_dtype_names</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">SearchStrategy</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<h1 id="generating-and-shrinking-samples">Generating and Shrinking Samples<a class="headerlink" href="#generating-and-shrinking-samples" title="Permanent link">&para;</a></h1>
+<p>When a property-based test fails, the array it reports is usually small and
+simple — a short list, a single small number — rather than a large, complex one.
+That is by design. The <a href="../testing-awkward-array/">Testing Awkward Array</a> page
+calls the reported array a "minimal failing array"; this page explains where it
+comes from: how <code>hypothesis-awkward</code> builds a random Awkward Array, and how it
+reduces a failing one.</p>
+<p>This is a deep dive into how the strategies work, written for Awkward Array
+contributors and for authors of Hypothesis strategies. If you only want to
+generate test arrays for your own code, start with
+<a href="../getting-started/">Getting Started</a>. Property-based testing (PBT) runs one
+test against many generated inputs; when one input fails, Hypothesis reduces it
+to a smaller input that still fails — it <em>shrinks</em> the example.</p>
+<h2 id="generating-a-sample">Generating a sample<a class="headerlink" href="#generating-a-sample" title="Permanent link">&para;</a></h2>
+<p>The main strategy, <code>st_ak.constructors.arrays()</code>, generates a nearly fully
+general Awkward Array. Underneath, <code>st_ak.contents.contents()</code> builds the
+array's layout from the top down: at each step it either stops at a <em>leaf</em> or
+chooses a <em>wrapper</em> layout and then builds that wrapper's child with the same
+strategy.</p>
+<ul>
+<li>Leaves carry the data: an <code>EmptyArray</code> (no data, type <code>unknown</code>), a
+  <code>NumpyArray</code> of one dtype, or a string or bytestring. (A string or bytestring
+  is itself a <code>ListOffsetArray</code> wrapping a <code>NumpyArray</code> of <code>uint8</code>, which the
+  strategy treats as a single leaf.)</li>
+<li>Wrappers add structure around a child: <code>RegularArray</code>, <code>ListOffsetArray</code>,
+  <code>ListArray</code>, <code>RecordArray</code>, <code>UnionArray</code>, and the option (missing-value)
+  types.</li>
+</ul>
+<p>Because a wrapper's child is generated by the same strategy, the layout grows
+recursively into a tree. Generation is bounded so that it always terminates:
+<code>max_size</code> is a budget over the scalar values in the layout (data elements,
+offsets, indices, field names, and parameters), and <code>max_depth</code>,
+<code>max_leaf_size</code>, <code>min_length</code>, and <code>max_length</code> constrain it further. When a
+layout has several children, the element budget is shared across them so that
+the total stays within <code>max_size</code>.</p>
+<p>These bounds are also knobs: passing a <code>dtypes</code> strategy, setting the <code>allow_*</code>
+flags, or fixing <code>min_length</code> and <code>max_length</code> lets a caller constrain the shape
+of what is generated. See the
+<a href="../../reference/strategies/contents/">Contents reference</a> for every option.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">given</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nd">@given</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_some_property</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 </span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Strategy for names of NumPy dtypes with corresponding Python built-in types.</p>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">builtin_safe_dtype_names</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">&#39;...&#39;</span>
+<p>The dtype of a <code>NumpyArray</code> leaf is itself drawn from a strategy,
+<code>st_ak.supported_dtypes()</code>.</p>
+<h2 id="how-hypothesis-shrinks">How Hypothesis shrinks<a class="headerlink" href="#how-hypothesis-shrinks" title="Permanent link">&para;</a></h2>
+<p>When a test fails, Hypothesis searches for a smaller input that still fails. The
+Hypothesis guide <a href="https://github.com/HypothesisWorks/hypothesis/blob/master/guides/strategies-that-shrink.rst"><em>Strategies that shrink</em></a> describes the model:
+the engine "sees every example as a labelled tree of choices," and it "shrinks
+from the 'bottom up'. If any component of your strategy is replaced with a
+simpler example, the end result should also become simpler."</p>
+<p>There is therefore no single setting that makes shrinking good. The quality
+emerges from how each choice in a strategy is arranged: if every individual
+choice shrinks toward something simple, the array built from those choices does
+too.</p>
+<h2 id="shrinking-toward-simpler-data">Shrinking toward simpler data<a class="headerlink" href="#shrinking-toward-simpler-data" title="Permanent link">&para;</a></h2>
+<p><code>hypothesis-awkward</code> cannot change how Hypothesis shrinks; it can only change
+the <em>order</em> in which it offers each choice. Hypothesis's <code>one_of()</code> and
+<code>sampled_from()</code> both shrink toward their earlier entries, so each strategy
+lists its alternatives simplest first. This tree of choices is the same tree the
+strategy built while generating, so a sample shrinks well exactly when each of
+its choices does.</p>
+<p>"Simpler" here means <em>simpler data</em> — what the array's values and shape look
+like — rather than the internal layout used to store them. For example, a list
+layout can hold <em>unreachable data</em>: content elements that no sublist refers to,
+left by offsets that do not start at <code>0</code> or do not reach the end of the content.
+Two layouts can describe the same list-of-lists while one carries unreachable
+data and the other does not. The strategies treat the layout without unreachable
+data as simpler and shrink toward it.</p>
+<p>A <code>contents()</code> node also shrinks toward a leaf rather than a wrapper, and among
+wrappers toward <code>RegularArray</code> (the first wrapper offered).</p>
+<h3 id="what-each-strategy-shrinks-toward">What each strategy shrinks toward<a class="headerlink" href="#what-each-strategy-shrinks-toward" title="Permanent link">&para;</a></h3>
+<p>Each strategy below lives in <code>st_ak.contents</code>, except <code>supported_dtypes()</code>,
+which is <code>st_ak.supported_dtypes()</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Shrinks toward</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>leaf_contents()</code></td>
+<td><code>EmptyArray</code>, then bytestring, string, and <code>NumpyArray</code></td>
+</tr>
+<tr>
+<td><code>supported_dtypes()</code></td>
+<td><code>bool</code>, then the rest of the dtypes that have Python built-in counterparts (<code>int64</code>, <code>float64</code>, <code>complex128</code>, <code>datetime64[us]</code>, <code>timedelta64[us]</code>), then the remaining dtypes</td>
+</tr>
+<tr>
+<td><code>masked_contents()</code></td>
+<td><code>UnmaskedArray</code>, then <code>ByteMaskedArray</code>, then <code>BitMaskedArray</code></td>
+</tr>
+<tr>
+<td><code>regular_array_contents()</code></td>
+<td>fewer groups (a shorter outer length) with a larger <code>size</code>, using divisors of the content length so that no data is unreachable</td>
+</tr>
+<tr>
+<td><code>list_offset_array_contents()</code> †</td>
+<td>no unreachable data: <code>offsets[0] == 0</code> and <code>offsets[-1] == len(content)</code></td>
+</tr>
+<tr>
+<td><code>list_array_contents()</code> †</td>
+<td>no unreachable data, with contiguous, monotonic, non-overlapping <code>starts</code>/<code>stops</code></td>
+</tr>
+</tbody>
+</table>
+<p>† Best-effort and not reliably reached; see <a href="#limitations">Limitations</a>.</p>
+<h2 id="verifying-shrink-quality">Verifying shrink quality<a class="headerlink" href="#verifying-shrink-quality" title="Permanent link">&para;</a></h2>
+<p>Each shrink direction in the table has a test; the simplest is the dtype case.
+The tests call <code>hypothesis.find()</code> with the example database disabled, then
+assert the minimal value:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">find</span><span class="p">,</span> <span class="n">settings</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">find</span><span class="p">(</span><span class="n">st_ak</span><span class="o">.</span><span class="n">supported_dtypes</span><span class="p">(),</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
 </span></code></pre></div>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="hypothesis_awkward.strategies.builtins_.builtin_safe_dtypes" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">builtin_safe_dtypes</span>
-
-
-<a href="#hypothesis_awkward.strategies.builtins_.builtin_safe_dtypes" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">builtin_safe_dtypes</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">SearchStrategy</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">]</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Strategy for NumPy dtypes with corresponding Python built-in types.</p>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">builtin_safe_dtypes</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">dtype(...)</span>
-</span></code></pre></div>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="hypothesis_awkward.strategies.builtins_.items_from_dtype" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">items_from_dtype</span>
-
-
-<a href="#hypothesis_awkward.strategies.builtins_.items_from_dtype" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">items_from_dtype</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">dtype</span><span class="p">:</span> <span class="n">dtype</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">allow_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">SearchStrategy</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Strategy for Python built-in type values for a given NumPy dtype.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>dtype</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.dtype" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype">dtype</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The NumPy dtype to generate items for.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>allow_nan</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Generate potentially <code>NaN</code> for relevant dtypes if <code>True</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">i</span> <span class="o">=</span> <span class="n">items_from_dtype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">True</span>
-</span></code></pre></div>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="hypothesis_awkward.strategies.builtins_.lists" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">lists</span>
-
-
-<a href="#hypothesis_awkward.strategies.builtins_.lists" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">lists</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">draw</span><span class="p">:</span> <span class="n">DrawFn</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">dtype</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">|</span> <span class="n">SearchStrategy</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">allow_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">max_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NestedList</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Strategy for nested Python lists for which Awkward Arrays can be created.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>dtype</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.dtype" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype">dtype</a> | <a class="autorefs autorefs-external" title="hypothesis.strategies.SearchStrategy" href="https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#hypothesis.strategies.SearchStrategy">SearchStrategy</a>[<a class="autorefs autorefs-external" title="numpy.dtype" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype">dtype</a>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The dtype of the list items or a strategy to generate it. If <code>None</code>, a dtype is
-drawn from <code>builtin_safe_dtypes()</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>allow_nan</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Generate potentially <code>NaN</code> for relevant dtypes if <code>True</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>max_size</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Maximum total number of items (non-lists) in the entire nested list.</p>
-              </div>
-            </td>
-            <td>
-                  <code>10</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">l</span> <span class="o">=</span> <span class="n">lists</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">&lt;Array ... type=&#39;...&#39;&gt;</span>
-</span></code></pre></div>
-
-
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="hypothesis_awkward.strategies.builtins_.from_list" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">from_list</span>
-
-
-<a href="#hypothesis_awkward.strategies.builtins_.from_list" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">from_list</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="o">*</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">dtype</span><span class="p">:</span> <span class="n">dtype</span> <span class="o">|</span> <span class="n">SearchStrategy</span><span class="p">[</span><span class="n">dtype</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">allow_nan</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">max_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">SearchStrategy</span><span class="p">[</span><span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">]</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Strategy for Awkward Arrays created from Python lists.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>dtype</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" title="numpy.dtype" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype">dtype</a> | <a class="autorefs autorefs-external" title="hypothesis.strategies.SearchStrategy" href="https://hypothesis.readthedocs.io/en/latest/reference/strategies.html#hypothesis.strategies.SearchStrategy">SearchStrategy</a>[<a class="autorefs autorefs-external" title="numpy.dtype" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype">dtype</a>] | None</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The dtype of the list items or a strategy to generate it. If <code>None</code>, a dtype is
-drawn from <code>builtin_safe_dtypes()</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>allow_nan</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Generate potentially <code>NaN</code> for relevant dtypes if <code>True</code>.</p>
-              </div>
-            </td>
-            <td>
-                  <code>True</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>max_size</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Maximum total number of items (non-lists) in the entire nested list.</p>
-              </div>
-            </td>
-            <td>
-                  <code>10</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">from_list</span><span class="p">()</span><span class="o">.</span><span class="n">example</span><span class="p">()</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">&lt;Array ... type=&#39;...&#39;&gt;</span>
-</span></code></pre></div>
-
-
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div>
+<p><code>find()</code> searches for the simplest value it can find that satisfies the
+predicate — best-effort, like all shrinking. Here the predicate <code>lambda d: True</code>
+accepts every dtype, so the result is the simplest dtype, <code>bool</code>. Setting
+<code>database=None</code> stops Hypothesis from replaying a previously stored example, so
+the result comes only from this run and the doctest stays reproducible. The full
+set of shrink tests is under
+<a href="https://github.com/scikit-hep/hypothesis-awkward/tree/main/tests/strategies"><code>tests/strategies/</code></a>.</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<p>Shrinking is best-effort: it searches for a minimal failing example but does not
+guarantee the globally simplest one. The reachability of list layouts shows the
+limit precisely. Generating the offsets of a <code>ListOffsetArray</code> in isolation
+reliably shrinks to no unreachable data. In the composed
+<code>list_offset_array_contents()</code> and <code>list_array_contents()</code> strategies, however —
+where the child content is generated and shrunk at the same time — the shrinker
+does not reliably reach that layout, so those two tests are marked <code>xfail</code> with
+the reason "shrinker does not reliably reach no-unreachable layout."</p>
+<p>For the general theory, and advice on writing strategies that shrink well, see
+the Hypothesis guide <a href="https://github.com/HypothesisWorks/hypothesis/blob/master/guides/strategies-that-shrink.rst"><em>Strategies that shrink</em></a>.</p>
 
 
 
@@ -1456,6 +1384,44 @@ drawn from <code>builtin_safe_dtypes()</code>.</p>
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../testing-awkward-array/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Testing Awkward Array">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Testing Awkward Array
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../reference/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Overview
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
