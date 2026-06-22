@@ -99,6 +99,9 @@ In `.design/`; see `.design/README.md` for the index.
 
 PR titles follow [Conventional Commits](https://www.conventionalcommits.org/),
 no scopes. Allowed types and the release procedure are in `CONTRIBUTING.md`.
+Since PRs are squash-merged, the title renders verbatim into the `git-cliff`
+`CHANGELOG.md` and release notes: wrap code identifiers in backticks and keep
+the title within 70 characters (see "PR Title Convention" in `CONTRIBUTING.md`).
 
 ## Code Style
 
