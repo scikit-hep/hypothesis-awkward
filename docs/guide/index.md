@@ -2,6 +2,8 @@
 
 This guide contains the following pages:
 
+- [Roadmap](roadmap.md) — what the package generates today and where it is
+  heading
 - [Installation](installation.md) — how to install the package
 - [Getting Started](getting-started.md) — how to use the `arrays()` strategy
   with examples
