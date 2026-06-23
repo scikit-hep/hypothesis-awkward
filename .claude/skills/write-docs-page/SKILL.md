@@ -10,8 +10,9 @@ persona-review workflow proven on the README intro and the _Testing Awkward
 Array_ page. The goal is a page that serves its primary audience and is
 accurate; **accuracy beats style**.
 
-Strategy, the six personas, and the page backlog live in
-`.design/notes/2026-06-17-02-Docs-plan.md`. Voice rules are in
+Strategy and the page backlog live in
+`.design/notes/2026-06-17-02-Docs-plan.md`; the six review personas are the
+`docs-persona-*` subagents in `.claude/agents/`. Voice rules are in
 `rules/docs-voice.md`; operational conventions (build, fences, nav) are in
 `rules/docs.md`.
 
@@ -31,15 +32,22 @@ Strategy, the six personas, and the page backlog live in
 4. **Diverse drafts** — Write three structurally distinct drafts, all meeting
    the rubric, varying only the framing and order.
 
-5. **Parallel persona review** — Spawn the six personas from the docs plan note
-   (Awkward core developer, downstream package developer, researcher/analyst,
-   Hypothesis/PBT expert, evaluator/stakeholder, AI) as independent parallel
-   subagents. Each scores every draft against the rubric and rates how relevant
-   the page is to itself. Consolidate the scores into a matrix.
+5. **Parallel persona review** — Launch the six persona subagents in
+   `.claude/agents/` (`docs-persona-awkward-core-dev`,
+   `docs-persona-downstream-dev`, `docs-persona-researcher`,
+   `docs-persona-pbt-expert`, `docs-persona-evaluator`, `docs-persona-ai`) in
+   parallel via the Agent tool's `subagent_type`. Write the drafts and a shared
+   review brief (rubric, verified facts, link targets) to temp files and pass
+   each subagent their paths. Ask each for: a score per draft on the rubric
+   axes; lens-specific flags with quoted text and `file:line` citations; how
+   relevant the page is to it; the best draft overall and per axis; specific
+   fixes; and the single most important improvement. Consolidate into a matrix.
 
 6. **Fact-check** — Verify every claim and code example against the actual
    source and tests (real API import paths, real upstream tests), and verify
-   issue and pull-request titles and status on GitHub. Accuracy beats style.
+   issue and pull-request titles and status on GitHub. When a claim summarizes
+   an ordered list (for example a "shrinks toward" table), verify the full order
+   against the source, not just the first item. Accuracy beats style.
 
 7. **Synthesize** — Merge the per-axis winners rather than picking one draft;
    apply cross-cutting fixes; follow `rules/docs-voice.md`.

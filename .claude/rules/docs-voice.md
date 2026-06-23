@@ -20,3 +20,9 @@ user-facing documentation prose (the README and `docs/`), not to code, to
 - State things directly — no hedging like "I think" or "I believe" unless they
   genuinely describe a thought or belief.
 - Spell out each acronym on first use, then use the short form.
+- Explain ideas in your own words rather than lightly rewording a source.
+- Put reused external wording in quotation marks, attribute it, and link the
+  source; never present quoted phrasing as your own.
+- Keep quotes short and load-bearing; do not quote whole paragraphs.
+- Summarize even first-party material (docstrings, `.design/` notes) rather than
+  paste it.
