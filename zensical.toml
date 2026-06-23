@@ -8,6 +8,7 @@ nav = [
     { "Home" = "index.md" },
     { "Guide" = [
         { "Overview" = "guide/index.md" },
+        { "Roadmap" = "guide/roadmap.md" },
         { "Installation" = "guide/installation.md" },
         { "Getting Started" = "guide/getting-started.md" },
         { "Testing Awkward Array" = "guide/testing-awkward-array.md" },
