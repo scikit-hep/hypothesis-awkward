@@ -68,8 +68,10 @@ mode's characteristic failure.
 - **Must do:** build a mental model — the why, the connections, the design
   rationale, trade-offs, alternatives, and the boundaries of the idea; it may
   hold opinion and discussion; it is understood away from the keyboard.
-- **Does NOT belong:** procedural steps, worked invocations, parameter how-to —
-  link to the how-to or reference instead.
+- **Does NOT belong:** procedural steps and parameter how-to that _teach a task_
+  — link to the how-to or reference instead. A short, clearly-labelled
+  illustrative sketch that _depicts_ an idea (for example a non-runnable
+  `@given` snippet) is fine; a runnable procedure that _instructs_ is not.
 - **Failure to catch:** facts without the why; missing connective tissue; the
   page quietly turning into a how-to or a reference.
 
@@ -86,12 +88,16 @@ one.
 1. **Demand side.** Every point you raise must serve one of the page's assigned
    questions. If an ask would pull the page toward a quadrant it does **not**
    target, label it **out of scope** and route it to the page that owns that
-   quadrant — do not report it as a defect of this page. (Asking an Explanation
-   page for runnable how-to steps is out of scope; those steps belong in a
-   how-to.)
-2. **Supply side.** Flag content **already on the page** that belongs to another
-   quadrant as **bleed to relocate**, naming where it should go (a worked
-   `@given` test on an Explanation page → move it to the how-to or Getting
-   Started).
+   quadrant — do not report it as a defect of this page. In particular, do not
+   demand that the page _acquire_ another quadrant's content it does not already
+   have: do not ask an Explanation page to add runnable how-to steps or a worked
+   example; that content belongs in the page you link to.
+2. **Supply side.** Flag content **already on the page** that _teaches or
+   instructs_ in another quadrant's mode as **bleed to relocate**, naming where
+   it should go. But content that serves _this_ page's mode is earned even when
+   it resembles another quadrant's form: a short, labelled, non-runnable
+   `@given` sketch that depicts a concept on an Explanation page illustrates the
+   idea rather than teaching a task — leave it. Distinguish depicting (earned)
+   from instructing (bleed).
 
 Report the result of both passes as the alignment self-check in your review.
