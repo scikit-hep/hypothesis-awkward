@@ -68,19 +68,22 @@ mode's characteristic failure.
 - **Must do:** build a mental model — the why, the connections, the design
   rationale, trade-offs, alternatives, and the boundaries of the idea; it may
   hold opinion and discussion; it is understood away from the keyboard.
-- **Does NOT belong:** procedural steps and parameter how-to that _teach a task_
-  — link to the how-to or reference instead. A short, clearly-labelled
-  illustrative sketch that _depicts_ an idea (for example a non-runnable
-  `@given` snippet) is fine; a runnable procedure that _instructs_ is not.
+- **Does NOT belong:** procedural steps, worked how-to, or parameter lookup _as
+  the page's work_ — link to the how-to or reference instead. (An illustrative
+  example may appear if it stays subordinate to the explanation; it becomes
+  bleed once it starts doing the how-to's job — see the self-check.)
 - **Failure to catch:** facts without the why; missing connective tissue; the
   page quietly turning into a how-to or a reference.
 
 ## Mixed pages
 
-A page may target more than one quadrant **only when the page plan declares it**
-(it is tagged with more than one quadrant). Then answer each assigned question,
-and additionally judge whether the modes are kept distinct within the page or
-muddled into each other. A page tagged with a single quadrant must stay in that
+Each page — and each section within it — does **one** job. Diátaxis allows
+complex _structure_, not blended _content_: a page that must serve two needs
+gives each its own single-purpose section, or is split, rather than letting the
+modes run together. When the page plan tags a page with more than one quadrant,
+read that as distinct single-purpose sections — answer each section's question
+and check that each stays in its lane. A section that blends modes is muddled,
+not a sanctioned mix; a page tagged with a single quadrant must stay in that
 one.
 
 ## Self-check (run before reporting)
@@ -92,12 +95,14 @@ one.
    demand that the page _acquire_ another quadrant's content it does not already
    have: do not ask an Explanation page to add runnable how-to steps or a worked
    example; that content belongs in the page you link to.
-2. **Supply side.** Flag content **already on the page** that _teaches or
-   instructs_ in another quadrant's mode as **bleed to relocate**, naming where
-   it should go. But content that serves _this_ page's mode is earned even when
-   it resembles another quadrant's form: a short, labelled, non-runnable
-   `@given` sketch that depicts a concept on an Explanation page illustrates the
-   idea rather than teaching a task — leave it. Distinguish depicting (earned)
-   from instructing (bleed).
+2. **Supply side.** Cross-mode material may appear **only subordinate to this
+   page's one purpose**. The test is _service, not status_: does a passage still
+   do _this_ page's job, or has it begun doing another mode's? Flag content
+   **already on the page** as **bleed to relocate** (naming where it goes) once
+   it crosses that line — an illustrative `@given` sketch that _depicts_ a
+   concept serves an Explanation page, but adjacent steps telling the reader how
+   to run or narrow it _now_ are how-to bleed. (Diátaxis: illustrative examples
+   are fine, but become bleed when they "develop into" the other mode and
+   interrupt the page's purpose.)
 
 Report the result of both passes as the alignment self-check in your review.
