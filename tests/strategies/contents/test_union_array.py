@@ -35,6 +35,7 @@ def _contents_list(
                 max_depth=2,
                 allow_union=False,
                 allow_option_root=False,
+                allow_indexed_root=False,
             )
         )
         for _ in range(n)

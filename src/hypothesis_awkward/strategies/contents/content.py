@@ -11,6 +11,7 @@ from hypothesis_awkward.util import safe_compare as sc
 
 from .bit_masked_array import bit_masked_array_from_contents
 from .byte_masked_array import byte_masked_array_from_contents
+from .indexed_array import indexed_array_from_contents
 from .indexed_option_array import indexed_option_array_from_contents
 from .leaf import leaf_contents
 from .list_array import list_array_from_contents
@@ -38,6 +39,7 @@ def contents(
     allow_list: bool = True,
     allow_record: bool = True,
     allow_union: bool = True,
+    allow_indexed: bool = True,
     allow_indexed_option: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
@@ -48,6 +50,7 @@ def contents(
     max_length: int | None = None,
     allow_union_root: bool = True,
     allow_option_root: bool = True,
+    allow_indexed_root: bool = True,
 ) -> Content:
     """Strategy for Awkward Array content layouts.
 
@@ -61,6 +64,7 @@ def contents(
     - Strings
     - Bytestrings
     - [`RecordArray`][ak.contents.RecordArray]
+    - [`IndexedArray`][ak.contents.IndexedArray]
     - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
     - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
     - [`BitMaskedArray`][ak.contents.BitMaskedArray]
@@ -122,6 +126,8 @@ def contents(
         No [`RecordArray`][ak.contents.RecordArray] is generated if `False`.
     allow_union
         No [`UnionArray`][ak.contents.UnionArray] is generated if `False`.
+    allow_indexed
+        No [`IndexedArray`][ak.contents.IndexedArray] is generated if `False`.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
         `False`.
@@ -154,6 +160,12 @@ def contents(
     allow_option_root
         The outermost content node cannot be an option type if `False`. Does not affect
         deeper levels. Prevents option-inside-option nesting.
+    allow_indexed_root
+        The outermost content node cannot be an [`IndexedArray`][ak.contents.IndexedArray]
+        if `False`. Unlike `allow_indexed`, this does not prevent
+        [`IndexedArray`][ak.contents.IndexedArray] at deeper levels. Awkward Array does not
+        allow an [`IndexedArray`][ak.contents.IndexedArray] to directly contain another
+        [`IndexedArray`][ak.contents.IndexedArray].
 
     Returns
     -------
@@ -194,8 +206,13 @@ def contents(
         )
         and allow_option_root
     )
+    any_indexed = allow_indexed and allow_indexed_root
     leaf_only = (
-        not any_wrapper and not any_option or max_leaf_size == 0 or max_size == 0
+        not any_wrapper
+        and not any_option
+        and not any_indexed
+        or max_leaf_size == 0
+        or max_size == 0
     )
 
     def _check(c: Content) -> Content:
@@ -241,6 +258,7 @@ def contents(
         allow_list=allow_list,
         allow_record=allow_record,
         allow_union=allow_union,
+        allow_indexed=allow_indexed,
         allow_indexed_option=allow_indexed_option,
         allow_byte_masked=allow_byte_masked,
         allow_bit_masked=allow_bit_masked,
@@ -259,6 +277,8 @@ def contents(
         candidates.append(record_array_from_contents)
     if allow_union and allow_union_root:
         candidates.append(union_array_from_contents)
+    if allow_indexed and allow_indexed_root:
+        candidates.append(indexed_array_from_contents)
     if allow_indexed_option and allow_option_root:
         candidates.append(indexed_option_array_from_contents)
     if allow_byte_masked and allow_option_root:
@@ -307,6 +327,7 @@ class StContent(Protocol):
         max_length: int | None = ...,
         allow_union_root: bool = ...,
         allow_option_root: bool = ...,
+        allow_indexed_root: bool = ...,
     ) -> st.SearchStrategy[Content]: ...
 
 

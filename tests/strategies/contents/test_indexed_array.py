@@ -2,12 +2,13 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import find, given, settings
+from hypothesis import Phase, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
 from awkward.contents import Content, IndexedArray
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 
 
@@ -28,7 +29,11 @@ def indexed_array_contents_kwargs(
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
-        st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+        st_ak.contents.contents(
+            allow_union_root=False,
+            allow_option_root=False,
+            allow_indexed_root=False,
+        )
     )
 
     min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=50))
@@ -44,7 +49,9 @@ def indexed_array_contents_kwargs(
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(
-                        allow_union_root=False, allow_option_root=False
+                        allow_union_root=False,
+                        allow_option_root=False,
+                        allow_indexed_root=False,
                     ),
                     st.just(st_content),
                 ),
@@ -160,3 +167,38 @@ def test_draw_empty_content() -> None:
         lambda c: len(c.content) == 0 and len(c) == 0,
         settings=settings(max_examples=2000),
     )
+
+
+def test_draw_from_contents() -> None:
+    """Assert `contents()` can generate an `IndexedArray` as outermost."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, IndexedArray),
+        settings=settings(max_examples=2000),
+    )
+
+
+def test_draw_nested_indexed() -> None:
+    """Assert an IndexedArray with a descendant IndexedArray can be drawn.
+
+    The direct subcontent of an IndexedArray must not be an IndexedArray
+    (no `Indexed[Indexed[...]]`), but deeper descendants may be, e.g.
+    `Indexed[Regular[Indexed[...]]]`.
+    """
+    find(
+        st_ak.contents.indexed_array_contents(),
+        _has_nested_indexed,
+        settings=settings(phases=[Phase.generate], max_examples=5000),
+    )
+
+
+def _has_nested_indexed(c: Content) -> bool:
+    for node in iter_contents(c):
+        if not isinstance(node, IndexedArray):
+            continue
+        # A direct subcontent of an IndexedArray cannot be an IndexedArray; a
+        # deeper descendant may be, e.g. Indexed[Regular[Indexed[...]]].
+        for descendant in iter_contents(node.content):
+            if isinstance(descendant, IndexedArray):
+                return True
+    return False

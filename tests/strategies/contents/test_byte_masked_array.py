@@ -24,7 +24,9 @@ def byte_masked_array_contents_kwargs(
     if chain is None:
         chain = st_ak.OptsChain({})
     st_content = chain.register(
-        st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+        st_ak.contents.contents(
+            allow_union_root=False, allow_option_root=False, allow_indexed_root=False
+        )
     )
 
     kwargs = draw(
@@ -33,7 +35,9 @@ def byte_masked_array_contents_kwargs(
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(
-                        allow_union_root=False, allow_option_root=False
+                        allow_union_root=False,
+                        allow_option_root=False,
+                        allow_indexed_root=False,
                     ),
                     st.just(st_content),
                 ),

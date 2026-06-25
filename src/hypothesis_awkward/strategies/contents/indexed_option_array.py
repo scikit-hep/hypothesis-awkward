@@ -59,7 +59,11 @@ def indexed_option_array_contents(
     match content:
         case None:
             content = draw(
-                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+                st_ak.contents.contents(
+                    allow_union_root=False,
+                    allow_option_root=False,
+                    allow_indexed_root=False,
+                )
             )
         case st.SearchStrategy():
             content = draw(content)
@@ -148,6 +152,7 @@ def indexed_option_array_from_contents(
             max_leaf_size=max_leaf_size,
             allow_option_root=False,
             allow_union_root=False,
+            allow_indexed_root=False,
         )
     )
     result = draw(indexed_option_array_contents(child, min_size=n, max_size=n))

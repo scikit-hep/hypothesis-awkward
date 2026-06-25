@@ -103,7 +103,11 @@ def _option_contents(
     match content:
         case None:
             content_concrete = draw(
-                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+                st_ak.contents.contents(
+                    allow_union_root=False,
+                    allow_option_root=False,
+                    allow_indexed_root=False,
+                )
             )
         case st.SearchStrategy():
             content_concrete = draw(content)
@@ -197,6 +201,7 @@ def option_from_contents(
             min_length=min_length,
             allow_option_root=False,
             allow_union_root=False,
+            allow_indexed_root=False,
         )
     )
     return draw(
