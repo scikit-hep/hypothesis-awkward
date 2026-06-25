@@ -1234,13 +1234,13 @@ the
 section of the Awkward Array documentation.</p>
 <p>The library includes strategies for each of <code>EmptyArray</code>, <code>NumpyArray</code>,
 <code>RegularArray</code>, <code>ListOffsetArray</code>, <code>ListArray</code>, <code>RecordArray</code>, <code>UnionArray</code>,
-<code>IndexedOptionArray</code>, <code>ByteMaskedArray</code>, <code>BitMaskedArray</code>, <code>UnmaskedArray</code>, as
-well as for strings and bytestrings. The main strategy <code>arrays()</code> generates
-nested combinations of these, and can also generate arrays backed by virtual
-(lazy) buffers. <a href="../getting-started/">Getting Started</a> shows sample outputs, and
-the <a href="../../reference/strategies/constructors/">API reference</a> lists the available
-options. The strategies for <code>IndexedArray</code> and categorical data have not yet
-been implemented.</p>
+<code>IndexedArray</code>, <code>IndexedOptionArray</code>, <code>ByteMaskedArray</code>, <code>BitMaskedArray</code>,
+<code>UnmaskedArray</code>, as well as for strings and bytestrings. The main strategy
+<code>arrays()</code> generates nested combinations of these, and can also generate arrays
+backed by virtual (lazy) buffers. <a href="../getting-started/">Getting Started</a> shows
+sample outputs, and the <a href="../../reference/strategies/constructors/">API reference</a>
+lists the available options. The strategy for categorical data has not yet been
+implemented.</p>
 <p>The current <code>arrays()</code> is not exported from the top-level package, so it must be
 called as <code>st_ak.constructors.arrays()</code> (with
 <code>import hypothesis_awkward.strategies as st_ak</code>). The bare name
@@ -1262,8 +1262,7 @@ concrete tree of <code>Content</code> nodes that holds the data buffers). Every 
 array has all three. What changes across the directions below is the level you
 describe it in terms of: today its layout, next its type, and later its form.</p>
 <h3 id="near-term">Near-term<a class="headerlink" href="#near-term" title="Permanent link">&para;</a></h3>
-<p><strong>Complete the layout coverage.</strong> Add <code>IndexedArray</code> (the remaining content kind
-in the Awkward constructors guide) and categorical-data strategies.</p>
+<p><strong>Complete the layout coverage.</strong> Add categorical-data strategies.</p>
 <p><strong>Generate arrays from a type.</strong> Add strategies that generate Awkward <em>types</em>
 (building on the existing <code>st_ak.numpy_types()</code>), then strategies that generate
 arrays matching a given type. This is the planned home of the reserved
