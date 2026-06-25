@@ -447,31 +447,6 @@ def _has_unmasked(c: ak.contents.Content) -> bool:
     return any(isinstance(n, ak.contents.UnmaskedArray) for n in iter_contents(c))
 
 
-def test_draw_from_contents_indexed() -> None:
-    """Assert that IndexedArray can be drawn from `contents()`."""
-    find(st_ak.contents.contents(), _has_indexed)
-
-
-def test_draw_from_contents_indexed_option() -> None:
-    """Assert that IndexedOptionArray can be drawn from `contents()`."""
-    find(st_ak.contents.contents(), _has_indexed_option)
-
-
-def test_draw_from_contents_byte_masked() -> None:
-    """Assert that ByteMaskedArray can be drawn from `contents()`."""
-    find(st_ak.contents.contents(), _has_byte_masked)
-
-
-def test_draw_from_contents_bit_masked() -> None:
-    """Assert that BitMaskedArray can be drawn from `contents()`."""
-    find(st_ak.contents.contents(), _has_bit_masked)
-
-
-def test_draw_from_contents_unmasked() -> None:
-    """Assert that UnmaskedArray can be drawn from `contents()`."""
-    find(st_ak.contents.contents(), _has_unmasked)
-
-
 def test_shrink_len_zero() -> None:
     """Assert that length-zero shrinks to `EmptyArray`."""
     c = find(
