@@ -13,7 +13,9 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_nat_in_awkward_array,
     content_size,
+    is_bytestring_leaf,
     is_leaf,
+    is_string_leaf,
     iter_contents,
     iter_numpy_arrays,
     leaf_size,
@@ -170,34 +172,27 @@ def test_properties(data: st.DataObject) -> None:
         assert _nesting_depth(c) == 0
 
     # Per-type gating
-    if not allow_numpy:
-        assert not _has_numpy(c)
-    if not allow_empty:
-        assert not _has_empty(c)
-    if not allow_regular:
-        assert not _has_regular(c)
-    if not allow_list_offset:
-        assert not _has_list_offset(c)
-    if not allow_list:
-        assert not _has_list(c)
-    if not allow_string:
-        assert not _has_string(c)
-    if not allow_bytestring:
-        assert not _has_bytestring(c)
-    if not allow_record:
-        assert not _has_record(c)
-    if not allow_union:
-        assert not _has_union(c)
-    if not allow_indexed:
-        assert not _has_indexed(c)
-    if not allow_indexed_option:
-        assert not _has_indexed_option(c)
-    if not allow_byte_masked:
-        assert not _has_byte_masked(c)
-    if not allow_bit_masked:
-        assert not _has_bit_masked(c)
-    if not allow_unmasked:
-        assert not _has_unmasked(c)
+    allow_by_type = {
+        'numpy': allow_numpy,
+        'empty': allow_empty,
+        'regular': allow_regular,
+        'list_offset': allow_list_offset,
+        'list': allow_list,
+        'string': allow_string,
+        'bytestring': allow_bytestring,
+        'record': allow_record,
+        'union': allow_union,
+        'indexed': allow_indexed,
+        'indexed_option': allow_indexed_option,
+        'byte_masked': allow_byte_masked,
+        'bit_masked': allow_bit_masked,
+        'unmasked': allow_unmasked,
+    }
+    present = _present_types(c)
+    disallowed = {t for t, allowed in allow_by_type.items() if not allowed}
+    assert not (present & disallowed), (
+        f'disallowed types present: {sorted(present & disallowed)}'
+    )
 
     # Dtype check via leaf arrays (works for both flat and nested layouts)
     match dtypes:
@@ -373,78 +368,42 @@ def _nesting_depth(c: ak.contents.Content) -> int:
     return 0
 
 
-def _has_numpy(c: ak.contents.Content) -> bool:
-    """Check if the content contains any NumpyArray node."""
-    return any(isinstance(n, ak.contents.NumpyArray) for n in iter_contents(c))
-
-
-def _has_empty(c: ak.contents.Content) -> bool:
-    """Check if the content contains any EmptyArray node."""
-    return any(isinstance(n, ak.contents.EmptyArray) for n in iter_contents(c))
-
-
-def _has_list_offset(c: ak.contents.Content) -> bool:
-    """Check if the content contains any structural ListOffsetArray node."""
-    return any(
-        isinstance(n, ak.contents.ListOffsetArray)
-        and n.parameter('__array__') not in ('string', 'bytestring')
-        for n in iter_contents(c)
-    )
-
-
-def _has_regular(c: ak.contents.Content) -> bool:
-    """Check if the content contains any RegularArray node."""
-    return any(isinstance(n, ak.contents.RegularArray) for n in iter_contents(c))
-
-
-def _has_list(c: ak.contents.Content) -> bool:
-    """Check if the content contains any ListArray node."""
-    return any(isinstance(n, ak.contents.ListArray) for n in iter_contents(c))
-
-
-def _has_string(c: ak.contents.Content) -> bool:
-    """Check if the content contains any string node."""
-    return any(n.parameter('__array__') == 'string' for n in iter_contents(c))
-
-
-def _has_bytestring(c: ak.contents.Content) -> bool:
-    """Check if the content contains any bytestring node."""
-    return any(n.parameter('__array__') == 'bytestring' for n in iter_contents(c))
-
-
-def _has_record(c: ak.contents.Content) -> bool:
-    """Check if the content contains any RecordArray node."""
-    return any(isinstance(n, ak.contents.RecordArray) for n in iter_contents(c))
-
-
-def _has_union(c: ak.contents.Content) -> bool:
-    """Check if the content contains any UnionArray node."""
-    return any(isinstance(n, ak.contents.UnionArray) for n in iter_contents(c))
-
-
-def _has_indexed(c: ak.contents.Content) -> bool:
-    """Check if the content contains any IndexedArray node."""
-    return any(isinstance(n, ak.contents.IndexedArray) for n in iter_contents(c))
-
-
-def _has_indexed_option(c: ak.contents.Content) -> bool:
-    """Check if the content contains any IndexedOptionArray node."""
-    return any(isinstance(n, ak.contents.IndexedOptionArray) for n in iter_contents(c))
-
-
-def _has_byte_masked(c: ak.contents.Content) -> bool:
-    """Check if the content contains any ByteMaskedArray node."""
-    return any(isinstance(n, ak.contents.ByteMaskedArray) for n in iter_contents(c))
-
-
-def _has_bit_masked(c: ak.contents.Content) -> bool:
-    """Check if the content contains any BitMaskedArray node."""
-    return any(isinstance(n, ak.contents.BitMaskedArray) for n in iter_contents(c))
-
-
-def _has_unmasked(c: ak.contents.Content) -> bool:
-    """Check if the content contains any UnmaskedArray node."""
-    return any(isinstance(n, ak.contents.UnmaskedArray) for n in iter_contents(c))
+def _present_types(c: ak.contents.Content) -> set[str]:
+    """Collect the gated layout-type tags present anywhere in `c`."""
+    present = set[str]()
+    for n in iter_contents(c):
+        if is_string_leaf(n):
+            present.add('string')
+            continue
+        elif is_bytestring_leaf(n):
+            present.add('bytestring')
+            continue
+        match n:
+            case ak.contents.NumpyArray():
+                present.add('numpy')
+            case ak.contents.EmptyArray():
+                present.add('empty')
+            case ak.contents.RegularArray():
+                present.add('regular')
+            case ak.contents.ListOffsetArray():
+                present.add('list_offset')
+            case ak.contents.ListArray():
+                present.add('list')
+            case ak.contents.RecordArray():
+                present.add('record')
+            case ak.contents.UnionArray():
+                present.add('union')
+            case ak.contents.IndexedArray():
+                present.add('indexed')
+            case ak.contents.IndexedOptionArray():
+                present.add('indexed_option')
+            case ak.contents.ByteMaskedArray():
+                present.add('byte_masked')
+            case ak.contents.BitMaskedArray():
+                present.add('bit_masked')
+            case ak.contents.UnmaskedArray():
+                present.add('unmasked')
+    return present
 
 
 def test_shrink_len_zero() -> None:
