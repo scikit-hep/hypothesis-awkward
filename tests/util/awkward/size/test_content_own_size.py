@@ -6,6 +6,7 @@ from awkward.contents import (
     BitMaskedArray,
     ByteMaskedArray,
     EmptyArray,
+    IndexedArray,
     IndexedOptionArray,
     ListArray,
     ListOffsetArray,
@@ -48,6 +49,8 @@ def test_properties(data: st.DataObject) -> None:
             expected = len(content.mask) + 2
         case UnmaskedArray():
             expected = 0
+        case IndexedArray():
+            expected = len(content.index)
         case IndexedOptionArray():
             expected = len(content.index)
         case _:  # pragma: no cover

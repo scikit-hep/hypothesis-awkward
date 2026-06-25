@@ -7,6 +7,7 @@ from awkward.contents import (
     ByteMaskedArray,
     Content,
     EmptyArray,
+    IndexedArray,
     IndexedOptionArray,
     ListArray,
     ListOffsetArray,
@@ -54,6 +55,7 @@ def test_properties(data: st.DataObject) -> None:
         case (
             BitMaskedArray()
             | ByteMaskedArray()
+            | IndexedArray()
             | IndexedOptionArray()
             | UnmaskedArray()
         ):

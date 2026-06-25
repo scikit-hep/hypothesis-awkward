@@ -16,13 +16,13 @@ section of the Awkward Array documentation.
 
 The library includes strategies for each of `EmptyArray`, `NumpyArray`,
 `RegularArray`, `ListOffsetArray`, `ListArray`, `RecordArray`, `UnionArray`,
-`IndexedOptionArray`, `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as
-well as for strings and bytestrings. The main strategy `arrays()` generates
-nested combinations of these, and can also generate arrays backed by virtual
-(lazy) buffers. [Getting Started](getting-started.md) shows sample outputs, and
-the [API reference](../reference/strategies/constructors.md) lists the available
-options. The strategies for `IndexedArray` and categorical data have not yet
-been implemented.
+`IndexedArray`, `IndexedOptionArray`, `ByteMaskedArray`, `BitMaskedArray`,
+`UnmaskedArray`, as well as for strings and bytestrings. The main strategy
+`arrays()` generates nested combinations of these, and can also generate arrays
+backed by virtual (lazy) buffers. [Getting Started](getting-started.md) shows
+sample outputs, and the [API reference](../reference/strategies/constructors.md)
+lists the available options. The strategy for categorical data has not yet been
+implemented.
 
 The current `arrays()` is not exported from the top-level package, so it must be
 called as `st_ak.constructors.arrays()` (with
@@ -50,8 +50,7 @@ describe it in terms of: today its layout, next its type, and later its form.
 
 ### Near-term
 
-**Complete the layout coverage.** Add `IndexedArray` (the remaining content kind
-in the Awkward constructors guide) and categorical-data strategies.
+**Complete the layout coverage.** Add categorical-data strategies.
 
 **Generate arrays from a type.** Add strategies that generate Awkward _types_
 (building on the existing `st_ak.numpy_types()`), then strategies that generate

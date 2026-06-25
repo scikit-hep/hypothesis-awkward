@@ -5,7 +5,7 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
-from awkward.contents import Content, IndexedOptionArray
+from awkward.contents import Content, IndexedArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import content_size
 
@@ -15,18 +15,22 @@ if TYPE_CHECKING:
 
 
 @st.composite
-def indexed_option_array_contents(
+def indexed_array_contents(
     draw: st.DrawFn,
     content: st.SearchStrategy[Content] | Content | None = None,
     *,
     min_size: int = 0,
     max_size: int | None = None,
-) -> IndexedOptionArray:
-    """Strategy for [`ak.contents.IndexedOptionArray`][] instances.
+) -> IndexedArray:
+    """Strategy for [`ak.contents.IndexedArray`][] instances.
 
-    The index length is drawn independently of the content length. Valid entries can
-    reference any content position (duplicates allowed). Missing entries have `index[i]
-    = -1`.
+    An [`IndexedArray`][ak.contents.IndexedArray] rearranges the elements of its
+    content: each entry of the index selects a content position, so the result can
+    reorder, duplicate, or drop elements. It has the same type as its content. The
+    index length is drawn independently of the content length. Every entry references
+    a valid content position (`0 <= index[i] < len(content)`); duplicates are allowed.
+    Unlike [`IndexedOptionArray`][ak.contents.IndexedOptionArray], there are no missing
+    entries, so the index also admits the unsigned `uint32` dtype.
 
     Parameters
     ----------
@@ -42,17 +46,17 @@ def indexed_option_array_contents(
 
     Returns
     -------
-    IndexedOptionArray
+    IndexedArray
 
     Examples
     --------
-    >>> c = indexed_option_array_contents().example()
-    >>> isinstance(c, IndexedOptionArray)
+    >>> c = indexed_array_contents().example()
+    >>> isinstance(c, IndexedArray)
     True
 
     Limit the index length:
 
-    >>> c = indexed_option_array_contents(min_size=2, max_size=5).example()
+    >>> c = indexed_array_contents(min_size=2, max_size=5).example()
     >>> 2 <= len(c) <= 5
     True
     """
@@ -72,21 +76,32 @@ def indexed_option_array_contents(
     assert isinstance(content, Content)
     content_len = len(content)
     upper = max_size if max_size is not None else max(content_len * 2, min_size)
-    pool = [-1, *range(content_len)]
-    index_list = draw(
-        st.lists(st.sampled_from(pool), min_size=min_size, max_size=upper)
-    )
-    dtype = draw(st.sampled_from([np.int32, np.int64]))
+    if content_len == 0:
+        # An empty content can only be referenced by an empty index, so the result
+        # has length 0. There is no -1 fallback as in IndexedOptionArray.
+        assume(min_size == 0)
+        index_list = list[int]()
+    else:
+        index_list = draw(
+            st.lists(
+                st.sampled_from(range(content_len)),
+                min_size=min_size,
+                max_size=upper,
+            )
+        )
+    dtype = draw(st.sampled_from([np.int32, np.uint32, np.int64]))
     index_array = np.array(index_list, dtype=dtype)
     if dtype == np.int32:
         index = ak.index.Index32(index_array)
+    elif dtype == np.uint32:
+        index = ak.index.IndexU32(index_array)
     else:
         index = ak.index.Index64(index_array)
-    return IndexedOptionArray(index, content)
+    return IndexedArray(index, content)
 
 
 @st.composite
-def indexed_option_array_from_contents(
+def indexed_array_from_contents(
     draw: st.DrawFn,
     content: 'StContent',
     *,
@@ -95,11 +110,13 @@ def indexed_option_array_from_contents(
     min_length: int = 0,
     max_length: int | None = None,
     st_option: 'StOption | None' = None,
-) -> IndexedOptionArray:
-    """Strategy for [`ak.contents.IndexedOptionArray`][] instances within a size budget.
+) -> IndexedArray:
+    """Strategy for [`ak.contents.IndexedArray`][] instances within a size budget.
 
-    Draws the index length first, then gives the remainder of the budget
-    to the child content.
+    Draws the index length first, then gives the remainder of the budget to the
+    child content. Because every index entry must reference a valid content
+    position, a non-empty index requires a non-empty content (there is no `-1`
+    fallback as in [`IndexedOptionArray`][ak.contents.IndexedOptionArray]).
 
     Called by `contents()` during recursive tree generation.
 
@@ -113,7 +130,7 @@ def indexed_option_array_from_contents(
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if `None`.
     min_length
-        Lower bound on `len(result)`. Forwarded to `min_size` of the wrapper.
+        Lower bound on `len(result)`.
     max_length
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
@@ -121,16 +138,16 @@ def indexed_option_array_from_contents(
 
     Returns
     -------
-    IndexedOptionArray
+    IndexedArray
 
     Examples
     --------
     >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
-    >>> c = indexed_option_array_from_contents(
+    >>> c = indexed_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, min_length=2, max_length=5
     ... ).example()
-    >>> isinstance(c, IndexedOptionArray)
+    >>> isinstance(c, IndexedArray)
     True
 
     >>> content_size(c) <= 20
@@ -146,15 +163,20 @@ def indexed_option_array_from_contents(
     assume(min_length <= ml)
     n = draw(st.integers(min_value=min_length, max_value=ml))
     max_content_size = max(max_size - n, 0)
+    if n > 0:
+        # A non-empty index must reference a non-empty content, which costs at
+        # least one toward content_size.
+        assume(max_content_size >= 1)
     child = draw(
         content(
             max_size=max_content_size,
             max_leaf_size=max_leaf_size,
+            min_length=1 if n > 0 else 0,
             allow_option_root=False,
             allow_union_root=False,
             allow_indexed_root=False,
         )
     )
-    result = draw(indexed_option_array_contents(child, min_size=n, max_size=n))
+    result = draw(indexed_array_contents(child, min_size=n, max_size=n))
     assume(content_size(result) <= max_size)
     return result

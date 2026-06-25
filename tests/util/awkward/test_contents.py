@@ -8,6 +8,7 @@ from awkward.contents import (
     BitMaskedArray,
     ByteMaskedArray,
     EmptyArray,
+    IndexedArray,
     IndexedOptionArray,
     ListArray,
     ListOffsetArray,
@@ -84,6 +85,7 @@ def test_get_contents(data: st.DataObject) -> None:
         case (
             BitMaskedArray()
             | ByteMaskedArray()
+            | IndexedArray()
             | IndexedOptionArray()
             | ListArray()
             | ListOffsetArray()

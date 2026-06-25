@@ -23,6 +23,7 @@ def arrays(
     allow_list: bool = True,
     allow_record: bool = True,
     allow_union: bool = True,
+    allow_indexed: bool = True,
     allow_indexed_option: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
@@ -61,6 +62,7 @@ def arrays(
     - Strings
     - Bytestrings
     - [`RecordArray`][ak.contents.RecordArray]
+    - [`IndexedArray`][ak.contents.IndexedArray]
     - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
     - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
     - [`BitMaskedArray`][ak.contents.BitMaskedArray]
@@ -124,6 +126,8 @@ def arrays(
         No [`RecordArray`][ak.contents.RecordArray] is generated if `False`.
     allow_union
         No [`UnionArray`][ak.contents.UnionArray] is generated if `False`.
+    allow_indexed
+        No [`IndexedArray`][ak.contents.IndexedArray] is generated if `False`.
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
         `False`.
@@ -176,6 +180,7 @@ def arrays(
             allow_bytestring=allow_bytestring,
             allow_record=allow_record,
             allow_union=allow_union,
+            allow_indexed=allow_indexed,
             allow_indexed_option=allow_indexed_option,
             allow_byte_masked=allow_byte_masked,
             allow_bit_masked=allow_bit_masked,

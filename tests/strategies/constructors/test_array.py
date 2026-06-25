@@ -30,6 +30,7 @@ DEFAULTS = ArraysKwargs(
     allow_list=True,
     allow_record=True,
     allow_union=True,
+    allow_indexed=True,
     allow_indexed_option=True,
     allow_byte_masked=True,
     allow_bit_masked=True,

@@ -44,7 +44,11 @@ def bit_masked_array_contents(
     match content:
         case None:
             content = draw(
-                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+                st_ak.contents.contents(
+                    allow_union_root=False,
+                    allow_option_root=False,
+                    allow_indexed_root=False,
+                )
             )
         case st.SearchStrategy():
             content = draw(content)
@@ -127,6 +131,7 @@ def bit_masked_array_from_contents(
         max_length=max_length,
         allow_option_root=False,
         allow_union_root=False,
+        allow_indexed_root=False,
     )
     result = draw(bit_masked_array_contents(st_content))
     assume(content_size(result) <= max_size)

@@ -40,6 +40,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_list: bool
     allow_record: bool
     allow_union: bool
+    allow_indexed: bool
     allow_indexed_option: bool
     allow_byte_masked: bool
     allow_bit_masked: bool
@@ -108,6 +109,7 @@ def contents_kwargs(
                 'allow_list': st.booleans(),
                 'allow_record': st.booleans(),
                 'allow_union': st.booleans(),
+                'allow_indexed': st.booleans(),
                 'allow_indexed_option': st.booleans(),
                 'allow_byte_masked': st.booleans(),
                 'allow_bit_masked': st.booleans(),
@@ -148,6 +150,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_list = opts.kwargs.get('allow_list', True)
     allow_record = opts.kwargs.get('allow_record', True)
     allow_union = opts.kwargs.get('allow_union', True)
+    allow_indexed = opts.kwargs.get('allow_indexed', True)
     allow_indexed_option = opts.kwargs.get('allow_indexed_option', True)
     allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
     allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
@@ -185,6 +188,8 @@ def test_properties(data: st.DataObject) -> None:
         assert not _has_record(c)
     if not allow_union:
         assert not _has_union(c)
+    if not allow_indexed:
+        assert not _has_indexed(c)
     if not allow_indexed_option:
         assert not _has_indexed_option(c)
     if not allow_byte_masked:
@@ -351,6 +356,8 @@ def _nesting_depth(c: ak.contents.Content) -> int:
         ak.contents.BitMaskedArray,
         ak.contents.UnmaskedArray,
     )
+    if isinstance(c, ak.contents.IndexedArray):
+        return _nesting_depth(c.content)
     if isinstance(c, _option_types):
         return _nesting_depth(c.content)
     if isinstance(c, ak.contents.UnionArray):
@@ -415,6 +422,11 @@ def _has_union(c: ak.contents.Content) -> bool:
     return any(isinstance(n, ak.contents.UnionArray) for n in iter_contents(c))
 
 
+def _has_indexed(c: ak.contents.Content) -> bool:
+    """Check if the content contains any IndexedArray node."""
+    return any(isinstance(n, ak.contents.IndexedArray) for n in iter_contents(c))
+
+
 def _has_indexed_option(c: ak.contents.Content) -> bool:
     """Check if the content contains any IndexedOptionArray node."""
     return any(isinstance(n, ak.contents.IndexedOptionArray) for n in iter_contents(c))
@@ -433,6 +445,11 @@ def _has_bit_masked(c: ak.contents.Content) -> bool:
 def _has_unmasked(c: ak.contents.Content) -> bool:
     """Check if the content contains any UnmaskedArray node."""
     return any(isinstance(n, ak.contents.UnmaskedArray) for n in iter_contents(c))
+
+
+def test_draw_from_contents_indexed() -> None:
+    """Assert that IndexedArray can be drawn from `contents()`."""
+    find(st_ak.contents.contents(), _has_indexed)
 
 
 def test_draw_from_contents_indexed_option() -> None:

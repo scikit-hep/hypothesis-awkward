@@ -3,6 +3,7 @@ from awkward.contents import (
     ByteMaskedArray,
     Content,
     EmptyArray,
+    IndexedArray,
     IndexedOptionArray,
     ListArray,
     ListOffsetArray,
@@ -174,6 +175,16 @@ def _(c: ByteMaskedArray, /, **_: bool) -> tuple[Content, ...]:
 @content_own_size.register
 def _(c: ByteMaskedArray, /) -> int:
     return 1 + len(c.mask.data)
+
+
+@get_contents.register
+def _(c: IndexedArray, /, **_: bool) -> tuple[Content, ...]:
+    return (c.content,)
+
+
+@content_own_size.register
+def _(c: IndexedArray, /) -> int:
+    return len(c.index.data)
 
 
 @get_contents.register

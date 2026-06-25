@@ -40,7 +40,11 @@ def unmasked_array_contents(
     match content:
         case None:
             content = draw(
-                st_ak.contents.contents(allow_union_root=False, allow_option_root=False)
+                st_ak.contents.contents(
+                    allow_union_root=False,
+                    allow_option_root=False,
+                    allow_indexed_root=False,
+                )
             )
         case st.SearchStrategy():
             content = draw(content)
@@ -116,6 +120,7 @@ def unmasked_array_from_contents(
             max_length=max_length,
             allow_option_root=False,
             allow_union_root=False,
+            allow_indexed_root=False,
         )
     )
     return UnmaskedArray(child)
