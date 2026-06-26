@@ -31,6 +31,7 @@ class NumpyArraysKwargs(TypedDict, total=False):
     max_dims: int
     min_size: int
     max_size: int
+    unique: bool
 
 
 @st.composite
@@ -41,29 +42,32 @@ def numpy_arrays_kwargs(
     """Strategy for options for `numpy_arrays()` strategy."""
     if chain is None:
         chain = st_ak.OptsChain({})
-    st_dtypes = chain.register(st_ak.supported_dtypes())
 
     min_dims, max_dims = draw(st_ak.ranges(min_start=1, max_end=5))
     min_size, max_size = draw(
         st_ak.ranges(min_start=0, max_end=100, max_start=DEFAULT_MAX_SIZE)
     )
+    unique = draw(st_ak.none_or(st.booleans()))
+
+    st_dtypes = st_ak.supported_dtypes()
+    if unique and not sc(min_size) <= 2:
+        st_dtypes = st_dtypes.filter(lambda d: d.kind != 'b')
+    registered_st_dtypes = chain.register(st_dtypes)
+    dtype = draw(st.one_of(st.none(), st.just(registered_st_dtypes), st_dtypes))
 
     drawn = (
         ('min_dims', min_dims),
         ('max_dims', max_dims),
         ('min_size', min_size),
         ('max_size', max_size),
+        ('unique', unique),
+        ('dtype', dtype),
     )
 
     kwargs = draw(
         st.fixed_dictionaries(
             {k: st.just(v) for k, v in drawn if v is not None},
             optional={
-                'dtype': st.one_of(
-                    st.none(),
-                    st.just(st_dtypes),
-                    st_ak.supported_dtypes(),
-                ),
                 'allow_structured': st.booleans(),
                 'allow_nan': st.booleans(),
             },
@@ -71,6 +75,21 @@ def numpy_arrays_kwargs(
     )
 
     return chain.extend(cast(NumpyArraysKwargs, kwargs))
+
+
+def _all_distinct(a: np.ndarray) -> bool:
+    """Return True if all elements of `a` are pairwise distinct.
+
+    Compares NumPy scalars (not `a.tolist()`) so that `NaN`/`NaT` count as distinct,
+    matching how Hypothesis generates `unique=True` arrays. `a.tolist()` maps `NaT` to
+    `None`, and `None == None` is `True`, which would collapse distinct `NaT`s.
+    """
+    vals = list(a.ravel())
+    return all(
+        not bool(vals[i] == vals[j])
+        for i in range(len(vals))
+        for j in range(i + 1, len(vals))
+    )
 
 
 @settings(max_examples=200)
@@ -92,6 +111,7 @@ def test_properties(data: st.DataObject) -> None:
     max_dims = opts.kwargs.get('max_dims', None)
     min_size = opts.kwargs.get('min_size', 0)
     max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
+    unique = opts.kwargs.get('unique', False)
 
     match dtype:
         case np.dtype():
@@ -116,6 +136,9 @@ def test_properties(data: st.DataObject) -> None:
         assert not has_nan
 
     assert min_dims <= len(n.shape) <= sc(max_dims)
+
+    if unique:
+        assert _all_distinct(n)
 
     # Assert an Awkward Array can be created.
     a = ak.from_numpy(n)
@@ -299,5 +322,18 @@ def test_draw_max_dims() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False, max_dims=3),
         lambda a: len(a.shape) == 3,
+        settings=settings(phases=[Phase.generate], max_examples=2000),
+    )
+
+
+def test_draw_unique_bool() -> None:
+    """Assert that [True, False] can be drawn when unique is True.
+
+    The `dtype.kind == 'b'` guard is required because `{0, 1} == {True, False}` in
+    Python, so a unique int array `[0, 1]` would otherwise match.
+    """
+    find(
+        st_ak.numpy_arrays(unique=True),
+        lambda a: a.dtype.kind == 'b' and set(a.ravel().tolist()) == {True, False},
         settings=settings(phases=[Phase.generate], max_examples=2000),
     )
