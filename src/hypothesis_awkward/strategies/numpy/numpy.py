@@ -7,7 +7,7 @@ from hypothesis.extra import numpy as st_np
 import awkward as ak
 from hypothesis_awkward.util import n_scalars_in
 
-from .dtype import numpy_dtypes
+from .dtype import numpy_dtypes, supported_dtypes
 
 # https://github.com/HypothesisWorks/hypothesis/blob/86d8a4d/hypothesis-python/src/hypothesis/extra/_array_helpers.py#L68
 NDIM_MAX = 32
@@ -24,6 +24,7 @@ def numpy_arrays(
     max_dims: int | None = None,
     min_size: int = 0,
     max_size: int = 10,
+    unique: bool = False,
 ) -> np.ndarray:
     """Strategy for NumPy arrays from which Awkward Arrays can be created.
 
@@ -46,6 +47,13 @@ def numpy_arrays(
     max_size
         Maximum number of scalars in the array. For structured dtypes, each
         element counts as multiple scalars (one per field).
+    unique
+        Generate arrays whose elements are pairwise distinct if `True`. Only simple
+        dtypes are generated (no structured dtypes). The achievable size is bounded by
+        the number of distinct values the dtype can represent; when `dtype` is `None`,
+        dtypes that cannot supply `min_size` distinct values (for example `bool` when
+        `min_size > 2`) are not drawn. A pinned `dtype` that cannot satisfy the request
+        raises.
 
     Examples
     --------
@@ -53,6 +61,15 @@ def numpy_arrays(
     >>> ak.from_numpy(n)
     <Array ... type='...'>
     """
+    if unique:
+        # Uniqueness is defined for simple dtypes only; drop structured dtypes and,
+        # when the dtype is free, any that cannot supply `min_size` distinct values.
+        allow_structured = False
+        if dtype is None:
+            dtype = supported_dtypes().filter(
+                lambda d: _n_distinct_values(d) >= min_size
+            )
+
     # Limit dtype_size so that the size can be between min_size and max_size
     max_dtype_size = max_size // min_size if min_size > 0 else max_size
     max_dtype_size = max(1, max_dtype_size)
@@ -71,7 +88,8 @@ def numpy_arrays(
         return dtype_size == 1 and min_dims <= 1 and max_dims <= 1
 
     if _is_1d_dtype_determined():
-        # Fast path for better shrinking.
+        # Fast path for better shrinking. `st.lists` self-caps a unique list at the
+        # dtype's distinct-value count.
         return draw(
             st.builds(
                 lambda v: np.array(v, dtype=dtype),
@@ -79,18 +97,43 @@ def numpy_arrays(
                     st_np.from_dtype(dtype=dtype, allow_nan=allow_nan),
                     min_size=min_size,
                     max_size=max_size,
+                    unique=unique,
                 ),
             )
         )
 
     min_items = -(-min_size // dtype_size)  # n items of dtype, rounded up
     max_items = max_size // dtype_size  # n items of dtype, rounded down
+    if unique:
+        # The shape is fixed before generation, so it must fit within the dtype's
+        # distinct values for `st_np.arrays(unique=True)` to be satisfiable.
+        card = _n_distinct_values(dtype)
+        if card < max_items:
+            max_items = int(card)
 
     shape = draw(_st_shape(min_items, max_items, min_dims, max_dims))
 
     return draw(
-        st_np.arrays(dtype=dtype, shape=shape, elements={'allow_nan': allow_nan})
+        st_np.arrays(
+            dtype=dtype,
+            shape=shape,
+            elements={'allow_nan': allow_nan},
+            unique=unique,
+        )
     )
+
+
+def _n_distinct_values(d: np.dtype) -> float:
+    """Number of distinct values a simple dtype can represent.
+
+    Returns ``math.inf`` for kinds whose domain is effectively unbounded at the array
+    sizes used here (floating, complex, datetime, timedelta).
+    """
+    if d.kind == 'b':
+        return 2
+    if d.kind in ('i', 'u'):
+        return 2 ** (d.itemsize * 8)
+    return math.inf
 
 
 @st.composite
