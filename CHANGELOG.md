@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.19.0] - 2026-06-26
+
+### Features
+
+- Generate `IndexedArray` ([#125](https://github.com/scikit-hep/hypothesis-awkward/pull/125))
+- Add `unique` option to `numpy_arrays()` ([#127](https://github.com/scikit-hep/hypothesis-awkward/pull/127))
+
+### Documentation
+
+- Add Roadmap guide page ([#124](https://github.com/scikit-hep/hypothesis-awkward/pull/124))
+
+### Testing
+
+- Simplify per-type checks in `contents()` tests ([#126](https://github.com/scikit-hep/hypothesis-awkward/pull/126))
+
+### Meta
+
+- Add docs-review persona subagents and retrospective fixes
+- Note split-later trigger to keep docs plan persona-agnostic
+- Calibrate docs-review personas and re-review synthesized pages
+- Make docs persona review quadrant-aware (Diátaxis)
+- Clarify earned vs. demanded illustration in Diátaxis review
+- Ground Diátaxis review in service-to-purpose, drop "earned"
+
+
 ## [0.18.1] - 2026-06-22
 
 ### Bug Fixes
