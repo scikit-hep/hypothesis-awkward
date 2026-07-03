@@ -36,6 +36,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_list: bool
     allow_record: bool
     allow_union: bool
+    allow_indexed: bool
     allow_indexed_option: bool
     allow_byte_masked: bool
     allow_bit_masked: bool
@@ -90,6 +91,7 @@ def contents_kwargs(
                 'allow_list': st.booleans(),
                 'allow_record': st.booleans(),
                 'allow_union': st.booleans(),
+                'allow_indexed': st.booleans(),
                 'allow_indexed_option': st.booleans(),
                 'allow_byte_masked': st.booleans(),
                 'allow_bit_masked': st.booleans(),

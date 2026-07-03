@@ -23,10 +23,16 @@ instructions, so the goal is accuracy — edit them to match reality.
      to `.github/**` and `pyproject.toml`).
    - `rules/testing-patterns.md` — test patterns, example code (path-scoped to
      `tests/**`).
+   - `rules/docs.md` — docs conventions: build, structure, examples (path-scoped
+     to `docs/**`).
+   - `rules/docs-voice.md` — voice rules for user-facing prose (path-scoped to
+     `README.md` and `docs/**`).
+   - `rules/diataxis-review.md` — Diátaxis review guidance for the
+     `docs-persona-*` agents (always loaded so subagents receive it).
+   - `agents/` and `skills/` — check that the file paths and repo facts they
+     reference still exist.
 
-   Pick up any rule files added later. The project `.claude/rules/` currently
-   holds only the two above; short rules like git/markdown live in the user's
-   global `~/.claude/rules/`, not this repo.
+   Pick up any rule files added later.
 
 3. **Optimize context** — Review always-loaded context (files without `paths:`
    frontmatter) for size and relevance:
