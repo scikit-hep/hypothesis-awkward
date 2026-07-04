@@ -564,41 +564,57 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-strategy-arrays" class="md-nav__link">
+  <a href="#draw-your-first-arrays" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        The strategy <code>arrays()</code>
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The strategy arrays()">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#sample-outputs-of-arrays" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Sample outputs of <code>arrays()</code>
+        Draw your first arrays
       </span>
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#the-options-of-arrays" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#what-arrays-generates" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        The options of <code>arrays()</code>
+        What <code>arrays()</code> generates
       </span>
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Reading the output
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#write-your-first-property-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Write your first property test
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shape-what-is-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Shape what is generated
+      </span>
+    </span>
+  </a>
   
 </li>
       
@@ -1054,41 +1070,57 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-strategy-arrays" class="md-nav__link">
+  <a href="#draw-your-first-arrays" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        The strategy <code>arrays()</code>
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The strategy arrays()">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#sample-outputs-of-arrays" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Sample outputs of <code>arrays()</code>
+        Draw your first arrays
       </span>
     </span>
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#the-options-of-arrays" class="md-nav__link">
+      
+        <li class="md-nav__item">
+  <a href="#what-arrays-generates" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        The options of <code>arrays()</code>
+        What <code>arrays()</code> generates
       </span>
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Reading the output
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#write-your-first-property-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Write your first property test
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shape-what-is-generated" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Shape what is generated
+      </span>
+    </span>
+  </a>
   
 </li>
       
@@ -1177,60 +1209,112 @@
                   
 
 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
-<h2 id="the-strategy-arrays">The strategy <code>arrays()</code><a class="headerlink" href="#the-strategy-arrays" title="Permanent link">&para;</a></h2>
-<p>The function <code>arrays()</code> is the main strategy. It generates Awkward Arrays with
-many options to control the output arrays.</p>
-<h3 id="sample-outputs-of-arrays">Sample outputs of <code>arrays()</code><a class="headerlink" href="#sample-outputs-of-arrays" title="Permanent link">&para;</a></h3>
-<p>You can see sample outputs of the current version of <code>arrays()</code> in the test
-case:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">given</span>
+<p>By the end of this page you will have drawn generated Awkward Arrays, learned to
+read their reprs, run your first property-based test, and shaped what is
+generated. The page assumes the package is <a href="../installation/">installed</a>.</p>
+<h2 id="draw-your-first-arrays">Draw your first arrays<a class="headerlink" href="#draw-your-first-arrays" title="Permanent link">&para;</a></h2>
+<p>The main strategy, <code>arrays()</code>, generates Awkward Arrays — a strategy is the
+object Hypothesis draws test data from. To see what it produces, save this
+script as <code>explore_arrays.py</code> and run it:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nd">@given</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_array</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">array</span><span class="si">=!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">strategy</span> <span class="o">=</span> <span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">()</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">strategy</span><span class="o">.</span><span class="n">example</span><span class="p">()))</span>
 </span></code></pre></div>
-<p>For example, this might print:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\U000c2f9f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="s1">&#39;@ú</span><span class="se">\x94</span><span class="s1">j</span><span class="se">\U000c4364</span><span class="s1">e&#39;</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;4 * string&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="o">...</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;42 * option[var * ?bytes]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;6 * var * unknown&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;8 * var * string&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;8 * var * string&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;O</span><span class="se">\x01\x14\xec</span><span class="s1">E</span><span class="se">\xdb</span><span class="s1">_&#39;</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * bytes&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;2 * var * bytes&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * ?bytes&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;4 * string&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="n">NaT</span><span class="p">,</span> <span class="n">NaT</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="o">-</span><span class="mi">9223372036854773681</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;26 * datetime64[Y]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">],</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">],</span> <span class="o">...</span><span class="p">,</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;8 * 2 * var * timedelta64[fs]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * 1 * var * var * timedelta64[fs]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[[[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]]]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * 1 * 1 * var * var * var * bool&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mi">16996</span><span class="p">],</span> <span class="p">[</span><span class="mi">10841</span><span class="p">],</span> <span class="o">...</span><span class="p">,</span> <span class="p">[</span><span class="mi">10841</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;7 * option[1 * uint16]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="mi">0</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * option[1 * uint16]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * option[1 * uint16]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[</span><span class="kc">None</span><span class="p">]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * 1 * option[1 * option[var * int16]]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;1 * option[var * 0 * union[timedelta64[D], 0 * unknown]]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;2 * datetime64[D]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;4 * ?timedelta64[us]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;14 * bytes&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="o">...</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;55 * option[var * var * ...&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">inf</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;5 * float16&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="o">-</span><span class="mi">768614336404561008</span><span class="o">-</span><span class="mi">11</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;6 * ?datetime64[M]&#39;</span><span class="o">&gt;</span>
-</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="n">array</span><span class="o">=&lt;</span><span class="n">Array</span> <span class="p">[</span><span class="err">??</span><span class="p">,</span> <span class="err">??</span><span class="p">]</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;2 * option[var * 1 * string]&#39;</span><span class="o">&gt;</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>python<span class="w"> </span>explore_arrays.py
 </span></code></pre></div>
-<p>The current version generates arrays with <code>NumpyArray</code>, <code>EmptyArray</code>, string,
-and bytestring as leaf contents that can be nested multiple levels deep in
-<code>RegularArray</code>, <code>ListOffsetArray</code>, <code>ListArray</code>, <code>RecordArray</code>, and <code>UnionArray</code>.
-Option types (<code>IndexedOptionArray</code>, <code>ByteMaskedArray</code>, <code>BitMaskedArray</code>,
-<code>UnmaskedArray</code>) add nullable values shown as <code>None</code> in the output. The <code>?</code> in
-type strings (e.g., <code>?int64</code>) indicates option types. Arrays might be virtual,
-shown as <code>??</code> in the output.</p>
-<h3 id="the-options-of-arrays">The options of <code>arrays()</code><a class="headerlink" href="#the-options-of-arrays" title="Permanent link">&para;</a></h3>
-<p>The strategy <code>arrays()</code> has many options to control the output arrays. You can
-find all options in the
-<a href="../../reference/strategies/constructors/">API reference</a>.</p>
+<p>The script prints five generated arrays. The <code>example()</code> method draws one sample
+from a strategy; it is meant for exploring a strategy interactively, not for use
+inside tests.</p>
+<h2 id="what-arrays-generates">What <code>arrays()</code> generates<a class="headerlink" href="#what-arrays-generates" title="Permanent link">&para;</a></h2>
+<p>Generation is random: each run prints different arrays, and yours will differ
+from any shown here. The lines below, each the repr of one generated array, were
+collected across many runs — a single run of the script above prints five:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&lt;Array [772, 53, -4462, -5260] type=&#39;4 * int32&#39;&gt;
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>&lt;Array [&#39;&#39;, &#39;&#39;, &#39;K&#39;, ..., &#39;\x00\U000d1d457Ë_&#39;, &#39;m&#39;] type=&#39;6 * string&#39;&gt;
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>&lt;Array [1535-09-05, 0965-02-21, -784-08-11, NaT] type=&#39;4 * datetime64[W]&#39;&gt;
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>&lt;Array [-inf+-0j, 0+-6.1e+16j, ..., 0+-6.81e-42j] type=&#39;5 * complex64&#39;&gt;
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>&lt;Array [-2.23e-309+0j, ..., 1.06e-222+nanj] type=&#39;8 * complex128&#39;&gt;
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>&lt;Array [] type=&#39;0 * unknown&#39;&gt;
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>&lt;Array [[b&#39;\xa1LC2&#39;], ...] type=&#39;2 * 1 * bytes&#39;&gt;
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>&lt;Array [??, ??, ??, ??, ??, ..., ??, ??, ??, ??, ??] type=&#39;24 * var * ?float64&#39;&gt;
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>&lt;Array [None, None, None, None, ..., None, None, None] type=&#39;50 * ?unknown&#39;&gt;
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>&lt;Array [(&#39;\xa0\xad&#39;), (&#39;©&#39;)] type=&#39;2 * (string)&#39;&gt;
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>&lt;Array [b&#39;\xd0\x86\xa3&#39;, ..., &#39;\U000ad087&#39;] type=&#39;4 * union[string, bytes]&#39;&gt;
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>&lt;Array [None] type=&#39;1 * option[12 * var * unknown]&#39;&gt;
+</span></code></pre></div>
+<p>The generated arrays cover numbers (including <code>nan</code> and infinities), dates and
+durations, strings, bytestrings, records, unions, missing values, and nested
+lists of regular and variable length, in a variety of Awkward layouts. The
+<a href="../../reference/strategies/constructors/">API reference</a> lists exactly which
+layouts are generated.</p>
+<h2 id="reading-the-output">Reading the output<a class="headerlink" href="#reading-the-output" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>None</code> is a missing value. <code>NaT</code> ("not a time") is the missing-value
+  placeholder inside date and duration types.</li>
+<li>A <code>?</code> prefix or <code>option[...]</code> in the type string marks an option type — a type
+  whose values can be missing. The two spellings mean the same; <code>?</code> is the short
+  form.</li>
+<li><code>??</code> marks a virtual value: the array is backed by lazy buffers that have not
+  been computed yet, so the repr shows placeholders instead of values. This
+  appears in the values, unlike the type-level <code>?</code>.</li>
+<li>Parentheses mark a record without field names, as in <code>2 * (string)</code>.</li>
+<li>A type string reads left to right: <code>4 * int32</code> is four <code>int32</code> values, and
+  <code>24 * var * ?float64</code> is 24 variable-length lists of <code>float64</code> values that can
+  be missing. <code>union[...]</code> is a mixed type, and <code>unknown</code> is the type of an
+  array with no actual values (an empty array, or one whose values are all
+  missing).</li>
+</ul>
+<h2 id="write-your-first-property-test">Write your first property test<a class="headerlink" href="#write-your-first-property-test" title="Permanent link">&para;</a></h2>
+<p>The strategies are for use with <a href="https://hypothesis.works/">Hypothesis</a> in
+tests. Save this as <code>test_arrays.py</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">given</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="nd">@given</span><span class="p">(</span><span class="n">array</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_arrays</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span>
+</span></code></pre></div>
+<p>The test runs with <a href="https://docs.pytest.org/">pytest</a>, which is not installed
+with the package; run <code>pip install pytest</code> first if you do not have it. pytest
+collects functions whose names start with <code>test_</code> in files named <code>test_*.py</code>.
+Run the test:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pytest<span class="w"> </span>test_arrays.py
+</span></code></pre></div>
+<p>The test passes (pytest reports <code>1 passed</code>). The <code>@given</code> decorator ran the test
+function many times, each time with a newly generated array, and the assertion
+held for every one of them. That is a property-based test: instead of picking
+input arrays by hand, you state a property and Hypothesis generates the inputs —
+the <a href="../../">introduction</a> explains the idea. Here the property is only
+that every generated value is an <code>ak.Array</code>; a real test asserts a property of
+your own code. When an assertion fails, Hypothesis reports a minimal failing
+example; <a href="../generating-and-shrinking-samples/">Generating and Shrinking Samples</a>
+explains how.</p>
+<h2 id="shape-what-is-generated">Shape what is generated<a class="headerlink" href="#shape-what-is-generated" title="Permanent link">&para;</a></h2>
+<p>Options of <code>arrays()</code> narrow the output. For example, <code>allow_virtual=False</code>
+turns off virtual arrays, so no <code>??</code> placeholders appear. Change the strategy in
+<code>explore_arrays.py</code> and run it again:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">strategy</span> <span class="o">=</span> <span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">(</span><span class="n">allow_virtual</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">strategy</span><span class="o">.</span><span class="n">example</span><span class="p">()))</span>
+</span></code></pre></div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python<span class="w"> </span>explore_arrays.py
+</span></code></pre></div>
+<p>A run might print, for example:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>&lt;Array [] type=&#39;0 * unknown&#39;&gt;
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>&lt;Array [[[b&#39;&#39;], [b&#39;&#39;], ..., [b&#39;&#39;], [b&#39;&#39;]], ...] type=&#39;3 * 13 * 1 * bytes&#39;&gt;
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>&lt;Array [] type=&#39;0 * var * 1 * int32&#39;&gt;
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>&lt;Array [b&#39;#h\x950#\x8cMv&#39;, b&#39;&#39;, ..., b&#39;\xbf\xcc\x1c\xfe\xe0&#39;] type=&#39;9 * bytes&#39;&gt;
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>&lt;Array [&#39;í衣䕉&#39;, ..., &#39;D&#39;] type=&#39;4 * string&#39;&gt;
+</span></code></pre></div>
+<p>The <a href="../../reference/strategies/constructors/">API reference</a> documents all
+options.</p>
 
 
 

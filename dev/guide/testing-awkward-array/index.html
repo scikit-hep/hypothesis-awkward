@@ -1230,15 +1230,19 @@ cases. This makes Awkward Array hard to test thoroughly.</p>
 project. If you want to use the strategies in your own tests, start with
 <a href="../getting-started/">Getting Started</a>.</p>
 <h2 id="how-hypothesis-awkward-tests-awkward-array">How hypothesis-awkward tests Awkward Array<a class="headerlink" href="#how-hypothesis-awkward-tests-awkward-array" title="Permanent link">&para;</a></h2>
-<p>This package addresses that problem with property-based testing: running one
-test against many automatically generated inputs instead of a fixed list. Its
-main strategy, <code>constructors.arrays()</code>, generates nearly fully general Awkward
-Arrays, including virtual arrays (arrays whose buffers are not yet
-materialized). See <a href="../getting-started/">Getting Started</a> for what it produces.</p>
+<p>This package addresses that problem with <a href="../../">property-based testing</a>:
+running one test against many automatically generated inputs instead of a fixed
+list. Its main strategy, <code>st_ak.constructors.arrays()</code>, generates nearly fully
+general Awkward Arrays, including virtual arrays (arrays whose buffers are not
+yet materialized); categorical data is the remaining gap (see the
+<a href="../roadmap/">Roadmap</a>). See <a href="../getting-started/">Getting Started</a> for what it
+produces.</p>
 <p>These strategies are integrated into Awkward Array's continuous integration
 (CI). The first property-based tests were added in
 <a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a> and now run on every
-change. Two kinds of properties are checked so far:</p>
+change (in
+<a href="https://github.com/scikit-hep/awkward/tree/main/tests/properties"><code>tests/properties</code></a>).
+Two kinds of properties are checked so far:</p>
 <p><strong>Round-trip.</strong> Converting an array to buffers with <code>ak.to_buffers()</code> and back
 with <code>ak.from_buffers()</code> reconstructs an equal array
 (<a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a>).</p>
@@ -1268,18 +1272,22 @@ symmetric (if <code>a</code> equals <code>b</code>, then <code>b</code> equals <
 </span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">backward</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">assert</span> <span class="n">forward</span> <span class="o">==</span> <span class="n">backward</span>
 </span></code></pre></div>
-<p><code>equal_nan=True</code> treats two <code>NaN</code> values as equal, which the generated
-floating-point arrays require. When a property fails, Hypothesis shrinks the
-input to a minimal failing array, which is why the reports below reduce to
-small, reproducible cases.</p>
-<p>The goal is to cover all testable properties of Awkward Array, including
-operations, slicing, reducers, and kernels.</p>
+<p><code>equal_nan=True</code> treats two <code>NaN</code> values as equal — and likewise two <code>NaT</code>
+values in datetimes and timedeltas — which the properties need because the
+generated arrays can contain both. When a property fails, Hypothesis shrinks the
+input toward a minimal failing array — a best-effort search that
+<a href="../generating-and-shrinking-samples/">Generating and Shrinking Samples</a> explains
+— which is why the reports below reduce to small, reproducible cases.</p>
+<p>Both kinds of properties are oracle-free: checking them needs no reference
+implementation to compare against. The goal is to cover all testable properties
+of Awkward Array, including operations, slicing, reducers, and kernels.</p>
 <h2 id="bugs-found">Bugs found<a class="headerlink" href="#bugs-found" title="Permanent link">&para;</a></h2>
-<p>These tests have found bugs in both Awkward Array and Hypothesis.</p>
+<p>These tests have found bugs in both Awkward Array and Hypothesis. This log is
+reviewed at each release.</p>
 <h3 id="awkward-array">Awkward Array<a class="headerlink" href="#awkward-array" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://github.com/scikit-hep/awkward/issues/3888">#3888</a> (fixed) —
-  <code>ak.array_equal()</code> raises an error on virtual arrays and returns the wrong
+  <code>ak.array_equal()</code> raised an error on virtual arrays and returned the wrong
   result for empty unions.</li>
 <li><a href="https://github.com/scikit-hep/awkward/pull/3921">#3921</a> (fixed) —
   <code>ak.array_equal()</code> returned the wrong result for datetimes and timedeltas
@@ -1287,17 +1295,18 @@ operations, slicing, reducers, and kernels.</p>
 <li><a href="https://github.com/scikit-hep/awkward/pull/3962">#3962</a> (fixed) —
   <code>ak.almost_equal()</code>, which backs <code>ak.array_equal()</code>, compared record-array
   fields incorrectly.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4126">#4126</a> (open) —
-  <code>IndexedOptionArray.to_ByteMaskedArray</code> raises a <code>TypeError</code> when its content
-  is an empty <code>EmptyArray</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4126">#4126</a> (fixed) —
+  <code>IndexedOptionArray.to_ByteMaskedArray</code> raised a <code>TypeError</code> when its content
+  was an <code>EmptyArray</code>.</li>
 </ul>
 <p>The test suite also reproduces or accounts for two known Awkward Array issues. A
 test in
 <a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/constructors/test_from_buffers.py"><code>test_from_buffers.py</code></a>
 reproduces an <code>ak.from_buffers()</code> bug with virtual buffers and a
 <code>RegularArray(size=0)</code> inside a <code>BitMaskedArray</code>; it raised an <code>AssertionError</code>
-on Awkward Array v2.9.0, is marked <code>xfail</code> for that version, and was fixed by
-<a href="https://github.com/scikit-hep/awkward/pull/3889">#3889</a>. A NumPy property test
+on Awkward Array v2.9.0, is marked <code>xfail</code> (expected failure), and passes with
+v2.9.1 (likely fixed by
+<a href="https://github.com/scikit-hep/awkward/pull/3889">#3889</a>). A NumPy property test
 in
 <a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/numpy/test_numpy_arrays.py"><code>test_numpy_arrays.py</code></a>
 accounts for <a href="https://github.com/scikit-hep/awkward/issues/3690">#3690</a> (open):
@@ -1311,11 +1320,9 @@ one-dimensional.</p>
   in Hypothesis 6.152.4.</li>
 </ul>
 <h2 id="outlook">Outlook<a class="headerlink" href="#outlook" title="Permanent link">&para;</a></h2>
-<p>Broad, automatically generated test inputs raise confidence that a change is
-correct across the full range of valid arrays, not only the cases a developer
-wrote by hand. This supports iterative development and test-driven development
-(TDD) with artificial-intelligence (AI) coding assistants. The plan is to extend
-coverage to all testable properties of Awkward Array.</p>
+<p>Automatically generated test inputs raise confidence that a change is correct
+across a broad range of valid arrays, not only the cases a developer wrote by
+hand.</p>
 <!-- Living log: review the "Bugs found" section each release. -->
 
 

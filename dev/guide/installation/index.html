@@ -1049,14 +1049,22 @@
                   
 
 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<p>You can install the package from PyPI using pip:</p>
+<p>The package requires Python 3.10 or later.</p>
+<p>You can install the package from
+<a href="https://pypi.org/project/hypothesis-awkward">PyPI</a> using pip:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip<span class="w"> </span>install<span class="w"> </span>hypothesis-awkward
 </span></code></pre></div>
-<p>Or from conda-forge using conda:</p>
+<p>Or from <a href="https://anaconda.org/conda-forge/hypothesis-awkward">conda-forge</a> using
+conda:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>conda<span class="w"> </span>install<span class="w"> </span>conda-forge::hypothesis-awkward
 </span></code></pre></div>
-<p>Hypothesis and Awkward Array will be installed as dependencies if not already
-present.</p>
+<p>Hypothesis and Awkward Array will be installed as dependencies if compatible
+versions are not already installed.</p>
+<p>To confirm the installation, import the package:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import hypothesis_awkward&quot;</span>
+</span></code></pre></div>
+<p>The command prints nothing if the installation succeeded.</p>
+<p>Once installed, see <a href="../getting-started/">Getting Started</a>.</p>
 
 
 
