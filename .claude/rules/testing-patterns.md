@@ -54,60 +54,7 @@ class ContentsKwargs(TypedDict, total=False):
 All kwargs strategies use `@st.composite` returning `st_ak.OptsChain[MyKwargs]`.
 The `chain` parameter enables kwargs delegation between composable strategies.
 
-```python
-@st.composite
-def contents_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ContentsKwargs]:
-    '''Strategy for options for `contents()` strategy.'''
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_dtypes = chain.register(st_ak.supported_dtypes())
-
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
-
-    drawn = (
-        ('min_length', min_length),
-        ('max_length', max_length),
-    )
-
-    kwargs = draw(
-        st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
-            optional={
-                'dtypes': st.one_of(
-                    st.none(),
-                    st.just(st_dtypes),
-                ),
-                'max_size': st.integers(min_value=0, max_value=200),
-                'allow_nan': st.booleans(),
-                'allow_numpy': st.booleans(),
-                'allow_empty': st.booleans(),
-                'allow_string': st.booleans(),
-                'allow_bytestring': st.booleans(),
-                'allow_regular': st.booleans(),
-                'allow_list_offset': st.booleans(),
-                'allow_list': st.booleans(),
-                'allow_record': st.booleans(),
-                'allow_union': st.booleans(),
-                'allow_indexed': st.booleans(),
-                'allow_indexed_option': st.booleans(),
-                'allow_byte_masked': st.booleans(),
-                'allow_bit_masked': st.booleans(),
-                'allow_unmasked': st.booleans(),
-                'max_leaf_size': st.one_of(
-                    st.none(), st.integers(min_value=0, max_value=50)
-                ),
-                'max_depth': st.one_of(
-                    st.none(), st.integers(min_value=0, max_value=5)
-                ),
-            },
-        )
-    )
-
-    return chain.extend(cast(ContentsKwargs, kwargs))
-```
+See `tests/strategies/contents/test_content.py` for a full example.
 
 Key techniques:
 
@@ -155,43 +102,9 @@ for full examples.
 
 See `tests/strategies/misc/test_ranges.py` for a full example.
 
-When kwargs depend on each other, use `@st.composite` and `flatmap`:
-
-```python
-@st.composite
-def ranges_kwargs(
-    draw: st.DrawFn, st_: StMinMaxValuesFactory[T] | None = None
-) -> RangesKwargs[T]:
-    if st_ is None:
-        st_ = st.integers
-
-    # Generate dependent values using flatmap
-    min_start, max_start = draw(min_max_starts(st_=st_))
-    min_end, max_end = draw(min_max_ends(st_=st_, min_start=min_start))
-
-    # Collect non-None values as required kwargs
-    drawn = (
-        ('min_start', min_start),
-        ('max_start', max_start),
-        ('min_end', min_end),
-        ('max_end', max_end),
-    )
-
-    # Mix required (non-None drawn values) and optional kwargs
-    kwargs = draw(
-        st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
-            optional={
-                'allow_start_none': st.booleans(),
-                'allow_end_none': st.booleans(),
-                'let_end_none_if_start_none': st.booleans(),
-                'allow_equal': st.booleans(),
-            },
-        )
-    )
-
-    return cast(RangesKwargs[T], kwargs)
-```
+When kwargs depend on each other, use `@st.composite` and `flatmap` to draw
+values with dependencies (e.g., an upper bound that depends on a drawn lower
+bound).
 
 Key techniques:
 
@@ -204,43 +117,10 @@ Key techniques:
 See `tests/strategies/forms/test_numpy_forms.py` for a full example.
 
 When a strategy has mutually exclusive parameter groups (e.g., `type_` mode vs
-`dtypes` mode), define mode functions selected via `st.one_of`:
-
-```python
-@st.composite
-def numpy_forms_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[NumpyFormsKwargs]:
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_type = chain.register(st_ak.numpy_types())
-    st_dtypes = chain.register(st_ak.supported_dtypes())
-    st_inner_shape = chain.register(_inner_shape_strategies())
-
-    def type_mode() -> st.SearchStrategy[NumpyFormsKwargs]:
-        return st.fixed_dictionaries(
-            {
-                'type_': st.one_of(
-                    st_ak.numpy_types(),        # concrete value
-                    st.just(st_type),           # strategy (tracked)
-                ),
-            },
-        ).map(lambda d: cast(NumpyFormsKwargs, d))
-
-    def dtypes_mode() -> st.SearchStrategy[NumpyFormsKwargs]:
-        return st.fixed_dictionaries(
-            {},
-            optional={
-                'dtypes': st.one_of(st.none(), st.just(st_dtypes)),
-                'allow_datetime': st.booleans(),
-                ...
-            },
-        ).map(lambda d: cast(NumpyFormsKwargs, d))
-
-    kwargs = draw(st.one_of(type_mode(), dtypes_mode()))
-    return chain.extend(kwargs)
-```
+`dtypes` mode), define mode functions selected via `st.one_of`. Within a mode, a
+kwarg can be drawn as either a concrete value or `st.just(recorder)` — a tracked
+strategy from `chain.register()` — so the test can later distinguish the two via
+`match`.
 
 In the test, call `reset()` before drawing and use `match` for assertions:
 
@@ -275,29 +155,6 @@ When a parameter is a callable that returns a strategy (not a strategy itself),
 use `chain.register_callable()` to create a `RecordCallDraws` wrapper. Each call
 to the wrapper produces a `RecordDraws` instance, and `drawn` aggregates all
 values across all calls.
-
-```python
-@st.composite
-def content_lists_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ContentListsKwargs]:
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register_callable(st_ak.contents.contents)
-
-    kwargs = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'st_content': st.just(st_content),
-                ...
-            },
-        )
-    )
-
-    return chain.extend(cast(ContentListsKwargs, kwargs))
-```
 
 In the test, use `match` to check for `RecordCallDraws` and verify drawn values:
 
@@ -382,3 +239,70 @@ Extract shared values like default parameters:
 ```python
 DEFAULT_MAX_SIZE = 10
 ```
+
+## 7. Tracking upstream Awkward Array bugs in tests
+
+Two patterns, depending on whether the bug can be triggered directly or only
+shows up as an incidental failure inside a broader property test.
+
+### Direct repro with `xfail`
+
+When a bug can be triggered by a small, hand-built case, write a dedicated test
+that constructs it directly and mark it `xfail` with the reason naming the
+broken version:
+
+```python
+"""Reproduce <library> bug with <short description>.
+
+Fixed in <library> vX.Y.Z (likely <PR/issue>).
+"""
+
+
+@pytest.mark.xfail(reason='fails with <library> vX.Y')
+def test_<bug_name>() -> None:
+    """<what triggers the bug and what it raises>."""
+    ...  # minimal case that triggers the bug
+```
+
+Full historical example:
+[`test_from_buffers.py` at v0.19.0](https://github.com/scikit-hep/hypothesis-awkward/blob/v0.19.0/tests/strategies/constructors/test_from_buffers.py)
+(removed once the minimum supported Awkward version moved past the fix).
+
+- The module or test docstring names the exact broken version and, if known, the
+  upstream fix.
+- Once the minimum supported version moves past the fix, the test XPASSes. This
+  project does not set `xfail_strict`, so an XPASS does not fail the run — watch
+  for it in the test summary as the signal to delete the test, and update any
+  doc that mentions it, rather than leave a dead marker in the suite.
+
+### Exclude the broken case from a property test
+
+When the bug only shows up inside a broader generated space and is not worth a
+dedicated repro, define a local predicate that reports whether a case is
+expected to work, and branch the assertion around it instead of adding an
+`xfail`:
+
+```python
+def _is_<condition>(a: ak.Array) -> bool:
+    """True if <operation> is expected to work without error.
+
+    <what fails and why>
+    <link to the upstream issue>
+    """
+    ...  # determine whether this case is affected
+
+
+if _is_<condition>(a):
+    ...  # normal assertion
+else:
+    with pytest.raises(<ExpectedError>):
+        ...  # the broken case raises instead
+```
+
+Full example (pinned to v0.19.0 so the line numbers stay accurate):
+[`test_numpy_arrays.py`, lines 163–185](https://github.com/scikit-hep/hypothesis-awkward/blob/v0.19.0/tests/strategies/numpy/test_numpy_arrays.py#L163-L185).
+
+- The predicate's docstring links the upstream issue, same as the `xfail` reason
+  above.
+- Unlike the `xfail` pattern, there is no automatic signal when the bug is fixed
+  — revisit the predicate (and its branch) when the linked issue closes.
