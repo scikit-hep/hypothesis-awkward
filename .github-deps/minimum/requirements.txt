@@ -1,7 +1,7 @@
 # Pinned oldest supported versions of dependencies.
 # Used in GitHub Actions for testing compatibility.
 # Must be manually updated to align with `pyproject.toml`.
-awkward==2.9.0
+awkward==2.9.1
 hypothesis==6.152.4
 typing-extensions==4.1.0; python_version < '3.11'
 
