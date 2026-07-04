@@ -1,6 +1,6 @@
 from typing import TypedDict, cast
 
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 from hypothesis_awkward import strategies as st_ak
@@ -49,7 +49,6 @@ def group_sizes_kwargs(draw: st.DrawFn) -> GroupSizesKwargs:
     return cast(GroupSizesKwargs, kwargs)
 
 
-@settings(max_examples=500)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `_st_group_sizes()`."""

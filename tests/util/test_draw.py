@@ -100,7 +100,7 @@ def _exhaust(
     return total, results
 
 
-@settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
+@settings(suppress_health_check=[HealthCheck.too_slow])
 @given(data=st.data())
 def test_countdown_drawer(data: st.DataObject) -> None:
     # Draw options

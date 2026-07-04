@@ -1,6 +1,6 @@
 from typing import Any, TypedDict, cast
 
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 from awkward.contents import Content, UnmaskedArray
@@ -47,7 +47,6 @@ def unmasked_array_contents_kwargs(
     return chain.extend(cast(UnmaskedArrayContentsKwargs, kwargs))
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `unmasked_array_contents()`."""

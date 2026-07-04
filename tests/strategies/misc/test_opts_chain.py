@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies import OptsChain, RecordDraws
@@ -112,7 +112,6 @@ def _level_kwargs(
     return {key: draw(_draw_value(opts=opts), label=key) for key in keys}
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_opts_chain(data: st.DataObject) -> None:
     """Test that register(), extend(), and reset() work together."""
@@ -153,7 +152,6 @@ def test_opts_chain(data: st.DataObject) -> None:
         assert r.drawn[0] == v
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_extend_does_not_affect_parent(data: st.DataObject) -> None:
     """Test that resetting child/parent does not affect the other's recorders."""

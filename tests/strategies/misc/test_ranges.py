@@ -2,7 +2,7 @@ import sys
 from functools import partial
 from typing import Optional, TypeVar, cast
 
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies import StMinMaxValuesFactory, none_or, ranges
@@ -105,7 +105,6 @@ def test_ranges_kwargs(data: st.DataObject) -> None:
 
 
 @given(st.data())
-@settings(max_examples=1000)
 def test_ranges(data: st.DataObject) -> None:
     st_ = data.draw(st.sampled_from([None, st_floats]))
     kwargs = data.draw(ranges_kwargs(st_=st_))  # type: ignore

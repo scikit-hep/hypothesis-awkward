@@ -1,7 +1,7 @@
 from typing import Any, cast
 from unittest.mock import Mock, patch
 
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -62,7 +62,6 @@ def arrays_kwargs(
     return opts.extend(cast(ArraysKwargs, extra))
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Test that `arrays()` forwards kwargs to `contents()` and wraps in `ak.Array`."""

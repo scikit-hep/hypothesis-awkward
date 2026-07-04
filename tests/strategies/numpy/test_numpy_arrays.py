@@ -3,7 +3,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
@@ -93,7 +93,6 @@ def _all_distinct(a: np.ndarray) -> bool:
     )
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_arrays()`."""

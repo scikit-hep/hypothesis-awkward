@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import pytest
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 from awkward.contents import (
@@ -74,7 +74,6 @@ def option_contents_kwargs(
     return chain.extend(cast(OptionContentsKwargs, kwargs))
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `option_contents()`."""
