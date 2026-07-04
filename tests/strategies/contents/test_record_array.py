@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 from awkward.contents import Content, RecordArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 DEFAULT_MAX_FIELDS = 5
 
@@ -126,12 +127,14 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_tuple() -> None:
     """Assert the record can be a tuple."""
-    find(st_ak.contents.record_array_contents(), lambda r: r.is_tuple)
+    find(st_ak.contents.record_array_contents(), lambda r: r.is_tuple, settings=FIND)
 
 
 def test_draw_named() -> None:
     """Assert the record can be named."""
-    find(st_ak.contents.record_array_contents(), lambda r: not r.is_tuple)
+    find(
+        st_ak.contents.record_array_contents(), lambda r: not r.is_tuple, settings=FIND
+    )
 
 
 @pytest.mark.parametrize('max_fields', [0, 1, 2, 5])
@@ -140,6 +143,7 @@ def test_draw_max_fields(max_fields: int) -> None:
     find(
         st_ak.contents.record_array_contents(max_fields=max_fields),
         lambda r: len(r.contents) == max_fields,
+        settings=FIND,
     )
 
 
@@ -149,6 +153,7 @@ def test_draw_min_length(min_length: int) -> None:
     find(
         st_ak.contents.record_array_contents(min_length=min_length),
         lambda r: len(r) == min_length,
+        settings=FIND,
     )
 
 
@@ -158,13 +163,10 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.record_array_contents(max_length=max_length),
         lambda r: len(r) == max_length,
+        settings=FIND,
     )
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `RecordArray` as outermost."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, RecordArray),
-        settings=settings(max_examples=2000),
-    )
+    find(st_ak.contents.contents(), lambda c: isinstance(c, RecordArray), settings=FIND)

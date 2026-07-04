@@ -8,6 +8,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies import RecordCallDraws
 from hypothesis_awkward.util import content_size, leaf_size
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 DEFAULT_MAX_SIZE = 50
 DEFAULT_MIN_LEN = 0
@@ -96,6 +97,7 @@ def test_draw_min_len() -> None:
             st_ak.contents.contents, max_leaf_size=50, min_len=2
         ),
         lambda cl: len(cl) == 2,
+        settings=FIND,
     )
 
 
@@ -104,6 +106,7 @@ def test_draw_max_len() -> None:
     find(
         st_ak.contents.content_lists(max_leaf_size=50, max_len=3),
         lambda cl: len(cl) == 3,
+        settings=FIND,
     )
 
 
@@ -114,4 +117,5 @@ def test_draw_empty_list() -> None:
             st_ak.contents.contents, max_leaf_size=50, min_len=0
         ),
         lambda cl: len(cl) == 0,
+        settings=FIND,
     )

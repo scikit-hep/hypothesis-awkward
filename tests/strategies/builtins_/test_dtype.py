@@ -2,10 +2,11 @@ import math
 from typing import Any
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND, FIND_NO_SHRINK
 
 
 def _is_nan(item: Any) -> bool:
@@ -49,21 +50,13 @@ def test_items_from_dtype(data: st.DataObject) -> None:
 
 def test_builtin_safe_dtype_names_shrinks_to_bool() -> None:
     """Assert that builtin_safe_dtype_names() shrinks to bool."""
-    result = find(
-        st_ak.builtin_safe_dtype_names(),
-        lambda _: True,
-        settings=settings(database=None),
-    )
+    result = find(st_ak.builtin_safe_dtype_names(), lambda _: True, settings=FIND)
     assert result == 'bool'
 
 
 def test_builtin_safe_dtypes_shrinks_to_bool() -> None:
     """Assert that builtin_safe_dtypes() shrinks to bool."""
-    result = find(
-        st_ak.builtin_safe_dtypes(),
-        lambda _: True,
-        settings=settings(database=None),
-    )
+    result = find(st_ak.builtin_safe_dtypes(), lambda _: True, settings=FIND)
     assert result == np.dtype('bool')
 
 
@@ -72,7 +65,7 @@ def test_draw_nan() -> None:
     find(
         st_ak.items_from_dtype(np.dtype('float64')),
         lambda item: isinstance(item, float) and math.isnan(item),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -81,5 +74,5 @@ def test_draw_nat() -> None:
     find(
         st_ak.items_from_dtype(np.dtype('datetime64[us]')),
         lambda item: item is None,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )

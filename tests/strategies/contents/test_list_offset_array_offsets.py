@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.list_offset_array import _st_offsets
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 
 class OffsetsKwargs(TypedDict, total=False):
@@ -83,41 +84,37 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_min_length() -> None:
     """Assert that offsets with exactly min_length lists can be drawn."""
-    find(_st_offsets(5, min_length=3), lambda o: len(o) - 1 == 3)
+    find(_st_offsets(5, min_length=3), lambda o: len(o) - 1 == 3, settings=FIND)
 
 
 def test_draw_min_length_content_len_zero() -> None:
     """Assert that min_length is respected when content is empty."""
-    find(_st_offsets(0, min_length=3), lambda o: len(o) - 1 == 3)
+    find(_st_offsets(0, min_length=3), lambda o: len(o) - 1 == 3, settings=FIND)
 
 
 def test_draw_max_length() -> None:
     """Assert that offsets with exactly max_length lists can be drawn."""
-    find(_st_offsets(5, max_length=10), lambda o: len(o) - 1 == 10)
+    find(_st_offsets(5, max_length=10), lambda o: len(o) - 1 == 10, settings=FIND)
 
 
 def test_draw_unreachable_head() -> None:
     """Assert that offsets with unreachable head data can be drawn."""
-    find(_st_offsets(10), lambda o: len(o) >= 2 and o[0] > 0)
+    find(_st_offsets(10), lambda o: len(o) >= 2 and o[0] > 0, settings=FIND)
 
 
 def test_draw_unreachable_tail() -> None:
     """Assert that offsets with unreachable tail data can be drawn."""
-    find(_st_offsets(10), lambda o: len(o) >= 2 and o[-1] < 10)
+    find(_st_offsets(10), lambda o: len(o) >= 2 and o[-1] < 10, settings=FIND)
 
 
 def test_shrink_no_unreachable() -> None:
     """Assert that offsets shrink to no unreachable data."""
-    offsets = find(
-        _st_offsets(10), lambda o: len(o) >= 3, settings=settings(database=None)
-    )
+    offsets = find(_st_offsets(10), lambda o: len(o) >= 3, settings=FIND)
     assert offsets[0] == 0
     assert offsets[-1] == 10
 
 
 def test_shrink_content_len_zero() -> None:
     """Assert that offsets shrink to one element (empty array) with no content."""
-    offsets = find(
-        _st_offsets(0), lambda o: len(o) < 3, settings=settings(database=None)
-    )
+    offsets = find(_st_offsets(0), lambda o: len(o) < 3, settings=FIND)
     assert offsets == [0]

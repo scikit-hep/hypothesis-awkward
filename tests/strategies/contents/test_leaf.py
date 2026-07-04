@@ -15,6 +15,7 @@ from hypothesis_awkward.util import (
     is_string_leaf,
 )
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_RARE
 
 DEFAULT_MAX_SIZE = 10
 
@@ -146,36 +147,46 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_numpy_array() -> None:
     """Assert that NumpyArray can be drawn by default."""
-    find(st_ak.contents.leaf_contents(), lambda c: isinstance(c, NumpyArray))
+    find(
+        st_ak.contents.leaf_contents(),
+        lambda c: isinstance(c, NumpyArray),
+        settings=FIND,
+    )
 
 
 def test_draw_empty_array() -> None:
     """Assert that EmptyArray can be drawn by default."""
-    find(st_ak.contents.leaf_contents(), lambda c: isinstance(c, EmptyArray))
+    find(
+        st_ak.contents.leaf_contents(),
+        lambda c: isinstance(c, EmptyArray),
+        settings=FIND,
+    )
 
 
 def test_draw_string() -> None:
     """Assert that string content can be drawn by default."""
-    find(st_ak.contents.leaf_contents(), lambda c: is_string_leaf(c))
+    find(st_ak.contents.leaf_contents(), lambda c: is_string_leaf(c), settings=FIND)
 
 
 def test_draw_bytestring() -> None:
     """Assert that bytestring content can be drawn by default."""
-    find(st_ak.contents.leaf_contents(), lambda c: is_bytestring_leaf(c))
+    find(st_ak.contents.leaf_contents(), lambda c: is_bytestring_leaf(c), settings=FIND)
 
 
 def test_draw_max_size() -> None:
     """Assert that leaf content with max_size elements can be drawn."""
     max_size = 25
-    find(st_ak.contents.leaf_contents(max_size=max_size), lambda c: len(c) == max_size)
+    find(
+        st_ak.contents.leaf_contents(max_size=max_size),
+        lambda c: len(c) == max_size,
+        settings=FIND,
+    )
 
 
 def test_draw_nan() -> None:
     """Assert that leaf content with NaN can be drawn."""
     c = find(
-        st_ak.contents.leaf_contents(),
-        any_nan_in_awkward_array,
-        settings=settings(max_examples=10_000, database=None),
+        st_ak.contents.leaf_contents(), any_nan_in_awkward_array, settings=FIND_RARE
     )
     assert isinstance(c, NumpyArray)
     assert np.array_equal(c.data, np.array([np.nan]), equal_nan=True)
@@ -183,19 +194,11 @@ def test_draw_nan() -> None:
 
 def test_shrink_leaf_contents_empty() -> None:
     """Assert that leaf content can shrink to an empty array when allowed."""
-    c = find(
-        st_ak.contents.leaf_contents(),
-        lambda c: len(c) == 0,
-        settings=settings(database=None),
-    )
+    c = find(st_ak.contents.leaf_contents(), lambda c: len(c) == 0, settings=FIND)
     assert isinstance(c, EmptyArray)
 
 
 def test_shrink_leaf_contents_one() -> None:
     """Assert that leaf content with one element shrinks to [b'']."""
-    c = find(
-        st_ak.contents.leaf_contents(),
-        lambda c: len(c) == 1,
-        settings=settings(database=None),
-    )
+    c = find(st_ak.contents.leaf_contents(), lambda c: len(c) == 1, settings=FIND)
     assert c.to_list() == [b'']

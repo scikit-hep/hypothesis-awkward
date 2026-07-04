@@ -1,12 +1,13 @@
 from typing import TypedDict, cast
 
-from hypothesis import HealthCheck, Phase, find, given, settings
+from hypothesis import HealthCheck, find, given, settings
 from hypothesis import strategies as st
 from typing_extensions import Unpack
 
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import CountdownDrawer
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND_NO_SHRINK
 
 DEFAULT_MIN_SIZE_EACH = 0
 DEFAULT_MIN_SIZE_TOTAL = 0
@@ -128,7 +129,7 @@ def test_draw_max_size_total() -> None:
     find(
         _exhaust(min_size_each=1, max_size_total=max_size_total),
         lambda r: r[0] == max_size_total,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -138,7 +139,7 @@ def test_draw_min_size_each() -> None:
     find(
         _exhaust(min_size_each=min_size_each, max_size_total=50),
         lambda r: any(len(result) == min_size_each for result in r[1]),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -148,7 +149,7 @@ def test_draw_max_size_each() -> None:
     find(
         _exhaust(max_size_each=max_size_each, max_size_total=50),
         lambda r: any(len(result) == max_size_each for result in r[1]),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -158,7 +159,7 @@ def test_draw_min_size_total() -> None:
     find(
         _exhaust(min_size_total=min_size_total, max_size_total=50),
         lambda r: r[0] == min_size_total,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -168,5 +169,5 @@ def test_draw_max_draws() -> None:
     find(
         _exhaust(max_draws=max_draws),
         lambda r: len(r[1]) == max_draws,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )

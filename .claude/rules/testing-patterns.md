@@ -203,18 +203,29 @@ The main property test asserts that invariants hold for every draw — it tests
 universal properties. It cannot assert that something is ever produced. `find()`
 tests the opposite: that there exists a draw satisfying a predicate.
 
+Always pass one of the shared `settings` instances from
+`tests/find_settings.py`:
+
 ```python
+from tests.find_settings import FIND
+
+
 def test_draw_empty() -> None:
     '''Assert that empty arrays can be drawn by default.'''
-    find(
-        st_ak.numpy_arrays(),
-        lambda a: math.prod(a.shape) == 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.numpy_arrays(), lambda a: math.prod(a.shape) == 0, settings=FIND)
 ```
 
-- Use `phases=[Phase.generate]` to skip shrinking (faster)
-- Use `max_examples=2000` for rare conditions
+- Never call `find()` without `settings`: Hypothesis then falls back to an
+  internal default (`max_examples=2000` with the example database on), and a
+  reachability test that replays a stored example passes without exercising
+  generation.
+- The shared instances pin `max_examples` explicitly, so `find()` budgets stay
+  independent of the active Hypothesis profile, and set `database=None`.
+- Start with `FIND` (2000 examples, shrinking on). Escalate to `FIND_RARE`
+  (10,000) when the target is too rare, and switch to a `_NO_SHRINK` variant
+  (`phases=[Phase.generate]`) only when shrinking is slow.
+- Derive any one-off tweak from the shared instances (e.g.
+  `settings(FIND, ...)`) instead of building `settings` inline.
 - Use specific dtypes to target relevant types (e.g., `st_np.floating_dtypes()`
   for NaN tests)
 

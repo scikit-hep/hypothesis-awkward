@@ -8,6 +8,7 @@ from hypothesis import strategies as st
 
 from awkward.contents import BitMaskedArray, Content
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND
 
 
 class BitMaskedArrayContentsKwargs(TypedDict, total=False):
@@ -91,14 +92,20 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_valid_when(valid_when: bool) -> None:
     """Assert the given `valid_when` can be drawn."""
     find(
-        st_ak.contents.bit_masked_array_contents(), lambda c: c.valid_when is valid_when
+        st_ak.contents.bit_masked_array_contents(),
+        lambda c: c.valid_when is valid_when,
+        settings=FIND,
     )
 
 
 @pytest.mark.parametrize('lsb_order', [True, False])
 def test_draw_lsb_order(lsb_order: bool) -> None:
     """Assert the given `lsb_order` can be drawn."""
-    find(st_ak.contents.bit_masked_array_contents(), lambda c: c.lsb_order is lsb_order)
+    find(
+        st_ak.contents.bit_masked_array_contents(),
+        lambda c: c.lsb_order is lsb_order,
+        settings=FIND,
+    )
 
 
 def test_draw_from_contents() -> None:
@@ -106,7 +113,7 @@ def test_draw_from_contents() -> None:
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, BitMaskedArray),
-        settings=settings(max_examples=2000),
+        settings=FIND,
     )
 
 
@@ -125,6 +132,7 @@ def test_draw_with_none_values() -> None:
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.length > 0 and any(not _is_valid(c, j) for j in range(c.length)),
+        settings=FIND,
     )
 
 
@@ -133,4 +141,5 @@ def test_draw_all_valid() -> None:
     find(
         st_ak.contents.bit_masked_array_contents(),
         lambda c: c.length > 0 and all(_is_valid(c, j) for j in range(c.length)),
+        settings=FIND,
     )

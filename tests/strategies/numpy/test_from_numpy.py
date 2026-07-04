@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -13,6 +13,7 @@ from hypothesis_awkward.util import (
     iter_contents,
     iter_numpy_arrays,
 )
+from tests.find_settings import FIND_NO_SHRINK
 
 DEFAULT_MAX_SIZE = 10
 
@@ -112,7 +113,7 @@ def test_draw_structured() -> None:
     find(
         st_ak.from_numpy(),
         lambda a: isinstance(a.layout, ak.contents.RecordArray),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -122,7 +123,7 @@ def test_draw_nan() -> None:
     find(
         st_ak.from_numpy(dtype=floating_dtypes, allow_nan=True),
         any_nan_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -132,7 +133,7 @@ def test_draw_nat_datetime64() -> None:
     find(
         st_ak.from_numpy(dtype=datetime64_dtypes, allow_nan=True),
         any_nat_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -142,17 +143,13 @@ def test_draw_nat_timedelta64() -> None:
     find(
         st_ak.from_numpy(dtype=timedelta64_dtypes, allow_nan=True),
         any_nat_in_awkward_array,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
 def test_draw_empty() -> None:
     """Assert that empty arrays can be drawn by default."""
-    find(
-        st_ak.from_numpy(),
-        lambda a: len(a) == 0,
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.from_numpy(), lambda a: len(a) == 0, settings=FIND_NO_SHRINK)
 
 
 def test_draw_regulararray() -> None:
@@ -160,7 +157,7 @@ def test_draw_regulararray() -> None:
     find(
         st_ak.from_numpy(allow_structured=False, regulararray=True),
         lambda a: isinstance(a.layout, ak.contents.RegularArray),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -169,7 +166,7 @@ def test_draw_max_size() -> None:
     find(
         st_ak.from_numpy(allow_structured=False),
         lambda a: _size(a) == DEFAULT_MAX_SIZE,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 

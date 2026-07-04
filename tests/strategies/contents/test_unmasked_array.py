@@ -5,6 +5,7 @@ from hypothesis import strategies as st
 
 from awkward.contents import Content, UnmaskedArray
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND
 
 
 class UnmaskedArrayContentsKwargs(TypedDict, total=False):
@@ -76,18 +77,16 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_nonempty() -> None:
     """Assert the length can be positive."""
-    find(st_ak.contents.unmasked_array_contents(), lambda c: len(c) > 0)
+    find(st_ak.contents.unmasked_array_contents(), lambda c: len(c) > 0, settings=FIND)
 
 
 def test_draw_empty() -> None:
     """Assert the length can be zero."""
-    find(st_ak.contents.unmasked_array_contents(), lambda c: len(c) == 0)
+    find(st_ak.contents.unmasked_array_contents(), lambda c: len(c) == 0, settings=FIND)
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate an `UnmaskedArray` as outermost."""
     find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, UnmaskedArray),
-        settings=settings(max_examples=2000),
+        st_ak.contents.contents(), lambda c: isinstance(c, UnmaskedArray), settings=FIND
     )

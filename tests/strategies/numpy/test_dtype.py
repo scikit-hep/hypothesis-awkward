@@ -1,13 +1,14 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import n_scalars_in, simple_dtype_kinds_in
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 
 @given(name=st_ak.supported_dtype_names())
@@ -22,11 +23,7 @@ def test_supported_dtypes(dtype: np.dtype) -> None:
 
 def test_supported_dtypes_shrinks_to_bool() -> None:
     """Assert that supported_dtypes() shrinks to bool."""
-    result = find(
-        st_ak.supported_dtypes(),
-        lambda _: True,
-        settings=settings(database=None),
-    )
+    result = find(st_ak.supported_dtypes(), lambda _: True, settings=FIND)
     assert result == np.dtype('bool')
 
 
