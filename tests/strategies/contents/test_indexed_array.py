@@ -2,7 +2,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -63,7 +63,6 @@ def indexed_array_contents_kwargs(
     return chain.extend(cast(IndexedArrayContentsKwargs, kwargs))
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `indexed_array_contents()`."""

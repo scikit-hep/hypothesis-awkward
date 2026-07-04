@@ -43,6 +43,19 @@ Runs on push to `main` and PRs targeting `main`. Tests a matrix of:
 | `latest`  | Installs package, then overwrites with `latest/requirements.txt`  |
 | `min`     | Installs package, then downgrades with `minimum/requirements.txt` |
 
+## Nightly Tests (`nightly-test.yml`)
+
+Runs the full suite with the `nightly` Hypothesis profile (10,000 examples per
+`@given` test instead of 200; profiles are registered in `tests/conftest.py` and
+selected via the `HYPOTHESIS_PROFILE` environment variable).
+
+- Triggers: daily cron and `workflow_dispatch`. The scheduled run is guarded by
+  `github.repository_owner == 'scikit-hep'` so forks do not run it.
+- Matrix: Python 3.10 and 3.14 × `latest` and `min` deps (install steps mirror
+  `unit-test.yml`).
+- Runs pytest with `--hypothesis-show-statistics`; no coverage upload. Use the
+  statistics output to tune the nightly budget.
+
 ## Release Workflows (Two-Tag Pipeline)
 
 Releases use a `u`/`v` two-tag flow to work around the `GITHUB_TOKEN` limitation

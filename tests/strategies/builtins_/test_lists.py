@@ -2,7 +2,7 @@ import math
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -33,7 +33,6 @@ def lists_kwargs() -> st.SearchStrategy[ListsKwargs]:
     ).map(lambda d: cast(ListsKwargs, d))
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `lists()`."""

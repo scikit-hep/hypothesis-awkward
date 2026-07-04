@@ -182,7 +182,6 @@ property test in each file is named `test_properties` — the file name already
 carries the strategy name, so the function name does not need to repeat it.
 
 ```python
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_arrays()`."""
@@ -196,6 +195,19 @@ def test_properties(data: st.DataObject) -> None:
     # Assert the options were effective
     ...
 ```
+
+Do not set `max_examples` on `@given` tests. The profiles registered in
+`tests/conftest.py` supply it — 200 by default (PRs and local runs), 10,000
+under the `nightly` profile selected with the `HYPOTHESIS_PROFILE` environment
+variable (or pytest's `--hypothesis-profile` flag). A test may deviate from the
+baseline with `@scaled(x)` from `tests/scaled_settings.py`, which keeps its
+budget proportional to the baseline under every profile:
+
+- above 1 only with a demonstrated rarity argument (a case the test must cover
+  that the baseline misses; historical values inherited without one were
+  removed);
+- below 1 is possible if necessary; use with caution so the PR budget does not
+  become too small.
 
 ## 4. Edge case reachability tests using `find()`
 

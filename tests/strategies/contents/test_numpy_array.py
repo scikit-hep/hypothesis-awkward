@@ -1,7 +1,7 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -61,7 +61,6 @@ def numpy_array_contents_kwargs(
     return chain.extend(cast(NumpyArrayContentsKwargs, kwargs))
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_array_contents()`."""

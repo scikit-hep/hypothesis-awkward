@@ -13,10 +13,12 @@ from hypothesis_awkward.util import (
     any_nat_in_numpy_array,
 )
 from tests.find_settings import FIND_NO_SHRINK
+from tests.scaled_settings import scaled
 
 _ArrayElement: TypeAlias = float | complex | np.generic | NDArray[np.generic]
 
 
+@scaled(0.5)
 @given(data=st.data())
 def test_any_nan_nat_in_numpy_array(data: st.DataObject) -> None:
     """Verify result matches element-by-element iteration."""
@@ -36,6 +38,7 @@ def test_any_nan_nat_in_numpy_array(data: st.DataObject) -> None:
     assert actual == expected
 
 
+@scaled(0.5)
 @given(data=st.data())
 def test_any_nan_in_numpy_array(data: st.DataObject) -> None:
     """Verify result matches element-by-element iteration."""
@@ -52,6 +55,7 @@ def test_any_nan_in_numpy_array(data: st.DataObject) -> None:
     assert actual == expected
 
 
+@scaled(0.5)
 @given(data=st.data())
 def test_any_nat_in_numpy_array(data: st.DataObject) -> None:
     """Verify result matches element-by-element iteration."""

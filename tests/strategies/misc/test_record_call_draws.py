@@ -1,12 +1,11 @@
 """Tests for `RecordCallDraws` and `OptsChain.register_callable()`."""
 
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies import RecordCallDraws, RecordDraws
 
 
-@settings(max_examples=200)
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Calling a RecordCallDraws records every drawn value in order."""
