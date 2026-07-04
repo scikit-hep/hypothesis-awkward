@@ -1299,15 +1299,7 @@ reviewed at each release.</p>
   <code>IndexedOptionArray.to_ByteMaskedArray</code> raised a <code>TypeError</code> when its content
   was an <code>EmptyArray</code>.</li>
 </ul>
-<p>The test suite also reproduces or accounts for two known Awkward Array issues. A
-test in
-<a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/constructors/test_from_buffers.py"><code>test_from_buffers.py</code></a>
-reproduces an <code>ak.from_buffers()</code> bug with virtual buffers and a
-<code>RegularArray(size=0)</code> inside a <code>BitMaskedArray</code>; it raised an <code>AssertionError</code>
-on Awkward Array v2.9.0, is marked <code>xfail</code> (expected failure), and passes with
-v2.9.1 (likely fixed by
-<a href="https://github.com/scikit-hep/awkward/pull/3889">#3889</a>). A NumPy property test
-in
+<p>A NumPy property test in
 <a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/numpy/test_numpy_arrays.py"><code>test_numpy_arrays.py</code></a>
 accounts for <a href="https://github.com/scikit-hep/awkward/issues/3690">#3690</a> (open):
 <code>ak.to_numpy()</code> does not support structured arrays whose fields are not
