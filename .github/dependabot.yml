@@ -11,15 +11,19 @@ updates:
     commit-message:
       prefix: "build"
 
-  # For `.github/deps/latest/requirements.txt`, used in GitHub Actions
+  # For `.github-deps/latest/requirements.txt`, used in GitHub Actions.
+  # The directory lives outside `.github/` because Dependabot cannot open PRs
+  # that modify the protected `.github/` directory for ecosystems other than
+  # `github-actions`:
+  # https://github.com/dependabot/dependabot-core/issues/15237
   - package-ecosystem: "pip"
-    directory: "/.github/deps/latest"
+    directory: "/.github-deps/latest"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "build"
 
-  # Note: `.github/deps/minimum/requirements.txt` is not updated by Dependabot.
+  # Note: `.github-deps/minimum/requirements.txt` is not updated by Dependabot.
 
   # For GitHub Actions versions
   - package-ecosystem: "github-actions"

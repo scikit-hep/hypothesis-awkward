@@ -51,14 +51,14 @@ jobs:
         if: matrix.deps == 'latest'
         run: |
           uv pip install -e . --group dev
-          uv pip install -r .github/deps/latest/requirements.txt
+          uv pip install -r .github-deps/latest/requirements.txt
 
       - name: Install packages (minimum)
         # Oldest supported versions of dependencies in `pyproject.toml`
         if: matrix.deps == 'min'
         run: |
           uv pip install -e . --group dev
-          uv pip install -r .github/deps/minimum/requirements.txt
+          uv pip install -r .github-deps/minimum/requirements.txt
 
       - name: List installed packages
         run: uv pip list

@@ -1,6 +1,7 @@
 ---
 paths:
   - ".github/**"
+  - ".github-deps/**"
   - "pyproject.toml"
 ---
 
@@ -8,12 +9,17 @@ paths:
 
 ## Dependency Pinning
 
-The project uses two requirements files under `.github/deps/` for CI testing:
+The project uses two requirements files under `.github-deps/` for CI testing:
 
 - **`minimum/requirements.txt`** — Pins the oldest supported versions (matching
   the lower bounds in `pyproject.toml`). Manually maintained.
 - **`latest/requirements.txt`** — Pins the latest known versions. Monitored by
   Dependabot, which opens PRs to bump these pins.
+
+The directory lives outside `.github/` because Dependabot cannot open pull
+requests that modify the protected `.github/` directory for ecosystems other
+than `github-actions`
+([dependabot-core#15237](https://github.com/dependabot/dependabot-core/issues/15237)).
 
 These files are **not** used for local development. The project does not use
 `uv.lock`.
