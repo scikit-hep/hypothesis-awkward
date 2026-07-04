@@ -2,13 +2,14 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
 
 DEFAULT_MAX_CONTENTS = 4
 
@@ -150,6 +151,7 @@ def test_draw_max_contents(max_contents: int) -> None:
     find(
         st_ak.contents.union_array_contents(max_contents=max_contents),
         lambda u: len(u.contents) == max_contents,
+        settings=FIND,
     )
 
 
@@ -158,6 +160,7 @@ def test_draw_different_content_lengths() -> None:
     find(
         st_ak.contents.union_array_contents(),
         lambda u: len({len(c) for c in u.contents}) > 1,
+        settings=FIND,
     )
 
 
@@ -167,6 +170,7 @@ def test_draw_min_length(min_length: int) -> None:
     find(
         st_ak.contents.union_array_contents(min_length=min_length),
         lambda u: len(u) == min_length,
+        settings=FIND,
     )
 
 
@@ -176,16 +180,13 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.union_array_contents(max_length=max_length),
         lambda u: len(u) == max_length,
+        settings=FIND,
     )
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `UnionArray` as outermost."""
-    find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, UnionArray),
-        settings=settings(max_examples=2000),
-    )
+    find(st_ak.contents.contents(), lambda c: isinstance(c, UnionArray), settings=FIND)
 
 
 def test_draw_nested_union() -> None:
@@ -197,7 +198,7 @@ def test_draw_nested_union() -> None:
     find(
         st_ak.contents.union_array_contents(),
         _has_nested_union,
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 
@@ -210,7 +211,7 @@ def test_draw_from_contents_nested_union() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_nested_union,
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 
@@ -235,7 +236,7 @@ def test_draw_from_contents_option_deep_inside_union() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_option_deep_inside_union,
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 
@@ -260,7 +261,7 @@ def test_draw_from_contents_all_option_union() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_all_option_union,
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 
@@ -269,7 +270,7 @@ def test_draw_all_option_union() -> None:
     find(
         st_ak.contents.union_array_contents(),
         lambda c: all(child.is_option for child in c.contents),
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 

@@ -8,6 +8,7 @@ import awkward as ak
 from awkward.contents import ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 DEFAULT_MAX_SIZE = 10
 
@@ -88,12 +89,16 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_empty() -> None:
     """Assert that empty arrays (zero bytestrings) can be drawn."""
-    find(st_ak.contents.bytestring_contents(), lambda c: len(c) == 0)
+    find(st_ak.contents.bytestring_contents(), lambda c: len(c) == 0, settings=FIND)
 
 
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size bytestrings can be drawn."""
-    find(st_ak.contents.bytestring_contents(), lambda c: len(c) == DEFAULT_MAX_SIZE)
+    find(
+        st_ak.contents.bytestring_contents(),
+        lambda c: len(c) == DEFAULT_MAX_SIZE,
+        settings=FIND,
+    )
 
 
 def test_draw_empty_bytestring() -> None:
@@ -101,6 +106,7 @@ def test_draw_empty_bytestring() -> None:
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: b'' in ak.Array(c).to_list(),
+        settings=FIND,
     )
 
 
@@ -109,4 +115,5 @@ def test_draw_null_byte() -> None:
     find(
         st_ak.contents.bytestring_contents(min_size=1),
         lambda c: any(b'\x00' in b for b in ak.Array(c).to_list()),
+        settings=FIND,
     )

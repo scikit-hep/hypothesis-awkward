@@ -8,6 +8,7 @@ import awkward as ak
 from awkward.contents import ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 DEFAULT_MAX_SIZE = 10
 
@@ -104,12 +105,16 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_empty() -> None:
     """Assert that empty arrays (zero strings) can be drawn."""
-    find(st_ak.contents.string_contents(), lambda c: len(c) == 0)
+    find(st_ak.contents.string_contents(), lambda c: len(c) == 0, settings=FIND)
 
 
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size strings can be drawn."""
-    find(st_ak.contents.string_contents(), lambda c: len(c) == DEFAULT_MAX_SIZE)
+    find(
+        st_ak.contents.string_contents(),
+        lambda c: len(c) == DEFAULT_MAX_SIZE,
+        settings=FIND,
+    )
 
 
 def test_draw_empty_string() -> None:
@@ -117,6 +122,7 @@ def test_draw_empty_string() -> None:
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: '' in ak.Array(c).to_list(),
+        settings=FIND,
     )
 
 
@@ -125,4 +131,5 @@ def test_draw_non_ascii() -> None:
     find(
         st_ak.contents.string_contents(min_size=1),
         lambda c: any(not s.isascii() for s in ak.Array(c).to_list()),
+        settings=FIND,
     )

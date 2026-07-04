@@ -2,13 +2,14 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, ListArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_NO_SHRINK
 
 
 class ListArrayContentsKwargs(TypedDict, total=False):
@@ -98,6 +99,7 @@ def test_draw_min_length(min_length: int) -> None:
     find(
         st_ak.contents.list_array_contents(min_length=min_length),
         lambda c: len(c) == min_length,
+        settings=FIND,
     )
 
 
@@ -107,6 +109,7 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.list_array_contents(max_length=max_length),
         lambda c: len(c) == max_length,
+        settings=FIND,
     )
 
 
@@ -115,7 +118,11 @@ def test_draw_default_max_length(len_content: int) -> None:
     """Assert that len(result) can reach len(content) by default."""
     content = NumpyArray(np.zeros(len_content))
     assert len(content) == len_content
-    find(st_ak.contents.list_array_contents(content), lambda c: len(c) == len(content))
+    find(
+        st_ak.contents.list_array_contents(content),
+        lambda c: len(c) == len(content),
+        settings=FIND,
+    )
 
 
 def test_draw_unreachable() -> None:
@@ -124,6 +131,7 @@ def test_draw_unreachable() -> None:
     find(
         st_ak.contents.list_array_contents(content),
         lambda c: len(c) >= 1 and (c.starts[0] > 0 or c.stops[-1] < len(c.content)),
+        settings=FIND,
     )
 
 
@@ -134,7 +142,7 @@ def test_shrink_no_unreachable() -> None:
     c = find(
         st_ak.contents.list_array_contents(content),
         lambda c: len(c) >= 2,
-        settings=settings(database=None),
+        settings=FIND,
     )
     assert c.starts[0] == 0
     assert c.stops[-1] == len(c.content)
@@ -143,17 +151,13 @@ def test_shrink_no_unreachable() -> None:
 def test_shrink_content_len_zero() -> None:
     """Assert no sublists are the simplest for an empty content."""
     content = NumpyArray(np.array([], dtype=np.int64))
-    c = find(
-        st_ak.contents.list_array_contents(content),
-        lambda c: True,
-        settings=settings(database=None),
-    )
+    c = find(st_ak.contents.list_array_contents(content), lambda c: True, settings=FIND)
     assert len(c) == 0
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `ListArray` as outermost."""
-    find(st_ak.contents.contents(), lambda c: isinstance(c, ListArray))
+    find(st_ak.contents.contents(), lambda c: isinstance(c, ListArray), settings=FIND)
 
 
 def test_draw_from_contents_variable_length() -> None:
@@ -167,11 +171,7 @@ def test_draw_from_contents_variable_length() -> None:
             for n in iter_contents(c)
         )
 
-    find(
-        st_ak.contents.contents(),
-        _has_variable_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.contents.contents(), _has_variable_length, settings=FIND_NO_SHRINK)
 
 
 def test_draw_from_contents_empty_sublist() -> None:
@@ -183,8 +183,4 @@ def test_draw_from_contents_empty_sublist() -> None:
             for n in iter_contents(c)
         )
 
-    find(
-        st_ak.contents.contents(),
-        _has_empty_sublist,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.contents.contents(), _has_empty_sublist, settings=FIND_NO_SHRINK)

@@ -8,6 +8,7 @@ from hypothesis import strategies as st
 from awkward.contents import Content, ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 
 class ListOffsetArrayContentsKwargs(TypedDict, total=False):
@@ -99,6 +100,7 @@ def test_draw_min_length(min_length: int) -> None:
     find(
         st_ak.contents.list_offset_array_contents(min_length=min_length),
         lambda c: len(c) == min_length,
+        settings=FIND,
     )
 
 
@@ -108,6 +110,7 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.list_offset_array_contents(max_length=max_length),
         lambda c: len(c) == max_length,
+        settings=FIND,
     )
 
 
@@ -119,6 +122,7 @@ def test_draw_default_max_length(len_content: int) -> None:
     find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: len(c) == len(content),
+        settings=FIND,
     )
 
 
@@ -127,6 +131,7 @@ def test_draw_variable_length() -> None:
     find(
         st_ak.contents.list_offset_array_contents(),
         lambda c: len(c) >= 2 and len(set(len(c[i]) for i in range(len(c)))) > 1,
+        settings=FIND,
     )
 
 
@@ -135,6 +140,7 @@ def test_draw_empty_sublist() -> None:
     find(
         st_ak.contents.list_offset_array_contents(),
         lambda c: any(len(c[i]) == 0 for i in range(len(c))),
+        settings=FIND,
     )
 
 
@@ -144,6 +150,7 @@ def test_draw_unreachable() -> None:
     find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: c.offsets[0] > 0 or c.offsets[-1] < len(c.content),
+        settings=FIND,
     )
 
 
@@ -154,7 +161,7 @@ def test_shrink_no_unreachable() -> None:
     c = find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: len(c) >= 2,
-        settings=settings(database=None),
+        settings=FIND,
     )
     assert c.offsets[0] == 0
     assert c.offsets[-1] == len(c.content)
@@ -166,11 +173,15 @@ def test_shrink_content_len_zero() -> None:
     c = find(
         st_ak.contents.list_offset_array_contents(content),
         lambda c: True,
-        settings=settings(database=None),
+        settings=FIND,
     )
     assert len(c) == 0
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `ListOffsetArray` as outermost."""
-    find(st_ak.contents.contents(), lambda c: isinstance(c, ListOffsetArray))
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, ListOffsetArray),
+        settings=FIND,
+    )

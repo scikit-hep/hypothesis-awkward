@@ -13,6 +13,7 @@ from awkward.contents import (
 )
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 OPTION_TYPES = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 
@@ -132,10 +133,11 @@ def test_draw_min_size(min_size: int) -> None:
     find(
         st_ak.contents.option_contents(min_size=min_size),
         lambda c: len(c) == min_size,
+        settings=FIND,
     )
 
 
 @pytest.mark.parametrize('cls', OPTION_TYPES)
 def test_draw_option_type(cls: type[Content]) -> None:
     """Assert the given option type can be drawn."""
-    find(st_ak.contents.option_contents(), lambda c: isinstance(c, cls))
+    find(st_ak.contents.option_contents(), lambda c: isinstance(c, cls), settings=FIND)

@@ -2,7 +2,7 @@ import math
 from typing import TypeAlias
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from numpy.typing import NDArray
@@ -12,6 +12,7 @@ from hypothesis_awkward.util import (
     any_nan_nat_in_numpy_array,
     any_nat_in_numpy_array,
 )
+from tests.find_settings import FIND_NO_SHRINK
 
 _ArrayElement: TypeAlias = float | complex | np.generic | NDArray[np.generic]
 
@@ -72,7 +73,7 @@ def test_draw_nan() -> None:
     find(
         st_np.arrays(dtype=st_np.nested_dtypes(), shape=st_np.array_shapes()),
         _expected_any_nan,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -81,7 +82,7 @@ def test_draw_nat() -> None:
     find(
         st_np.arrays(dtype=st_np.nested_dtypes(), shape=st_np.array_shapes()),
         _expected_any_nat,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 

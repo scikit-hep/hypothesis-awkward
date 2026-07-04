@@ -2,7 +2,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -10,6 +10,7 @@ from awkward.contents import Content, IndexedArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
 
 
 class IndexedArrayContentsKwargs(TypedDict, total=False):
@@ -121,6 +122,7 @@ def test_draw_min_size(min_size: int) -> None:
     find(
         st_ak.contents.indexed_array_contents(min_size=min_size),
         lambda c: len(c) == min_size,
+        settings=FIND,
     )
 
 
@@ -130,6 +132,7 @@ def test_draw_index_dtype(dtype: np.dtype) -> None:
     find(
         st_ak.contents.indexed_array_contents(),
         lambda c: c.index.data.dtype == dtype,
+        settings=FIND,
     )
 
 
@@ -138,6 +141,7 @@ def test_draw_duplicate_indices() -> None:
     find(
         st_ak.contents.indexed_array_contents(),
         lambda c: len(c) >= 2 and len(set(c.index.data.tolist())) < len(c),
+        settings=FIND,
     )
 
 
@@ -146,6 +150,7 @@ def test_draw_index_longer_than_content() -> None:
     find(
         st_ak.contents.indexed_array_contents(),
         lambda c: len(c) > len(c.content),
+        settings=FIND,
     )
 
 
@@ -157,6 +162,7 @@ def test_draw_permutation() -> None:
             len(c) == len(c.content) >= 2
             and sorted(c.index.data.tolist()) == list(range(len(c.content)))
         ),
+        settings=FIND,
     )
 
 
@@ -165,16 +171,14 @@ def test_draw_empty_content() -> None:
     find(
         st_ak.contents.indexed_array_contents(),
         lambda c: len(c.content) == 0 and len(c) == 0,
-        settings=settings(max_examples=2000),
+        settings=FIND,
     )
 
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate an `IndexedArray` as outermost."""
     find(
-        st_ak.contents.contents(),
-        lambda c: isinstance(c, IndexedArray),
-        settings=settings(max_examples=2000),
+        st_ak.contents.contents(), lambda c: isinstance(c, IndexedArray), settings=FIND
     )
 
 
@@ -188,7 +192,7 @@ def test_draw_nested_indexed() -> None:
     find(
         st_ak.contents.indexed_array_contents(),
         _has_nested_indexed,
-        settings=settings(phases=[Phase.generate], max_examples=5000),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 

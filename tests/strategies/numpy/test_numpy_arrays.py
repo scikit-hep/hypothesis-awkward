@@ -3,7 +3,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
@@ -17,6 +17,7 @@ from hypothesis_awkward.util import (
     simple_dtype_kinds_in,
 )
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND_NO_SHRINK
 
 DEFAULT_MAX_SIZE = 10
 
@@ -190,7 +191,7 @@ def test_draw_structured() -> None:
     find(
         st_ak.numpy_arrays(),
         lambda a: a.dtype.names is not None,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -199,7 +200,7 @@ def test_draw_nan() -> None:
     find(
         st_ak.numpy_arrays(dtype=st_np.floating_dtypes(), allow_nan=True),
         lambda a: any_nan_in_numpy_array(a),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -208,7 +209,7 @@ def test_draw_nat_datetime64() -> None:
     find(
         st_ak.numpy_arrays(dtype=st_np.datetime64_dtypes(), allow_nan=True),
         lambda a: any_nat_in_numpy_array(a),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -217,16 +218,14 @@ def test_draw_nat_timedelta64() -> None:
     find(
         st_ak.numpy_arrays(dtype=st_np.timedelta64_dtypes(), allow_nan=True),
         lambda a: any_nat_in_numpy_array(a),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
 def test_draw_empty() -> None:
     """Assert that empty arrays can be drawn by default."""
     find(
-        st_ak.numpy_arrays(),
-        lambda a: math.prod(a.shape) == 0,
-        settings=settings(phases=[Phase.generate]),
+        st_ak.numpy_arrays(), lambda a: math.prod(a.shape) == 0, settings=FIND_NO_SHRINK
     )
 
 
@@ -242,7 +241,7 @@ def test_draw_empty_parametrized(
             max_dims=max_dims, max_size=max_size, allow_structured=allow_structured
         ),
         lambda a: math.prod(a.shape) == 0,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -251,7 +250,7 @@ def test_draw_max_size() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False),
         lambda a: math.prod(a.shape) == DEFAULT_MAX_SIZE,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -263,7 +262,7 @@ def test_draw_max_size_structured() -> None:
             math.prod(a.shape) * n_scalars_in(a.dtype) == DEFAULT_MAX_SIZE
             and a.dtype.names is not None
         ),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -272,7 +271,7 @@ def test_draw_nonempty_max_size_1() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False, max_size=1),
         lambda a: math.prod(a.shape) == 1,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -282,7 +281,7 @@ def test_draw_min_size() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False, min_size=min_size),
         lambda a: math.prod(a.shape) == min_size,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -295,7 +294,7 @@ def test_draw_min_size_structured() -> None:
             math.prod(a.shape) * n_scalars_in(a.dtype) == min_size
             and a.dtype.names is not None
         ),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -304,7 +303,7 @@ def test_draw_one_dim() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False),
         lambda a: len(a.shape) == 1,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -313,7 +312,7 @@ def test_draw_min_dims() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False, min_dims=2),
         lambda a: len(a.shape) == 2,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -322,7 +321,7 @@ def test_draw_max_dims() -> None:
     find(
         st_ak.numpy_arrays(allow_structured=False, max_dims=3),
         lambda a: len(a.shape) == 3,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -335,5 +334,5 @@ def test_draw_unique_bool() -> None:
     find(
         st_ak.numpy_arrays(unique=True),
         lambda a: a.dtype.kind == 'b' and set(a.ravel().tolist()) == {True, False},
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )

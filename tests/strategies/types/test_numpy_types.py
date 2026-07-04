@@ -1,11 +1,12 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND_NO_SHRINK
 
 
 @given(data=st.data())
@@ -73,7 +74,7 @@ def test_draw_integer_type() -> None:
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('int8', 'int16', 'int32', 'int64'),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -82,7 +83,7 @@ def test_draw_unsigned_integer_type() -> None:
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('uint8', 'uint16', 'uint32', 'uint64'),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -91,7 +92,7 @@ def test_draw_float_type() -> None:
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('float16', 'float32', 'float64'),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -100,17 +101,13 @@ def test_draw_complex_type() -> None:
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive in ('complex64', 'complex128'),
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
 def test_draw_bool_type() -> None:
     """Assert that bool NumpyType can be drawn."""
-    find(
-        st_ak.numpy_types(),
-        lambda t: t.primitive == 'bool',
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.numpy_types(), lambda t: t.primitive == 'bool', settings=FIND_NO_SHRINK)
 
 
 def test_draw_datetime64_type() -> None:
@@ -118,7 +115,7 @@ def test_draw_datetime64_type() -> None:
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive.startswith('datetime64'),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -127,5 +124,5 @@ def test_draw_timedelta64_type() -> None:
     find(
         st_ak.numpy_types(),
         lambda t: t.primitive.startswith('timedelta64'),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )

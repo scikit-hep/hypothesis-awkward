@@ -4,7 +4,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -22,6 +22,7 @@ from hypothesis_awkward.util import (
     safe_max,
 )
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_NO_SHRINK
 
 DEFAULT_MAX_SIZE = 50
 DEFAULT_MAX_DEPTH = None
@@ -220,6 +221,7 @@ def test_draw_max_size() -> None:
     find(
         st_ak.contents.contents(max_size=max_size, max_leaf_size=max_size),
         lambda c: content_size(c) == max_size,
+        settings=FIND,
     )
 
 
@@ -229,6 +231,7 @@ def test_draw_max_leaf_size() -> None:
     find(
         st_ak.contents.contents(max_size=200, max_leaf_size=max_leaf_size),
         lambda c: leaf_size(c) == max_leaf_size,
+        settings=FIND,
     )
 
 
@@ -238,17 +241,26 @@ def test_draw_max_depth() -> None:
     find(
         st_ak.contents.contents(max_size=200, max_depth=max_depth),
         lambda c: _nesting_depth(c) == max_depth,
+        settings=FIND,
     )
 
 
 def test_draw_deep_without_max_depth() -> None:
     """Assert that deep content can be drawn without specifying max_depth."""
-    find(st_ak.contents.contents(max_size=200), lambda c: _nesting_depth(c) >= 8)
+    find(
+        st_ak.contents.contents(max_size=200),
+        lambda c: _nesting_depth(c) >= 8,
+        settings=FIND,
+    )
 
 
 def test_draw_nested() -> None:
     """Assert that nested content (depth >= 2) can be drawn."""
-    find(st_ak.contents.contents(max_leaf_size=20), lambda c: _nesting_depth(c) >= 2)
+    find(
+        st_ak.contents.contents(max_leaf_size=20),
+        lambda c: _nesting_depth(c) >= 2,
+        settings=FIND,
+    )
 
 
 @pytest.mark.parametrize('min_length', [1, 2, 5])
@@ -258,6 +270,7 @@ def test_draw_min_length(leaf: bool, min_length: int) -> None:
     find(
         st_ak.contents.contents(min_length=min_length),
         lambda c: is_leaf(c) == leaf and len(c) == min_length,
+        settings=FIND,
     )
 
 
@@ -274,6 +287,7 @@ def test_draw_min_length_not_recursed(leaf: bool, min_length: int) -> None:
             for n in iter_contents(c)
             if n is not c
         ),
+        settings=FIND,
     )
 
 
@@ -284,6 +298,7 @@ def test_draw_max_length(leaf: bool, max_length: int) -> None:
     find(
         st_ak.contents.contents(max_length=max_length),
         lambda c: is_leaf(c) == leaf and len(c) == max_length,
+        settings=FIND,
     )
 
 
@@ -301,6 +316,7 @@ def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
             for n in iter_contents(c)
             if n is not c
         ),
+        settings=FIND,
     )
 
 
@@ -329,7 +345,7 @@ def test_draw_min_length_gt_leaf_max_size() -> None:
             allow_unmasked=False,
         ),
         lambda _: True,
-        settings=settings(phases=[Phase.generate], derandomize=True),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -408,20 +424,12 @@ def _present_types(c: ak.contents.Content) -> set[str]:
 
 def test_shrink_len_zero() -> None:
     """Assert that length-zero shrinks to `EmptyArray`."""
-    c = find(
-        st_ak.contents.contents(),
-        lambda c: len(c) == 0,
-        settings=settings(database=None),
-    )
+    c = find(st_ak.contents.contents(), lambda c: len(c) == 0, settings=FIND)
     assert isinstance(c, EmptyArray)
 
 
 def test_shrink_len_positive() -> None:
     """Assert that length-positive shrinks."""
-    c = find(
-        st_ak.contents.contents(),
-        lambda c: len(c) > 0,
-        settings=settings(database=None),
-    )
+    c = find(st_ak.contents.contents(), lambda c: len(c) > 0, settings=FIND)
     assert len(c) == 1
     assert content_size(c) <= 2

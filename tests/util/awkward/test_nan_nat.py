@@ -1,7 +1,7 @@
 import math
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -12,6 +12,7 @@ from hypothesis_awkward.util import (
     any_nat_in_awkward_array,
     iter_leaf_contents,
 )
+from tests.find_settings import FIND_RARE_NO_SHRINK
 
 
 @given(data=st.data())
@@ -58,7 +59,7 @@ def test_draw_nan() -> None:
     find(
         st_ak.constructors.arrays(allow_nan=True, allow_virtual=False),
         _expected_any_nan,
-        settings=settings(max_examples=10000, phases=[Phase.generate]),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 
@@ -67,7 +68,7 @@ def test_draw_nat() -> None:
     find(
         st_ak.constructors.arrays(allow_nan=True, allow_virtual=False),
         _expected_any_nat,
-        settings=settings(max_examples=10000, phases=[Phase.generate]),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 

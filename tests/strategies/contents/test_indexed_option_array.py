@@ -8,6 +8,7 @@ from hypothesis import strategies as st
 from awkward.contents import Content, IndexedOptionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 
 class IndexedOptionArrayContentsKwargs(TypedDict, total=False):
@@ -103,6 +104,7 @@ def test_draw_min_size(min_size: int) -> None:
     find(
         st_ak.contents.indexed_option_array_contents(min_size=min_size),
         lambda c: len(c) == min_size,
+        settings=FIND,
     )
 
 
@@ -112,6 +114,7 @@ def test_draw_index_dtype(dtype: np.dtype) -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: c.index.data.dtype == dtype,
+        settings=FIND,
     )
 
 
@@ -120,6 +123,7 @@ def test_draw_with_none_values() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > 0 and any(c.index.data[i] < 0 for i in range(len(c))),
+        settings=FIND,
     )
 
 
@@ -128,6 +132,7 @@ def test_draw_all_valid() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > 0 and all(c.index.data[i] >= 0 for i in range(len(c))),
+        settings=FIND,
     )
 
 
@@ -140,6 +145,7 @@ def test_draw_duplicate_indices() -> None:
             and len(set(i for i in c.index.data if i >= 0))
             < sum(1 for i in c.index.data if i >= 0)
         ),
+        settings=FIND,
     )
 
 
@@ -148,6 +154,7 @@ def test_draw_index_longer_than_content() -> None:
     find(
         st_ak.contents.indexed_option_array_contents(),
         lambda c: len(c) > len(c.content),
+        settings=FIND,
     )
 
 
@@ -156,5 +163,5 @@ def test_draw_from_contents() -> None:
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, IndexedOptionArray),
-        settings=settings(max_examples=2000),
+        settings=FIND,
     )

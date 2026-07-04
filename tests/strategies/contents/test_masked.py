@@ -12,6 +12,7 @@ from awkward.contents import (
     UnmaskedArray,
 )
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND
 
 MASKED_TYPES = (ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 
@@ -114,16 +115,12 @@ def test_properties(data: st.DataObject) -> None:
 @pytest.mark.parametrize('cls', MASKED_TYPES)
 def test_draw_masked_type(cls: type[Content]) -> None:
     """Assert the given masked type can be drawn."""
-    find(st_ak.contents.masked_contents(), lambda c: isinstance(c, cls))
+    find(st_ak.contents.masked_contents(), lambda c: isinstance(c, cls), settings=FIND)
 
 
 def test_shrink_to_unmasked() -> None:
     """Assert `UnmaskedArray` is the simplest."""
-    c = find(
-        st_ak.contents.masked_contents(),
-        lambda _: True,
-        settings=settings(database=None),
-    )
+    c = find(st_ak.contents.masked_contents(), lambda _: True, settings=FIND)
     assert isinstance(c, UnmaskedArray)
 
 
@@ -132,6 +129,6 @@ def test_shrink_to_byte_masked() -> None:
     c = find(
         st_ak.contents.masked_contents(allow_unmasked=False),
         lambda _: True,
-        settings=settings(database=None),
+        settings=FIND,
     )
     assert isinstance(c, ByteMaskedArray)

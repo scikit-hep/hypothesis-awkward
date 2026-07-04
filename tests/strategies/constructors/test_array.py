@@ -1,13 +1,14 @@
 from typing import Any, cast
 from unittest.mock import Mock, patch
 
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
 from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
+from tests.find_settings import FIND_NO_SHRINK
 from tests.strategies.contents.test_content import ContentsKwargs, contents_kwargs
 
 
@@ -150,7 +151,7 @@ def test_draw_virtual() -> None:
     find(
         st_ak.constructors.arrays(),
         lambda a: not ak.to_layout(a).is_all_materialized,
-        settings=settings(phases=[Phase.generate]),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -165,5 +166,5 @@ def test_draw_virtual_union() -> None:
     find(
         st_ak.constructors.arrays(max_leaf_size=20),
         _is_virtual_union,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )

@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.list_array import _st_starts_stops
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 
 class StartsStopsKwargs(TypedDict, total=False):
@@ -87,47 +88,53 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_min_length() -> None:
     """Assert that starts/stops with exactly min_length lists can be drawn."""
-    find(_st_starts_stops(5, min_length=3), lambda ss: len(ss[0]) == 3)
+    find(_st_starts_stops(5, min_length=3), lambda ss: len(ss[0]) == 3, settings=FIND)
 
 
 def test_draw_min_length_content_len_zero() -> None:
     """Assert that min_length is respected when content is empty."""
-    find(_st_starts_stops(0, min_length=3), lambda ss: len(ss[0]) == 3)
+    find(_st_starts_stops(0, min_length=3), lambda ss: len(ss[0]) == 3, settings=FIND)
 
 
 def test_draw_max_length() -> None:
     """Assert that starts/stops with exactly max_length lists can be drawn."""
-    find(_st_starts_stops(5, max_length=10), lambda ss: len(ss[0]) == 10)
+    find(_st_starts_stops(5, max_length=10), lambda ss: len(ss[0]) == 10, settings=FIND)
 
 
 def test_draw_empty() -> None:
     """Assert that empty starts/stops can be drawn."""
-    find(_st_starts_stops(5), lambda ss: len(ss[0]) == 0)
+    find(_st_starts_stops(5), lambda ss: len(ss[0]) == 0, settings=FIND)
 
 
 def test_draw_content_len_zero() -> None:
     """Assert that starts/stops can be drawn with zero content length."""
-    starts, stops = find(_st_starts_stops(0, max_length=5), lambda ss: len(ss[0]) >= 2)
+    starts, stops = find(
+        _st_starts_stops(0, max_length=5), lambda ss: len(ss[0]) >= 2, settings=FIND
+    )
     assert all(s == 0 for s in starts)
     assert all(s == 0 for s in stops)
 
 
 def test_draw_unreachable_head() -> None:
     """Assert that starts/stops with unreachable head data can be drawn."""
-    find(_st_starts_stops(10), lambda ss: len(ss[0]) >= 1 and ss[0][0] > 0)
+    find(
+        _st_starts_stops(10), lambda ss: len(ss[0]) >= 1 and ss[0][0] > 0, settings=FIND
+    )
 
 
 def test_draw_unreachable_tail() -> None:
     """Assert that starts/stops with unreachable tail data can be drawn."""
-    find(_st_starts_stops(10), lambda ss: len(ss[0]) >= 1 and ss[1][-1] < 10)
+    find(
+        _st_starts_stops(10),
+        lambda ss: len(ss[0]) >= 1 and ss[1][-1] < 10,
+        settings=FIND,
+    )
 
 
 def test_shrink_no_unreachable() -> None:
     """Assert that starts/stops shrink toward no unreachable data."""
     starts, stops = find(
-        _st_starts_stops(10),
-        lambda ss: len(ss[0]) >= 2,
-        settings=settings(database=None),
+        _st_starts_stops(10), lambda ss: len(ss[0]) >= 2, settings=FIND
     )
     assert starts[0] == 0
     assert stops[-1] == 10
@@ -138,15 +145,14 @@ def test_draw_gap() -> None:
     find(
         _st_starts_stops(10),
         lambda ss: any(ss[1][i] < ss[0][i + 1] for i in range(len(ss[0]) - 1)),
+        settings=FIND,
     )
 
 
 def test_shrink_no_gap() -> None:
     """Assert that starts/stops shrink toward no gaps (contiguous)."""
     starts, stops = find(
-        _st_starts_stops(10),
-        lambda ss: len(ss[0]) >= 2,
-        settings=settings(database=None),
+        _st_starts_stops(10), lambda ss: len(ss[0]) >= 2, settings=FIND
     )
     for i in range(len(starts) - 1):
         assert stops[i] == starts[i + 1]
@@ -157,15 +163,14 @@ def test_draw_overlap() -> None:
     find(
         _st_starts_stops(10),
         lambda ss: any(ss[0][i + 1] < ss[1][i] for i in range(len(ss[0]) - 1)),
+        settings=FIND,
     )
 
 
 def test_shrink_no_overlap() -> None:
     """Assert that starts/stops shrink toward no overlaps."""
     starts, stops = find(
-        _st_starts_stops(10),
-        lambda ss: len(ss[0]) >= 2,
-        settings=settings(database=None),
+        _st_starts_stops(10), lambda ss: len(ss[0]) >= 2, settings=FIND
     )
     for i in range(len(starts) - 1):
         assert starts[i + 1] >= stops[i]
@@ -176,15 +181,14 @@ def test_draw_out_of_order() -> None:
     find(
         _st_starts_stops(10),
         lambda ss: any(ss[0][i] > ss[0][i + 1] for i in range(len(ss[0]) - 1)),
+        settings=FIND,
     )
 
 
 def test_shrink_monotonic() -> None:
     """Assert that starts/stops shrink toward monotonic starts."""
     starts, stops = find(
-        _st_starts_stops(10),
-        lambda ss: len(ss[0]) >= 2,
-        settings=settings(database=None),
+        _st_starts_stops(10), lambda ss: len(ss[0]) >= 2, settings=FIND
     )
     for i in range(len(starts) - 1):
         assert starts[i] <= starts[i + 1]
@@ -192,8 +196,6 @@ def test_shrink_monotonic() -> None:
 
 def test_shrink_content_len_zero() -> None:
     """Assert that starts/stops shrink to empty with zero content length."""
-    starts, stops = find(
-        _st_starts_stops(0), lambda ss: True, settings=settings(database=None)
-    )
+    starts, stops = find(_st_starts_stops(0), lambda ss: True, settings=FIND)
     assert starts == []
     assert stops == []

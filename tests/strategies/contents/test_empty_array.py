@@ -3,6 +3,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND
 
 
 @given(data=st.data())
@@ -15,4 +16,8 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate an `EmptyArray` as outermost."""
-    find(st_ak.contents.contents(), lambda c: isinstance(c, ak.contents.EmptyArray))
+    find(
+        st_ak.contents.contents(),
+        lambda c: isinstance(c, ak.contents.EmptyArray),
+        settings=FIND,
+    )

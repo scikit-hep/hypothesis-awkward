@@ -2,12 +2,13 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 from awkward.contents import Content, NumpyArray, RegularArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_NO_SHRINK
 
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
@@ -102,7 +103,7 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_size_zero() -> None:
     """Assert the size can be zero."""
-    find(st_ak.contents.regular_array_contents(), lambda c: c.size == 0)
+    find(st_ak.contents.regular_array_contents(), lambda c: c.size == 0, settings=FIND)
 
 
 @pytest.mark.parametrize('max_size', [0, 1, 2, 50])
@@ -111,6 +112,7 @@ def test_draw_max_size(max_size: int) -> None:
     find(
         st_ak.contents.regular_array_contents(max_size=max_size),
         lambda c: c.size == max_size,
+        settings=FIND,
     )
 
 
@@ -120,6 +122,7 @@ def test_draw_min_length(min_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(min_length=min_length),
         lambda c: c.size > 0 and len(c) == min_length,
+        settings=FIND,
     )
 
 
@@ -129,7 +132,7 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(max_length=max_length),
         lambda c: c.size > 0 and len(c) == max_length,
-        settings=settings(max_examples=2000),
+        settings=FIND,
     )
 
 
@@ -139,6 +142,7 @@ def test_draw_max_zeros_length(max_zeros_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(max_zeros_length=max_zeros_length),
         lambda c: c.size == 0 and len(c) == max_zeros_length,
+        settings=FIND,
     )
 
 
@@ -149,7 +153,7 @@ def test_draw_default_max_size(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(content),
         lambda c: c.size == max_length,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -160,7 +164,7 @@ def test_draw_default_max_zeros_length(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(content, max_size=0),
         lambda c: c.size == 0 and len(c) == max_length,
-        settings=settings(max_examples=2000),
+        settings=FIND,
     )
 
 
@@ -169,6 +173,7 @@ def test_draw_unreachable() -> None:
     find(
         st_ak.contents.regular_array_contents(),
         lambda c: c.size > 0 and len(c.content) % c.size != 0,
+        settings=FIND,
     )
 
 
@@ -183,7 +188,7 @@ def test_shrink_no_unreachable(n: int) -> None:
     c = find(
         st_ak.contents.regular_array_contents(content),
         lambda c: 1 < c.size < len(c.content),
-        settings=settings(database=None),
+        settings=FIND,
     )
     assert len(c) == min(n // s for s in range(2, n) if n % s == 0)
     assert len(c.content) == c.size * len(c)
@@ -191,4 +196,6 @@ def test_shrink_no_unreachable(n: int) -> None:
 
 def test_draw_from_contents() -> None:
     """Assert `contents()` can generate a `RegularArray` as outermost."""
-    find(st_ak.contents.contents(), lambda c: isinstance(c, RegularArray))
+    find(
+        st_ak.contents.contents(), lambda c: isinstance(c, RegularArray), settings=FIND
+    )

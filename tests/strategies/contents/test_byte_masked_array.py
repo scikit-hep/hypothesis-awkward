@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 
 from awkward.contents import ByteMaskedArray, Content
 from hypothesis_awkward import strategies as st_ak
+from tests.find_settings import FIND
 
 
 class ByteMaskedArrayContentsKwargs(TypedDict, total=False):
@@ -91,6 +92,7 @@ def test_draw_valid_when(valid_when: bool) -> None:
     find(
         st_ak.contents.byte_masked_array_contents(),
         lambda c: c.valid_when is valid_when,
+        settings=FIND,
     )
 
 
@@ -101,6 +103,7 @@ def test_draw_with_none_values() -> None:
         lambda c: (
             len(c) > 0 and any(c.mask.data[i] != c.valid_when for i in range(len(c)))
         ),
+        settings=FIND,
     )
 
 
@@ -111,6 +114,7 @@ def test_draw_all_valid() -> None:
         lambda c: (
             len(c) > 0 and all(c.mask.data[i] == c.valid_when for i in range(len(c)))
         ),
+        settings=FIND,
     )
 
 
@@ -119,5 +123,5 @@ def test_draw_from_contents() -> None:
     find(
         st_ak.contents.contents(),
         lambda c: isinstance(c, ByteMaskedArray),
-        settings=settings(max_examples=2000),
+        settings=FIND,
     )

@@ -1,12 +1,13 @@
 from typing import Any, TypedDict, cast
 
 import numpy as np
-from hypothesis import Phase, find, given, settings
+from hypothesis import find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import SUPPORTED_DTYPE_NAMES
+from tests.find_settings import FIND_NO_SHRINK
 
 
 class NumpyFormsKwargs(TypedDict, total=False):
@@ -144,20 +145,12 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_empty_inner_shape() -> None:
     """Assert that forms with empty inner_shape can be drawn."""
-    find(
-        st_ak.numpy_forms(),
-        lambda f: f.inner_shape == (),
-        settings=settings(phases=[Phase.generate]),
-    )
+    find(st_ak.numpy_forms(), lambda f: f.inner_shape == (), settings=FIND_NO_SHRINK)
 
 
 def test_draw_nonempty_inner_shape() -> None:
     """Assert that forms with non-empty inner_shape can be drawn."""
-    find(
-        st_ak.numpy_forms(),
-        lambda f: len(f.inner_shape) > 0,
-        settings=settings(phases=[Phase.generate], max_examples=2000),
-    )
+    find(st_ak.numpy_forms(), lambda f: len(f.inner_shape) > 0, settings=FIND_NO_SHRINK)
 
 
 def test_draw_datetime_primitive() -> None:
@@ -165,7 +158,7 @@ def test_draw_datetime_primitive() -> None:
     find(
         st_ak.numpy_forms(),
         lambda f: f.primitive.startswith('datetime64'),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -174,17 +167,13 @@ def test_draw_integer_primitive() -> None:
     find(
         st_ak.numpy_forms(),
         lambda f: f.primitive in ('int8', 'int16', 'int32', 'int64'),
-        settings=settings(phases=[Phase.generate], max_examples=2000),
+        settings=FIND_NO_SHRINK,
     )
 
 
 def test_draw_from_type() -> None:
     """Assert that a form from a NumpyType matches the type."""
     t = ak.types.NumpyType('float64')
-    f = find(
-        st_ak.numpy_forms(type_=t),
-        lambda f: True,
-        settings=settings(phases=[Phase.generate]),
-    )
+    f = find(st_ak.numpy_forms(type_=t), lambda f: True, settings=FIND_NO_SHRINK)
     assert f.primitive == 'float64'
     assert f.inner_shape == ()

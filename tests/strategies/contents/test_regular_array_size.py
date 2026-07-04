@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.regular_array import _st_group_sizes
 from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND
 
 
 class GroupSizesKwargs(TypedDict, total=False):
@@ -91,35 +92,29 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_shrink_to_total_items() -> None:
     """Assert that positive size shrinks to total_items (fewest partitions)."""
-    s = find(
-        _st_group_sizes(12, max_group_size=12),
-        lambda s: s > 0,
-        settings=settings(database=None),
-    )
+    s = find(_st_group_sizes(12, max_group_size=12), lambda s: s > 0, settings=FIND)
     assert s == 12
 
 
 def test_shrink_to_max_divisor() -> None:
     """Assert that positive size shrinks to the largest divisor <= max_group_size."""
     # total_items=12, max_group_size=11: divisors <= 11 are [6, 4, 3, 2, 1]
-    s = find(
-        _st_group_sizes(12, max_group_size=11),
-        lambda s: s > 0,
-        settings=settings(database=None),
-    )
+    s = find(_st_group_sizes(12, max_group_size=11), lambda s: s > 0, settings=FIND)
     assert s == 6
 
 
 def test_draw_total_items() -> None:
     """Assert that size can equal total_items."""
-    find(_st_group_sizes(7, max_group_size=7), lambda s: s == 7)
+    find(_st_group_sizes(7, max_group_size=7), lambda s: s == 7, settings=FIND)
 
 
 def test_draw_total_items_zero() -> None:
     """Assert that any size up to max_group_size can be drawn when total_items is 0."""
     max_group_size = 10
     find(
-        _st_group_sizes(0, max_group_size=max_group_size), lambda s: s == max_group_size
+        _st_group_sizes(0, max_group_size=max_group_size),
+        lambda s: s == max_group_size,
+        settings=FIND,
     )
 
 
@@ -131,33 +126,33 @@ def test_shrink_divisors_first() -> None:
     s = find(
         _st_group_sizes(12, max_group_size=11, allow_non_divisors=True),
         lambda s: s > 0,
-        settings=settings(database=None),
+        settings=FIND,
     )
     assert s == 6
 
 
 def test_draw_non_divisor() -> None:
     """Assert that a non-divisor can be drawn when allow_non_divisors is True."""
-    find(_st_group_sizes(12, allow_non_divisors=True), lambda s: s > 0 and 12 % s != 0)
+    find(
+        _st_group_sizes(12, allow_non_divisors=True),
+        lambda s: s > 0 and 12 % s != 0,
+        settings=FIND,
+    )
 
 
 def test_min_length_caps_size() -> None:
     """Assert that min_length caps the resolved max_group_size."""
     # total_items=12, min_length=3 → size <= 12 // 3 = 4.
     # Largest divisor of 12 in [1, 4] is 4.
-    s = find(
-        _st_group_sizes(12, min_length=3),
-        lambda s: s > 0,
-        settings=settings(database=None),
-    )
+    s = find(_st_group_sizes(12, min_length=3), lambda s: s > 0, settings=FIND)
     assert s == 4
 
 
 def test_draw_min_length_zero_fallback() -> None:
     """Assert size=0 fallback when `min_length > total_items`."""
-    find(_st_group_sizes(3, min_length=5), lambda s: s == 0)
+    find(_st_group_sizes(3, min_length=5), lambda s: s == 0, settings=FIND)
 
 
 def test_draw_min_length_total_items_zero() -> None:
     """Assert size=0 fallback when total_items=0 and min_length>0."""
-    find(_st_group_sizes(0, min_length=1), lambda s: s == 0)
+    find(_st_group_sizes(0, min_length=1), lambda s: s == 0, settings=FIND)
