@@ -4,7 +4,7 @@ from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
-from hypothesis import find, given
+from hypothesis import HealthCheck, find, given, settings
 from hypothesis import strategies as st
 
 import awkward as ak
@@ -23,6 +23,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK
+from tests.scaled_settings import scaled
 
 DEFAULT_MAX_SIZE = 50
 DEFAULT_MAX_DEPTH = None
@@ -126,6 +127,7 @@ def contents_kwargs(
     return chain.extend(cast(ContentsKwargs, kwargs))
 
 
+@scaled(2.5)  # `contents()` composes every strategy; interaction bugs live here
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `contents()`."""
@@ -260,6 +262,39 @@ def test_draw_nested() -> None:
         lambda c: _nesting_depth(c) >= 2,
         settings=FIND,
     )
+
+
+# The narrowed space filters heavily by design: the fix turned the raising
+# draws (wrapper requiring a non-empty subtree) into filtered ones.
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
+@given(data=st.data())
+def test_draw_only_empty_leaf_with_wrapper(data: st.DataObject) -> None:
+    """Assert that draws succeed when only `EmptyArray` leaves are allowed.
+
+    Regression test for a `ValueError` from `leaf_contents()`: a wrapper (e.g.
+    `IndexedArray` with a non-empty index) requires a non-empty subtree, but the
+    depth budget forces a leaf and only `EmptyArray` (length 0) is allowed. Found
+    by the nightly run on 2026-07-04.
+    """
+    c = data.draw(
+        st_ak.contents.contents(
+            allow_numpy=False,
+            allow_string=False,
+            allow_bytestring=False,
+            allow_regular=False,
+            allow_list_offset=False,
+            allow_list=False,
+            allow_record=False,
+            allow_union=False,
+            allow_indexed=True,
+            allow_indexed_option=False,
+            allow_byte_masked=False,
+            allow_bit_masked=False,
+            allow_unmasked=False,
+            max_depth=1,
+        )
+    )
+    assert len(c) == 0
 
 
 @pytest.mark.parametrize('min_length', [1, 2, 5])

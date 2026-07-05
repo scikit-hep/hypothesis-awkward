@@ -229,14 +229,17 @@ def contents(
 
     if leaf_only:
         # No wrapper/option available; the leaf path must produce the result.
-        # Filter when bounds are inconsistent; let leaf_contents raise when
-        # only Empty is allowed but min_length>0.
-        assume(leaf_feasible)
+        # Filter inconsistent bounds and the empty-only case with
+        # min_length > 0 (reachable in recursion, e.g. a child of IndexedArray
+        # with allow_indexed_root=False); let leaf_contents raise only when no
+        # leaf type is allowed at all.
+        assume(leaf_can_satisfy_min)
         return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
 
     if max_depth is not None and max_depth <= 0:
-        # Depth limit forces a leaf.
-        assume(leaf_feasible)
+        # Depth limit forces a leaf. Filter also when an ancestor requires a
+        # non-empty subtree (min_length > 0) but only Empty is allowed.
+        assume(leaf_can_satisfy_min)
         return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
 
     # Random choice between leaf and wrapper. Skip the leaf branch when it
@@ -289,7 +292,9 @@ def contents(
         candidates.append(unmasked_array_from_contents)
 
     if not candidates:
-        assume(leaf_feasible)
+        # No wrapper is possible at this node (e.g. a root-excluded type);
+        # same filter as the depth-limit branch above.
+        assume(leaf_can_satisfy_min)
         return _check(draw(st_leaf(min_size=min_length, max_size=leaf_max_size)))
 
     st_option_: StOption | None = (
