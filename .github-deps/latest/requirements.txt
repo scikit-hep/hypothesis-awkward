@@ -2,5 +2,5 @@
 # Used in GitHub Actions for testing compatibility.
 # Monitored by Dependabot.
 awkward==2.10.0
-hypothesis==6.156.1
+hypothesis==6.156.2
 typing-extensions==4.16.0; python_version < '3.11'
