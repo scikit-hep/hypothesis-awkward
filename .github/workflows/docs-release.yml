@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Checkout release tag
         id: checkout
-        uses: TaiSakuma/checkout-version-tag@v1
+        uses: TaiSakuma/checkout-version-tag@920911b2aaaea227efc3a0e50c201aa03ccafa0c # v1.2.0
         with:
           trigger-tag: ${{ github.event.workflow_run.head_branch }}
 
@@ -28,6 +28,23 @@ jobs:
         run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
         env:
           TAG: ${{ steps.checkout.outputs.release-tag }}
+
+      # Decide "is this the newest release?" over every v* tag by version
+      # order, so a backport never moves the `latest` alias to old docs.
+      # checkout-version-tag checks out a single tag, so fetch them all.
+      - name: Determine whether this is the newest release
+        id: latest
+        env:
+          RELEASE_TAG: ${{ steps.checkout.outputs.release-tag }}
+        run: |
+          set -euo pipefail
+          git fetch --force --tags origin
+          newest="$(git tag -l 'v*' | sort -V | tail -n1)"
+          if [ "${newest}" = "${RELEASE_TAG}" ]; then
+            echo "is-latest=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "is-latest=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: astral-sh/setup-uv@v8.3.2
 
@@ -39,12 +56,25 @@ jobs:
       - name: Fetch gh-pages
         run: git fetch origin gh-pages
 
+      # The newest release moves the `latest` alias with it; a backport
+      # deploys its version into the selector without touching `latest`.
       - name: Deploy release docs
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          IS_LATEST: ${{ steps.latest.outputs.is-latest }}
         run: |
-          uv run --group docs mike deploy --push \
-            --branch gh-pages \
-            --update-aliases \
-            "${{ steps.version.outputs.version }}" latest
+          set -euo pipefail
+          if [ "${IS_LATEST}" = "true" ]; then
+            uv run --group docs mike deploy --push \
+              --branch gh-pages \
+              --update-aliases \
+              "${VERSION}" latest
+          else
+            uv run --group docs mike deploy --push \
+              --branch gh-pages \
+              "${VERSION}"
+          fi
 
       - name: Ensure default alias
+        if: steps.latest.outputs.is-latest == 'true'
         run: uv run --group docs mike set-default --push --branch gh-pages latest

@@ -63,12 +63,17 @@ that prevents one workflow from triggering another via tag push:
 
 1. **`hatch version <rule>`** — bumps the version, commits, and creates a
    `u<version>` tag (configured via `tag_name` in `pyproject.toml`).
-2. **`changelog.yml`** — triggered by the `u*.*.*` tag push. Generates
-   `CHANGELOG.md` with git-cliff, commits the result, creates the corresponding
-   `v<version>` tag, and pushes both to `main`.
+2. **`changelog.yml`** — triggered by the `u*.*.*` tag push. Creates a
+   `release/<version>` branch at the tagged commit, generates `CHANGELOG.md`
+   with git-cliff and creates the `v<version>` tag on that branch, then merges
+   the branch back into `main` and deletes it — only when the released commit is
+   on `main` and the newest existing release is in its history. Otherwise (a
+   backport) the merge-back is skipped with a warning, the branch stays as the
+   maintenance line, and `main` is untouched.
 3. **`release.yml`** — triggered by `workflow_run` on the changelog workflow.
-   Creates a GitHub Release with auto-generated notes and updates a `latest`
-   tag.
+   Creates a GitHub Release with auto-generated notes; marks it "Latest" and
+   moves the rolling `latest` tag only when the version is the newest by version
+   order.
 4. **`pypi.yml`** — triggered by `workflow_run` on the changelog workflow.
    Builds with `hatch build` and publishes to PyPI via trusted publishing.
 
@@ -83,10 +88,11 @@ invisible to the version selector.
 
 - **`docs-dev.yml`** — Runs `mike deploy --push dev` on push to `main`,
   refreshing the `dev/` subdirectory and its `versions.json` entry.
-- **`docs-release.yml`** — Runs
+- **`docs-release.yml`** — Runs on the `workflow_run` after changelog
+  generation. When the version is the newest by version order, runs
   `mike deploy --push --update-aliases <version> latest` then
-  `mike set-default --push latest` on the `workflow_run` after changelog
-  generation.
+  `mike set-default --push latest`; otherwise (a backport) runs
+  `mike deploy --push <version>` without touching the `latest` alias.
 - **`docs-pr-build.yml`** — Builds a single-version preview with the mike
   version provider stripped via
   `.github/actions/build-docs/prepare_pr_build.py`. Uploads the built site as an
