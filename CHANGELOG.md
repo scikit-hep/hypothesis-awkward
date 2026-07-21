@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.19.1] - 2026-07-21
+
+### Bug Fixes
+
+- Normalize `typing-extensions` package name in dependency files ([#129](https://github.com/scikit-hep/hypothesis-awkward/pull/129))
+- Avoid spurious `ValueError` in `contents()` recursion ([#139](https://github.com/scikit-hep/hypothesis-awkward/pull/139))
+
+### Documentation
+
+- Revise guide pages and rewrite Getting Started ([#128](https://github.com/scikit-hep/hypothesis-awkward/pull/128))
+
+### Testing
+
+- Remove obsolete `test_from_buffers.py` bug repro ([#136](https://github.com/scikit-hep/hypothesis-awkward/pull/136))
+- Use shared `settings` instances for `find()` tests ([#137](https://github.com/scikit-hep/hypothesis-awkward/pull/137))
+- Add nightly Hypothesis profile with 10,000 examples ([#138](https://github.com/scikit-hep/hypothesis-awkward/pull/138))
+
+### Build & CI
+
+- Move CI dependency pins out of `.github/` for Dependabot ([#131](https://github.com/scikit-hep/hypothesis-awkward/pull/131))
+- Bump awkward from 2.9.0 to 2.10.0 in /.github-deps/latest ([#132](https://github.com/scikit-hep/hypothesis-awkward/pull/132))
+- Bump typing-extensions from 4.15.0 to 4.16.0 in /.github-deps/latest ([#133](https://github.com/scikit-hep/hypothesis-awkward/pull/133))
+- Bump minimum `awkward` version to 2.9.1 ([#135](https://github.com/scikit-hep/hypothesis-awkward/pull/135))
+- Bump hypothesis from 6.152.4 to 6.156.1 in /.github-deps/latest ([#134](https://github.com/scikit-hep/hypothesis-awkward/pull/134))
+- Require `typing-extensions>=4.7` on Python < 3.11 ([#151](https://github.com/scikit-hep/hypothesis-awkward/pull/151))
+- Run pytest with `uv run --no-sync` to keep pinned deps ([#150](https://github.com/scikit-hep/hypothesis-awkward/pull/150))
+- Bump astral-sh/setup-uv from 8.2.0 to 8.3.2 ([#143](https://github.com/scikit-hep/hypothesis-awkward/pull/143))
+- Bump actions/setup-python from 6 to 7 ([#146](https://github.com/scikit-hep/hypothesis-awkward/pull/146))
+- Support releases from older commits ([#152](https://github.com/scikit-hep/hypothesis-awkward/pull/152))
+
+### Meta
+
+- Guard docs-voice rules against over-literal application
+- Update `.claude` docs after repo audit
+- Document upstream-bug patterns, trim stale kwargs code in `testing-patterns.md`
+
+
 ## [0.19.0] - 2026-06-26
 
 ### Features
