@@ -64,7 +64,7 @@ jobs:
         run: uv pip list
 
       - name: Run tests
-        run: uv run pytest -vv --cov --cov-report=xml
+        run: uv run --no-sync pytest -vv --cov --cov-report=xml
 
       - name: Check Codecov token # e.g., Dependabot doesn't have the CODECOV_TOKEN
         id: check_codecov_token
