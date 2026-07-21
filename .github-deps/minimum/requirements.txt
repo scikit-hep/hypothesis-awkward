@@ -3,7 +3,7 @@
 # Must be manually updated to align with `pyproject.toml`.
 awkward==2.9.1
 hypothesis==6.152.4
-typing-extensions==4.1.0; python_version < '3.11'
+typing-extensions==4.7.0; python_version < '3.11'
 
 # In the future, `pip` may install minimum versions from
 # `pyproject.toml` directly: https://github.com/pypa/pip/issues/8085
