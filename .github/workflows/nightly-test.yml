@@ -57,6 +57,6 @@ jobs:
         run: uv pip list
 
       - name: Run tests
-        run: uv run pytest -vv -rs --hypothesis-show-statistics
+        run: uv run --no-sync pytest -vv -rs --hypothesis-show-statistics
         env:
           HYPOTHESIS_PROFILE: nightly
