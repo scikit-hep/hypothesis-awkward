@@ -1,7 +1,15 @@
 name: Release a new version
 
 # Create a GitHub Release after the "Generate changelog" workflow succeeds,
-# then update the `latest` tag to point at the new release commit.
+# then -- only when this version is the newest release by version order --
+# mark the GitHub Release as "Latest" and move the rolling `latest` tag to it.
+#
+# A release can be cut from an older commit (a backport, or a concurrent
+# release that lost the merge-back race). Such a release is published like any
+# other, but it must NOT claim "Latest" if a higher version already exists.
+# Whether it is newest is decided purely by version order over all v* tags
+# (which by now includes this release's own v<version>), independent of
+# whether its changelog branch merged back into main.
 #
 # This is the second half of the two-tag release flow (see changelog.yml).
 
@@ -18,20 +26,52 @@ jobs:
       contents: write
 
     steps:
+      # Derive the v tag from the u tag (the triggering run's head_branch is
+      # the u tag name) and check out its commit. EndBug/latest-tag below
+      # moves `latest` to whatever commit is checked out here.
       - name: Checkout release tag
         id: version
-        uses: TaiSakuma/checkout-version-tag@v1
+        uses: TaiSakuma/checkout-version-tag@920911b2aaaea227efc3a0e50c201aa03ccafa0c # v1.2.0
         with:
           trigger-tag: ${{ github.event.workflow_run.head_branch }}
 
+      # Decide "is this the newest release?" over every v* tag by version
+      # order. The action checks out a single tag, so fetch them all first.
+      # If the fetch fails, set -e fails the step loudly rather than silently
+      # mis-marking the release.
+      - name: Determine whether this is the newest release
+        id: latest
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.release-tag }}
+        run: |
+          set -euo pipefail
+          git fetch --force --tags origin
+          newest="$(git tag -l 'v*' | sort -V | tail -n1)"
+          if [ "${newest}" = "${RELEASE_TAG}" ]; then
+            echo "is-latest=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "is-latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Publish the release. --latest={true|false} overrides GitHub's own
+      # date/version heuristic, so a backport never displaces a newer release,
+      # and a genuinely-newest release is marked latest even when its
+      # merge-back was skipped.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.release-tag }}
+          IS_LATEST: ${{ steps.latest.outputs.is-latest }}
         run: |
-          gh release create ${{ steps.version.outputs.release-tag }} \
-            --generate-notes
+          set -euo pipefail
+          gh release create "${RELEASE_TAG}" \
+            --generate-notes \
+            --latest="${IS_LATEST}"
 
-      # Maintain a rolling `latest` tag so users can always reference the
-      # most recent release (e.g., in install instructions).
+      # Maintain a rolling `latest` tag so users can always reference the most
+      # recent release (e.g., in install instructions) -- only when this is
+      # the newest release. EndBug/latest-tag acts on the commit checked out
+      # by checkout-version-tag above.
       - name: Tag latest
-        uses: EndBug/latest-tag@v1
+        if: steps.latest.outputs.is-latest == 'true'
+        uses: EndBug/latest-tag@8fcae8848c1e23fd8212258f69a9619bc62cad67 # v1.6.3

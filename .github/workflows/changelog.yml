@@ -1,13 +1,36 @@
 name: Generate changelog
 
 # Generate CHANGELOG.md with git-cliff (https://git-cliff.org/) when a
-# version-bump tag (u*.*.*) is pushed, then commit the result, create the
-# corresponding v-prefixed tag, and push both to main.
+# version-bump tag (u*.*.*) is pushed, commit the result and create the
+# corresponding v-prefixed tag on a per-release branch, then merge that
+# branch back into main.
 #
-# This is the first half of the two-tag release flow:
-#   1. hatch version <rule> → commit → push tag u<version>
-#   2. (this workflow) generates CHANGELOG.md → commits → pushes tag v<version>
-#   3. The "Release a new version" workflow creates a GitHub Release
+# The version-bump commit U (created by `hatch version <rule>`) sits on top
+# of the commit C being released (C = U^). U may or may not be main's head:
+# a release can be cut from any commit that already carries these workflow
+# files. To keep the changelog range and the released tree independent of
+# whatever landed on main after C, every release is built on its own branch
+# release/<version> created at U, never directly on main.
+#
+# Steps:
+#   1. Resolve U and <version> from the pushed tag. hatch-regex-commit makes
+#      an ANNOTATED tag, so github.sha may be the tag OBJECT; the commits API
+#      peels the tag to its commit.
+#   2. Create branch release/<version> at U on origin (the changelog-commit
+#      action does not create the branch, so it must exist first).
+#   3. changelog-commit builds CHANGELOG.md on that branch, commits it as V,
+#      creates tag v<version> at V, and pushes the branch and the tags.
+#   4. Merge release/<version> back into main -- a fast-forward when C was
+#      main's head, a real merge commit otherwise -- IFF the precondition
+#      holds, then delete the branch. When it does not hold (a backport, or a
+#      concurrent release that advanced main past C first) the merge-back is
+#      skipped with a warning and the branch is kept as the maintenance line.
+#      Skipping is not an error: the run still succeeds so release.yml fires.
+#
+# Pushes here use the workflow GITHUB_TOKEN, which does not trigger further
+# workflows, so pushing the branch, the tags, and main starts nothing
+# recursive. This is the first half of the two-tag release flow; the
+# "Release a new version" workflow (release.yml) publishes the GitHub Release.
 
 on:
   push:
@@ -21,6 +44,113 @@ jobs:
       contents: write
 
     steps:
-      - uses: TaiSakuma/changelog-commit@v1
+      # 1. Resolve the released commit U and the version from the trigger tag.
+      #    There is no checkout yet, so `git rev-parse` is unavailable; the
+      #    commits API peels the annotated tag to its commit for us.
+      - name: Resolve tagged commit and version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          version="${TAG#u}"                       # u1.2.3 -> 1.2.3
+          commit="$(gh api "repos/${{ github.repository }}/commits/${TAG}" --jq .sha)"
+          {
+            echo "version=${version}"
+            echo "commit=${commit}"
+            echo "branch=release/${version}"
+          } >> "$GITHUB_OUTPUT"
+
+      # 2. Create the release branch at U. A pre-existing ref (e.g. a leftover
+      #    from a failed run) makes this fail loudly -- the operator deletes it
+      #    and re-pushes the tag, as the CONTRIBUTING.md recovery steps describe.
+      - name: Create release branch at the tagged commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.resolve.outputs.branch }}
+          COMMIT: ${{ steps.resolve.outputs.commit }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${{ github.repository }}/git/refs" \
+            -f "ref=refs/heads/${BRANCH}" \
+            -f "sha=${COMMIT}"
+
+      # 3. Build the changelog, commit it as V, create tag v<version>, and
+      #    push -- all on release/<version>. Passing `branch` is what makes
+      #    git-cliff compute the range from this branch's history (previous
+      #    v tag reachable from U .. U), not from main.
+      - name: Generate changelog and create the release tag
+        uses: TaiSakuma/changelog-commit@b3fbc77d560296e267f3dd34932111a5ef765703 # v1.1.2
         with:
           trigger-tag: ${{ github.ref_name }}
+          branch: ${{ steps.resolve.outputs.branch }}
+
+      # A dedicated checkout of main gives the merge-back a defined starting
+      # state (which branch is checked out, full history, all tags, push
+      # credentials) instead of depending on whatever state changelog-commit
+      # happens to leave behind. fetch-depth: 0 is required for the ancestry
+      # tests and for the merge.
+      - name: Check out main for the merge-back
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: main
+          fetch-depth: 0
+
+      # 4. Merge-back, guarded by the precondition. Everything is explicit git
+      #    here (rather than hidden in an action) so this reads as a reference
+      #    implementation.
+      - name: Merge the release branch back into main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.resolve.outputs.version }}
+          BRANCH: ${{ steps.resolve.outputs.branch }}
+          U: ${{ steps.resolve.outputs.commit }}
+        run: |
+          set -euo pipefail
+
+          # An identity is required to record a merge commit (the non-ff case).
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          # Re-fetch main and the release branch with explicit refspecs (do not
+          # rely on the checkout's persisted refspec) so the precondition is
+          # judged against the CURRENT origin/main and the CURRENT tags: if
+          # another release advanced main past C in the meantime, this release
+          # must observe that and skip.
+          git fetch --force --tags origin \
+            '+refs/heads/main:refs/remotes/origin/main' \
+            "+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}"
+          git checkout -B main origin/main
+
+          release_tag="v${VERSION}"
+          # C is the commit that was released -- U's (only) parent.
+          C="$(git rev-parse "${U}^")"
+          # Newest EXISTING release by version order, excluding THIS release's
+          # own tag. sort -V orders v1.2.3-style tags; empty means first-ever
+          # release. grep may drop every line (only v<version> exists), so the
+          # pipeline is allowed to exit non-zero here.
+          newest_v="$(git tag -l 'v*' | grep -vxF "${release_tag}" | sort -V | tail -n1 || true)"
+
+          # Precondition (both halves):
+          #   (a) C is already contained in main, and
+          #   (b) the newest existing release is contained in C's history
+          #       (vacuously true when there is none).
+          if git merge-base --is-ancestor "${C}" origin/main \
+             && { [ -z "${newest_v}" ] \
+                  || git merge-base --is-ancestor "${newest_v}^{commit}" "${C}"; }; then
+            # One merge call covers both shapes: fast-forward when C was main's
+            # head, a two-parent merge commit when C is older. No case split.
+            git merge --no-edit "origin/${BRANCH}"
+            git push origin main
+            # The release has landed on main; retire the branch.
+            git push origin --delete "${BRANCH}"
+          else
+            # Backport, or a concurrent release that advanced main past C
+            # first. Keep the branch as the maintenance line, leave main
+            # untouched, and succeed (exit 0) so release.yml still runs.
+            echo "::warning::Merge-back of ${BRANCH} into main skipped:" \
+                 "C (${C}) is not on main, or the newest existing release" \
+                 "(${newest_v:-none}) is not an ancestor of C -- a backport" \
+                 "or a concurrent release. Branch kept; main unchanged."
+          fi
