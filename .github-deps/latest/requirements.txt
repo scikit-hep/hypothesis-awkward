@@ -1,6 +1,6 @@
 # Pinned latest versions of dependencies.
 # Used in GitHub Actions for testing compatibility.
 # Monitored by Dependabot.
-awkward==2.10.0
+awkward==2.11.0
 hypothesis==6.156.1
 typing-extensions==4.16.0; python_version < '3.11'
