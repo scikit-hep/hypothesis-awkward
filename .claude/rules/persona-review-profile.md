@@ -70,9 +70,10 @@ Disabled.
 ## Verification
 
 One-time wiring: register the page in `zensical.toml` (`nav`) and the section
-index page. Checks, re-run each review round: prettier; doctest collection; the
-marker check (`pytest tests/docs`); `zensical build`; and confirm links resolve.
-Operational conventions (build, fences, nav) are in `.claude/rules/docs.md`.
+index page. Checks, re-run each review round: prettier; doctest collection;
+`zensical build`; and confirm links resolve. The markers are checked by the
+reviewers' declaration pass, not mechanically. Operational conventions (build,
+fences, nav) are in `.claude/rules/docs.md`.
 
 ## Record
 

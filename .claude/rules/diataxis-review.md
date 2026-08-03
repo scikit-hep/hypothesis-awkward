@@ -54,8 +54,9 @@ A page takes one of two shapes:
 
 Markers sit at one level per branch: a heading whose subsections carry their own
 markers is a container and carries none. Every page under `docs/` carries at
-least one marker, and `tests/docs/test_diataxis_markers.py` enforces these
-rules.
+least one marker. Nothing enforces this mechanically: a reviewer with no
+declared quadrant has nothing to review against, so a missing marker surfaces in
+the declaration pass of the self-check.
 
 A one-unit page that grows a section of another quadrant changes shape: the H1
 marker is removed and every H2 gets one. That is a scoping decision, not
@@ -156,4 +157,11 @@ content against the marker, never the reverse.
    out-of-quadrant content when they "develop into" the other mode and interrupt
    the page's purpose.)
 
-Report the result of both passes as the alignment self-check in your review.
+3. **Declaration.** List each unit you reviewed with the marker you read above
+   its heading. Report a unit with no marker, or a marker that is not directly
+   below its heading, as a defect. If a marker's value does not match what the
+   unit actually does, say so as a reclassification for the user to decide —
+   reclassifying is not a review outcome.
+
+Report the result of all three passes as the alignment self-check in your
+review.

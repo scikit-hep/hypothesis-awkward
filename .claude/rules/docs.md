@@ -22,7 +22,7 @@ persona-review workflow).
   H1 title and H2 sections. Each unit of content declares its quadrant with a
   `<!-- diataxis: … -->` marker below its heading — one below the H1 when the
   whole page is one unit, otherwise one below every H2. The rules are in
-  `diataxis-review.md`, checked by `pytest tests/docs`.
+  `diataxis-review.md`.
 - **Register a page** in both `zensical.toml` (`nav`) and the section index page
   (for example `docs/guide/index.md`).
 - **Examples:** illustrative `@given` snippets use plain ` ```python ` fences
