@@ -70,8 +70,8 @@ mode's characteristic failure.
   hold opinion and discussion; it is understood away from the keyboard.
 - **Does NOT belong:** procedural steps, worked how-to, or parameter lookup _as
   the page's work_ — link to the how-to or reference instead. (An illustrative
-  example may appear if it stays subordinate to the explanation; it becomes
-  bleed once it starts doing the how-to's job — see the self-check.)
+  example may appear if it stays subordinate to the explanation; it becomes out
+  of quadrant once it starts doing the how-to's job — see the self-check.)
 - **Failure to catch:** facts without the why; missing connective tissue; the
   page quietly turning into a how-to or a reference.
 
@@ -98,11 +98,12 @@ one.
 2. **Supply side.** Cross-mode material may appear **only subordinate to this
    page's one purpose**. The test is _service, not status_: does a passage still
    do _this_ page's job, or has it begun doing another mode's? Flag content
-   **already on the page** as **bleed to relocate** (naming where it goes) once
-   it crosses that line — an illustrative `@given` sketch that _depicts_ a
-   concept serves an Explanation page, but adjacent steps telling the reader how
-   to run or narrow it _now_ are how-to bleed. (Diátaxis: illustrative examples
-   are fine, but become bleed when they "develop into" the other mode and
-   interrupt the page's purpose.)
+   **already on the page** as **out-of-quadrant content to relocate** (naming
+   where it goes) once it crosses that line — an illustrative `@given` sketch
+   that _depicts_ a concept serves an Explanation page, but adjacent steps
+   telling the reader how to run or narrow it _now_ are out-of-quadrant how-to
+   content. (Diátaxis: illustrative examples are fine, but become
+   out-of-quadrant content when they "develop into" the other mode and interrupt
+   the page's purpose.)
 
 Report the result of both passes as the alignment self-check in your review.

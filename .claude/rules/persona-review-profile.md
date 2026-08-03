@@ -27,11 +27,11 @@ table in the docs plan note.
 Each page's Diátaxis quadrant(s) and primary audience are declared in the
 page-plan table in the docs plan note. The Diátaxis rules are
 `.claude/rules/diataxis-review.md`. A page may be declared as a combination of
-quadrants and split later as it grows; undeclared cross-quadrant content is
-bleed, not a sanctioned mix. Declarations reach reviewers via the review brief,
-which carries the page's quadrant(s) and the matching reader question(s).
-Out-of-scope asks and bleed are routed to the owning page's backlog in the docs
-plan note.
+quadrants and split later as it grows; undeclared cross-quadrant content is out
+of quadrant, not a sanctioned mix. Declarations reach reviewers via the review
+brief, which carries the page's quadrant(s) and the matching reader question(s).
+Out-of-scope asks and out-of-quadrant content are routed to the owning page's
+backlog in the docs plan note.
 
 ## Premise to pin
 
