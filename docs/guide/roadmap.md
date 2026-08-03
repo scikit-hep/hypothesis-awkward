@@ -1,12 +1,12 @@
 # Roadmap
 
+<!-- diataxis: explanation -->
+
 This page describes what `hypothesis-awkward` generates today and where it is
 heading, and is reviewed at each release. It gives no dates; the order of the
 items reflects priority, not a schedule.
 
 ## What you can generate today
-
-<!-- diataxis: explanation -->
 
 Today the main strategy,
 [`st_ak.constructors.arrays()`](../reference/strategies/constructors.md) (with
@@ -40,8 +40,6 @@ releases (see the
 [release notes](https://github.com/scikit-hep/hypothesis-awkward/releases)).
 
 ## Directions we are exploring
-
-<!-- diataxis: explanation -->
 
 Awkward describes an array at three levels, from the most abstract to the most
 concrete: its **type** (the
@@ -107,8 +105,6 @@ reserved `st_ak.arrays()`. This helps when a test depends on the concrete
 layout, not only the type.
 
 ## How to influence the roadmap
-
-<!-- diataxis: how-to -->
 
 These priorities are open. If you build on Awkward and need a particular type,
 layout, or option that the library does not yet generate, please
