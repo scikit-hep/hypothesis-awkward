@@ -19,10 +19,12 @@ persona-review workflow).
 
 - **Build / preview:** `uv run --group docs zensical build --clean`.
 - **Structure:** Diátaxis (tutorial / how-to / reference / explanation). Use an
-  H1 title and H2 sections. Each unit of content declares its quadrant with a
-  `<!-- diataxis: … -->` marker below its heading — one below the H1 when the
-  whole page is one unit, otherwise one below every H2. The rules are in
-  `diataxis-review.md`.
+  H1 title, and H2 sections when the page needs them. Each unit of content
+  declares its quadrant with a `<!-- diataxis: … -->` marker below its heading —
+  one below the H1 when the whole page is one unit, otherwise one below every
+  H2, leaving the material before the first H2 as an unmarked orientation
+  preamble. A page that is not a Diátaxis unit, such as a navigation index, uses
+  `none (<reason>)`. The rules are in `diataxis-review.md`.
 - **Register a page** in both `zensical.toml` (`nav`) and the section index page
   (for example `docs/guide/index.md`).
 - **Examples:** illustrative `@given` snippets use plain ` ```python ` fences

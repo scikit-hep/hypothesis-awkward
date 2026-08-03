@@ -1,14 +1,14 @@
 # Diátaxis Review
 
-How to review a documentation page against the Diátaxis quadrant(s) it is
-written for. Used by the `docs-persona-*` reviewers in the `write-docs-page`
+How to review a documentation page against the Diátaxis quadrant(s) its units
+are written for. Used by the `docs-persona-*` reviewers in the `write-docs-page`
 workflow. Each unit of content declares its own quadrant with a marker in the
 page (see [Markers](#markers)); there is no separate table to keep in sync.
 
 ## How to use this
 
-You will be told which quadrant(s) the page targets and asked the matching
-reader question(s). Review the page in that mode, applying the guidance below
+You will be told which quadrant each unit targets and asked the matching reader
+question(s). Review each unit in that mode, applying the guidance below
 **through your own persona lens** (your audience, pain points, and what you
 value still hold — but only to the extent the assigned quadrant calls for them).
 Before reporting, run the self-check at the end.
@@ -54,9 +54,9 @@ A page takes one of two shapes:
 
 Markers sit at one level per branch: a heading whose subsections carry their own
 markers is a container and carries none. Every page under `docs/` carries at
-least one marker. Nothing enforces this mechanically: a reviewer with no
-declared quadrant has nothing to review against, so a missing marker surfaces in
-the declaration pass of the self-check.
+least one marker. Nothing enforces this mechanically: a unit with no marker
+gives its reviewers no question to answer, so it surfaces in the declaration
+pass of the self-check.
 
 A one-unit page that grows a section of another quadrant changes shape: the H1
 marker is removed and every H2 gets one. That is a scoping decision, not
@@ -64,9 +64,9 @@ something a review does in passing.
 
 ## Reviewing each quadrant
 
-For each quadrant the page is assigned, check three things: does it do what the
-mode requires, does it keep out what the mode excludes, and does it avoid the
-mode's characteristic failure.
+For each quadrant declared on the page, check three things: does the unit do
+what the mode requires, does it keep out what the mode excludes, and does it
+avoid the mode's characteristic failure.
 
 ### Tutorial — "Do I learn this?" (action + acquisition)
 
@@ -130,22 +130,23 @@ ends up carrying two quadrants:
   subsections under a container heading instead, each keeping its own marker.
 - **Relocate** — how content crosses quadrants, possibly into a section newly
   added in the destination quadrant.
-- **Reclassify** — changing the marker on existing content. This is a scoping
-  decision, made when a run is scoped or by the user, and never a review
-  outcome.
+- **Reclassify** — changing the marker on existing content, or giving unmarked
+  existing content its first marker. This is a scoping decision, made when a run
+  is scoped or by the user, and never a review outcome.
 
 The declared quadrant is the fixed point of a review round: reviewers judge
 content against the marker, never the reverse.
 
 ## Self-check (run before reporting)
 
-1. **Demand side.** Every point you raise must serve one of the page's assigned
+1. **Demand side.** Every point you raise must serve one of the assigned
    questions. If an ask would pull a unit toward a quadrant it does **not**
    target, label it **out of scope** and route it to the unit that owns that
-   quadrant — do not report it as a defect of this page. In particular, do not
-   demand that a unit _acquire_ another quadrant's content it does not already
-   have: do not ask an Explanation unit to add runnable how-to steps or a worked
-   example; that content belongs in the page you link to.
+   quadrant, or — when no unit does — to the destination the profile's
+   Declaration mechanism names; do not report it as a defect of this page. In
+   particular, do not demand that a unit _acquire_ another quadrant's content it
+   does not already have: do not ask an Explanation unit to add runnable how-to
+   steps or a worked example; that content belongs in the page you link to.
 2. **Supply side.** Cross-mode material may appear **only subordinate to the
    unit's one purpose**. The test is _service, not status_: does a passage still
    do _this_ unit's job, or has it begun doing another mode's? Flag content
@@ -157,11 +158,14 @@ content against the marker, never the reverse.
    out-of-quadrant content when they "develop into" the other mode and interrupt
    the page's purpose.)
 
-3. **Declaration.** List each unit you reviewed with the marker you read above
+3. **Declaration.** List each unit you reviewed with the marker you read below
    its heading. Report a unit with no marker, or a marker that is not directly
-   below its heading, as a defect. If a marker's value does not match what the
-   unit actually does, say so as a reclassification for the user to decide —
-   reclassifying is not a review outcome.
+   below its heading, as a defect — and one the run cannot fix itself, since
+   giving existing content a marker is a scoping decision (below). If a marker's
+   value does not match what the unit actually does, say so as a proposed
+   reclassification, which is likewise scoping and not a review outcome. A unit
+   marked `none (<reason>)` has no reader question: check only that the reason
+   still holds and that the unit has not started doing a quadrant's work.
 
 Report the result of all three passes as the alignment self-check in your
 review.

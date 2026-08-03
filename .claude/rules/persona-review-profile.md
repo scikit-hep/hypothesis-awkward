@@ -34,16 +34,18 @@ HTML comment directly below the unit's heading. The Diátaxis rules are
 `.claude/rules/diataxis-review.md`, which holds the marker syntax, the two page
 shapes (one unit, or a container of marked sections), and the rules for
 restructuring. The markers are the record; there is no separate table of
-quadrants. No unit is declared with two quadrants, and unmarked content belongs
-to no unit, so it is out of quadrant by construction.
+quadrants. No unit is declared with two quadrants. Content that belongs to no
+unit is out of quadrant by construction, with one sanctioned exception: the
+orientation preamble a container page may carry between its H1 and its first H2.
 
 Declarations travel with the text: each draft carries its own markers, so the
 declaration under review is always the one in the draft. The review brief
 repeats each unit's quadrant and the matching reader question, and gives the
-page's primary audience from the chapters table. Out-of-scope asks and
-out-of-quadrant content are routed to the owning page's backlog in the docs plan
-note. Reclassifying existing content is a scoping decision, not a review
-outcome.
+page's primary audience from the chapters table. An out-of-scope ask or
+out-of-quadrant content goes to the unit that owns that quadrant; when no page
+owns it, it goes to the routed-items list under **Page backlog** in the docs
+plan note. Reclassifying existing content — or giving unmarked existing content
+its first marker — is a scoping decision, not a review outcome.
 
 ## Premise to pin
 
