@@ -5,10 +5,6 @@ carries what a page needs but its own text cannot hold: the primary audience a
 review briefs its personas with, and the trigger that says when the page is due
 for a refresh.
 
-Pages that do not exist yet are in the page backlog in
-[`2026-06-17-02-Docs-plan.md`](../notes/2026-06-17-02-Docs-plan.md); a row moves
-here when the page ships.
-
 "Primary audience" gives short forms of the persona names — who the page mainly
 serves; all personas review every page.
 
