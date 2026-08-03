@@ -25,12 +25,12 @@ subagents listed in the profile's Personas section.
 Every unit of content is declared in a [Diátaxis](https://diataxis.fr/) quadrant
 (tutorial, how-to, reference, or explanation) as the profile's Declaration
 mechanism section directs; the Diátaxis rules hold the reader questions and the
-bleed and out-of-scope rules. When the profile's Status dimension section is
-enabled, every unit also carries a **status** — _implemented_ (describes current
-behavior; verified against the profile's Fact-check targets) or _spec_
-(describes intended behavior; source of truth is a design brief supplied when
-the skill is invoked — a decision list or note that need not live in the
-repository).
+out-of-quadrant and out-of-scope rules. When the profile's Status dimension
+section is enabled, every unit also carries a **status** — _implemented_
+(describes current behavior; verified against the profile's Fact-check targets)
+or _spec_ (describes intended behavior; source of truth is a design brief
+supplied when the skill is invoked — a decision list or note that need not live
+in the repository).
 
 ## Steps
 
@@ -81,12 +81,12 @@ repository).
    overall and per axis; specific fixes; structural recommendations (sections to
    add, split, merge, or remove) when the section set is an output of the run;
    the single most important improvement; an alignment self-check per the
-   Diátaxis rules (out-of-scope asks and their routing; bleed flagged); and a
-   one-line ship/revise verdict (with the single most important change if
-   revising). Consolidate into a matrix. If a reviewer errors out mid-run,
-   re-launch it — do not treat a missing verdict as a pass. This pass validates
-   lens-relevance and accuracy, not framing or altitude; the re-review step
-   below covers that.
+   Diátaxis rules (out-of-scope asks and their routing; out-of-quadrant content
+   flagged); and a one-line ship/revise verdict (with the single most important
+   change if revising). Consolidate into a matrix. If a reviewer errors out
+   mid-run, re-launch it — do not treat a missing verdict as a pass. This pass
+   validates lens-relevance and accuracy, not framing or altitude; the re-review
+   step below covers that.
 
 6. **Fact-check** — Verify every claim and code example against the targets in
    the profile's Fact-check targets section, applying its checking notes. When
@@ -104,9 +104,9 @@ repository).
    wins from the others. Merging adds seams, so do not merge for its own sake.
    Apply cross-cutting fixes and write the final text yourself, following the
    voice rules — persona-suggested wording is advisory. An ask a persona flagged
-   out of scope, and any content flagged as bleed, is routed to the destination
-   named in the profile's Declaration mechanism section — not folded in where it
-   does not belong.
+   out of scope, and any content flagged as out of quadrant, is routed to the
+   destination named in the profile's Declaration mechanism section — not folded
+   in where it does not belong.
 
 8. **Re-review the resulting document** — The draft review (step 5) does not
    cover the text you will ship: a merge can inherit a weakness shared by all
@@ -138,15 +138,16 @@ repository).
   any persona content. The correct review from a low-relevance persona is a low
   relevance score and a ship verdict — not asks that bend the document toward
   its lens. When personas' fixes conflict, the primary personas from step 1 win.
-- When the section set is an output of the run: relocating bleed, creating the
-  section a quadrant needs, and removing a section that no longer serves anyone
-  are actions the run takes, guided by persona feedback. Removal has exactly two
-  legitimate sources: a persona speaking as the section's own audience
-  (duplication, void purpose, vanished subject), or the consolidated matrix
-  showing a section every persona finds low-relevance — the latter is the
-  orchestrator's judgment at synthesis, never a single low-relevance persona's
-  ask. Every section-set change is listed in the report; an ask the run chooses
-  not to serve is reported with a keep/drop recommendation for the user.
+- When the section set is an output of the run: relocating out-of-quadrant
+  content, creating the section a quadrant needs, and removing a section that no
+  longer serves anyone are actions the run takes, guided by persona feedback.
+  Removal has exactly two legitimate sources: a persona speaking as the
+  section's own audience (duplication, void purpose, vanished subject), or the
+  consolidated matrix showing a section every persona finds low-relevance — the
+  latter is the orchestrator's judgment at synthesis, never a single
+  low-relevance persona's ask. Every section-set change is listed in the report;
+  an ask the run chooses not to serve is reported with a keep/drop
+  recommendation for the user.
 - When the status dimension is enabled: the design decisions in the brief are
   settled for spec content. A persona ask that would change a decision is design
   feedback — surface it in the report for the user to rule on; never fold it
@@ -156,11 +157,12 @@ repository).
   drift.
 - Declarations, their granularity, and what counts as a sanctioned combination
   of quadrants follow the profile's Declaration mechanism section; undeclared
-  cross-quadrant content is bleed. Personas review and route by quadrant per the
-  Diátaxis rules: a lens asking for content outside a unit's declared mode — for
-  example runnable how-to steps in explanation content — is out of scope, not a
-  defect; route it (and any bleed) to the destination the profile names instead
-  of folding it in. Bleed is relocated or routed, never polished in place.
+  cross-quadrant content is out of quadrant. Personas review and route by
+  quadrant per the Diátaxis rules: a lens asking for content outside a unit's
+  declared mode — for example runnable how-to steps in explanation content — is
+  out of scope, not a defect; route it (and any out-of-quadrant content) to the
+  destination the profile names instead of folding it in. Out-of-quadrant
+  content is relocated or routed, never polished in place.
 - Voice and formatting follow the voice rules; the orchestrator writes the final
   text, not the personas.
 - Apply the additional guidelines in the profile's Extra guidelines section.
