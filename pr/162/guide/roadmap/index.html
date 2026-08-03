@@ -1205,12 +1205,12 @@
                   
 
 <h1 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h1>
+<!-- diataxis: explanation -->
+
 <p>This page describes what <code>hypothesis-awkward</code> generates today and where it is
 heading, and is reviewed at each release. It gives no dates; the order of the
 items reflects priority, not a schedule.</p>
 <h2 id="what-you-can-generate-today">What you can generate today<a class="headerlink" href="#what-you-can-generate-today" title="Permanent link">&para;</a></h2>
-<!-- diataxis: explanation -->
-
 <p>Today the main strategy,
 <a href="../../reference/strategies/constructors/"><code>st_ak.constructors.arrays()</code></a> (with
 <code>import hypothesis_awkward.strategies as st_ak</code>), generates arrays <strong>in terms of
@@ -1239,8 +1239,6 @@ type. Asking for an array of a <em>specific type</em> is the next direction.</p>
 releases (see the
 <a href="https://github.com/scikit-hep/hypothesis-awkward/releases">release notes</a>).</p>
 <h2 id="directions-we-are-exploring">Directions we are exploring<a class="headerlink" href="#directions-we-are-exploring" title="Permanent link">&para;</a></h2>
-<!-- diataxis: explanation -->
-
 <p>Awkward describes an array at three levels, from the most abstract to the most
 concrete: its <strong>type</strong> (the
 <a href="https://awkward-array.org/doc/stable/user-guide/how-to-examine-type.html">datashape</a>,
@@ -1295,8 +1293,6 @@ later step is to generate forms for a given type (building on the existing
 reserved <code>st_ak.arrays()</code>. This helps when a test depends on the concrete
 layout, not only the type.</p>
 <h2 id="how-to-influence-the-roadmap">How to influence the roadmap<a class="headerlink" href="#how-to-influence-the-roadmap" title="Permanent link">&para;</a></h2>
-<!-- diataxis: how-to -->
-
 <p>These priorities are open. If you build on Awkward and need a particular type,
 layout, or option that the library does not yet generate, please
 <a href="https://github.com/scikit-hep/hypothesis-awkward/issues">open an issue</a> with
