@@ -1,5 +1,7 @@
 # Installation
 
+<!-- diataxis: how-to -->
+
 The package requires Python 3.10 or later.
 
 You can install the package from

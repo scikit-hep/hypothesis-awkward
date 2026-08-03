@@ -12,6 +12,8 @@ project. If you want to use the strategies in your own tests, start with
 
 ## How hypothesis-awkward tests Awkward Array
 
+<!-- diataxis: explanation -->
+
 This package addresses that problem with [property-based testing](../index.md):
 running one test against many automatically generated inputs instead of a fixed
 list. Its main strategy, `st_ak.constructors.arrays()`, generates nearly fully
@@ -75,6 +77,8 @@ of Awkward Array, including operations, slicing, reducers, and kernels.
 
 ## Bugs found
 
+<!-- diataxis: reference -->
+
 These tests have found bugs in both Awkward Array and Hypothesis. This log is
 reviewed at each release.
 
@@ -107,6 +111,8 @@ one-dimensional.
   in Hypothesis 6.152.4.
 
 ## Outlook
+
+<!-- diataxis: explanation -->
 
 Automatically generated test inputs raise confidence that a change is correct
 across a broad range of valid arrays, not only the cases a developer wrote by

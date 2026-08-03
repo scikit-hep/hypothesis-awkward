@@ -9,29 +9,41 @@ counterpart profile in legendary-octo-happiness.
 
 The document is one page under `docs/`; the page set grows page by page.
 Strategy and the page backlog live in `.design/notes/2026-06-17-02-Docs-plan.md`
-(the docs plan note). The section set is not an output of the run: the page is
-the unit of work, and drafts vary only framing and order. Scoping note: for a
-new page, judge how well it fits as the next page to add. Provenance: this is
-the narrative-track workflow, proven on the README intro and the _Testing
+(the docs plan note); per-page primary audience and update trigger live in
+`.design/docs/Chapters.md` (the chapters table). The page is the unit of work,
+but the unit of declaration is finer: a page is either one unit or a container
+of single-purpose sections, each carrying its own marker. The section set is an
+output of the run — a run may create, remove, split, merge, and relocate
+sections under the rules in `.claude/rules/diataxis-review.md`. Scoping note:
+for a new page, judge how well it fits as the next page to add. Provenance: this
+is the narrative-track workflow, proven on the README intro and the _Testing
 Awkward Array_, _Generating and Shrinking Samples_, and _Roadmap_ guide pages.
 
 ## Personas
 
 The six review personas are the `docs-persona-*` subagents in `.claude/agents/`:
 `awkward-core-dev`, `downstream-dev`, `researcher`, `pbt-expert`, `evaluator`,
-and `ai`. The primary personas are the page's primary audience in the page-plan
-table in the docs plan note.
+and `ai`. The primary personas are the page's primary audience in the chapters
+table; for a page that does not exist yet, its row in the page backlog in the
+docs plan note.
 
 ## Declaration mechanism
 
-Each page's Diátaxis quadrant(s) and primary audience are declared in the
-page-plan table in the docs plan note. The Diátaxis rules are
-`.claude/rules/diataxis-review.md`. A page may be declared as a combination of
-quadrants and split later as it grows; undeclared cross-quadrant content is out
-of quadrant, not a sanctioned mix. Declarations reach reviewers via the review
-brief, which carries the page's quadrant(s) and the matching reader question(s).
-Out-of-scope asks and out-of-quadrant content are routed to the owning page's
-backlog in the docs plan note.
+Each unit's Diátaxis quadrant is declared by a marker in the page itself — an
+HTML comment directly below the unit's heading. The Diátaxis rules are
+`.claude/rules/diataxis-review.md`, which holds the marker syntax, the two page
+shapes (one unit, or a container of marked sections), and the rules for
+restructuring. The markers are the record; there is no separate table of
+quadrants. No unit is declared with two quadrants, and unmarked content belongs
+to no unit, so it is out of quadrant by construction.
+
+Declarations travel with the text: each draft carries its own markers, so the
+declaration under review is always the one in the draft. The review brief
+repeats each unit's quadrant and the matching reader question, and gives the
+page's primary audience from the chapters table. Out-of-scope asks and
+out-of-quadrant content are routed to the owning page's backlog in the docs plan
+note. Reclassifying existing content is a scoping decision, not a review
+outcome.
 
 ## Premise to pin
 
@@ -58,13 +70,15 @@ Disabled.
 ## Verification
 
 One-time wiring: register the page in `zensical.toml` (`nav`) and the section
-index page. Checks, re-run each review round: prettier; doctest collection;
-`zensical build`; and confirm links resolve. Operational conventions (build,
-fences, nav) are in `.claude/rules/docs.md`.
+index page. Checks, re-run each review round: prettier; doctest collection; the
+marker check (`pytest tests/docs`); `zensical build`; and confirm links resolve.
+Operational conventions (build, fences, nav) are in `.claude/rules/docs.md`.
 
 ## Record
 
-Set the page's status in the page-plan table in the docs plan note.
+The markers in the shipped page are the record of its quadrants, so no separate
+update is needed. For a page that did not exist before, add its row to the
+chapters table and remove its row from the page backlog in the docs plan note.
 
 ## Voice rules
 

@@ -2,8 +2,8 @@
 
 How to review a documentation page against the Diátaxis quadrant(s) it is
 written for. Used by the `docs-persona-*` reviewers in the `write-docs-page`
-workflow. A page's quadrant assignment comes from the page-plan table in
-`.design/notes/2026-06-17-02-Docs-plan.md`.
+workflow. Each unit of content declares its own quadrant with a marker in the
+page (see [Markers](#markers)); there is no separate table to keep in sync.
 
 ## How to use this
 
@@ -27,6 +27,39 @@ The four quadrants and the question their reader arrives with:
 | How-to      | "Using this page, could you accomplish your task?"             | action + application    |
 | Reference   | "Were you informed — could you find and trust the exact fact?" | cognition + application |
 | Explanation | "After reading, do you understand it — does it make sense?"    | cognition + acquisition |
+
+## Markers
+
+A unit of content declares its quadrant with an HTML comment placed directly
+below the unit's heading, separated by one blank line:
+
+```markdown
+## Bugs found
+
+<!-- diataxis: reference -->
+```
+
+The value is one of `tutorial`, `how-to`, `reference`, `explanation`, or
+`none (<reason>)` for a page that is not a Diátaxis unit, such as a navigation
+index. Markers are invisible to site readers: they do not change heading
+anchors, the table of contents, or the search index.
+
+A page takes one of two shapes:
+
+- **One unit** — a single marker below the H1, and no other marker on the page.
+- **Container** — no marker below the H1, and one below every H2. The material
+  between the H1 and the first H2 is an **orientation preamble**: framing,
+  audience, scope, and links out. It carries no marker and is not a unit; once
+  it starts doing a quadrant's work, it has to become a marked section.
+
+Markers sit at one level per branch: a heading whose subsections carry their own
+markers is a container and carries none. Every page under `docs/` carries at
+least one marker, and `tests/docs/test_diataxis_markers.py` enforces these
+rules.
+
+A one-unit page that grows a section of another quadrant changes shape: the H1
+marker is removed and every H2 gets one. That is a scoping decision, not
+something a review does in passing.
 
 ## Reviewing each quadrant
 
@@ -69,38 +102,55 @@ mode's characteristic failure.
   rationale, trade-offs, alternatives, and the boundaries of the idea; it may
   hold opinion and discussion; it is understood away from the keyboard.
 - **Does NOT belong:** procedural steps, worked how-to, or parameter lookup _as
-  the page's work_ — link to the how-to or reference instead. (An illustrative
+  the unit's work_ — link to the how-to or reference instead. (An illustrative
   example may appear if it stays subordinate to the explanation; it becomes out
   of quadrant once it starts doing the how-to's job — see the self-check.)
 - **Failure to catch:** facts without the why; missing connective tissue; the
-  page quietly turning into a how-to or a reference.
+  unit quietly turning into a how-to or a reference.
 
-## Mixed pages
+## One quadrant per unit
 
-Each page — and each section within it — does **one** job. Diátaxis allows
-complex _structure_, not blended _content_: a page that must serve two needs
-gives each its own single-purpose section, or is split, rather than letting the
-modes run together. When the page plan tags a page with more than one quadrant,
-read that as distinct single-purpose sections — answer each section's question
-and check that each stays in its lane. A section that blends modes is muddled,
-not a sanctioned mix; a page tagged with a single quadrant must stay in that
-one.
+Each unit does **one** job. Diátaxis allows complex _structure_, not blended
+_content_: a page that must serve two needs gives each need its own
+single-purpose section rather than letting the modes run together. No unit is
+declared with two quadrants, and a section that blends modes is muddled, not a
+sanctioned mix.
+
+A run may restructure a page, and each operation is constrained so that no unit
+ends up carrying two quadrants:
+
+- **Create / remove** — a run may add the section a quadrant needs and remove
+  one that no longer carries content. A new section carries a marker from the
+  moment it is created, taken from the quadrant of the content moving into it.
+- **Split** — same-quadrant: the products inherit the original marker. A split
+  never assigns a new quadrant.
+- **Merge** — same-quadrant only. Sections of different quadrants cannot merge,
+  because the merged section would carry two declarations; group them as
+  subsections under a container heading instead, each keeping its own marker.
+- **Relocate** — how content crosses quadrants, possibly into a section newly
+  added in the destination quadrant.
+- **Reclassify** — changing the marker on existing content. This is a scoping
+  decision, made when a run is scoped or by the user, and never a review
+  outcome.
+
+The declared quadrant is the fixed point of a review round: reviewers judge
+content against the marker, never the reverse.
 
 ## Self-check (run before reporting)
 
 1. **Demand side.** Every point you raise must serve one of the page's assigned
-   questions. If an ask would pull the page toward a quadrant it does **not**
-   target, label it **out of scope** and route it to the page that owns that
+   questions. If an ask would pull a unit toward a quadrant it does **not**
+   target, label it **out of scope** and route it to the unit that owns that
    quadrant — do not report it as a defect of this page. In particular, do not
-   demand that the page _acquire_ another quadrant's content it does not already
-   have: do not ask an Explanation page to add runnable how-to steps or a worked
+   demand that a unit _acquire_ another quadrant's content it does not already
+   have: do not ask an Explanation unit to add runnable how-to steps or a worked
    example; that content belongs in the page you link to.
-2. **Supply side.** Cross-mode material may appear **only subordinate to this
-   page's one purpose**. The test is _service, not status_: does a passage still
-   do _this_ page's job, or has it begun doing another mode's? Flag content
+2. **Supply side.** Cross-mode material may appear **only subordinate to the
+   unit's one purpose**. The test is _service, not status_: does a passage still
+   do _this_ unit's job, or has it begun doing another mode's? Flag content
    **already on the page** as **out-of-quadrant content to relocate** (naming
    where it goes) once it crosses that line — an illustrative `@given` sketch
-   that _depicts_ a concept serves an Explanation page, but adjacent steps
+   that _depicts_ a concept serves an Explanation unit, but adjacent steps
    telling the reader how to run or narrow it _now_ are out-of-quadrant how-to
    content. (Diátaxis: illustrative examples are fine, but become
    out-of-quadrant content when they "develop into" the other mode and interrupt

@@ -1,5 +1,7 @@
 # API Reference
 
+<!-- diataxis: reference -->
+
 **Modules:**
 
 | Name           | Description                                                             |
