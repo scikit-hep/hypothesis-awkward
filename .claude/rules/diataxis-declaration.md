@@ -2,9 +2,9 @@
 
 How units of content declare their Diátaxis quadrants in the pages under
 `docs/`. The review rules that use these declarations are in the
-`persona-review` skill's `references/diataxis-review.md` (the shared core); this
-file supplies the marker syntax, the page shapes, and the declaration record the
-core defers to.
+`reviewed-writer` plugin's `persona-review` skill
+(`references/diataxis-review.md`, the shared core); this file supplies the
+marker syntax, the page shapes, and the declaration record the core defers to.
 
 ## Markers
 

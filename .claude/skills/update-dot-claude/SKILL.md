@@ -30,14 +30,13 @@ instructions, so the goal is accuracy — edit them to match reality.
    - `rules/diataxis-declaration.md` — how units declare their quadrants: marker
      syntax, page shapes, and the declaration record (always loaded so subagents
      receive it).
-   - `skills/persona-review/` — the shared review skill and its Diátaxis core
-     (`references/diataxis-review.md`, read by explicit path, not ambient).
-     Mirrored repository-agnostic; see `rules/persona-review-engine.md`.
-   - `agents/persona-reviewer.md` — the generic persona reviewer; the persona
-     head files it adopts live in `personas/`. Mirrored repository-agnostic; see
-     `rules/persona-review-engine.md`.
-   - `agents/`, `skills/`, and `personas/` — check that the file paths and repo
-     facts they reference still exist.
+   - `rules/reviewed-writer-interface.md` — the repository's side of the
+     `reviewed-writer` plugin's interface; the plugin, pinned in
+     `settings.json`, supplies the review machinery. Check that the profile, the
+     persona head files in `personas/`, and the declaration file still match
+     what it records.
+   - `skills/` and `personas/` — check that the file paths and repo facts they
+     reference still exist.
 
    Pick up any rule files added later.
 
