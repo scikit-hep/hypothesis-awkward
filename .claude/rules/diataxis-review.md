@@ -66,6 +66,12 @@ content into a new section on the same page, because the change preserves every
 existing unit's quadrant — only the markers' placement moves, and no value
 changes. Changing a value is reclassification, and stays a scoping decision.
 
+Converting a page this way demotes the material under the H1, which was part of
+the declared unit and becomes an unmarked preamble. Do not leave it there:
+whatever does the unit's work moves below the first section's heading, or
+becomes the first marked section. Only framing, audience, scope, and links out
+stay in the preamble.
+
 ## Reviewing each quadrant
 
 For each quadrant declared on the page, check three things: does the unit do

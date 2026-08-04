@@ -79,8 +79,8 @@ of Awkward Array, including operations, slicing, reducers, and kernels.
 
 <!-- diataxis: reference -->
 
-<!-- Living log, reviewed each release. Declared reference: its completeness
-     obligation is to the bugs found so far, not to every bug that exists. -->
+<!-- Declared reference: its completeness obligation is to the bugs found so
+     far, not to every bug that exists. -->
 
 These tests have found bugs in both Awkward Array and Hypothesis. This log is
 reviewed at each release.
