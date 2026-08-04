@@ -15,29 +15,30 @@ primary audience and update trigger live in `.design/docs/Chapters.md` (the
 chapters table). The page is the unit of work, but the unit of declaration is
 finer: a page is either one unit or a container of single-purpose sections, each
 carrying its own marker. The section set is an output of the run — a run may
-create, remove, split, merge, and relocate sections under the rules in
-`.claude/rules/diataxis-review.md`. Scoping note: for a new page, judge how well
+create, remove, split, merge, and relocate sections under the restructuring
+rules in the shared review core (the `persona-review` skill's
+`references/diataxis-review.md`). Scoping note: for a new page, judge how well
 it fits as the next page to add. Provenance: this is the narrative-track
 workflow, proven on the README intro and the _Testing Awkward Array_,
 _Generating and Shrinking Samples_, and _Roadmap_ guide pages.
 
 ## Personas
 
-The six review personas are the `docs-persona-*` subagents in `.claude/agents/`:
-`awkward-core-dev`, `downstream-dev`, `researcher`, `pbt-expert`, `evaluator`,
-and `ai`. The primary personas are the page's primary audience in the chapters
-table; for a page that does not exist yet, its row in the page backlog in the
-docs plan note.
+The six review personas are the persona head files in `.claude/personas/`:
+`awkward-core-dev.md`, `downstream-dev.md`, `researcher.md`, `pbt-expert.md`,
+`evaluator.md`, and `ai.md`. The primary personas are the page's primary
+audience in the chapters table; for a page that does not exist yet, its row in
+the page backlog in the docs plan note.
 
 ## Declaration mechanism
 
 Each unit's Diátaxis quadrant is declared by a marker in the page itself — an
 HTML comment directly below the unit's heading, as
 `.claude/rules/diataxis-declaration.md` specifies (marker syntax, page shapes,
-record). The Diátaxis rules are `.claude/rules/diataxis-review.md`, the shared
-review core: the reader questions, the per-quadrant guidance, the restructuring
-rules, and the reviewers' self-check. The markers are the record; there is no
-separate table of quadrants.
+record). The Diátaxis rules are the shared review core in the `persona-review`
+skill (`references/diataxis-review.md` in its directory): the reader questions,
+the per-quadrant guidance, the restructuring rules, and the reviewers'
+self-check. The markers are the record; there is no separate table of quadrants.
 
 Declarations travel with the text: each draft carries its own markers, so the
 declaration under review is always the one in the draft. The review brief
