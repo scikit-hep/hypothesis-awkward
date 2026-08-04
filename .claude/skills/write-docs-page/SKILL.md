@@ -10,8 +10,9 @@ Every repository-specific value lives in this repository's
 profile supplies, by section: Document, Personas, Declaration mechanism, Premise
 to pin, Sources, Fact-check targets, Status dimension, Verification, Record,
 Voice rules, and Extra guidelines. In this file, "the Diátaxis rules" refers to
-the rules file named in the profile's Declaration mechanism section, and "the
-voice rules" to the file named in its Voice rules section.
+the shared review core in the `persona-review` skill
+(`references/diataxis-review.md` in that skill's directory), and "the voice
+rules" to the file named in the profile's Voice rules section.
 
 Author (or substantially revise) the document defined in the profile's Document
 section using the persona-review workflow. A revision may be triggered by one
@@ -19,8 +20,9 @@ change or one weak part, but drafting, review, and shipping cover the document
 as a whole. When the profile's Document section declares the **section set an
 output of the run**, sections are added, split, merged, and removed as the
 content requires. The goal is a document whose content serves its primary
-personas and is accurate; **accuracy beats style**. The review personas are the
-subagents listed in the profile's Personas section.
+personas and is accurate; **accuracy beats style**. The review personas are
+defined by the persona head files listed in the profile's Personas section; the
+`persona-review` skill launches one reviewer per persona.
 
 Every unit of content is declared in a [Diátaxis](https://diataxis.fr/) quadrant
 (tutorial, how-to, reference, or explanation) as the profile's Declaration
@@ -65,29 +67,11 @@ in the repository).
    each draft keeps its declarations valid per the Declaration mechanism and
    declares its own structure. Otherwise, vary only the framing and order.
 
-5. **Parallel persona review** — Launch the persona subagents listed in the
-   profile's Personas section in parallel via the Agent tool's `subagent_type`.
-   Write a shared review brief — the project and document identity, from the
-   profile's Document section; the document's purpose; the declared quadrant(s)
-   and matching reader question(s), carried as the Declaration mechanism
-   directs; when the status dimension is enabled, each unit's status; what is in
-   and out of scope; rubric; verified facts; link targets — to a temp file and
-   pass each subagent its path plus the draft paths. Subagents never depend on
-   files outside the repository and the brief; when the status dimension is
-   enabled, the brief itself carries the design decisions for spec content. Ask
-   each for: answers to the reader questions for the content its lens serves; a
-   score per draft on the rubric axes; lens-specific flags with quoted text and
-   `file:line` citations; how relevant the document is to it (per section, when
-   the section set is an output of the run); the best draft overall and per
-   axis; specific fixes; structural recommendations (sections to add, split,
-   merge, or remove) when the section set is an output of the run; the single
-   most important improvement; an alignment self-check per the Diátaxis rules
-   (out-of-scope asks and their routing; out-of-quadrant content flagged); and a
-   one-line ship/revise verdict (with the single most important change if
-   revising). Consolidate into a matrix. If a reviewer errors out mid-run,
-   re-launch it — do not treat a missing verdict as a pass. This pass validates
-   lens-relevance and accuracy, not framing or altitude; the re-review step
-   below covers that.
+5. **Parallel persona review** — Invoke the `persona-review` skill over the
+   three drafts: it composes the shared review brief from the run state and the
+   profile, launches one reviewer per persona in parallel, collects the reviews,
+   and consolidates them into a matrix. This pass validates lens-relevance and
+   accuracy, not framing or altitude; the re-review step below covers that.
 
 6. **Fact-check** — Verify every claim and code example against the targets in
    the profile's Fact-check targets section, applying its checking notes. When
@@ -112,15 +96,15 @@ in the repository).
 8. **Re-review the resulting document** — The draft review (step 5) does not
    cover the text you will ship: a merge can inherit a weakness shared by all
    three drafts, and a chosen-and-edited draft carries changes no reviewer saw.
-   Run the personas again on the resulting document (same brief; the
-   declarations travel with the text as the Declaration mechanism directs,
-   however much a round has changed), apply the genuine fixes within the
-   declared quadrant(s), and re-review — iterating until every persona returns a
-   "ship" verdict (cap at five rounds). Re-run the checks in the profile's
-   Verification section each round, since a fix can introduce a new error. If
-   the cap is reached with dissent remaining, stop and present the unresolved
-   verdicts to the user — do not keep bending the text to chase the last
-   holdout.
+   Invoke the `persona-review` skill again on the resulting document (same
+   request; the declarations travel with the text as the Declaration mechanism
+   directs, however much a round has changed), apply the genuine fixes within
+   the declared quadrant(s), and re-review — iterating until every persona
+   returns a "ship" verdict (cap at five rounds). Re-run the checks in the
+   profile's Verification section each round, since a fix can introduce a new
+   error. If the cap is reached with dissent remaining, stop and present the
+   unresolved verdicts to the user — do not keep bending the text to chase the
+   last holdout.
 
 9. **Verify** — Work through the profile's Verification section: perform any
    one-time wiring it lists, then run its checks.

@@ -13,7 +13,8 @@ build and deploy workflows are in `ci.md`.
 ## Authoring
 
 To author or substantially revise a page, use the `write-docs-page` skill (the
-persona-review workflow).
+persona-review workflow). For a single review round of an existing page without
+revising it, invoke the `persona-review` skill directly.
 
 ## Conventions
 
