@@ -28,7 +28,11 @@ instructions, so the goal is accuracy — edit them to match reality.
    - `rules/docs-voice.md` — voice rules for user-facing prose (path-scoped to
      `README.md` and `docs/**`).
    - `rules/diataxis-review.md` — Diátaxis review guidance for the
-     `docs-persona-*` agents (always loaded so subagents receive it).
+     `docs-persona-*` agents (always loaded so subagents receive it). Mirrored
+     repository-agnostic core; see `rules/persona-review-engine.md`.
+   - `rules/diataxis-declaration.md` — how units declare their quadrants: marker
+     syntax, page shapes, and the declaration record (always loaded so subagents
+     receive it).
    - `agents/` and `skills/` — check that the file paths and repo facts they
      reference still exist.
 
