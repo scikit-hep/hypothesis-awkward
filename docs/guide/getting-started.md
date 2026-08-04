@@ -1,5 +1,7 @@
 # Getting Started
 
+<!-- diataxis: tutorial -->
+
 By the end of this page you will have drawn generated Awkward Arrays, learned to
 read their reprs, run your first property-based test, and shaped what is
 generated. The page assumes the package is [installed](installation.md).

@@ -1,5 +1,7 @@
 # Generating and Shrinking Samples
 
+<!-- diataxis: explanation -->
+
 When a property-based test fails, the array it reports is usually small and
 simple — a short list, a single small number — rather than a large, complex one.
 That is by design. The [Testing Awkward Array](testing-awkward-array.md) page

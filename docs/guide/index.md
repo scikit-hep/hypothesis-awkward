@@ -1,5 +1,7 @@
 # Guide
 
+<!-- diataxis: none (nav index) -->
+
 This guide contains the following pages:
 
 - [Roadmap](roadmap.md) — what the package generates today and where it is

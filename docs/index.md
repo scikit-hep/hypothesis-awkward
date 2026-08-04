@@ -1,5 +1,7 @@
 # hypothesis-awkward
 
+<!-- diataxis: explanation -->
+
 _Hypothesis strategies for Awkward Arrays._
 
 [Hypothesis] is a _property-based testing_ library. Its [_strategies_][hyp-st]

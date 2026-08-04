@@ -11,7 +11,8 @@ hypothesis-awkward.
 ├── research/          # UX research interviews and findings
 ├── api/               # API design proposals and decisions
 ├── impl/              # Implementation decisions (directory structure, internals)
-└── notes/             # Progress tracking and working notes
+├── notes/             # Progress tracking and working notes
+└── docs/              # Living records for the documentation initiative
 ```
 
 ## Purpose
@@ -29,14 +30,23 @@ hypothesis-awkward.
 
 - **notes/**: Store progress tracking and working notes for ongoing work.
 
+- **docs/**: Living records for the documentation initiative — currently
+  `Chapters.md`, the table of the pages that exist under `docs/` with their
+  primary audience and update trigger. Unlike the buckets above, this one groups
+  by initiative rather than by kind, and holds continuously edited records
+  rather than point-in-time documents.
+
 ## Naming Convention
 
-Every file is prefixed with its date and a two-digit intra-day sequence:
-`YYYY-MM-DD-NN-<topic>.md`. The `NN` orders files created on the same day within
-a directory (`01`, `02`, …); use `01` when a file is the only one that day. This
-keeps a directory listing in chronological order. Topic words use sentence case
-(capitalize the first word); acronyms and proper nouns keep their canonical
-casing (README, API, UX, NumPy, PBT). Per-type topic conventions:
+Living documents — continuously edited records rather than point-in-time
+documents, such as this file and the files in `docs/` — are undated and named
+`<Topic>.md`. Every other file is prefixed with its date and a two-digit
+intra-day sequence: `YYYY-MM-DD-NN-<topic>.md`. The `NN` orders files created on
+the same day within a directory (`01`, `02`, …); use `01` when a file is the
+only one that day. This keeps a directory listing in chronological order. Topic
+words use sentence case (capitalize the first word); acronyms and proper nouns
+keep their canonical casing (README, API, UX, NumPy, PBT). Per-type topic
+conventions:
 
 - Research files: `YYYY-MM-DD-NN-<topic>-research.md` (e.g.,
   `2026-02-02-01-NumPy-form-research.md`). UX interviews use
