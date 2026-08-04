@@ -104,7 +104,7 @@ later step is to generate forms for a given type (building on the existing
 reserved `st_ak.arrays()`. This helps when a test depends on the concrete
 layout, not only the type.
 
-## How to influence the roadmap
+## Influencing the roadmap
 
 These priorities are open. If you build on Awkward and need a particular type,
 layout, or option that the library does not yet generate, please

@@ -56,7 +56,9 @@ Markers sit at one level per branch: a heading whose subsections carry their own
 markers is a container and carries none. Every page under `docs/` carries at
 least one marker. Nothing enforces this mechanically: a unit with no marker
 gives its reviewers no question to answer, so it surfaces in the declaration
-pass of the self-check.
+pass of the self-check. Note what that covers — the page under review, when a
+run happens. A page edited outside a run keeps whatever markers it has until its
+next review.
 
 A one-unit page that grows a section of another quadrant changes shape: the H1
 marker is removed and every H2 gets one. That is a scoping decision, not
@@ -156,16 +158,23 @@ content against the marker, never the reverse.
    telling the reader how to run or narrow it _now_ are out-of-quadrant how-to
    content. (Diátaxis: illustrative examples are fine, but become
    out-of-quadrant content when they "develop into" the other mode and interrupt
-   the page's purpose.)
+   the page's purpose.) Flag it for relocation only when the destination unit
+   exists. When it does not, the content stays where it is and you record the
+   intent in the backlog instead — otherwise a page loses material to a list in
+   a design note and no page receives it.
 
-3. **Declaration.** List each unit you reviewed with the marker you read below
-   its heading. Report a unit with no marker, or a marker that is not directly
-   below its heading, as a defect — and one the run cannot fix itself, since
-   giving existing content a marker is a scoping decision (below). If a marker's
-   value does not match what the unit actually does, say so as a proposed
-   reclassification, which is likewise scoping and not a review outcome. A unit
-   marked `none (<reason>)` has no reader question: check only that the reason
-   still holds and that the unit has not started doing a quadrant's work.
+3. **Declaration.** List each unit you reviewed with its heading and the marker
+   you read below that heading, quoting the marker line verbatim so a misspelled
+   value is visible. Report as defects: a unit with no marker; a marker that is
+   not directly below its heading; a value outside the allowed set; and any
+   breach of the page's shape — markers at more than one level of a branch, a
+   container with an unmarked H2, or an H1 marker alongside section markers.
+   These are defects the run cannot fix itself, since giving existing content a
+   marker is a scoping decision (below). If a marker's value does not match what
+   the unit actually does, say so as a proposed reclassification, which is
+   likewise scoping and not a review outcome. A unit marked `none (<reason>)`
+   has no reader question: check only that the reason still holds and that the
+   unit has not started doing a quadrant's work.
 
 Report the result of all three passes as the alignment self-check in your
 review.

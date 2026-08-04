@@ -1,11 +1,5 @@
 # Testing Awkward Array
 
-[Awkward Array](https://awkward-array.org/) represents nested, variable-length,
-and mixed-type data, so its valid arrays span a large combinatorial space of
-layouts. Test data written by hand covers only a small part of that space, and
-failures often occur on input shapes that are absent from hand-written test
-cases. This makes Awkward Array hard to test thoroughly.
-
 This page is for Awkward Array contributors and for readers assessing the
 project. If you want to use the strategies in your own tests, start with
 [Getting Started](getting-started.md).
@@ -13,6 +7,12 @@ project. If you want to use the strategies in your own tests, start with
 ## How hypothesis-awkward tests Awkward Array
 
 <!-- diataxis: explanation -->
+
+[Awkward Array](https://awkward-array.org/) represents nested, variable-length,
+and mixed-type data, so its valid arrays span a large combinatorial space of
+layouts. Test data written by hand covers only a small part of that space, and
+failures often occur on input shapes that are absent from hand-written test
+cases. This makes Awkward Array hard to test thoroughly.
 
 This package addresses that problem with [property-based testing](../index.md):
 running one test against many automatically generated inputs instead of a fixed
@@ -79,6 +79,9 @@ of Awkward Array, including operations, slicing, reducers, and kernels.
 
 <!-- diataxis: reference -->
 
+<!-- Living log, reviewed each release. Declared reference: its completeness
+     obligation is to the bugs found so far, not to every bug that exists. -->
+
 These tests have found bugs in both Awkward Array and Hypothesis. This log is
 reviewed at each release.
 
@@ -117,5 +120,3 @@ one-dimensional.
 Automatically generated test inputs raise confidence that a change is correct
 across a broad range of valid arrays, not only the cases a developer wrote by
 hand.
-
-<!-- Living log: review the "Bugs found" section each release. -->

@@ -8,6 +8,11 @@ for a refresh.
 "Primary audience" gives short forms of the persona names — who the page mainly
 serves; all personas review every page.
 
+Related: the marker rules in
+[`.claude/rules/diataxis-review.md`](../../.claude/rules/diataxis-review.md),
+and the page backlog in
+[`2026-06-17-02-Docs-plan.md`](../notes/2026-06-17-02-Docs-plan.md).
+
 | Page                                        | Primary audience                         | Update trigger      |
 | ------------------------------------------- | ---------------------------------------- | ------------------- |
 | `index.md`                                  | Researcher / Evaluator                   | on intro change     |
