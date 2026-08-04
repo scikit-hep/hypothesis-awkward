@@ -67,26 +67,27 @@ in the repository).
 
 5. **Parallel persona review** — Launch the persona subagents listed in the
    profile's Personas section in parallel via the Agent tool's `subagent_type`.
-   Write a shared review brief — the document's purpose; the declared
-   quadrant(s) and matching reader question(s), carried as the Declaration
-   mechanism directs; when the status dimension is enabled, each unit's status;
-   what is in and out of scope; rubric; verified facts; link targets — to a temp
-   file and pass each subagent its path plus the draft paths. Subagents never
-   depend on files outside the repository and the brief; when the status
-   dimension is enabled, the brief itself carries the design decisions for spec
-   content. Ask each for: answers to the reader questions for the content its
-   lens serves; a score per draft on the rubric axes; lens-specific flags with
-   quoted text and `file:line` citations; how relevant the document is to it
-   (per section, when the section set is an output of the run); the best draft
-   overall and per axis; specific fixes; structural recommendations (sections to
-   add, split, merge, or remove) when the section set is an output of the run;
-   the single most important improvement; an alignment self-check per the
-   Diátaxis rules (out-of-scope asks and their routing; out-of-quadrant content
-   flagged); and a one-line ship/revise verdict (with the single most important
-   change if revising). Consolidate into a matrix. If a reviewer errors out
-   mid-run, re-launch it — do not treat a missing verdict as a pass. This pass
-   validates lens-relevance and accuracy, not framing or altitude; the re-review
-   step below covers that.
+   Write a shared review brief — the project and document identity, from the
+   profile's Document section; the document's purpose; the declared quadrant(s)
+   and matching reader question(s), carried as the Declaration mechanism
+   directs; when the status dimension is enabled, each unit's status; what is in
+   and out of scope; rubric; verified facts; link targets — to a temp file and
+   pass each subagent its path plus the draft paths. Subagents never depend on
+   files outside the repository and the brief; when the status dimension is
+   enabled, the brief itself carries the design decisions for spec content. Ask
+   each for: answers to the reader questions for the content its lens serves; a
+   score per draft on the rubric axes; lens-specific flags with quoted text and
+   `file:line` citations; how relevant the document is to it (per section, when
+   the section set is an output of the run); the best draft overall and per
+   axis; specific fixes; structural recommendations (sections to add, split,
+   merge, or remove) when the section set is an output of the run; the single
+   most important improvement; an alignment self-check per the Diátaxis rules
+   (out-of-scope asks and their routing; out-of-quadrant content flagged); and a
+   one-line ship/revise verdict (with the single most important change if
+   revising). Consolidate into a matrix. If a reviewer errors out mid-run,
+   re-launch it — do not treat a missing verdict as a pass. This pass validates
+   lens-relevance and accuracy, not framing or altitude; the re-review step
+   below covers that.
 
 6. **Fact-check** — Verify every claim and code example against the targets in
    the profile's Fact-check targets section, applying its checking notes. When

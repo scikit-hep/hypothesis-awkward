@@ -7,17 +7,19 @@ counterpart profile in legendary-octo-happiness.
 
 ## Document
 
-The document is one page under `docs/`; the page set grows page by page.
-Strategy and the page backlog live in `.design/notes/2026-06-17-02-Docs-plan.md`
-(the docs plan note); per-page primary audience and update trigger live in
-`.design/docs/Chapters.md` (the chapters table). The page is the unit of work,
-but the unit of declaration is finer: a page is either one unit or a container
-of single-purpose sections, each carrying its own marker. The section set is an
-output of the run — a run may create, remove, split, merge, and relocate
-sections under the rules in `.claude/rules/diataxis-review.md`. Scoping note:
-for a new page, judge how well it fits as the next page to add. Provenance: this
-is the narrative-track workflow, proven on the README intro and the _Testing
-Awkward Array_, _Generating and Shrinking Samples_, and _Roadmap_ guide pages.
+The document is one page under `docs/` of `hypothesis-awkward`, Hypothesis
+strategies that generate Awkward Array test data; the page set grows page by
+page. Strategy and the page backlog live in
+`.design/notes/2026-06-17-02-Docs-plan.md` (the docs plan note); per-page
+primary audience and update trigger live in `.design/docs/Chapters.md` (the
+chapters table). The page is the unit of work, but the unit of declaration is
+finer: a page is either one unit or a container of single-purpose sections, each
+carrying its own marker. The section set is an output of the run — a run may
+create, remove, split, merge, and relocate sections under the rules in
+`.claude/rules/diataxis-review.md`. Scoping note: for a new page, judge how well
+it fits as the next page to add. Provenance: this is the narrative-track
+workflow, proven on the README intro and the _Testing Awkward Array_,
+_Generating and Shrinking Samples_, and _Roadmap_ guide pages.
 
 ## Personas
 
