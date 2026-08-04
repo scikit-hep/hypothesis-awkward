@@ -9,7 +9,7 @@ for a refresh.
 serves; all personas review every page.
 
 Related: the marker rules in
-[`.claude/rules/diataxis-review.md`](../../.claude/rules/diataxis-review.md),
+[`.claude/rules/diataxis-declaration.md`](../../.claude/rules/diataxis-declaration.md),
 and the page backlog in
 [`2026-06-17-02-Docs-plan.md`](../notes/2026-06-17-02-Docs-plan.md).
 

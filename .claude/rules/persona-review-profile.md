@@ -30,25 +30,20 @@ docs plan note.
 ## Declaration mechanism
 
 Each unit's Diátaxis quadrant is declared by a marker in the page itself — an
-HTML comment directly below the unit's heading. The Diátaxis rules are
-`.claude/rules/diataxis-review.md`, which holds the marker syntax, the two page
-shapes (one unit, or a container of marked sections), and the rules for
-restructuring. The markers are the record; there is no separate table of
-quadrants. No unit is declared with two quadrants. Content that belongs to no
-unit is out of quadrant by construction, with one sanctioned exception: the
-orientation preamble a container page may carry between its H1 and its first H2.
+HTML comment directly below the unit's heading, as
+`.claude/rules/diataxis-declaration.md` specifies (marker syntax, page shapes,
+record). The Diátaxis rules are `.claude/rules/diataxis-review.md`, the shared
+review core: the reader questions, the per-quadrant guidance, the restructuring
+rules, and the reviewers' self-check. The markers are the record; there is no
+separate table of quadrants.
 
 Declarations travel with the text: each draft carries its own markers, so the
 declaration under review is always the one in the draft. The review brief
 repeats each unit's quadrant and the matching reader question, and gives the
-page's primary audience from the chapters table. Out-of-quadrant content moves
-only within the page under review, into a unit that owns its quadrant or into a
-new section carrying it. An out-of-scope ask, or content whose home is another
-page, is reported as a suggestion and recorded in the routed-items list under
-**Page backlog** in the docs plan note; acting on it is the user's decision,
-since a run restructures one page and never the page set. Reclassifying existing
-content — or giving unmarked existing content its first marker — is likewise a
-scoping decision, not a review outcome.
+page's primary audience from the chapters table. An out-of-scope ask, or content
+whose home is another page, is reported as a suggestion and recorded in the
+routed-items list under **Page backlog** in the docs plan note; acting on it is
+the user's decision.
 
 ## Premise to pin
 

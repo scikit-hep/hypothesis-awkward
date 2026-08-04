@@ -26,7 +26,7 @@ persona-review workflow).
   preamble. A page that is not a Diátaxis unit, such as a navigation index, uses
   `none (<reason>)`. A page may start as one unit and grow into a container as
   sections of other quadrants appear; splitting it into separate pages is a
-  later, separate decision. The rules are in `diataxis-review.md`.
+  later, separate decision. The rules are in `diataxis-declaration.md`.
 - **Register a page** in both `zensical.toml` (`nav`) and the section index page
   (for example `docs/guide/index.md`).
 - **Examples:** illustrative `@given` snippets use plain ` ```python ` fences
