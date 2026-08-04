@@ -61,8 +61,10 @@ run happens. A page edited outside a run keeps whatever markers it has until its
 next review.
 
 A one-unit page that grows a section of another quadrant changes shape: the H1
-marker is removed and every H2 gets one. That is a scoping decision, not
-something a review does in passing.
+marker is removed and every H2 gets one. A run may do this while relocating
+content into a new section on the same page, because the change preserves every
+existing unit's quadrant — only the markers' placement moves, and no value
+changes. Changing a value is reclassification, and stays a scoping decision.
 
 ## Reviewing each quadrant
 
@@ -125,13 +127,18 @@ ends up carrying two quadrants:
 - **Create / remove** — a run may add the section a quadrant needs and remove
   one that no longer carries content. A new section carries a marker from the
   moment it is created, taken from the quadrant of the content moving into it.
+  This is the destination for out-of-quadrant content that belongs on the page
+  but has no unit to receive it, and it may only take content already on the
+  page — a run never writes new material into another quadrant to fill it.
 - **Split** — same-quadrant: the products inherit the original marker. A split
   never assigns a new quadrant.
 - **Merge** — same-quadrant only. Sections of different quadrants cannot merge,
   because the merged section would carry two declarations; group them as
   subsections under a container heading instead, each keeping its own marker.
 - **Relocate** — how content crosses quadrants, possibly into a section newly
-  added in the destination quadrant.
+  added in the destination quadrant. A run relocates only within the page it is
+  working on; content whose home is another page is reported to the user as a
+  suggested move, never carried out.
 - **Reclassify** — changing the marker on existing content, or giving unmarked
   existing content its first marker. This is a scoping decision, made when a run
   is scoped or by the user, and never a review outcome.
@@ -158,10 +165,12 @@ content against the marker, never the reverse.
    telling the reader how to run or narrow it _now_ are out-of-quadrant how-to
    content. (Diátaxis: illustrative examples are fine, but become
    out-of-quadrant content when they "develop into" the other mode and interrupt
-   the page's purpose.) Flag it for relocation only when the destination unit
-   exists. When it does not, the content stays where it is and you record the
-   intent in the backlog instead — otherwise a page loses material to a list in
-   a design note and no page receives it.
+   the page's purpose.) Name the destination, taking the first that fits: a unit
+   on this page that already owns the quadrant; failing that, a new section on
+   this page carrying that quadrant; and if the content's home is another page,
+   neither — leave it in place and report it as a cross-page move suggested to
+   the user. A run restructures the page in front of it, never the page set, so
+   content is never taken off a page with nothing to receive it.
 
 3. **Declaration.** List each unit you reviewed with its heading and the marker
    you read below that heading, quoting the marker line verbatim so a misspelled

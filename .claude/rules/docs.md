@@ -24,7 +24,9 @@ persona-review workflow).
   one below the H1 when the whole page is one unit, otherwise one below every
   H2, leaving the material before the first H2 as an unmarked orientation
   preamble. A page that is not a Diátaxis unit, such as a navigation index, uses
-  `none (<reason>)`. The rules are in `diataxis-review.md`.
+  `none (<reason>)`. A page may start as one unit and grow into a container as
+  sections of other quadrants appear; splitting it into separate pages is a
+  later, separate decision. The rules are in `diataxis-review.md`.
 - **Register a page** in both `zensical.toml` (`nav`) and the section index page
   (for example `docs/guide/index.md`).
 - **Examples:** illustrative `@given` snippets use plain ` ```python ` fences
