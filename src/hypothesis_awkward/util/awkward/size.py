@@ -6,16 +6,27 @@ from awkward.contents import Content
 from .iter import iter_contents, iter_leaf_contents
 
 
-def leaf_size(a: ak.Array | Content, /) -> int:
+def leaf_size(
+    a: ak.Array | Content,
+    /,
+    *,
+    zero_field_record_as_leaf: bool = True,
+) -> int:
     """Count total leaf elements in an Awkward Array layout.
 
-    Each [`NumpyArray`][ak.contents.NumpyArray] element counts as one. Each string and bytestring
-    (not character or byte) counts as one. [`EmptyArray`][ak.contents.EmptyArray] counts as zero.
+    Each [`NumpyArray`][ak.contents.NumpyArray] element counts as one. Each string and
+    bytestring (not character or byte) counts as one.
+    [`EmptyArray`][ak.contents.EmptyArray] counts as zero. Each element of a zero-field
+    [`RecordArray`][ak.contents.RecordArray] counts as one unless
+    `zero_field_record_as_leaf` is `False`.
 
     Parameters
     ----------
     a
         An Awkward Array or Content.
+    zero_field_record_as_leaf
+        If `True` (default), treat a [`RecordArray`][ak.contents.RecordArray] with no
+        fields as a leaf.
 
     Returns
     -------
@@ -35,8 +46,20 @@ def leaf_size(a: ak.Array | Content, /) -> int:
     >>> a = ak.Array(['hello', 'world'])
     >>> leaf_size(a)
     2
+
+    >>> from awkward.contents import RecordArray
+    >>> c = RecordArray([], fields=None, length=3)
+    >>> leaf_size(c)
+    3
+    >>> leaf_size(c, zero_field_record_as_leaf=False)
+    0
     """
-    return sum(len(leaf) for leaf in iter_leaf_contents(a))
+    return sum(
+        len(leaf)
+        for leaf in iter_leaf_contents(
+            a, zero_field_record_as_leaf=zero_field_record_as_leaf
+        )
+    )
 
 
 def content_size(a: ak.Array | Content, /) -> int:
