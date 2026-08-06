@@ -15,14 +15,14 @@ def leaf_contents(
     allow_empty: bool = True,
     allow_string: bool = True,
     allow_bytestring: bool = True,
-    allow_zero_field_record: bool = False,
+    allow_zero_field_record: bool = True,
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]:
     """Strategy for leaf content types.
 
     This strategy generates [`EmptyArray`][ak.contents.EmptyArray], a zero-field
-    [`RecordArray`][ak.contents.RecordArray] (only when allowed), bytestring content,
-    string content, and [`NumpyArray`][ak.contents.NumpyArray] and shrinks in that order
-    towards [`EmptyArray`][ak.contents.EmptyArray].
+    [`RecordArray`][ak.contents.RecordArray], bytestring content, string content, and
+    [`NumpyArray`][ak.contents.NumpyArray] and shrinks in that order towards
+    [`EmptyArray`][ak.contents.EmptyArray].
 
     Parameters
     ----------
@@ -47,9 +47,9 @@ def leaf_contents(
     allow_bytestring
         No bytestring content is generated if `False`.
     allow_zero_field_record
-        A [`RecordArray`][ak.contents.RecordArray] with no fields is generated if `True`,
-        with its length drawn between `min_size` and `max_size`. A zero-field record
-        stores no data, so nothing derives its length.
+        No zero-field [`RecordArray`][ak.contents.RecordArray] is generated if `False`.
+        Its length is drawn between `min_size` and `max_size`, since a zero-field record
+        stores no data and nothing derives its length.
 
     Raises
     ------
