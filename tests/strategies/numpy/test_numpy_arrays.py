@@ -18,8 +18,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND_NO_SHRINK
-
-DEFAULT_MAX_SIZE = 10
+from tests.funcs import assert_kwargs_match_signature
 
 
 class NumpyArraysKwargs(TypedDict, total=False):
@@ -29,10 +28,47 @@ class NumpyArraysKwargs(TypedDict, total=False):
     allow_structured: bool
     allow_nan: bool
     min_dims: int
-    max_dims: int
+    max_dims: int | None
     min_size: int
     max_size: int
     unique: bool
+
+
+DEFAULTS = NumpyArraysKwargs(
+    dtype=None,
+    allow_structured=True,
+    allow_nan=True,
+    min_dims=1,
+    max_dims=None,
+    min_size=0,
+    max_size=10,
+    unique=False,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together: the dtype pool depends on the other options.
+
+    `bool` dtypes are excluded when `unique` is drawn and `min_size` may exceed the
+    two distinct `bool` values.
+    """
+
+    min_dims: int
+    max_dims: int | None
+    min_size: int
+    max_size: int
+    unique: bool
+    dtype: np.dtype | st.SearchStrategy[np.dtype] | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `numpy_arrays()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.numpy_arrays,
+        kwargs_cls=NumpyArraysKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -44,30 +80,41 @@ def numpy_arrays_kwargs(
     if chain is None:
         chain = st_ak.OptsChain({})
 
-    min_dims, max_dims = draw(st_ak.ranges(min_start=1, max_end=5))
-    min_size, max_size = draw(
-        st_ak.ranges(min_start=0, max_end=100, max_start=DEFAULT_MAX_SIZE)
-    )
-    unique = draw(st_ak.none_or(st.booleans()))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_dims, max_dims = draw(st_ak.ranges(min_start=1, max_end=5))
+        min_size, max_size = draw(
+            st_ak.ranges(min_start=0, max_end=100, max_start=DEFAULTS['max_size'])
+        )
+        unique = draw(st_ak.none_or(st.booleans()))
 
-    st_dtypes = st_ak.supported_dtypes()
-    if unique and not sc(min_size) <= 2:
-        st_dtypes = st_dtypes.filter(lambda d: d.kind != 'b')
-    registered_st_dtypes = chain.register(st_dtypes)
-    dtype = draw(st.one_of(st.none(), st.just(registered_st_dtypes), st_dtypes))
+        st_dtypes = st_ak.supported_dtypes()
+        if unique and not sc(min_size) <= 2:
+            st_dtypes = st_dtypes.filter(lambda d: d.kind != 'b')
+        registered_st_dtypes = chain.register(st_dtypes)
+        dtype = draw(st.one_of(st.none(), st.just(registered_st_dtypes), st_dtypes))
 
-    drawn = (
-        ('min_dims', min_dims),
-        ('max_dims', max_dims),
-        ('min_size', min_size),
-        ('max_size', max_size),
-        ('unique', unique),
-        ('dtype', dtype),
-    )
+        ret = RelatedKwargs()
+        if min_dims is not None:
+            ret['min_dims'] = min_dims
+        if max_dims is not None:
+            ret['max_dims'] = max_dims
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        if unique is not None:
+            ret['unique'] = unique
+        if dtype is not None:
+            ret['dtype'] = dtype
+        return ret
 
-    kwargs = draw(
+    related = draw(_st_related_kwargs())
+
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'allow_structured': st.booleans(),
                 'allow_nan': st.booleans(),
@@ -75,7 +122,7 @@ def numpy_arrays_kwargs(
         )
     )
 
-    return chain.extend(cast(NumpyArraysKwargs, kwargs))
+    return chain.extend(cast(NumpyArraysKwargs, {**related, **optional_independent}))
 
 
 def _all_distinct(a: np.ndarray) -> bool:
@@ -104,14 +151,14 @@ def test_properties(data: st.DataObject) -> None:
     n = data.draw(st_ak.numpy_arrays(**opts.kwargs), label='n')
 
     # Assert the options were effective
-    dtype = opts.kwargs.get('dtype', None)
-    allow_structured = opts.kwargs.get('allow_structured', True)
-    allow_nan = opts.kwargs.get('allow_nan', True)
-    min_dims = opts.kwargs.get('min_dims', 1)
-    max_dims = opts.kwargs.get('max_dims', None)
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    unique = opts.kwargs.get('unique', False)
+    dtype = opts.kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_structured = opts.kwargs.get('allow_structured', DEFAULTS['allow_structured'])
+    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    min_dims = opts.kwargs.get('min_dims', DEFAULTS['min_dims'])
+    max_dims = opts.kwargs.get('max_dims', DEFAULTS['max_dims'])
+    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    unique = opts.kwargs.get('unique', DEFAULTS['unique'])
 
     match dtype:
         case np.dtype():
@@ -229,7 +276,7 @@ def test_draw_empty() -> None:
 
 
 @pytest.mark.parametrize('max_dims', [1, None])
-@pytest.mark.parametrize('max_size', [1, DEFAULT_MAX_SIZE])
+@pytest.mark.parametrize('max_size', [1, DEFAULTS['max_size']])
 @pytest.mark.parametrize('allow_structured', [True, False])
 def test_draw_empty_parametrized(
     max_size: int, max_dims: int | None, allow_structured: bool
@@ -248,7 +295,7 @@ def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size scalars can be drawn."""
     find(
         st_ak.numpy_arrays(allow_structured=False),
-        lambda a: math.prod(a.shape) == DEFAULT_MAX_SIZE,
+        lambda a: math.prod(a.shape) == DEFAULTS['max_size'],
         settings=FIND_NO_SHRINK,
     )
 
@@ -258,7 +305,7 @@ def test_draw_max_size_structured() -> None:
     find(
         st_ak.numpy_arrays(),
         lambda a: (
-            math.prod(a.shape) * n_scalars_in(a.dtype) == DEFAULT_MAX_SIZE
+            math.prod(a.shape) * n_scalars_in(a.dtype) == DEFAULTS['max_size']
             and a.dtype.names is not None
         ),
         settings=FIND_NO_SHRINK,
