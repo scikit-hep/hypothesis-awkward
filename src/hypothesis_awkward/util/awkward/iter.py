@@ -194,6 +194,7 @@ def iter_leaf_contents(
     *,
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
+    zero_field_record_as_leaf: bool = True,
 ) -> Iterator[Content]:
     """Iterate over all leaf contents in an Awkward Array layout.
 
@@ -207,6 +208,9 @@ def iter_leaf_contents(
         [`RegularArray`][ak.contents.RegularArray] nodes as leaves.
     bytestring_as_leaf
         If `True` (default), treat bytestring nodes as leaves.
+    zero_field_record_as_leaf
+        If `True` (default), treat a [`RecordArray`][ak.contents.RecordArray] with no
+        fields as a leaf.
 
     Yields
     ------
@@ -220,6 +224,7 @@ def iter_leaf_contents(
             content,
             string_as_leaf=string_as_leaf,
             bytestring_as_leaf=bytestring_as_leaf,
+            zero_field_record_as_leaf=zero_field_record_as_leaf,
         ):
             yield content
 
