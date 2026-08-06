@@ -15,7 +15,7 @@ from awkward.contents import (
 )
 
 from .iter import get_contents, is_leaf
-from .leaf import is_string_or_bytestring_leaf
+from .leaf import is_string_or_bytestring_leaf, is_zero_field_record_leaf
 from .size import content_own_size
 
 
@@ -56,6 +56,7 @@ def _(
     *,
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
+    **_: bool,
 ) -> bool:
     return is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf)
 
@@ -85,6 +86,7 @@ def _(
     *,
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
+    **_: bool,
 ) -> bool:
     return is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf)
 
@@ -114,6 +116,7 @@ def _(
     *,
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
+    **_: bool,
 ) -> bool:
     return is_string_or_bytestring_leaf(c, string_as_leaf, bytestring_as_leaf)
 
@@ -134,6 +137,17 @@ def _(
 @content_own_size.register
 def _(c: ListArray, /) -> int:
     return len(c.starts.data) + len(c.stops.data)
+
+
+@is_leaf.register
+def _(
+    c: RecordArray,
+    /,
+    *,
+    zero_field_record_as_leaf: bool = True,
+    **_: bool,
+) -> bool:
+    return zero_field_record_as_leaf and is_zero_field_record_leaf(c)
 
 
 @get_contents.register

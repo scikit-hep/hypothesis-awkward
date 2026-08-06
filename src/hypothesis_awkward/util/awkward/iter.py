@@ -231,14 +231,16 @@ def is_leaf(
     *,
     string_as_leaf: bool = True,
     bytestring_as_leaf: bool = True,
+    zero_field_record_as_leaf: bool = True,
 ) -> bool:
     """Return `True` if an [`ak.contents.Content`][] is a leaf.
 
-    [`NumpyArray`][ak.contents.NumpyArray] and [`EmptyArray`][ak.contents.EmptyArray] are always leaves. String and
-    bytestring list nodes are leaves only when the respective flag is
-    set. Wrappers ([`RecordArray`][ak.contents.RecordArray], [`UnionArray`][ak.contents.UnionArray], option/masked types,
-    non-string list types) are never leaves. Unknown types fall back to
-    `False`.
+    [`NumpyArray`][ak.contents.NumpyArray] and [`EmptyArray`][ak.contents.EmptyArray] are
+    always leaves. String and bytestring list nodes, and a
+    [`RecordArray`][ak.contents.RecordArray] with zero fields, are leaves only when the
+    respective flag is set. Other wrappers ([`UnionArray`][ak.contents.UnionArray],
+    records with fields, option/masked types, non-string list types) are never leaves.
+    Unknown types fall back to `False`.
 
     Dispatch is performed with [functools.singledispatch][] so support
     for a new [`Content`][ak.contents.Content] subclass can be added by calling
@@ -253,6 +255,9 @@ def is_leaf(
         [`ListArray`][ak.contents.ListArray]/[`RegularArray`][ak.contents.RegularArray] nodes as leaves.
     bytestring_as_leaf
         Same as `string_as_leaf` for bytestring nodes.
+    zero_field_record_as_leaf
+        If `True` (default), treat a [`RecordArray`][ak.contents.RecordArray] with no
+        fields as a leaf.
 
     Returns
     -------
@@ -271,6 +276,15 @@ def is_leaf(
 
     >>> c = RegularArray(NumpyArray(np.array([1, 2, 3, 4])), size=2)
     >>> is_leaf(c)
+    False
+
+    A zero-field [`RecordArray`][ak.contents.RecordArray] is a leaf unless disabled:
+
+    >>> from awkward.contents import RecordArray
+    >>> c = RecordArray([], fields=None, length=3)
+    >>> is_leaf(c)
+    True
+    >>> is_leaf(c, zero_field_record_as_leaf=False)
     False
     """
     return False
