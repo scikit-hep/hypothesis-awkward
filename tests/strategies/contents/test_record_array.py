@@ -156,12 +156,28 @@ def test_draw_min_length(min_length: int) -> None:
     )
 
 
-@pytest.mark.parametrize('max_length', [1, 2, 10])
-def test_draw_max_length(max_length: int) -> None:
+@pytest.mark.parametrize('max_length', [0, 1, 2, 4])
+@pytest.mark.parametrize('is_tuple', [True, False])
+@pytest.mark.parametrize('with_contents', [True, False])
+def test_draw_max_length(max_length: int, is_tuple: bool, with_contents: bool) -> None:
     """Assert the length can reach `max_length`."""
     find(
         st_ak.contents.record_array_contents(max_length=max_length),
-        lambda r: len(r) == max_length,
+        lambda r: (
+            bool(r.contents) == with_contents
+            and r.is_tuple == is_tuple
+            and len(r) == max_length
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('is_tuple', [True, False])
+def test_draw_zero_fields(is_tuple: bool) -> None:
+    """Assert a zero-field record can have a non-zero length."""
+    find(
+        st_ak.contents.record_array_contents(),
+        lambda r: not r.contents and r.is_tuple == is_tuple and len(r) != 0,
         settings=FIND,
     )
 
