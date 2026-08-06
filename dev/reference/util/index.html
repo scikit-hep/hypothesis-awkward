@@ -1045,6 +1045,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#hypothesis_awkward.util.is_zero_field_record_leaf" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        is_zero_field_record_leaf
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#hypothesis_awkward.util.iter_contents" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1366,6 +1377,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         is_bytestring_leaf
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hypothesis_awkward.util.is_zero_field_record_leaf" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        is_zero_field_record_leaf
       </span>
     </span>
   </a>
@@ -1747,6 +1769,14 @@
               <td>
                 <div class="doc-md-description">
                   <p>Return <code>True</code> if an <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>ak.contents.Content</code></a> is bytestring.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;is_zero_field_record_leaf&lt;/span&gt;" href="./#hypothesis_awkward.util.is_zero_field_record_leaf">is_zero_field_record_leaf</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Return <code>True</code> if an <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>ak.contents.Content</code></a> is a zero-field record.</p>
                 </div>
               </td>
             </tr>
@@ -2385,17 +2415,19 @@ These have one inner content. The
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">*</span><span class="p">,</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">string_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">bytestring_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">zero_field_record_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Return <code>True</code> if an <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>ak.contents.Content</code></a> is a leaf.</p>
-<p><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a> are always leaves. String and
-bytestring list nodes are leaves only when the respective flag is
-set. Wrappers (<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a>, <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a>, option/masked types,
-non-string list types) are never leaves. Unknown types fall back to
-<code>False</code>.</p>
+<p><a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a> are
+always leaves. String and bytestring list nodes, and a
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> with zero fields, are leaves only when the
+respective flag is set. Other wrappers (<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a>,
+records with fields, option/masked types, non-string list types) are never leaves.
+Unknown types fall back to <code>False</code>.</p>
 <p>Dispatch is performed with <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functools.html#functools.singledispatch">functools.singledispatch</a> so support
 for a new <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> subclass can be added by calling
 <code>is_leaf.register</code> without modifying this function.</p>
@@ -2461,6 +2493,23 @@ for a new <a class="autorefs autorefs-external" href="https://awkward-array.org/
                   <code>True</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>zero_field_record_as_leaf</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code> (default), treat a <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> with no
+fields as a leaf.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -2499,6 +2548,14 @@ for a new <a class="autorefs autorefs-external" href="https://awkward-array.org/
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">RegularArray</span><span class="p">(</span><span class="n">NumpyArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])),</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">is_leaf</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">False</span>
+</span></code></pre></div>
+    <p>A zero-field <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> is a leaf unless disabled:</p>
+    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">awkward.contents</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordArray</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">RecordArray</span><span class="p">([],</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">is_leaf</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="go">True</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">is_leaf</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">zero_field_record_as_leaf</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="go">False</span>
 </span></code></pre></div>
 
 
@@ -2769,6 +2826,83 @@ for a new <a class="autorefs autorefs-external" href="https://awkward-array.org/
 <div class="doc doc-object doc-function">
 
 
+<h2 id="hypothesis_awkward.util.is_zero_field_record_leaf" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">is_zero_field_record_leaf</span>
+
+
+<a href="#hypothesis_awkward.util.is_zero_field_record_leaf" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">is_zero_field_record_leaf</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">Content</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Return <code>True</code> if an <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>ak.contents.Content</code></a> is a zero-field record.</p>
+<p>A <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> with no fields is the third, corner-case
+leaf type of a layout tree: it has no children and stores no data.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>c</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" title="awkward.contents.Content" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#awkward.contents.Content">Content</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An Awkward <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> node.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>True</code> if the content is a <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> with no
+fields.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="hypothesis_awkward.util.iter_contents" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">iter_contents</span>
 
@@ -2895,7 +3029,8 @@ descend into the inner <a class="autorefs autorefs-external" href="https://awkwa
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">*</span><span class="p">,</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">string_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">bytestring_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Content</span><span class="p">]</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">zero_field_record_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Content</span><span class="p">]</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -2958,6 +3093,23 @@ descend into the inner <a class="autorefs autorefs-external" href="https://awkwa
             <td>
               <div class="doc-md-description">
                 <p>If <code>True</code> (default), treat bytestring nodes as leaves.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>zero_field_record_as_leaf</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code> (default), treat a <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> with no
+fields as a leaf.</p>
               </div>
             </td>
             <td>
@@ -3126,14 +3278,22 @@ descend into the inner <a class="autorefs autorefs-external" href="https://awkwa
 
 
 <a href="#hypothesis_awkward.util.leaf_size" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">leaf_size</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Content</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">leaf_size</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">a</span><span class="p">:</span> <span class="n">Array</span> <span class="o">|</span> <span class="n">Content</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="o">/</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="o">*</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">zero_field_record_as_leaf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Count total leaf elements in an Awkward Array layout.</p>
-<p>Each <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> element counts as one. Each string and bytestring
-(not character or byte) counts as one. <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a> counts as zero.</p>
+<p>Each <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> element counts as one. Each string and
+bytestring (not character or byte) counts as one.
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a> counts as zero. Each element of a zero-field
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> counts as one unless
+<code>zero_field_record_as_leaf</code> is <code>False</code>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3161,6 +3321,23 @@ descend into the inner <a class="autorefs autorefs-external" href="https://awkwa
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>zero_field_record_as_leaf</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>True</code> (default), treat a <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> with no
+fields as a leaf.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
       </tbody>
@@ -3202,6 +3379,13 @@ descend into the inner <a class="autorefs autorefs-external" href="https://awkwa
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">([</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;world&#39;</span><span class="p">])</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">leaf_size</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">2</span>
+</span></code></pre></div>
+    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">awkward.contents</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecordArray</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">RecordArray</span><span class="p">([],</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">leaf_size</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="go">3</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">leaf_size</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">zero_field_record_as_leaf</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="go">0</span>
 </span></code></pre></div>
 
 

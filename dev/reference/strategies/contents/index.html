@@ -2493,17 +2493,19 @@ Required when <code>all_option_or_none</code> is <code>True</code>.</p>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">allow_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">allow_string</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">allow_bytestring</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">SearchStrategy</span><span class="p">[</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">NumpyArray</span> <span class="o">|</span> <span class="n">EmptyArray</span> <span class="o">|</span> <span class="n">ListOffsetArray</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">]</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">allow_zero_field_record</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">st</span><span class="o">.</span><span class="n">SearchStrategy</span><span class="p">[</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">NumpyArray</span> <span class="o">|</span> <span class="n">EmptyArray</span> <span class="o">|</span> <span class="n">ListOffsetArray</span> <span class="o">|</span> <span class="n">RecordArray</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">]</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
         <p>Strategy for leaf content types.</p>
-<p>This strategy generates <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a>, bytestring content,
-string content, and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> and shrinks in that order
-towards <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a>.</p>
+<p>This strategy generates <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a>, a zero-field
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a>, bytestring content, string content, and
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#ak.contents.NumpyArray"><code>NumpyArray</code></a> and shrinks in that order towards
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#ak.contents.EmptyArray"><code>EmptyArray</code></a>.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2649,6 +2651,24 @@ if <code>False</code>.</p>
                   <code>True</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>allow_zero_field_record</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>No zero-field <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#ak.contents.RecordArray"><code>RecordArray</code></a> is generated if <code>False</code>.
+Its length is drawn between <code>min_size</code> and <code>max_size</code>, since a zero-field record
+stores no data and nothing derives its length.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -2687,7 +2707,7 @@ if <code>False</code>.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-external" title="awkward.contents.NumpyArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#awkward.contents.NumpyArray">NumpyArray</a> | <a class="autorefs autorefs-external" title="awkward.contents.EmptyArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#awkward.contents.EmptyArray">EmptyArray</a> | <a class="autorefs autorefs-external" title="awkward.contents.ListOffsetArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#awkward.contents.ListOffsetArray">ListOffsetArray</a></code>
+                  <code><a class="autorefs autorefs-external" title="awkward.contents.NumpyArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.NumpyArray.html#awkward.contents.NumpyArray">NumpyArray</a> | <a class="autorefs autorefs-external" title="awkward.contents.EmptyArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.EmptyArray.html#awkward.contents.EmptyArray">EmptyArray</a> | <a class="autorefs autorefs-external" title="awkward.contents.ListOffsetArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.ListOffsetArray.html#awkward.contents.ListOffsetArray">ListOffsetArray</a> | <a class="autorefs autorefs-external" title="awkward.contents.RecordArray" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.RecordArray.html#awkward.contents.RecordArray">RecordArray</a></code>
             </td>
             <td>
               <div class="doc-md-description">
