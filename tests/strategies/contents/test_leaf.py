@@ -6,13 +6,14 @@ import pytest
 from hypothesis import find, given
 from hypothesis import strategies as st
 
-from awkward.contents import EmptyArray, NumpyArray, RecordArray
+from awkward.contents import EmptyArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_numpy_array,
     is_bytestring_leaf,
     is_string_leaf,
+    is_zero_field_record_leaf,
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE
@@ -117,7 +118,7 @@ def test_properties(data: st.DataObject) -> None:
     is_empty = isinstance(result, EmptyArray)
     is_string = is_string_leaf(result)
     is_bytestring = is_bytestring_leaf(result)
-    is_zero_field_record = isinstance(result, RecordArray) and not result.contents
+    is_zero_field_record = is_zero_field_record_leaf(result)
 
     assert any((is_numpy, is_empty, is_string, is_bytestring, is_zero_field_record))
 
@@ -185,10 +186,7 @@ def test_draw_zero_field_record(is_tuple: bool) -> None:
     find(
         st_ak.contents.leaf_contents(allow_zero_field_record=True),
         lambda c: (
-            isinstance(c, RecordArray)
-            and not c.contents
-            and c.is_tuple == is_tuple
-            and len(c) != 0
+            is_zero_field_record_leaf(c) and c.is_tuple == is_tuple and len(c) != 0
         ),
         settings=FIND,
     )
