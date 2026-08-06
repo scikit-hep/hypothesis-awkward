@@ -7,6 +7,7 @@ __all__ = [
     'is_string_or_bytestring_leaf',
     'is_string_leaf',
     'is_bytestring_leaf',
+    'is_zero_field_record_leaf',
     'iter_contents',
     'iter_leaf_contents',
     'iter_numpy_arrays',
@@ -27,6 +28,7 @@ from .leaf import (
     is_bytestring_leaf,
     is_string_leaf,
     is_string_or_bytestring_leaf,
+    is_zero_field_record_leaf,
 )
 from .nan_nat import (
     any_nan_in_awkward_array,

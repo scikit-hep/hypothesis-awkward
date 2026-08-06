@@ -1,4 +1,4 @@
-from awkward.contents import Content
+from awkward.contents import Content, RecordArray
 
 
 def is_string_or_bytestring_leaf(
@@ -59,3 +59,23 @@ def is_bytestring_leaf(c: Content) -> bool:
         `'bytestring'`.
     """
     return c.parameter('__array__') == 'bytestring'
+
+
+def is_zero_field_record_leaf(c: Content) -> bool:
+    """Return `True` if an [`ak.contents.Content`][] is a zero-field record.
+
+    A [`RecordArray`][ak.contents.RecordArray] with no fields is the third, corner-case
+    leaf type of a layout tree: it has no children and stores no data.
+
+    Parameters
+    ----------
+    c
+        An Awkward [`Content`][ak.contents.Content] node.
+
+    Returns
+    -------
+    bool
+        `True` if the content is a [`RecordArray`][ak.contents.RecordArray] with no
+        fields.
+    """
+    return isinstance(c, RecordArray) and not c.contents

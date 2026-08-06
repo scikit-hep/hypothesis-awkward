@@ -185,6 +185,7 @@ def contents(
         allow_empty=allow_empty,
         allow_string=allow_string,
         allow_bytestring=allow_bytestring,
+        allow_zero_field_record=False,
     )
     leaf_max_size = max_size
     if max_leaf_size is not None:
