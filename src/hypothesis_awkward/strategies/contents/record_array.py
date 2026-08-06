@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from .content import StContent
     from .option import StOption
 
+MAX_LENGTH_NO_FIELDS = 5
+
 
 @st.composite
 def record_array_contents(
@@ -43,6 +45,14 @@ def record_array_contents(
     -------
     RecordArray
 
+    Notes
+    -----
+    With at least one field, the length is derived from the children as
+    `min(len(c) for c in contents)`, capped by `max_length`. A record with no fields has
+    no children and stores no data, so nothing derives its length; it is drawn between
+    `min_length` and `max_length` instead. When `max_length` is `None`, the ceiling is
+    `MAX_LENGTH_NO_FIELDS`, raised to `min_length` if that is larger.
+
     Examples
     --------
     >>> c = record_array_contents().example()
@@ -60,6 +70,15 @@ def record_array_contents(
     >>> c = record_array_contents(min_length=2, max_length=4).example()
     >>> 2 <= len(c) <= 4
     True
+
+    A record with no fields has its length drawn, since no field content determines it:
+
+    >>> c = record_array_contents(max_fields=0, min_length=3, max_length=3).example()
+    >>> len(c)
+    3
+
+    >>> len(c.contents)
+    0
     """
     match contents:
         case None:
@@ -88,15 +107,16 @@ def record_array_contents(
             )
         )
 
-    candidate_length = min((len(c) for c in contents), default=0)
-    assume(candidate_length >= min_length)
-
-    if not contents:
-        length = 0
-    elif max_length is not None:
-        length = min(candidate_length, max_length)
+    if contents:
+        candidate_length = min(len(c) for c in contents)
+        assume(candidate_length >= min_length)
+        length = None if max_length is None else min(candidate_length, max_length)
     else:
-        length = None
+        # A record with no fields stores no data, so nothing derives its length.
+        if max_length is None:
+            max_length = max(min_length, MAX_LENGTH_NO_FIELDS)
+        assume(min_length <= max_length)
+        length = draw(st.integers(min_value=min_length, max_value=max_length))
     return RecordArray(contents, fields=fields, length=length)
 
 
