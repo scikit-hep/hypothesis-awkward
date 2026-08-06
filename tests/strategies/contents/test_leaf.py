@@ -6,7 +6,7 @@ import pytest
 from hypothesis import find, given
 from hypothesis import strategies as st
 
-from awkward.contents import EmptyArray, NumpyArray
+from awkward.contents import EmptyArray, NumpyArray, RecordArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     any_nan_in_awkward_array,
@@ -31,6 +31,7 @@ class LeafContentsKwargs(TypedDict, total=False):
     allow_empty: bool
     allow_string: bool
     allow_bytestring: bool
+    allow_zero_field_record: bool
 
 
 @st.composite
@@ -67,6 +68,7 @@ def leaf_contents_kwargs(
                 'allow_empty': st.booleans(),
                 'allow_string': st.booleans(),
                 'allow_bytestring': st.booleans(),
+                'allow_zero_field_record': st.booleans(),
             },
         )
     )
@@ -87,6 +89,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_empty = opts.kwargs.get('allow_empty', True)
     allow_string = opts.kwargs.get('allow_string', True)
     allow_bytestring = opts.kwargs.get('allow_bytestring', True)
+    allow_zero_field_record = opts.kwargs.get('allow_zero_field_record', False)
 
     def _is_allowed_any() -> bool:
         return any(
@@ -95,6 +98,7 @@ def test_properties(data: st.DataObject) -> None:
                 allow_numpy,
                 allow_string,
                 allow_bytestring,
+                allow_zero_field_record,
             )
         )
 
@@ -113,8 +117,9 @@ def test_properties(data: st.DataObject) -> None:
     is_empty = isinstance(result, EmptyArray)
     is_string = is_string_leaf(result)
     is_bytestring = is_bytestring_leaf(result)
+    is_zero_field_record = isinstance(result, RecordArray) and not result.contents
 
-    assert any((is_numpy, is_empty, is_string, is_bytestring))
+    assert any((is_numpy, is_empty, is_string, is_bytestring, is_zero_field_record))
 
     # Assert the options were effective
     if not allow_numpy:
@@ -125,6 +130,8 @@ def test_properties(data: st.DataObject) -> None:
         assert not is_string
     if not allow_bytestring:
         assert not is_bytestring
+    if not allow_zero_field_record:
+        assert not is_zero_field_record
 
     dtypes = opts.kwargs.get('dtypes', None)
     allow_nan = opts.kwargs.get('allow_nan', True)
@@ -170,6 +177,21 @@ def test_draw_string() -> None:
 def test_draw_bytestring() -> None:
     """Assert that bytestring content can be drawn by default."""
     find(st_ak.contents.leaf_contents(), lambda c: is_bytestring_leaf(c), settings=FIND)
+
+
+@pytest.mark.parametrize('is_tuple', [True, False])
+def test_draw_zero_field_record(is_tuple: bool) -> None:
+    """Assert a zero-field record can be drawn when allowed."""
+    find(
+        st_ak.contents.leaf_contents(allow_zero_field_record=True),
+        lambda c: (
+            isinstance(c, RecordArray)
+            and not c.contents
+            and c.is_tuple == is_tuple
+            and len(c) != 0
+        ),
+        settings=FIND,
+    )
 
 
 def test_draw_max_size() -> None:

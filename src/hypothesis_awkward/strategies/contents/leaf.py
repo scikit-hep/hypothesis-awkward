@@ -1,7 +1,7 @@
 import numpy as np
 from hypothesis import strategies as st
 
-from awkward.contents import EmptyArray, ListOffsetArray, NumpyArray
+from awkward.contents import EmptyArray, ListOffsetArray, NumpyArray, RecordArray
 from hypothesis_awkward import strategies as st_ak
 
 
@@ -15,10 +15,12 @@ def leaf_contents(
     allow_empty: bool = True,
     allow_string: bool = True,
     allow_bytestring: bool = True,
-) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]:
+    allow_zero_field_record: bool = False,
+) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]:
     """Strategy for leaf content types.
 
-    This strategy generates [`EmptyArray`][ak.contents.EmptyArray], bytestring content,
+    This strategy generates [`EmptyArray`][ak.contents.EmptyArray], a zero-field
+    [`RecordArray`][ak.contents.RecordArray] (only when allowed), bytestring content,
     string content, and [`NumpyArray`][ak.contents.NumpyArray] and shrinks in that order
     towards [`EmptyArray`][ak.contents.EmptyArray].
 
@@ -44,6 +46,10 @@ def leaf_contents(
         No string content is generated if `False`.
     allow_bytestring
         No bytestring content is generated if `False`.
+    allow_zero_field_record
+        A [`RecordArray`][ak.contents.RecordArray] with no fields is generated if `True`,
+        with its length drawn between `min_size` and `max_size`. A zero-field record
+        stores no data, so nothing derives its length.
 
     Raises
     ------
@@ -52,13 +58,20 @@ def leaf_contents(
 
     Returns
     -------
-    NumpyArray | EmptyArray | ListOffsetArray
+    NumpyArray | EmptyArray | ListOffsetArray | RecordArray
     """
-    options: list[st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray]] = []
+    options = list[
+        st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]
+    ]()
 
     # Append strategies in optimal order for shrinking.
     if allow_empty and min_size <= 0 <= max_size:
         options.append(st_ak.contents.empty_array_contents())
+    if allow_zero_field_record:
+        s = st_ak.contents.record_array_contents(
+            max_fields=0, min_length=min_size, max_length=max_size
+        )
+        options.append(s)
     if allow_bytestring:
         s = st_ak.contents.bytestring_contents(min_size=min_size, max_size=max_size)
         options.append(s)
