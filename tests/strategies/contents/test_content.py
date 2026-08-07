@@ -458,30 +458,17 @@ def test_draw_min_record_fields(min_record_fields: int, nested: bool) -> None:
     )
 
 
-@pytest.mark.parametrize('max_record_fields', [1, 2, 3])
-def test_draw_max_record_fields(max_record_fields: int) -> None:
-    """Assert the field count can reach `max_record_fields`."""
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('max_record_fields', [0, 1, 2, 3])
+def test_draw_max_record_fields(max_record_fields: int, nested: bool) -> None:
+    """Assert a record with exactly `max_record_fields` fields at each position."""
     find(
         st_ak.contents.contents(max_record_fields=max_record_fields),
         lambda c: any(
             isinstance(n, ak.contents.RecordArray)
             and len(n.contents) == max_record_fields
+            and (n is not c) == nested
             for n in iter_contents(c)
-        ),
-        settings=FIND,
-    )
-
-
-@pytest.mark.parametrize('max_record_fields', [1, 2])
-def test_draw_max_record_fields_recursed(max_record_fields: int) -> None:
-    """Assert a nested record can reach `max_record_fields` fields."""
-    find(
-        st_ak.contents.contents(max_record_fields=max_record_fields),
-        lambda c: any(
-            isinstance(n, ak.contents.RecordArray)
-            and len(n.contents) == max_record_fields
-            for n in iter_contents(c)
-            if n is not c
         ),
         settings=FIND,
     )
