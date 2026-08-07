@@ -51,6 +51,7 @@ class ContentsKwargs(TypedDict, total=False):
     max_depth: int | None
     min_length: int
     max_length: int | None
+    max_record_fields: int | None
 
 
 DEFAULTS = ContentsKwargs(
@@ -75,6 +76,7 @@ DEFAULTS = ContentsKwargs(
     max_depth=None,
     min_length=0,
     max_length=None,
+    max_record_fields=None,
 )
 
 
@@ -178,6 +180,7 @@ def contents_kwargs(
                 'allow_unmasked': st.booleans(),
                 'max_leaf_size': st.integers(min_value=0, max_value=50),
                 'max_depth': st.integers(min_value=0, max_value=5),
+                'max_record_fields': st.integers(min_value=1, max_value=5),
             },
         )
     )
@@ -227,6 +230,9 @@ def test_properties(data: st.DataObject) -> None:
     min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
     max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
     max_depth = opts.kwargs.get('max_depth', DEFAULTS['max_depth'])
+    max_record_fields = opts.kwargs.get(
+        'max_record_fields', DEFAULTS['max_record_fields']
+    )
 
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
@@ -278,6 +284,10 @@ def test_properties(data: st.DataObject) -> None:
         assert leaf_size(c) <= max_leaf_size
     assert _nesting_depth(c) <= sc(max_depth)
     assert min_length <= len(c) <= sc(max_length)
+
+    for n in iter_contents(c):
+        if isinstance(n, ak.contents.RecordArray):
+            assert len(n.contents) <= sc(max_record_fields)
 
 
 def test_draw_max_size() -> None:
@@ -411,6 +421,35 @@ def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
         st_ak.contents.contents(max_length=max_length),
         lambda c: any(
             len(n) > max_length and is_leaf(n) == leaf
+            for n in iter_contents(c)
+            if n is not c
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('max_record_fields', [1, 2, 3])
+def test_draw_max_record_fields(max_record_fields: int) -> None:
+    """Assert the field count can reach `max_record_fields`."""
+    find(
+        st_ak.contents.contents(max_record_fields=max_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == max_record_fields
+            for n in iter_contents(c)
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('max_record_fields', [1, 2])
+def test_draw_max_record_fields_recursed(max_record_fields: int) -> None:
+    """Assert a nested record can reach `max_record_fields` fields."""
+    find(
+        st_ak.contents.contents(max_record_fields=max_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == max_record_fields
             for n in iter_contents(c)
             if n is not c
         ),
