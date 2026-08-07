@@ -8,6 +8,7 @@ import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import SUPPORTED_DTYPE_NAMES
 from tests.find_settings import FIND_NO_SHRINK
+from tests.funcs import assert_kwargs_match_signature
 
 
 class NumpyFormsKwargs(TypedDict, total=False):
@@ -18,6 +19,24 @@ class NumpyFormsKwargs(TypedDict, total=False):
     allow_datetime: bool
     inner_shape: tuple[int, ...] | st.SearchStrategy[tuple[int, ...]] | None
     allow_inner_shape: bool
+
+
+DEFAULTS = NumpyFormsKwargs(
+    type_=None,
+    dtypes=None,
+    allow_datetime=True,
+    inner_shape=None,
+    allow_inner_shape=True,
+)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `numpy_forms()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.numpy_forms,
+        kwargs_cls=NumpyFormsKwargs,
+        defaults=DEFAULTS,
+    )
 
 
 def _inner_shape_strategies() -> st.SearchStrategy[tuple[int, ...]]:
@@ -105,11 +124,13 @@ def test_properties(data: st.DataObject) -> None:
     assert result._form_key is None
 
     # Assert the options were effective
-    type_ = opts.kwargs.get('type_', None)
-    dtypes = opts.kwargs.get('dtypes', None)
-    allow_datetime = opts.kwargs.get('allow_datetime', True)
-    inner_shape = opts.kwargs.get('inner_shape', None)
-    allow_inner_shape = opts.kwargs.get('allow_inner_shape', True)
+    type_ = opts.kwargs.get('type_', DEFAULTS['type_'])
+    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
+    allow_datetime = opts.kwargs.get('allow_datetime', DEFAULTS['allow_datetime'])
+    inner_shape = opts.kwargs.get('inner_shape', DEFAULTS['inner_shape'])
+    allow_inner_shape = opts.kwargs.get(
+        'allow_inner_shape', DEFAULTS['allow_inner_shape']
+    )
 
     if type_ is not None:
         # type_ mode: primitive matches type, inner_shape is ()

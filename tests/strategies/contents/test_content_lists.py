@@ -9,9 +9,7 @@ from hypothesis_awkward.strategies import RecordCallDraws
 from hypothesis_awkward.util import content_size, leaf_size
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-
-DEFAULT_MAX_SIZE = 50
-DEFAULT_MIN_LEN = 0
+from tests.funcs import assert_kwargs_match_signature
 
 
 class ContentListsKwargs(TypedDict, total=False):
@@ -24,6 +22,33 @@ class ContentListsKwargs(TypedDict, total=False):
     max_len: int | None
 
 
+DEFAULTS = ContentListsKwargs(
+    st_content=st_ak.contents.contents,
+    max_size=50,
+    max_leaf_size=None,
+    min_len=0,
+    max_len=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together as an ordered pair (`min_len <= max_len`)."""
+
+    min_len: int
+    max_len: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `content_lists()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.content_lists,
+        exclude={'all_option_or_none', 'st_option'},
+        kwargs_cls=ContentListsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
+
+
 @st.composite
 def content_lists_kwargs(
     draw: st.DrawFn,
@@ -34,16 +59,22 @@ def content_lists_kwargs(
         chain = st_ak.OptsChain({})
     st_content = chain.register_callable(st_ak.contents.contents)
 
-    min_len, max_len = draw(st_ak.ranges(min_start=0, max_end=10, max_start=5))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_len, max_len = draw(st_ak.ranges(min_start=0, max_end=10, max_start=5))
+        ret = RelatedKwargs()
+        if min_len is not None:
+            ret['min_len'] = min_len
+        if max_len is not None:
+            ret['max_len'] = max_len
+        return ret
 
-    drawn = (
-        ('min_len', min_len),
-        ('max_len', max_len),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'st_content': st.just(st_content),
                 'max_size': st.integers(min_value=0, max_value=200),
@@ -54,7 +85,7 @@ def content_lists_kwargs(
         )
     )
 
-    return chain.extend(cast(ContentListsKwargs, kwargs))
+    return chain.extend(cast(ContentListsKwargs, {**related, **optional_independent}))
 
 
 @given(data=st.data())
@@ -64,10 +95,10 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(content_lists_kwargs(), label='opts')
     opts.reset()
 
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    max_leaf_size = opts.kwargs.get('max_leaf_size')
-    min_len = opts.kwargs.get('min_len', DEFAULT_MIN_LEN)
-    max_len = opts.kwargs.get('max_len')
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
+    min_len = opts.kwargs.get('min_len', DEFAULTS['min_len'])
+    max_len = opts.kwargs.get('max_len', DEFAULTS['max_len'])
 
     # Call the test subject
     result = data.draw(

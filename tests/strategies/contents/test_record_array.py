@@ -8,18 +8,43 @@ from awkward.contents import Content, RecordArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-
-DEFAULT_MAX_FIELDS = 5
+from tests.funcs import assert_kwargs_match_signature
 
 
 class RecordArrayContentsKwargs(TypedDict, total=False):
     """Options for `record_array_contents()` strategy."""
 
-    contents: list[Content] | st.SearchStrategy[list[Content]]
+    contents: list[Content] | st.SearchStrategy[list[Content]] | None
     max_fields: int
     allow_tuple: bool
     min_length: int
-    max_length: int
+    max_length: int | None
+
+
+DEFAULTS = RecordArrayContentsKwargs(
+    contents=None,
+    max_fields=5,
+    allow_tuple=True,
+    min_length=0,
+    max_length=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together as an ordered pair (`min_length <= max_length`)."""
+
+    min_length: int
+    max_length: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `record_array_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.record_array_contents,
+        kwargs_cls=RecordArrayContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -43,16 +68,22 @@ def record_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_contents = chain.register(_contents_list())
 
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=5))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=5))
+        ret = RelatedKwargs()
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
 
-    drawn = (
-        ('min_length', min_length),
-        ('max_length', max_length),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'contents': st.one_of(
                     _contents_list(),
@@ -64,7 +95,9 @@ def record_array_contents_kwargs(
         )
     )
 
-    return chain.extend(cast(RecordArrayContentsKwargs, kwargs))
+    return chain.extend(
+        cast(RecordArrayContentsKwargs, {**related, **optional_independent})
+    )
 
 
 @given(data=st.data())
@@ -82,9 +115,9 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result, RecordArray)
 
     # Assert the options were effective
-    max_fields = opts.kwargs.get('max_fields', DEFAULT_MAX_FIELDS)
-    allow_tuple = opts.kwargs.get('allow_tuple', True)
-    contents = opts.kwargs.get('contents', None)
+    max_fields = opts.kwargs.get('max_fields', DEFAULTS['max_fields'])
+    allow_tuple = opts.kwargs.get('allow_tuple', DEFAULTS['allow_tuple'])
+    contents = opts.kwargs.get('contents', DEFAULTS['contents'])
 
     # When auto-generating contents, field count is bounded by max_fields
     match contents:
@@ -112,8 +145,8 @@ def test_properties(data: st.DataObject) -> None:
         assert len(set(result.fields)) == len(result.fields)
 
     # Assert length is within bounds
-    min_length = opts.kwargs.get('min_length', 0)
-    max_length = opts.kwargs.get('max_length')
+    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
     assert min_length <= len(result) <= sc(max_length)
 
     # Non-empty records: length equals the minimum content length, capped by max_length

@@ -9,6 +9,8 @@ from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from tests.find_settings import FIND_NO_SHRINK
+from tests.funcs import assert_kwargs_match_signature
+from tests.strategies.contents.test_content import DEFAULTS as CONTENTS_DEFAULTS
 from tests.strategies.contents.test_content import ContentsKwargs, contents_kwargs
 
 
@@ -18,30 +20,16 @@ class ArraysKwargs(ContentsKwargs, total=False):
     allow_virtual: bool
 
 
-DEFAULTS = ArraysKwargs(
-    dtypes=None,
-    max_size=50,
-    allow_nan=True,
-    allow_numpy=True,
-    allow_empty=True,
-    allow_string=True,
-    allow_bytestring=True,
-    allow_regular=True,
-    allow_list_offset=True,
-    allow_list=True,
-    allow_record=True,
-    allow_union=True,
-    allow_indexed=True,
-    allow_indexed_option=True,
-    allow_byte_masked=True,
-    allow_bit_masked=True,
-    allow_unmasked=True,
-    max_leaf_size=None,
-    max_depth=None,
-    min_length=0,
-    max_length=None,
-    allow_virtual=True,
-)
+DEFAULTS = ArraysKwargs(**CONTENTS_DEFAULTS, allow_virtual=True)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `arrays()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.constructors.arrays,
+        kwargs_cls=ArraysKwargs,
+        defaults=DEFAULTS,
+    )
 
 
 @st.composite

@@ -23,10 +23,8 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK
+from tests.funcs import assert_kwargs_match_signature
 from tests.scaled_settings import scaled
-
-DEFAULT_MAX_SIZE = 50
-DEFAULT_MAX_DEPTH = None
 
 
 class ContentsKwargs(TypedDict, total=False):
@@ -55,6 +53,58 @@ class ContentsKwargs(TypedDict, total=False):
     max_length: int | None
 
 
+DEFAULTS = ContentsKwargs(
+    dtypes=None,
+    max_size=50,
+    allow_nan=True,
+    allow_numpy=True,
+    allow_empty=True,
+    allow_string=True,
+    allow_bytestring=True,
+    allow_regular=True,
+    allow_list_offset=True,
+    allow_list=True,
+    allow_record=True,
+    allow_union=True,
+    allow_indexed=True,
+    allow_indexed_option=True,
+    allow_byte_masked=True,
+    allow_bit_masked=True,
+    allow_unmasked=True,
+    max_leaf_size=None,
+    max_depth=None,
+    min_length=0,
+    max_length=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together: feasibility couples them.
+
+    `min_length > 0` requires a non-empty leaf type to be allowed, and
+    `max_size` must be at least `min_length`.
+    """
+
+    min_length: int
+    max_length: int | None
+    max_size: int
+    allow_numpy: bool
+    allow_empty: bool
+    allow_string: bool
+    allow_bytestring: bool
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `contents()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.contents,
+        exclude={'allow_union_root', 'allow_option_root', 'allow_indexed_root'},
+        kwargs_cls=ContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
+
+
 @st.composite
 def contents_kwargs(
     draw: st.DrawFn,
@@ -65,46 +115,54 @@ def contents_kwargs(
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
-    max_size = draw(st.integers(min_value=safe_max([min_length, 0]), max_value=200))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+        max_size = draw(st.integers(min_value=safe_max([min_length, 0]), max_value=200))
 
-    non_empty_leaves = {'numpy', 'string', 'bytestring'}
-    all_leaves = non_empty_leaves | {'empty'}
-    if min_length:
-        # At least one non-empty leaf must be allowed.
-        allowed = draw(
-            st.sets(
-                st.sampled_from(list(non_empty_leaves)),
-                min_size=1,
-                max_size=len(non_empty_leaves),
+        non_empty_leaves = {'numpy', 'string', 'bytestring'}
+        all_leaves = non_empty_leaves | {'empty'}
+        if min_length:
+            # At least one non-empty leaf must be allowed.
+            allowed = draw(
+                st.sets(
+                    st.sampled_from(list(non_empty_leaves)),
+                    min_size=1,
+                    max_size=len(non_empty_leaves),
+                )
             )
-        )
-        if draw(st.booleans()):
-            allowed.add('empty')
-    else:
-        # The length zero is possible.
-        # At least any one leaf must be allowed.
-        allowed = draw(
-            st.sets(
-                st.sampled_from(list(all_leaves)),
-                min_size=1,
-                max_size=len(all_leaves),
+            if draw(st.booleans()):
+                allowed.add('empty')
+        else:
+            # The length zero is possible.
+            # At least any one leaf must be allowed.
+            allowed = draw(
+                st.sets(
+                    st.sampled_from(list(all_leaves)),
+                    min_size=1,
+                    max_size=len(all_leaves),
+                )
             )
+
+        ret = RelatedKwargs(
+            max_size=max_size,
+            allow_numpy='numpy' in allowed,
+            allow_empty='empty' in allowed,
+            allow_string='string' in allowed,
+            allow_bytestring='bytestring' in allowed,
         )
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
 
-    drawn = (
-        ('min_length', min_length),
-        ('max_length', max_length),
-        ('max_size', max_size),
-        ('allow_numpy', 'numpy' in allowed),
-        ('allow_empty', 'empty' in allowed),
-        ('allow_string', 'string' in allowed),
-        ('allow_bytestring', 'bytestring' in allowed),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'dtypes': st.just(st_dtypes),
                 'allow_nan': st.booleans(),
@@ -124,7 +182,7 @@ def contents_kwargs(
         )
     )
 
-    return chain.extend(cast(ContentsKwargs, kwargs))
+    return chain.extend(cast(ContentsKwargs, {**related, **optional_independent}))
 
 
 @scaled(2.5)  # `contents()` composes every strategy; interaction bugs live here
@@ -142,27 +200,33 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(c, ak.contents.Content)
 
     # Assert the options were effective
-    dtypes = opts.kwargs.get('dtypes', None)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    allow_nan = opts.kwargs.get('allow_nan', True)
-    allow_numpy = opts.kwargs.get('allow_numpy', True)
-    allow_empty = opts.kwargs.get('allow_empty', True)
-    allow_string = opts.kwargs.get('allow_string', True)
-    allow_bytestring = opts.kwargs.get('allow_bytestring', True)
-    allow_regular = opts.kwargs.get('allow_regular', True)
-    allow_list_offset = opts.kwargs.get('allow_list_offset', True)
-    allow_list = opts.kwargs.get('allow_list', True)
-    allow_record = opts.kwargs.get('allow_record', True)
-    allow_union = opts.kwargs.get('allow_union', True)
-    allow_indexed = opts.kwargs.get('allow_indexed', True)
-    allow_indexed_option = opts.kwargs.get('allow_indexed_option', True)
-    allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
-    allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
-    allow_unmasked = opts.kwargs.get('allow_unmasked', True)
-    max_leaf_size = opts.kwargs.get('max_leaf_size')
-    min_length = opts.kwargs.get('min_length', 0)
-    max_length = opts.kwargs.get('max_length')
-    max_depth = opts.kwargs.get('max_depth', DEFAULT_MAX_DEPTH)
+    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    allow_numpy = opts.kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
+    allow_empty = opts.kwargs.get('allow_empty', DEFAULTS['allow_empty'])
+    allow_string = opts.kwargs.get('allow_string', DEFAULTS['allow_string'])
+    allow_bytestring = opts.kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
+    allow_regular = opts.kwargs.get('allow_regular', DEFAULTS['allow_regular'])
+    allow_list_offset = opts.kwargs.get(
+        'allow_list_offset', DEFAULTS['allow_list_offset']
+    )
+    allow_list = opts.kwargs.get('allow_list', DEFAULTS['allow_list'])
+    allow_record = opts.kwargs.get('allow_record', DEFAULTS['allow_record'])
+    allow_union = opts.kwargs.get('allow_union', DEFAULTS['allow_union'])
+    allow_indexed = opts.kwargs.get('allow_indexed', DEFAULTS['allow_indexed'])
+    allow_indexed_option = opts.kwargs.get(
+        'allow_indexed_option', DEFAULTS['allow_indexed_option']
+    )
+    allow_byte_masked = opts.kwargs.get(
+        'allow_byte_masked', DEFAULTS['allow_byte_masked']
+    )
+    allow_bit_masked = opts.kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
+    allow_unmasked = opts.kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
+    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
+    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
+    max_depth = opts.kwargs.get('max_depth', DEFAULTS['max_depth'])
 
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)

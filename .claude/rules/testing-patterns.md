@@ -7,194 +7,120 @@ paths:
 
 Reference implementations:
 
-- `tests/strategies/contents/test_content.py` (base `OptsChain` pattern, all
-  optional kwargs)
-- `tests/strategies/numpy/test_numpy_arrays.py` (min/max pairs with `ranges()`)
-- `tests/strategies/forms/test_numpy_forms.py` (mode selection for
-  strategy-valued kwargs)
-- `tests/strategies/misc/test_ranges.py` (dependent kwargs without `OptsChain`)
-- `tests/strategies/contents/test_content_lists.py` (callable-valued kwargs with
-  `register_callable()`)
+- `tests/strategies/contents/test_content.py` — full template with `OptsChain`;
+  `exclude` for internal recursion params
+- `tests/strategies/constructors/test_array.py` — kwargs inheritance; `DEFAULTS`
+  derived from the parent module's
+- `tests/strategies/contents/test_record_array.py` — smallest full-template
+  example
+- `tests/strategies/numpy/test_numpy_arrays.py` — min/max pairs with `ranges()`;
+  the dtype pool depends on other drawn options
+- `tests/strategies/forms/test_numpy_forms.py` — mode selection for
+  strategy-valued kwargs (no `RelatedKwargs`)
+- `tests/strategies/contents/test_content_lists.py` — callable-valued kwargs
+  with `register_callable()`
+- `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without `OptsChain`
+  (closest to the original template in awkward's
+  `tests/properties/operations/test_flatten.py`)
 
-## 1. TypedDict for Strategy kwargs
+Test modules not listed above may predate this template; follow the references,
+not neighboring files. The remaining modules will be brought onto the template
+eventually.
 
-Define a `TypedDict` that mirrors the strategy's parameters:
+## 1. Option declarations
+
+Each kwargs test module declares a strategy's options in up to three objects,
+and a meta-test keeps them in sync with the strategy's signature:
+
+- A `TypedDict` (`total=False`) with one key per signature parameter;
+  annotations match the signature exactly (a convention the meta-test does not
+  check — verify by reading; the meta-test compares only keys and defaults).
+- `DEFAULTS`: the TypedDict instantiated with the signature's default values.
+- `RelatedKwargs`: a second TypedDict naming the options drawn together (see
+  section 2). Omitted when the coupling takes another form, such as mode
+  selection.
+
+The meta-test, named `test_kwargs_match_signature`, calls
+`assert_kwargs_match_signature()` from `tests/funcs.py`:
 
 ```python
-class ContentsKwargs(TypedDict, total=False):
-    '''Options for `contents()` strategy.'''
-
-    dtypes: st.SearchStrategy[np.dtype] | None
-    max_size: int
-    allow_nan: bool
-    allow_numpy: bool
-    allow_empty: bool
-    allow_string: bool
-    allow_bytestring: bool
-    allow_regular: bool
-    allow_list_offset: bool
-    allow_list: bool
-    allow_record: bool
-    allow_union: bool
-    allow_indexed: bool
-    allow_indexed_option: bool
-    allow_byte_masked: bool
-    allow_bit_masked: bool
-    allow_unmasked: bool
-    max_leaf_size: int | None
-    max_depth: int | None
-    min_length: int
-    max_length: int | None
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `contents()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.contents,
+        exclude={'allow_union_root', 'allow_option_root', 'allow_indexed_root'},
+        kwargs_cls=ContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 ```
+
+It asserts that the TypedDict keys equal the signature's parameters minus
+`exclude`, that `DEFAULTS` equals the signature's defaults, and that
+`RelatedKwargs` keys are a subset. `exclude` records the parameters the kwargs
+strategy deliberately does not draw: internal recursion controls (`allow_*_root`
+in `contents()`; `all_option_or_none` and `st_option` in `content_lists()`) or a
+positional factory (`st_` in `ranges()`). Adding a parameter to a strategy turns
+this test red first; update the declarations with it.
+
+A strategy that extends another subclasses the TypedDict and derives its
+`DEFAULTS` by unpacking the parent module's — see `ArraysKwargs` in
+`test_array.py`.
 
 ## 2. Strategy for kwargs
 
-### Base pattern with `OptsChain`
+`<strategy>_kwargs()` is a `@st.composite` returning
+`st_ak.OptsChain[MyKwargs]`, with a `chain` parameter so composable strategies
+can delegate kwargs (`arrays_kwargs` chains `contents_kwargs`). When nothing
+needs recorders or chaining, it returns a plain kwargs dict instead
+(`test_ranges.py`).
 
-All kwargs strategies use `@st.composite` returning `st_ak.OptsChain[MyKwargs]`.
-The `chain` parameter enables kwargs delegation between composable strategies.
+The body makes two draws and merges them:
 
-See `tests/strategies/contents/test_content.py` for a full example.
+- A nested `_st_related_kwargs()` composite returns `RelatedKwargs` — the
+  options whose values constrain each other: min/max pairs from
+  `st_ak.ranges()`, feasibility-coupled flags (`test_content.py`), or pools that
+  depend on other drawn values (`test_numpy_arrays.py`). A value that can be
+  `None` is added to the dict only when it is not `None`, so the omitted-key
+  path exercises the strategy's default.
+- An `st.fixed_dictionaries({}, optional={...})` draw for the independent
+  options; whether each key appears is drawn separately from its value.
 
-Key techniques:
-
-- `@st.composite` with `chain` parameter for composability
-- `chain.register(strategy)` creates a `RecordDraws` wrapper that tracks drawn
-  values; pass it via `st.just(recorder)` as a strategy-valued kwarg
-- `chain.register_callable(factory)` creates a `RecordCallDraws` wrapper for
-  callable-valued kwargs (see "Callable-valued kwargs" section below)
-- `chain.extend(kwargs)` returns a new `OptsChain` with merged kwargs
-- Use `st.fixed_dictionaries` with `optional` for independently drawn kwargs
-
-### Min/max pairs with `st_ak.ranges()`
-
-Use `st_ak.ranges()` to generate `(min, max)` pairs where `min <= max` and
-either may be `None`:
-
-```python
-min_size, max_size = draw(
-    st_ak.ranges(min_start=0, max_end=100, max_start=DEFAULT_MAX_SIZE)
-)
-```
-
-Include non-`None` values as required keys in `st.fixed_dictionaries`:
-
-```python
-drawn = (
-    ('min_size', min_size),
-    ('max_size', max_size),
-)
-
-kwargs = draw(
-    st.fixed_dictionaries(
-        {k: st.just(v) for k, v in drawn if v is not None},
-        optional={...},
-    )
-)
-
-return chain.extend(cast(MyKwargs, kwargs))
-```
-
-See `tests/strategies/numpy/test_numpy_arrays.py` and `tests/util/test_draw.py`
-for full examples.
-
-### Dependent kwargs (without `OptsChain`)
-
-See `tests/strategies/misc/test_ranges.py` for a full example.
-
-When kwargs depend on each other, use `@st.composite` and `flatmap` to draw
-values with dependencies (e.g., an upper bound that depends on a drawn lower
-bound).
-
-Key techniques:
-
-- `@st.composite` allows multiple `draw()` calls with dependencies
-- `flatmap` chains dependent strategies (e.g., max depends on min)
-- Mix required and optional in `st.fixed_dictionaries`
-
-### Mode selection for strategy-valued kwargs
-
-See `tests/strategies/forms/test_numpy_forms.py` for a full example.
-
-When a strategy has mutually exclusive parameter groups (e.g., `type_` mode vs
-`dtypes` mode), define mode functions selected via `st.one_of`. Within a mode, a
-kwarg can be drawn as either a concrete value or `st.just(recorder)` — a tracked
-strategy from `chain.register()` — so the test can later distinguish the two via
-`match`.
-
-In the test, call `reset()` before drawing and use `match` for assertions:
-
-```python
-opts = data.draw(numpy_forms_kwargs(), label='opts')
-opts.reset()
-result = data.draw(st_ak.numpy_forms(**opts.kwargs), label='result')
-
-match type_:
-    case ak.types.NumpyType():
-        assert result.primitive == type_.primitive
-    case st_ak.RecordDraws():
-        drawn_primitives = {t.primitive for t in type_.drawn}
-        assert result.primitive in drawn_primitives
-```
-
-Key techniques:
-
-- Register multiple recorders for different strategy-valued parameters
-- `st.one_of(type_mode(), dtypes_mode())` selects between mutually exclusive
-  parameter groups
-- `reset()` clears all registered recorders before each draw (avoids stale
-  state)
-- `match` / `case` distinguishes concrete values from `st_ak.RecordDraws` in
-  assertions
-
-### Callable-valued kwargs with `register_callable()`
-
-See `tests/strategies/contents/test_content_lists.py` for a full example.
-
-When a parameter is a callable that returns a strategy (not a strategy itself),
-use `chain.register_callable()` to create a `RecordCallDraws` wrapper. Each call
-to the wrapper produces a `RecordDraws` instance, and `drawn` aggregates all
-values across all calls.
-
-In the test, use `match` to check for `RecordCallDraws` and verify drawn values:
-
-```python
-match opts.kwargs.get('st_content'):
-    case RecordCallDraws() as st_content:
-        assert len(st_content.drawn) == len(result)
-        assert all(d is r for d, r in zip(st_content.drawn, result))
-```
-
-Key techniques:
-
-- `chain.register_callable(factory)` creates a `RecordCallDraws` wrapper that
-  tracks all calls and their drawn values
-- When the kwarg is optional (callable has a default), use `optional` in
-  `st.fixed_dictionaries` so it can be omitted
-- `RecordCallDraws.drawn` returns a flat list of all drawn values across all
-  calls, in order
-- `reset()` on `OptsChain` also resets all callable recorders
+Strategy-valued kwargs are registered on the chain so the test can later assert
+what was drawn: `chain.register(strategy)` returns a tracked `RecordDraws`
+wrapper (passed via `st.just(recorder)`), and `chain.register_callable(factory)`
+returns a `RecordCallDraws` wrapper for callable-valued kwargs, aggregating
+draws across all calls (`test_content_lists.py`). The option's pool typically
+mixes concrete values with the recorder — e.g.
+`st.one_of(_contents_list(), st.just(recorder))` in `test_record_array.py` — so
+the concrete-value path is exercised too. For mutually exclusive parameter
+groups, define mode functions selected with `st.one_of` (`test_numpy_forms.py`).
 
 ## 3. Main property-based test
 
-Test that the strategy respects all its options. By convention, the main
-property test in each file is named `test_properties` — the file name already
-carries the strategy name, so the function name does not need to repeat it.
+The main property test in each file is named `test_properties` — the file name
+already carries the strategy name. It draws the options, calls the test subject,
+and asserts every option was effective:
 
 ```python
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_arrays()`."""
-    # Draw options
     opts = data.draw(numpy_arrays_kwargs(), label='opts')
-    opts.reset()
+    opts.reset()  # clear recorders before each draw
 
-    # Call the test subject
     n = data.draw(st_ak.numpy_arrays(**opts.kwargs), label='n')
 
-    # Assert the options were effective
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
     ...
 ```
+
+Defaults are read as `opts.kwargs.get(k, DEFAULTS[k])`, never as literals. A
+kwarg that can hold either a concrete value or a recorder is distinguished with
+`match` / `case`: the recorder arms (`st_ak.RecordDraws()` /
+`RecordCallDraws()`) assert against the recorded draws, and a concrete-value arm
+(e.g. `case list():` in `test_record_array.py`) asserts the result uses the
+passed objects.
 
 Do not set `max_examples` on `@given` tests. The profiles registered in
 `tests/conftest.py` supply it — 200 by default (PRs and local runs), 10,000
@@ -223,7 +149,7 @@ from tests.find_settings import FIND
 
 
 def test_draw_empty() -> None:
-    '''Assert that empty arrays can be drawn by default.'''
+    """Assert that empty arrays can be drawn by default."""
     find(st_ak.numpy_arrays(), lambda a: math.prod(a.shape) == 0, settings=FIND)
 ```
 
@@ -239,7 +165,7 @@ def test_draw_empty() -> None:
 - Derive any one-off tweak from the shared instances (e.g.
   `settings(FIND, ...)`) instead of building `settings` inline.
 - Use specific dtypes to target relevant types (e.g., `st_np.floating_dtypes()`
-  for NaN tests)
+  for NaN tests, where `st_np` is `hypothesis.extra.numpy`)
 
 ## 5. Optional bounds with `safe_compare`
 
@@ -255,15 +181,7 @@ assert sc(min_size) <= len(result) <= sc(max_size)
 `sc(None)` returns an object that is true for all inequality comparisons, so
 `None` bounds are effectively ignored.
 
-## 6. Global constants
-
-Extract shared values like default parameters:
-
-```python
-DEFAULT_MAX_SIZE = 10
-```
-
-## 7. Tracking upstream Awkward Array bugs in tests
+## 6. Tracking upstream Awkward Array bugs in tests
 
 Two patterns, depending on whether the bug can be triggered directly or only
 shows up as an incidental failure inside a broader property test.
