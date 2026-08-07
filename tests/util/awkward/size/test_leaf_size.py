@@ -1,9 +1,7 @@
-import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
-from awkward.contents import RecordArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
     iter_contents,
@@ -33,16 +31,6 @@ def test_properties(data: st.DataObject) -> None:
         )
         actual = leaf_size(c, zero_field_record_as_leaf=zero_field_record_as_leaf)
         assert actual == expected
-
-
-@pytest.mark.parametrize('is_tuple', [True, False])
-def test_zero_field_record(is_tuple: bool) -> None:
-    """A zero-field record counts its length unless disabled."""
-    # TODO: Delete this test when `contents()` generates the zero-field record
-    # leaf; `test_properties` then covers both flag values for it.
-    c = RecordArray([], fields=None if is_tuple else [], length=3)
-    assert leaf_size(c) == 3
-    assert leaf_size(c, zero_field_record_as_leaf=False) == 0
 
 
 @given(a=st_ak.constructors.arrays(min_record_fields=1))
