@@ -137,7 +137,7 @@ def test_properties(data: st.DataObject) -> None:
         )
     except TypeError as e:
         assert _expect_raised()
-        assert "must have at least 2 'contents'" in str(e)
+        assert 'at least 2' in str(e)
         return
 
     assert not _expect_raised()

@@ -76,8 +76,10 @@ def union_array_contents(
                         allow_indexed_root=False,
                     ),
                     max_leaf_size=max_length if max_length is not None else 10,
-                    # Let UnionArray reject max_contents < 2 rather than
-                    # validating here.
+                    # The clamp keeps min_len <= max_len: content_lists()
+                    # honors min_len over max_len, so an unclamped 2 would
+                    # override max_contents instead of letting UnionArray
+                    # reject it.
                     min_len=min(2, max_contents),
                     max_len=max_contents,
                     all_option_or_none=True,
