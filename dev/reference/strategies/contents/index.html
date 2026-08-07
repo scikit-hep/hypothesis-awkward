@@ -4684,7 +4684,9 @@ a concrete list, or <code>None</code> to draw random children.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum number of child contents when <code>contents</code> is <code>None</code>.</p>
+                <p>Maximum number of child contents when <code>contents</code> is <code>None</code>. Below 2, the
+drawn contents cannot satisfy the minimum of
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a>, whose <code>TypeError</code> propagates.</p>
               </div>
             </td>
             <td>
@@ -4723,6 +4725,30 @@ pre-truncation sum of children lengths; never satisfied by truncation.</p>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#TypeError">TypeError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If fewer than two child contents result, whether from <code>max_contents</code> or
+from <code>contents</code>. Raised by <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a>.</p>
+              </div>
             </td>
           </tr>
       </tbody>
