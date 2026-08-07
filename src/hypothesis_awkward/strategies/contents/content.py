@@ -48,6 +48,8 @@ def contents(
     max_depth: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    min_record_fields: int = 0,
+    max_record_fields: int | None = None,
     allow_union_root: bool = True,
     allow_option_root: bool = True,
     allow_indexed_root: bool = True,
@@ -123,7 +125,8 @@ def contents(
     allow_list
         No [`ListArray`][ak.contents.ListArray] is generated if `False`.
     allow_record
-        No [`RecordArray`][ak.contents.RecordArray] is generated if `False`.
+        No [`RecordArray`][ak.contents.RecordArray] is generated if `False`. This
+        includes records with no fields.
     allow_union
         No [`UnionArray`][ak.contents.UnionArray] is generated if `False`.
     allow_indexed
@@ -151,6 +154,16 @@ def contents(
         Minimum `len()` of the generated array.
     max_length
         Maximum `len()` of the generated array. Unbounded if `None`.
+    min_record_fields
+        Minimum number of fields in each generated
+        [`RecordArray`][ak.contents.RecordArray], at any nesting depth. If 1 or
+        greater, no records with no fields are generated. No
+        [`RecordArray`][ak.contents.RecordArray] is generated when it exceeds
+        `max_record_fields`.
+    max_record_fields
+        Maximum number of fields in each generated
+        [`RecordArray`][ak.contents.RecordArray], at any nesting depth. Unbounded
+        if `None`. If `0`, only records with no fields are generated.
     allow_union_root
         The outermost content node cannot be a [`UnionArray`][ak.contents.UnionArray] if
         `False`. Unlike `allow_union`, this does not prevent
@@ -177,6 +190,11 @@ def contents(
     >>> isinstance(c, Content)
     True
     """
+    # A zero-field record is a RecordArray layer: it obeys allow_record and
+    # min_record_fields, and consumes one level of max_depth even as a leaf.
+    allow_zero_field_record = (
+        allow_record and min_record_fields <= 0 and sc(max_depth) >= 1
+    )
     st_leaf = functools.partial(
         leaf_contents,
         dtypes=dtypes,
@@ -185,7 +203,7 @@ def contents(
         allow_empty=allow_empty,
         allow_string=allow_string,
         allow_bytestring=allow_bytestring,
-        allow_zero_field_record=False,
+        allow_zero_field_record=allow_zero_field_record,
     )
     leaf_max_size = max_size
     if max_leaf_size is not None:
@@ -225,7 +243,11 @@ def contents(
     # allowed (Empty has length 0 and is excluded by min_size > 0 inside
     # leaf_contents).
     leaf_can_satisfy_min = leaf_feasible and (
-        min_length == 0 or allow_numpy or allow_string or allow_bytestring
+        min_length == 0
+        or allow_numpy
+        or allow_string
+        or allow_bytestring
+        or allow_zero_field_record
     )
 
     if leaf_only:
@@ -267,6 +289,8 @@ def contents(
         allow_byte_masked=allow_byte_masked,
         allow_bit_masked=allow_bit_masked,
         allow_unmasked=allow_unmasked,
+        min_record_fields=min_record_fields,
+        max_record_fields=max_record_fields,
     )
 
     # Choose wrapper type from allow_* flags
@@ -277,8 +301,14 @@ def contents(
         candidates.append(list_offset_array_from_contents)
     if allow_list:
         candidates.append(list_array_from_contents)
-    if allow_record:
-        candidates.append(record_array_from_contents)
+    if allow_record and max(min_record_fields, 1) <= sc(max_record_fields):
+        candidates.append(
+            functools.partial(
+                record_array_from_contents,
+                min_fields=max(min_record_fields, 1),
+                max_fields=max_record_fields,
+            )
+        )
     if allow_union and allow_union_root:
         candidates.append(union_array_from_contents)
     if allow_indexed and allow_indexed_root:

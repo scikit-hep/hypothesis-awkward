@@ -22,7 +22,7 @@ from hypothesis_awkward.util import (
     safe_max,
 )
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND, FIND_NO_SHRINK
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
 from tests.funcs import assert_kwargs_match_signature
 from tests.scaled_settings import scaled
 
@@ -51,6 +51,8 @@ class ContentsKwargs(TypedDict, total=False):
     max_depth: int | None
     min_length: int
     max_length: int | None
+    min_record_fields: int
+    max_record_fields: int | None
 
 
 DEFAULTS = ContentsKwargs(
@@ -75,6 +77,8 @@ DEFAULTS = ContentsKwargs(
     max_depth=None,
     min_length=0,
     max_length=None,
+    min_record_fields=0,
+    max_record_fields=None,
 )
 
 
@@ -92,6 +96,8 @@ class RelatedKwargs(TypedDict, total=False):
     allow_empty: bool
     allow_string: bool
     allow_bytestring: bool
+    min_record_fields: int
+    max_record_fields: int | None
 
 
 def test_kwargs_match_signature() -> None:
@@ -156,6 +162,14 @@ def contents_kwargs(
             ret['min_length'] = min_length
         if max_length is not None:
             ret['max_length'] = max_length
+
+        min_record_fields, max_record_fields = draw(
+            st_ak.ranges(min_start=0, max_end=5)
+        )
+        if min_record_fields is not None:
+            ret['min_record_fields'] = min_record_fields
+        if max_record_fields is not None:
+            ret['max_record_fields'] = max_record_fields
         return ret
 
     related = draw(_st_related_kwargs())
@@ -227,6 +241,12 @@ def test_properties(data: st.DataObject) -> None:
     min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
     max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
     max_depth = opts.kwargs.get('max_depth', DEFAULTS['max_depth'])
+    min_record_fields = opts.kwargs.get(
+        'min_record_fields', DEFAULTS['min_record_fields']
+    )
+    max_record_fields = opts.kwargs.get(
+        'max_record_fields', DEFAULTS['max_record_fields']
+    )
 
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
@@ -278,6 +298,10 @@ def test_properties(data: st.DataObject) -> None:
         assert leaf_size(c) <= max_leaf_size
     assert _nesting_depth(c) <= sc(max_depth)
     assert min_length <= len(c) <= sc(max_length)
+
+    for n in iter_contents(c):
+        if isinstance(n, ak.contents.RecordArray):
+            assert min_record_fields <= len(n.contents) <= sc(max_record_fields)
 
 
 def test_draw_max_size() -> None:
@@ -415,6 +439,57 @@ def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
             if n is not c
         ),
         settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('min_record_fields', [0, 1, 2, 3])
+def test_draw_min_record_fields(min_record_fields: int, nested: bool) -> None:
+    """Assert a record with exactly `min_record_fields` fields at each position."""
+    find(
+        st_ak.contents.contents(min_record_fields=min_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == min_record_fields
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('max_record_fields', [0, 1, 2, 3])
+def test_draw_max_record_fields(max_record_fields: int, nested: bool) -> None:
+    """Assert a record with exactly `max_record_fields` fields at each position."""
+    find(
+        st_ak.contents.contents(max_record_fields=max_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == max_record_fields
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('empty', [True, False])
+@pytest.mark.parametrize('is_tuple', [True, False])
+def test_draw_zero_field_record(is_tuple: bool, empty: bool, nested: bool) -> None:
+    """Assert a zero-field record of each flavor, length, and position can be drawn."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and not n.contents
+            and n.is_tuple == is_tuple
+            and (len(n) == 0) == empty
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND_RARE,
     )
 
 
