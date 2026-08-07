@@ -32,6 +32,7 @@ def arrays(
     max_depth: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    max_record_fields: int | None = None,
     allow_virtual: bool = True,
 ) -> ak.Array:
     """Strategy for Awkward Arrays.
@@ -153,6 +154,10 @@ def arrays(
     max_length
         Maximum `len()` of the generated array. No constraint when `None` (the
         default).
+    max_record_fields
+        Maximum number of fields in each generated
+        [`RecordArray`][ak.contents.RecordArray], at any nesting depth. Unbounded
+        if `None`. No [`RecordArray`][ak.contents.RecordArray] is generated if `0`.
     allow_virtual
         No virtual arrays are generated if `False`.
 
@@ -188,6 +193,7 @@ def arrays(
             max_depth=max_depth,
             min_length=min_length,
             max_length=max_length,
+            max_record_fields=max_record_fields,
         )
     )
     array = ak.Array(layout)

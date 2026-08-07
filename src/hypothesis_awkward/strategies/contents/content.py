@@ -48,6 +48,7 @@ def contents(
     max_depth: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    max_record_fields: int | None = None,
     allow_union_root: bool = True,
     allow_option_root: bool = True,
     allow_indexed_root: bool = True,
@@ -151,6 +152,10 @@ def contents(
         Minimum `len()` of the generated array.
     max_length
         Maximum `len()` of the generated array. Unbounded if `None`.
+    max_record_fields
+        Maximum number of fields in each generated
+        [`RecordArray`][ak.contents.RecordArray], at any nesting depth. Unbounded
+        if `None`. No [`RecordArray`][ak.contents.RecordArray] is generated if `0`.
     allow_union_root
         The outermost content node cannot be a [`UnionArray`][ak.contents.UnionArray] if
         `False`. Unlike `allow_union`, this does not prevent
@@ -267,6 +272,7 @@ def contents(
         allow_byte_masked=allow_byte_masked,
         allow_bit_masked=allow_bit_masked,
         allow_unmasked=allow_unmasked,
+        max_record_fields=max_record_fields,
     )
 
     # Choose wrapper type from allow_* flags
@@ -277,8 +283,10 @@ def contents(
         candidates.append(list_offset_array_from_contents)
     if allow_list:
         candidates.append(list_array_from_contents)
-    if allow_record:
-        candidates.append(record_array_from_contents)
+    if allow_record and sc(max_record_fields) >= 1:
+        candidates.append(
+            functools.partial(record_array_from_contents, max_fields=max_record_fields)
+        )
     if allow_union and allow_union_root:
         candidates.append(union_array_from_contents)
     if allow_indexed and allow_indexed_root:
