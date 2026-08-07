@@ -51,6 +51,7 @@ class ContentsKwargs(TypedDict, total=False):
     max_depth: int | None
     min_length: int
     max_length: int | None
+    min_record_fields: int
     max_record_fields: int | None
 
 
@@ -76,6 +77,7 @@ DEFAULTS = ContentsKwargs(
     max_depth=None,
     min_length=0,
     max_length=None,
+    min_record_fields=0,
     max_record_fields=None,
 )
 
@@ -94,6 +96,8 @@ class RelatedKwargs(TypedDict, total=False):
     allow_empty: bool
     allow_string: bool
     allow_bytestring: bool
+    min_record_fields: int
+    max_record_fields: int | None
 
 
 def test_kwargs_match_signature() -> None:
@@ -158,6 +162,14 @@ def contents_kwargs(
             ret['min_length'] = min_length
         if max_length is not None:
             ret['max_length'] = max_length
+
+        min_record_fields, max_record_fields = draw(
+            st_ak.ranges(min_start=0, max_end=5)
+        )
+        if min_record_fields is not None:
+            ret['min_record_fields'] = min_record_fields
+        if max_record_fields is not None:
+            ret['max_record_fields'] = max_record_fields
         return ret
 
     related = draw(_st_related_kwargs())
@@ -180,7 +192,6 @@ def contents_kwargs(
                 'allow_unmasked': st.booleans(),
                 'max_leaf_size': st.integers(min_value=0, max_value=50),
                 'max_depth': st.integers(min_value=0, max_value=5),
-                'max_record_fields': st.integers(min_value=1, max_value=5),
             },
         )
     )
@@ -230,6 +241,9 @@ def test_properties(data: st.DataObject) -> None:
     min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
     max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
     max_depth = opts.kwargs.get('max_depth', DEFAULTS['max_depth'])
+    min_record_fields = opts.kwargs.get(
+        'min_record_fields', DEFAULTS['min_record_fields']
+    )
     max_record_fields = opts.kwargs.get(
         'max_record_fields', DEFAULTS['max_record_fields']
     )
@@ -287,7 +301,7 @@ def test_properties(data: st.DataObject) -> None:
 
     for n in iter_contents(c):
         if isinstance(n, ak.contents.RecordArray):
-            assert len(n.contents) <= sc(max_record_fields)
+            assert min_record_fields <= len(n.contents) <= sc(max_record_fields)
 
 
 def test_draw_max_size() -> None:
@@ -423,6 +437,22 @@ def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
             len(n) > max_length and is_leaf(n) == leaf
             for n in iter_contents(c)
             if n is not c
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('min_record_fields', [0, 1, 2, 3])
+def test_draw_min_record_fields(min_record_fields: int, nested: bool) -> None:
+    """Assert a record with exactly `min_record_fields` fields at each position."""
+    find(
+        st_ak.contents.contents(min_record_fields=min_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == min_record_fields
+            and (n is not c) == nested
+            for n in iter_contents(c)
         ),
         settings=FIND,
     )
