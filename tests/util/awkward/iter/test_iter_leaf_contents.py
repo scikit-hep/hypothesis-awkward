@@ -1,4 +1,3 @@
-import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -45,13 +44,3 @@ def test_properties(data: st.DataObject) -> None:
             assert content.parameter('__array__') != 'byte'
         else:
             assert content.parameter('__array__') != 'bytestring'
-
-
-@pytest.mark.parametrize('is_tuple', [True, False])
-def test_zero_field_record(is_tuple: bool) -> None:
-    """A zero-field record is yielded as a leaf unless disabled."""
-    # TODO: Delete this test when `contents()` generates the zero-field record
-    # leaf; `test_properties` then covers both flag values for it.
-    c = RecordArray([], fields=None if is_tuple else [], length=3)
-    assert list(iter_leaf_contents(c)) == [c]
-    assert list(iter_leaf_contents(c, zero_field_record_as_leaf=False)) == []

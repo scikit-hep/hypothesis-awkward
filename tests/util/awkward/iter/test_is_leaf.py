@@ -1,4 +1,3 @@
-import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -72,16 +71,6 @@ def test_properties(data: st.DataObject) -> None:
             raise TypeError(f'Unexpected content type: {type(content).__name__}')
 
     assert actual == expected
-
-
-@pytest.mark.parametrize('is_tuple', [True, False])
-def test_zero_field_record(is_tuple: bool) -> None:
-    """A zero-field record is a leaf by default; the option disables it."""
-    # TODO: Delete this test when `contents()` generates the zero-field record
-    # leaf; `test_properties` then covers both flag values for it.
-    c = RecordArray([], fields=None if is_tuple else [], length=3)
-    assert is_leaf(c) is True
-    assert is_leaf(c, zero_field_record_as_leaf=False) is False
 
 
 def test_unregistered_type_returns_false() -> None:
