@@ -48,6 +48,7 @@ def contents(
     max_depth: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    min_record_fields: int = 0,
     max_record_fields: int | None = None,
     allow_union_root: bool = True,
     allow_option_root: bool = True,
@@ -153,6 +154,12 @@ def contents(
         Minimum `len()` of the generated array.
     max_length
         Maximum `len()` of the generated array. Unbounded if `None`.
+    min_record_fields
+        Minimum number of fields in each generated
+        [`RecordArray`][ak.contents.RecordArray], at any nesting depth. If 1 or
+        greater, no records with no fields are generated. No
+        [`RecordArray`][ak.contents.RecordArray] is generated when it exceeds
+        `max_record_fields`.
     max_record_fields
         Maximum number of fields in each generated
         [`RecordArray`][ak.contents.RecordArray], at any nesting depth. Unbounded
@@ -184,8 +191,10 @@ def contents(
     True
     """
     # A zero-field record is a RecordArray layer: it obeys allow_record and
-    # consumes one level of max_depth even as a leaf.
-    allow_zero_field_record = allow_record and sc(max_depth) >= 1
+    # min_record_fields, and consumes one level of max_depth even as a leaf.
+    allow_zero_field_record = (
+        allow_record and min_record_fields <= 0 and sc(max_depth) >= 1
+    )
     st_leaf = functools.partial(
         leaf_contents,
         dtypes=dtypes,
@@ -280,6 +289,7 @@ def contents(
         allow_byte_masked=allow_byte_masked,
         allow_bit_masked=allow_bit_masked,
         allow_unmasked=allow_unmasked,
+        min_record_fields=min_record_fields,
         max_record_fields=max_record_fields,
     )
 
@@ -291,9 +301,13 @@ def contents(
         candidates.append(list_offset_array_from_contents)
     if allow_list:
         candidates.append(list_array_from_contents)
-    if allow_record and sc(max_record_fields) >= 1:
+    if allow_record and max(min_record_fields, 1) <= sc(max_record_fields):
         candidates.append(
-            functools.partial(record_array_from_contents, max_fields=max_record_fields)
+            functools.partial(
+                record_array_from_contents,
+                min_fields=max(min_record_fields, 1),
+                max_fields=max_record_fields,
+            )
         )
     if allow_union and allow_union_root:
         candidates.append(union_array_from_contents)

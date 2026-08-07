@@ -33,6 +33,7 @@ def arrays(
     max_depth: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    min_record_fields: int = 0,
     max_record_fields: int | None = None,
     allow_virtual: bool = True,
 ) -> ak.Array:
@@ -156,6 +157,12 @@ def arrays(
     max_length
         Maximum `len()` of the generated array. No constraint when `None` (the
         default).
+    min_record_fields
+        Minimum number of fields in each generated
+        [`RecordArray`][ak.contents.RecordArray], at any nesting depth. If 1 or
+        greater, no records with no fields are generated. No
+        [`RecordArray`][ak.contents.RecordArray] is generated when it exceeds
+        `max_record_fields`.
     max_record_fields
         Maximum number of fields in each generated
         [`RecordArray`][ak.contents.RecordArray], at any nesting depth. Unbounded
@@ -195,6 +202,7 @@ def arrays(
             max_depth=max_depth,
             min_length=min_length,
             max_length=max_length,
+            min_record_fields=min_record_fields,
             max_record_fields=max_record_fields,
         )
     )

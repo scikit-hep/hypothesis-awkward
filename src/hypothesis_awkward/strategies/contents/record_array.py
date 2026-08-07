@@ -127,6 +127,7 @@ def record_array_from_contents(
     *,
     max_size: int,
     max_leaf_size: int | None = None,
+    min_fields: int = 1,
     max_fields: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
@@ -134,9 +135,9 @@ def record_array_from_contents(
 ) -> RecordArray:
     """Strategy for [`ak.contents.RecordArray`][] instances within a size budget.
 
-    Draws one or more children, at most `max_fields`, via `content_lists()` with
-    `min_len=1`, then wraps them in a [`RecordArray`][ak.contents.RecordArray] with
-    generated or omitted field names.
+    Draws at least `min_fields` and at most `max_fields` children via
+    `content_lists()`, then wraps them in a
+    [`RecordArray`][ak.contents.RecordArray] with generated or omitted field names.
 
     Called by `contents()` during recursive tree generation.
 
@@ -149,6 +150,8 @@ def record_array_from_contents(
         Upper bound on `content_size()` of the result.
     max_leaf_size
         Upper bound on total leaf elements. Unbounded if `None`.
+    min_fields
+        Lower bound on the number of fields, i.e., `len(result.contents)`.
     max_fields
         Upper bound on the number of fields, i.e., `len(result.contents)`.
         Unbounded if `None`.
@@ -184,8 +187,10 @@ def record_array_from_contents(
 
     Limit the number of fields:
 
-    >>> c = record_array_from_contents(contents, max_size=20, max_fields=2).example()
-    >>> 1 <= len(c.contents) <= 2
+    >>> c = record_array_from_contents(
+    ...     contents, max_size=20, min_fields=2, max_fields=3
+    ... ).example()
+    >>> 2 <= len(c.contents) <= 3
     True
     """
     children = draw(
@@ -193,7 +198,7 @@ def record_array_from_contents(
             content,
             max_size=max_size,
             max_leaf_size=max_leaf_size,
-            min_len=1,
+            min_len=min_fields,
             max_len=max_fields,
         )
     )
