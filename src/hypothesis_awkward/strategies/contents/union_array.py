@@ -34,13 +34,21 @@ def union_array_contents(
         Child contents. Can be a strategy for a list of [`Content`][ak.contents.Content],
         a concrete list, or `None` to draw random children.
     max_contents
-        Maximum number of child contents when `contents` is `None`.
+        Maximum number of child contents when `contents` is `None`. Below 2, the
+        drawn contents cannot satisfy the minimum of
+        [`UnionArray`][ak.contents.UnionArray], whose `TypeError` propagates.
     min_length
         Lower bound on the union length, i.e., `len(result)`. Constrains the
         pre-truncation sum of children lengths; never satisfied by truncation.
     max_length
         Upper bound on the union length, i.e., `len(result)`. Unbounded if
         `None`.
+
+    Raises
+    ------
+    TypeError
+        If fewer than two child contents result, whether from `max_contents` or
+        from `contents`. Raised by [`UnionArray`][ak.contents.UnionArray].
 
     Returns
     -------
@@ -68,7 +76,11 @@ def union_array_contents(
                         allow_indexed_root=False,
                     ),
                     max_leaf_size=max_length if max_length is not None else 10,
-                    min_len=2,
+                    # The clamp keeps min_len <= max_len: content_lists()
+                    # honors min_len over max_len, so an unclamped 2 would
+                    # override max_contents instead of letting UnionArray
+                    # reject it.
+                    min_len=min(2, max_contents),
                     max_len=max_contents,
                     all_option_or_none=True,
                     st_option=option_from_contents,
