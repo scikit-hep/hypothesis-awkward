@@ -45,7 +45,10 @@ def test_zero_field_record(is_tuple: bool) -> None:
     assert leaf_size(c, zero_field_record_as_leaf=False) == 0
 
 
-@given(a=st_ak.constructors.arrays())
+@given(a=st_ak.constructors.arrays(min_record_fields=1))
 def test_accepts_array(a: ak.Array) -> None:
     """`leaf_size` accepts an `ak.Array` as well as a `Content`."""
+    # TODO: Drop `min_record_fields=1` when awkward#4288 is fixed: `leaf_size()`
+    # raises `TypeError` on a virtual array with a nested zero-field record.
+    # https://github.com/scikit-hep/awkward/issues/4288
     assert leaf_size(a) == leaf_size(a.layout)
