@@ -5,6 +5,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import is_zero_field_record_leaf, iter_contents
 
 
 @st.composite
@@ -124,7 +125,8 @@ def arrays(
     allow_list
         No [`ListArray`][ak.contents.ListArray] is generated if `False`.
     allow_record
-        No [`RecordArray`][ak.contents.RecordArray] is generated if `False`.
+        No [`RecordArray`][ak.contents.RecordArray] is generated if `False`. This
+        includes records with no fields.
     allow_union
         No [`UnionArray`][ak.contents.UnionArray] is generated if `False`.
     allow_indexed
@@ -157,7 +159,7 @@ def arrays(
     max_record_fields
         Maximum number of fields in each generated
         [`RecordArray`][ak.contents.RecordArray], at any nesting depth. Unbounded
-        if `None`. No [`RecordArray`][ak.contents.RecordArray] is generated if `0`.
+        if `None`. If `0`, only records with no fields are generated.
     allow_virtual
         No virtual arrays are generated if `False`.
 
@@ -197,6 +199,8 @@ def arrays(
         )
     )
     array = ak.Array(layout)
+    if _has_zero_field_record(layout):
+        allow_virtual = False
     to_lazify = allow_virtual and draw(st.booleans())
     if not to_lazify:
         return array
@@ -209,6 +213,17 @@ def arrays(
         )
         warnings.warn(msg, RuntimeWarning, stacklevel=2)
         return array
+
+
+def _has_zero_field_record(layout: ak.contents.Content) -> bool:
+    """True if any node in `layout` is a record with no fields.
+
+    Lazifying such a layout produces a broken array: `ak.from_buffers` with
+    virtual buffers reconstructs the record without its length, and computing it
+    raises `TypeError`, from `len()` and even `ak.materialize`. Reproduced on
+    awkward 2.9.1 and 2.12.0.
+    """
+    return any(is_zero_field_record_leaf(n) for n in iter_contents(layout))
 
 
 def _lazify(array: ak.Array) -> ak.Array:

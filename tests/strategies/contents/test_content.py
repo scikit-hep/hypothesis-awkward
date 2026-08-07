@@ -22,7 +22,7 @@ from hypothesis_awkward.util import (
     safe_max,
 )
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND, FIND_NO_SHRINK
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
 from tests.funcs import assert_kwargs_match_signature
 from tests.scaled_settings import scaled
 
@@ -454,6 +454,25 @@ def test_draw_max_record_fields_recursed(max_record_fields: int) -> None:
             if n is not c
         ),
         settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('empty', [True, False])
+@pytest.mark.parametrize('is_tuple', [True, False])
+def test_draw_zero_field_record(is_tuple: bool, empty: bool, nested: bool) -> None:
+    """Assert a zero-field record of each flavor, length, and position can be drawn."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and not n.contents
+            and n.is_tuple == is_tuple
+            and (len(n) == 0) == empty
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND_RARE,
     )
 
 
