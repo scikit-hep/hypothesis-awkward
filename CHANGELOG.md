@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.20.0] - 2026-08-07
+
+### Features
+
+- Draw zero-field record length in `record_array_contents` ([#169](https://github.com/scikit-hep/hypothesis-awkward/pull/169))
+- Generate zero-field records in `leaf_contents()` ([#170](https://github.com/scikit-hep/hypothesis-awkward/pull/170))
+- Generate zero-field records, add record-field count options ([#173](https://github.com/scikit-hep/hypothesis-awkward/pull/173))
+
+### Bug Fixes
+
+- Let `UnionArray` reject `max_contents` < 2 ([#172](https://github.com/scikit-hep/hypothesis-awkward/pull/172))
+
+### Documentation
+
+- Declare Diátaxis quadrants with markers in the pages ([#162](https://github.com/scikit-hep/hypothesis-awkward/pull/162))
+- Expand the Testing Awkward Array guide page ([#174](https://github.com/scikit-hep/hypothesis-awkward/pull/174))
+
+### Refactoring
+
+- Add signature meta-tests to the kwargs test modules ([#171](https://github.com/scikit-hep/hypothesis-awkward/pull/171))
+
+### Build & CI
+
+- Extract persona-review profile from `write-docs-page` skill ([#160](https://github.com/scikit-hep/hypothesis-awkward/pull/160))
+- Bump astral-sh/setup-uv from 8.3.2 to 9.0.0 ([#153](https://github.com/scikit-hep/hypothesis-awkward/pull/153))
+- Bump awkward from 2.10.0 to 2.12.0 in /.github-deps/latest ([#159](https://github.com/scikit-hep/hypothesis-awkward/pull/159))
+- Split Diátaxis rules into shared core and declaration file ([#163](https://github.com/scikit-hep/hypothesis-awkward/pull/163))
+- Converge persona files onto one skeleton via the review brief ([#164](https://github.com/scikit-hep/hypothesis-awkward/pull/164))
+- Factor persona review into a shared skill and reviewer agent ([#165](https://github.com/scikit-hep/hypothesis-awkward/pull/165))
+- Consume the reviewed-writer plugin, delete mirrored copies ([#166](https://github.com/scikit-hep/hypothesis-awkward/pull/166))
+
+### Meta
+
+- Adopt "out-of-quadrant content" in persona-review engine
+- Finish "out-of-quadrant content" rename in review rules
+
+
 ## [0.19.1] - 2026-07-21
 
 ### Bug Fixes
