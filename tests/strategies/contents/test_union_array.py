@@ -51,8 +51,8 @@ def test_kwargs_match_signature() -> None:
 def _contents_list(
     draw: st.DrawFn,
 ) -> list[Content]:
-    """Draw a list of 2..5 Content objects for testing."""
-    n = draw(st.integers(min_value=2, max_value=5))
+    """Draw a list of Content objects for testing."""
+    n = draw(st.integers(min_value=0, max_value=5))
     return [
         draw(
             st_ak.contents.contents(
@@ -95,7 +95,7 @@ def union_array_contents_kwargs(
             {},
             optional={
                 'contents': st.one_of(_contents_list(), st.just(st_contents)),
-                'max_contents': st.integers(min_value=2, max_value=10),
+                'max_contents': st.integers(min_value=0, max_value=10),
             },
         )
     )
@@ -112,17 +112,39 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(union_array_contents_kwargs(), label='opts')
     opts.reset()
 
+    max_contents = opts.kwargs.get('max_contents', DEFAULTS['max_contents'])
+    contents = opts.kwargs.get('contents', DEFAULTS['contents'])
+
+    def _expect_raised() -> bool:
+        """`UnionArray` requires at least two contents.
+
+        For the recorder arm, callable only after the draw: `RecordDraws` records
+        the drawn list before the constructor raises.
+        """
+        match contents:
+            case None:
+                return max_contents < 2
+            case list():
+                return len(contents) < 2
+            case st_ak.RecordDraws():
+                return len(contents.drawn[0]) < 2
+        raise AssertionError(f'unhandled contents: {contents!r}')  # pragma: no cover
+
     # Call the test subject
-    result = data.draw(
-        st_ak.contents.union_array_contents(**opts.kwargs), label='result'
-    )
+    try:
+        result = data.draw(
+            st_ak.contents.union_array_contents(**opts.kwargs), label='result'
+        )
+    except TypeError as e:
+        assert _expect_raised()
+        assert "must have at least 2 'contents'" in str(e)
+        return
+
+    assert not _expect_raised()
 
     assert isinstance(result, UnionArray)
 
     # Assert the options were effective
-    max_contents = opts.kwargs.get('max_contents', DEFAULTS['max_contents'])
-    contents = opts.kwargs.get('contents', DEFAULTS['contents'])
-
     # Contents dispatch
     match contents:
         case None:
