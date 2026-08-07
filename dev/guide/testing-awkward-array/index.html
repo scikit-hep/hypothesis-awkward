@@ -602,6 +602,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-the-tests-run-in-awkward-arrays-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How the tests run in Awkward Array's CI
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-bugs-show" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What the bugs show
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upstream-test-pull-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Upstream test pull requests
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#bugs-found" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -618,6 +651,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Awkward Array
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyarrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        PyArrow
       </span>
     </span>
   </a>
@@ -1087,6 +1131,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#how-the-tests-run-in-awkward-arrays-ci" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How the tests run in Awkward Array's CI
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-bugs-show" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What the bugs show
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upstream-test-pull-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Upstream test pull requests
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#bugs-found" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1103,6 +1180,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Awkward Array
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyarrow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        PyArrow
       </span>
     </span>
   </a>
@@ -1227,27 +1315,32 @@ project. If you want to use the strategies in your own tests, start with
 <h2 id="how-hypothesis-awkward-tests-awkward-array">How hypothesis-awkward tests Awkward Array<a class="headerlink" href="#how-hypothesis-awkward-tests-awkward-array" title="Permanent link">&para;</a></h2>
 <!-- diataxis: explanation -->
 
-<p><a href="https://awkward-array.org/">Awkward Array</a> represents nested, variable-length,
-and mixed-type data, so its valid arrays span a large combinatorial space of
-layouts. Test data written by hand covers only a small part of that space, and
-failures often occur on input shapes that are absent from hand-written test
-cases. This makes Awkward Array hard to test thoroughly.</p>
-<p>This package addresses that problem with <a href="../../">property-based testing</a>:
-running one test against many automatically generated inputs instead of a fixed
-list. Its main strategy, <code>st_ak.constructors.arrays()</code>, generates nearly fully
-general Awkward Arrays, including virtual arrays (arrays whose buffers are not
-yet materialized); categorical data is the remaining gap (see the
-<a href="../roadmap/">Roadmap</a>). See <a href="../getting-started/">Getting Started</a> for what it
-produces.</p>
-<p>These strategies are integrated into Awkward Array's continuous integration
-(CI). The first property-based tests were added in
-<a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a> and now run on every
-change (in
-<a href="https://github.com/scikit-hep/awkward/tree/main/tests/properties"><code>tests/properties</code></a>).
-Two kinds of properties are checked so far:</p>
-<p><strong>Round-trip.</strong> Converting an array to buffers with <code>ak.to_buffers()</code> and back
-with <code>ak.from_buffers()</code> reconstructs an equal array
-(<a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a>).</p>
+<p><a href="https://awkward-array.org/">Awkward Array</a> builds arrays by composing a small
+set of layout nodes (the classes in <code>ak.contents</code>): numeric leaves, the
+unknown-type <code>EmptyArray</code>, variable-length and regular lists, indexed
+(indirection) nodes, missing values in four node forms, records, and unions. The
+nodes compose recursively, subject to a few validity rules, so the valid arrays
+span a large combinatorial space of layouts. Test data written by hand covers
+only a small part of that space, and failures often occur on input shapes that
+are absent from hand-written test cases. This makes Awkward Array hard to test
+thoroughly.</p>
+<p><a href="../../">Property-based testing</a> inverts the approach: instead of choosing
+inputs, a test states a property that must hold for every valid array, and the
+inputs are generated. This package supplies the generation. Its main strategy is
+<a href="../../reference/strategies/constructors/"><code>st_ak.constructors.arrays()</code></a> (with
+<code>import hypothesis_awkward.strategies as st_ak</code>), which generates nearly fully
+general Awkward Arrays, including virtual arrays — arrays whose buffers are not
+yet materialized. A generated array has either all buffers virtual or none; it
+lives on the CPU backend and carries no node parameters other than the
+<code>__array__</code> markers that make strings and bytestrings, so categorical data (the
+main remaining gap; see the <a href="../roadmap/">Roadmap</a>), named record types, and
+custom behaviors are not yet generated. See
+<a href="../getting-started/">Getting Started</a> for what it produces.</p>
+<p>Four kinds of properties are checked:</p>
+<p><strong>Round-trip.</strong> Converting an array to another representation and back
+reconstructs an equal array. The first property test covered <code>ak.to_buffers()</code>
+and <code>ak.from_buffers()</code> (the snippet is adapted from
+<a href="https://github.com/scikit-hep/awkward/blob/main/tests/properties/operations/test_to_from_buffers.py"><code>test_to_from_buffers.py</code></a>):</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">given</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
@@ -1260,9 +1353,24 @@ with <code>ak.from_buffers()</code> reconstructs an equal array
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">returned</span> <span class="o">=</span> <span class="n">ak</span><span class="o">.</span><span class="n">from_buffers</span><span class="p">(</span><span class="o">*</span><span class="n">sent</span><span class="p">)</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="k">assert</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">returned</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span></code></pre></div>
+<p>The same property now also covers the conversions to and from NumPy, Arrow,
+Parquet, Feather, and JSON. Only the buffers round trip draws from the
+unrestricted strategy; the other five narrow it — with the strategy's <code>allow_*</code>
+flags, restricted dtype strategies, and format-compatibility filters — to what
+the target format can represent, so each conversion is checked over the subset
+it is expected to support. Where a bug is still open, a restriction can also
+stand in for a known-issue predicate, with the issue cited in the test module.
+The NumPy round trip, for example, draws no variable-length lists, records,
+unions, strings, or bytestrings — regular (fixed-size) lists stay, since they
+become NumPy dimensions — and a separate test carries option types through NumPy
+masked arrays. Where a conversion cannot preserve everything, the property
+becomes a fixed point instead: converting the reconstructed array a second time
+reproduces the same result.</p>
 <p><strong>Equality.</strong> <code>ak.array_equal()</code> is reflexive (an array equals itself) and
-symmetric (if <code>a</code> equals <code>b</code>, then <code>b</code> equals <code>a</code>)
-(<a href="https://github.com/scikit-hep/awkward/pull/3891">#3891</a>).</p>
+symmetric (the argument order does not change the result), with tests adapted
+from
+<a href="https://github.com/scikit-hep/awkward/blob/main/tests/properties/operations/test_array_equal.py"><code>test_array_equal.py</code></a>
+(the imports are the same as above):</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nd">@given</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">st_ak</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">arrays</span><span class="p">())</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_reflexivity</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">assert</span> <span class="n">ak</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">equal_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1275,42 +1383,307 @@ symmetric (if <code>a</code> equals <code>b</code>, then <code>b</code> equals <
 </span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">assert</span> <span class="n">forward</span> <span class="o">==</span> <span class="n">backward</span>
 </span></code></pre></div>
 <p><code>equal_nan=True</code> treats two <code>NaN</code> values as equal — and likewise two <code>NaT</code>
-values in datetimes and timedeltas — which the properties need because the
-generated arrays can contain both. When a property fails, Hypothesis shrinks the
-input toward a minimal failing array — a best-effort search that
+(not-a-time) values in datetimes and timedeltas — which the properties need
+because the generated arrays can contain both.</p>
+<p><strong>No-raise.</strong> When the operation is expected to accept a generated array — the
+test judges this from the array's form and the call's arguments — it must
+complete without raising an error. <code>ak.flatten()</code>, <code>ak.all()</code>, and <code>ak.ravel()</code>
+are tested this way.</p>
+<p><strong>Kernel.</strong> Awkward Array specifies each low-level kernel with a pure-Python
+reference definition in
+<a href="https://github.com/scikit-hep/awkward/blob/main/kernel-specification.yml"><code>kernel-specification.yml</code></a>.
+One kernel is covered so far, <code>awkward_BitMaskedArray_to_ByteMaskedArray</code>: its
+test runs the compiled CPU kernel — and the CUDA kernel when a GPU is present —
+and compares the results with the reference definition. A kernel works below the
+layout level, so this test draws the kernel's own arguments — a bit mask and its
+flags — with plain Hypothesis strategies rather than with this package's.</p>
+<p>The round-trip, equality, and no-raise properties need no reference
+implementation to compare against; the kernel property is the exception, and its
+oracle is the specification's reference definition. When a property fails,
+Hypothesis shrinks the input toward a minimal failing array — a best-effort
+search that
 <a href="../generating-and-shrinking-samples/">Generating and Shrinking Samples</a> explains
-— which is why the reports below reduce to small, reproducible cases.</p>
-<p>Both kinds of properties are oracle-free: checking them needs no reference
-implementation to compare against. The goal is to cover all testable properties
-of Awkward Array, including operations, slicing, reducers, and kernels.</p>
+— which is why the bug reports below are small enough to reproduce by hand.</p>
+<h2 id="how-the-tests-run-in-awkward-arrays-ci">How the tests run in Awkward Array's CI<a class="headerlink" href="#how-the-tests-run-in-awkward-arrays-ci" title="Permanent link">&para;</a></h2>
+<!-- diataxis: explanation -->
+
+<p>The strategies are integrated into Awkward Array's continuous integration (CI).
+The first property-based tests were added in
+<a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a> and live in
+<a href="https://github.com/scikit-hep/awkward/tree/main/tests/properties"><code>tests/properties</code></a>.
+On every change they run under the <code>default</code> profile in
+<a href="https://github.com/scikit-hep/awkward/blob/main/tests/properties/conftest.py"><code>tests/properties/conftest.py</code></a>,
+which inherits the built-in <code>ci</code> profile that Hypothesis loads automatically in
+CI: generation is derandomized — seeded from a hash of each test function — so a
+run repeats the same examples until the test function, the strategies, or the
+Hypothesis or Python version changes. A nightly run
+(<a href="https://github.com/scikit-hep/awkward/blob/main/.github/workflows/property-tests.yml"><code>property-tests.yml</code></a>)
+selects the <code>nightly</code> profile from the same file, which raises
+<a href="https://hypothesis.readthedocs.io/en/latest/reference/api.html#hypothesis.settings.max_examples"><code>max_examples</code></a>
+— the number of valid examples each test tries — and turns randomization back
+on, so it reaches examples the per-change runs never generate. The nightly run
+also reports Hypothesis's run statistics — how many examples each test generated
+and how many were invalid — which keeps the discard rate visible as the
+predicates below accumulate. A second nightly workflow
+(<a href="https://github.com/scikit-hep/awkward/blob/main/.github/workflows/property-tests-gpu.yml"><code>property-tests-gpu.yml</code></a>)
+runs the kernel test on a GPU under the same <code>nightly</code> profile.</p>
+<p>Awkward Array pins hypothesis-awkward to an exact version, and Dependabot
+proposes an update for each release: a new strategy release changes which inputs
+are generated, and the pin keeps that change from surfacing as an unrelated
+failure in someone else's pull request.
+<a href="#upstream-test-pull-requests">Upstream test pull requests</a> lists the pull
+requests that built this arrangement.</p>
+<p>A bug that stays open does not block the suite. Where the tests would otherwise
+reach it, its trigger is encoded as a predicate on the array, named after its
+issue number (<code>has_issue_4262</code>, for example) — shared predicates live in
+<a href="https://github.com/scikit-hep/awkward/blob/main/tests/properties/operations/known_issues.py"><code>known_issues.py</code></a>,
+and a module that is alone affected keeps private ones next to its tests — and
+the affected draws are discarded, with Hypothesis's
+<a href="https://hypothesis.readthedocs.io/en/latest/reference/api.html#hypothesis.assume"><code>assume()</code></a>
+inside the test or by filtering the strategy. A predicate is deleted in the pull
+request that fixes its issue, so the discarded inputs are tested again. The
+predicates are reviewed and merged in Awkward Array itself
+(<a href="https://github.com/scikit-hep/awkward/pull/4275">#4275</a>,
+<a href="https://github.com/scikit-hep/awkward/pull/4281">#4281</a>), so the open bugs
+these tests reach are acknowledged in the library's own test suite. The suite
+keeps passing while every open bug remains visible in the issue tracker and in
+the <a href="#bugs-found">log below</a>.</p>
+<h2 id="what-the-bugs-show">What the bugs show<a class="headerlink" href="#what-the-bugs-show" title="Permanent link">&para;</a></h2>
+<!-- diataxis: explanation -->
+
+<p>The bugs found so far (listed in <a href="#bugs-found">Bugs found</a> below) are not spread
+evenly over Awkward Array; they cluster where generated inputs have an advantage
+over hand-written ones.</p>
+<p><strong>Conversion boundaries.</strong> The largest group of the bugs is in the conversions —
+<code>ak.to_numpy()</code>, <code>ak.to_arrow()</code>, <code>ak.from_json()</code>, <code>ak.from_parquet()</code>, and
+their inverses. A conversion must map every valid layout onto another system's
+representation, so each rarely-exercised layout feature is a chance for a
+mismatch. Round-trip properties probe exactly that mapping, in both directions.</p>
+<p><strong>Rare but valid shapes.</strong> The triggers are almost never the common cases; they
+are empty unions, zero-length lists, missing values in unusual places, offsets
+that do not start at zero, and uncommon dtypes such as <code>datetime64[D]</code> or
+<code>float16</code>. A developer writing test data by hand rarely constructs these; a
+generator that samples the whole layout space constructs them routinely.</p>
+<p><strong>Beyond the library under test.</strong> The tests also exercise the software around
+Awkward Array. The Feather round trip — <code>ak.to_feather()</code> writes Arrow's
+inter-process communication (IPC) file format — produced invalid files whose
+cause is in PyArrow's IPC writer; it was reported upstream after reducing to a
+pure-PyArrow case. And one bug was in Hypothesis itself: after shrinking a
+failing array, its explain phase ended in an internal assertion error.</p>
+<h2 id="upstream-test-pull-requests">Upstream test pull requests<a class="headerlink" href="#upstream-test-pull-requests" title="Permanent link">&para;</a></h2>
+<!-- diataxis: reference -->
+
+<p>The pull requests in Awkward Array that added or changed the property-based
+tests, grouped by purpose and ascending by number within each group; the
+one-line descriptions follow the pull-request titles. All are merged.</p>
+<p><strong>New property tests:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3887">#3887</a> — the first
+  property-based test: the <code>to_buffers</code>/<code>from_buffers</code> round trip.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3891">#3891</a> — the equality
+  properties of <code>ak.array_equal</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4142">#4142</a> — a property-based
+  kernel test with CPU and GPU backends.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4215">#4215</a> — the
+  <code>to_numpy</code>/<code>from_numpy</code> round-trip test.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4218">#4218</a> — the
+  <code>to_parquet</code>/<code>from_parquet</code> round-trip test.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4225">#4225</a> — a stability
+  round-trip test for <code>to_numpy</code>/<code>from_numpy</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4231">#4231</a> — the
+  <code>to_arrow</code>/<code>from_arrow</code> round-trip tests.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4239">#4239</a> — the
+  <code>to_feather</code>/<code>from_feather</code> round-trip tests.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4245">#4245</a> — the
+  <code>to_json</code>/<code>from_json</code> round-trip tests.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4265">#4265</a> — no-raise property
+  tests for <code>ak.flatten</code> and <code>ak.all</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4284">#4284</a> — the no-raise
+  property-test module for <code>ak.ravel</code>.</li>
+</ul>
+<p><strong>Test infrastructure:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3942">#3942</a> — pinned
+  hypothesis-awkward to an exact version.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3944">#3944</a> — added a Dependabot
+  configuration for hypothesis-awkward.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4128">#4128</a> — added a nightly run
+  with a large <code>max_examples</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4146">#4146</a> — reported Hypothesis
+  statistics in the nightly runs.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4147">#4147</a> — ran the GPU kernel
+  property tests nightly under the nightly profile.</li>
+</ul>
+<p><strong>Maintenance and documentation:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4273">#4273</a> — documented the
+  <code>tests/properties</code> naming convention in <code>CONTRIBUTING.md</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4275">#4275</a> — added known-issue
+  predicates for <a href="https://github.com/scikit-hep/awkward/issues/4255">#4255</a> and
+  <a href="https://github.com/scikit-hep/awkward/issues/4274">#4274</a>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4281">#4281</a> — added known-issue
+  predicates for <a href="https://github.com/scikit-hep/awkward/issues/4278">#4278</a> and
+  <a href="https://github.com/scikit-hep/awkward/issues/4280">#4280</a>.</li>
+</ul>
 <h2 id="bugs-found">Bugs found<a class="headerlink" href="#bugs-found" title="Permanent link">&para;</a></h2>
 <!-- diataxis: reference -->
 
 <!-- Declared reference: its completeness obligation is to the bugs found so
      far, not to every bug that exists. -->
 
-<p>These tests have found bugs in both Awkward Array and Hypothesis. This log is
-reviewed at each release.</p>
+<p>Tests written with these strategies — in Awkward Array's suite and in
+hypothesis-awkward's own — have found bugs in Awkward Array, in PyArrow, and in
+Hypothesis. This log is reviewed at each
+<a href="https://github.com/scikit-hep/hypothesis-awkward/releases">release</a>; status is
+as of the last review. The Awkward Array list is grouped by the operation
+involved, ascending by number within each group; "fixed" points to the merged
+fixing pull request, and an entry says so where the fix is not yet in a released
+Awkward version.</p>
 <h3 id="awkward-array">Awkward Array<a class="headerlink" href="#awkward-array" title="Permanent link">&para;</a></h3>
+<p><strong>Equality:</strong></p>
 <ul>
-<li><a href="https://github.com/scikit-hep/awkward/issues/3888">#3888</a> (fixed) —
-  <code>ak.array_equal()</code> raised an error on virtual arrays and returned the wrong
-  result for empty unions.</li>
-<li><a href="https://github.com/scikit-hep/awkward/pull/3921">#3921</a> (fixed) —
-  <code>ak.array_equal()</code> returned the wrong result for datetimes and timedeltas
-  containing <code>NaT</code> (not-a-time).</li>
-<li><a href="https://github.com/scikit-hep/awkward/pull/3962">#3962</a> (fixed) —
-  <code>ak.almost_equal()</code>, which backs <code>ak.array_equal()</code>, compared record-array
-  fields incorrectly.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4126">#4126</a> (fixed) —
-  <code>IndexedOptionArray.to_ByteMaskedArray</code> raised a <code>TypeError</code> when its content
-  was an <code>EmptyArray</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/3888">#3888</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/3909">#3909</a>) — <code>ak.array_equal()</code>
+  raised an error on virtual arrays and returned the wrong result for empty
+  unions.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3921">#3921</a> (reported and fixed
+  in this pull request) — <code>ak.array_equal()</code> returned the wrong result for
+  datetimes and timedeltas containing <code>NaT</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/3962">#3962</a> (reported and fixed
+  in this pull request) — <code>ak.almost_equal()</code>, which backs <code>ak.array_equal()</code>,
+  compared record-array fields incorrectly.</li>
+</ul>
+<p><strong>NumPy conversion:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4217">#4217</a> (open) —
+  <code>ak.to_numpy()</code> fails for option-type <code>timedelta64</code> arrays that contain
+  missing values.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4226">#4226</a> (open) —
+  <code>ak.from_numpy()</code> fails for multidimensional masked string arrays with no
+  masked elements.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4227">#4227</a> (open) —
+  <code>ak.from_numpy()</code> raises a <code>ValueError</code> for masked arrays of three or more
+  dimensions with a zero-length dimension.</li>
+</ul>
+<p><strong>Arrow conversion:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4219">#4219</a> (open) —
+  <code>ak.to_arrow()</code> silently corrupts <code>datetime64[D]</code> values.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4221">#4221</a> (open) —
+  <code>ak.to_arrow()</code> raises an <code>IndexError</code> for a non-empty option array with
+  zero-length list content.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4222">#4222</a> (open) —
+  <code>ak.to_arrow()</code> silently shifts list values when a nullable list's offsets do
+  not start at zero.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4228">#4228</a> (open) —
+  <code>ak.to_arrow()</code> raises an <code>IndexError</code> for valid unions with option-type
+  children.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4229">#4229</a> (open) —
+  <code>ak.from_arrow()</code> loses the length of a size-0 fixed-size list.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4230">#4230</a> (open) —
+  <code>ak.from_arrow()</code> raises an <code>AttributeError</code> for a table with a null-type
+  column.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4255">#4255</a> (open) —
+  <code>ak.from_arrow()</code> fails on an option record with an
+  <code>IndexedArray</code>-of-<code>EmptyArray</code> field.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4274">#4274</a> (open) —
+  <code>ak.to_arrow_table()</code> fails for an <code>UnmaskedArray</code> of records with a
+  uint32-indexed field.</li>
+</ul>
+<p><strong>Parquet conversion:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4220">#4220</a> (open) —
+  <code>ak.from_parquet()</code> fails on <code>NaT</code> or out-of-range <code>datetime64[ms]</code>/<code>[us]</code>
+  row-group statistics.</li>
+</ul>
+<p><strong>Feather conversion:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4238">#4238</a> (open) —
+  <code>ak.to_feather()</code> writes union-type arrays as invalid files, and
+  <code>ak.from_feather()</code> crashes reading them; the cause is
+  <a href="https://github.com/apache/arrow/issues/50623">#50623</a> in PyArrow's IPC
+  writer.</li>
+</ul>
+<p><strong>JSON conversion:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4241">#4241</a> (open) —
+  <code>ak.from_json()</code> parses floats at reduced precision, so values drift on each
+  reparse.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4242">#4242</a> (open) —
+  <code>ak.from_json()</code> raises a <code>TypeError</code> when JSON mixes null with heterogeneous
+  values.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4243">#4243</a> (open) —
+  <code>ak.from_json()</code> silently wraps JSON integers in <code>[2**63, 2**64)</code> to negative
+  int64 values.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4244">#4244</a> (open) —
+  <code>ak.to_json()</code> writes lone-surrogate escapes that <code>ak.from_json()</code> rejects.</li>
+</ul>
+<p><strong>Flattening and broadcasting:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4214">#4214</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4246">#4246</a>) —
+  <code>ak.flatten(axis=None)</code> dropped data or raised an <code>IndexError</code> on nested
+  unions, a regression in Awkward Array 2.11.0; the fix is not yet in a released
+  version as of the last review.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4247">#4247</a> (open) —
+  <code>ak.broadcast_arrays()</code> silently skips broadcasting on some union-containing
+  arrays.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4260">#4260</a> (open) —
+  <code>ak.flatten()</code> with a negative <code>axis</code> raises an <code>AssertionError</code> when record
+  field depths differ.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4261">#4261</a> (open) —
+  <code>ak.ravel()</code> raises internal errors when the collected leaves cannot merge.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4262">#4262</a> (open) —
+  <code>ak.broadcast_arrays()</code> fails for a flat array and a regular list of
+  variable-length lists.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4263">#4263</a> (open) —
+  <code>ak.ravel()</code> raises an <code>AssertionError</code> with no message on a union that no
+  values reach.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4278">#4278</a> (open) —
+  <code>ak.ravel()</code> raises an <code>OverflowError</code> when temporal leaves need an
+  overflowing unit conversion.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4280">#4280</a> (open) —
+  <code>ak.ravel()</code> raises an <code>OverflowError</code> when a temporal value does not fit the
+  merged unit.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4282">#4282</a> (open) —
+  <code>ak.ravel()</code> fails or silently reorders values when a union branch is an
+  all-regular list.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4283">#4283</a> (open) —
+  <code>ak.ravel()</code> raises an <code>AssertionError</code> on a record under an option beside a
+  non-record leaf.</li>
+</ul>
+<p><strong>Reducers and sorting:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4259">#4259</a> (open) — nearly all
+  reducers and sorting raise a <code>KeyError</code> on <code>float16</code>, <code>float128</code>, and
+  <code>complex256</code> leaves.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4264">#4264</a> (open) — reducers
+  fail on an option type inside a <code>RegularArray</code>'s untrimmed content.</li>
+</ul>
+<p><strong>Layout internals and virtual arrays:</strong></p>
+<ul>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4126">#4126</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4127">#4127</a>) —
+  <code>ak.contents.IndexedOptionArray.to_ByteMaskedArray</code> raised an unhelpful
+  <code>TypeError</code> when a non-empty array's content was an <code>EmptyArray</code>; the fix
+  rejects the conversion with a clear error.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4288">#4288</a> (open) — virtual
+  arrays lose the <code>length</code> of a nested zero-field <code>RecordArray</code>.</li>
 </ul>
 <p>A NumPy property test in
 <a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/numpy/test_numpy_arrays.py"><code>test_numpy_arrays.py</code></a>
 accounts for <a href="https://github.com/scikit-hep/awkward/issues/3690">#3690</a> (open):
 <code>ak.to_numpy()</code> does not support structured arrays whose fields are not
-one-dimensional.</p>
+one-dimensional. This is a pre-existing limitation the tests work around, not a
+bug they found.</p>
+<h3 id="pyarrow">PyArrow<a class="headerlink" href="#pyarrow" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a href="https://github.com/apache/arrow/issues/50623">#50623</a> (open) — Arrow's IPC
+  serialization drops a union's buffers when the union is wrapped in an
+  extension type, producing invalid data that segfaults on read. Reported with a
+  pure-PyArrow reproduction after the Feather round trip surfaced it as
+  <a href="https://github.com/scikit-hep/awkward/issues/4238">#4238</a>.</li>
+</ul>
 <h3 id="hypothesis">Hypothesis<a class="headerlink" href="#hypothesis" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://github.com/HypothesisWorks/hypothesis/issues/4708">#4708</a> (fixed) —
@@ -1321,9 +1694,12 @@ one-dimensional.</p>
 <h2 id="outlook">Outlook<a class="headerlink" href="#outlook" title="Permanent link">&para;</a></h2>
 <!-- diataxis: explanation -->
 
-<p>Automatically generated test inputs raise confidence that a change is correct
-across a broad range of valid arrays, not only the cases a developer wrote by
-hand.</p>
+<p>The goal is to cover all testable properties of Awkward Array — more operations,
+slicing, reducers, and the remaining kernels — following the pattern the suite
+has established: add a property test, file the bugs it finds, and discard their
+triggers until the fixes are merged. Automatically generated test inputs raise
+confidence that a change is correct across a broad range of valid arrays, not
+only the cases a developer wrote by hand.</p>
 
 
 
