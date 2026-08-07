@@ -222,6 +222,8 @@ def _has_zero_field_record(layout: ak.contents.Content) -> bool:
     virtual buffers reconstructs the record without its length, and computing it
     raises `TypeError`, from `len()` and even `ak.materialize`. Reproduced on
     awkward 2.9.1 and 2.12.0.
+
+    https://github.com/scikit-hep/awkward/issues/4288
     """
     return any(is_zero_field_record_leaf(n) for n in iter_contents(layout))
 
