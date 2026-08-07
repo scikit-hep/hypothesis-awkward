@@ -10,17 +10,41 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
-
-DEFAULT_MAX_CONTENTS = 4
+from tests.funcs import assert_kwargs_match_signature
 
 
 class UnionArrayContentsKwargs(TypedDict, total=False):
     """Options for `union_array_contents()` strategy."""
 
-    contents: list[Content] | st.SearchStrategy[list[Content]]
+    contents: list[Content] | st.SearchStrategy[list[Content]] | None
     max_contents: int
     min_length: int
-    max_length: int
+    max_length: int | None
+
+
+DEFAULTS = UnionArrayContentsKwargs(
+    contents=None,
+    max_contents=4,
+    min_length=0,
+    max_length=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together as an ordered pair (`min_length <= max_length`)."""
+
+    min_length: int
+    max_length: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `union_array_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.union_array_contents,
+        kwargs_cls=UnionArrayContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -53,27 +77,32 @@ def union_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_contents = chain.register(_contents_list())
 
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=10))
+        ret = RelatedKwargs()
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
 
-    drawn = (
-        ('min_length', min_length),
-        ('max_length', max_length),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
-                'contents': st.one_of(
-                    _contents_list(),
-                    st.just(st_contents),
-                ),
+                'contents': st.one_of(_contents_list(), st.just(st_contents)),
                 'max_contents': st.integers(min_value=2, max_value=10),
             },
         )
     )
 
-    return chain.extend(cast(UnionArrayContentsKwargs, kwargs))
+    return chain.extend(
+        cast(UnionArrayContentsKwargs, {**related, **optional_independent})
+    )
 
 
 @given(data=st.data())
@@ -91,8 +120,8 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result, UnionArray)
 
     # Assert the options were effective
-    max_contents = opts.kwargs.get('max_contents', DEFAULT_MAX_CONTENTS)
-    contents = opts.kwargs.get('contents', None)
+    max_contents = opts.kwargs.get('max_contents', DEFAULTS['max_contents'])
+    contents = opts.kwargs.get('contents', DEFAULTS['contents'])
 
     # Contents dispatch
     match contents:
@@ -131,7 +160,7 @@ def test_properties(data: st.DataObject) -> None:
     assert len(result) == len(tags)
 
     # Compact indexing holds unless max_length is given
-    max_length = opts.kwargs.get('max_length')
+    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
     if max_length is None:
         for tag_val in range(len(result.contents)):
             indices_for_tag = index[tags == tag_val]
@@ -140,7 +169,7 @@ def test_properties(data: st.DataObject) -> None:
             assert set(indices_for_tag.tolist()) == set(range(content_len))
 
     # Assert length is within bounds
-    min_length = opts.kwargs.get('min_length', 0)
+    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
     assert min_length <= len(result) <= sc(max_length)
 
 
