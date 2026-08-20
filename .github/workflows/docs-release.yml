@@ -46,7 +46,7 @@ jobs:
             echo "is-latest=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: astral-sh/setup-uv@v9.0.0
+      - uses: astral-sh/setup-uv@v10.0.1
 
       - name: Configure git
         run: |
