@@ -30,6 +30,13 @@ dependencies = [
     "typing-extensions>=4.7; python_version < '3.11'",
 ]
 
+[project.urls]
+Homepage = "https://github.com/scikit-hep/hypothesis-awkward"
+Documentation = "https://scikit-hep.github.io/hypothesis-awkward/"
+"Source Code" = "https://github.com/scikit-hep/hypothesis-awkward"
+"Bug Tracker" = "https://github.com/scikit-hep/hypothesis-awkward/issues"
+Changelog = "https://github.com/scikit-hep/hypothesis-awkward/blob/main/CHANGELOG.md"
+
 [dependency-groups]
 dev = ["mypy", "pytest", "pytest-cov", "ruff"]
 docs = [
