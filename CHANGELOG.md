@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.20.1] - 2026-09-22
+
+### Documentation
+
+- Add `.zenodo.json` for Zenodo DOI deposits ([#187](https://github.com/scikit-hep/hypothesis-awkward/pull/187))
+
+### Build & CI
+
+- Bump astral-sh/setup-uv from 9.0.0 to 10.0.1 ([#177](https://github.com/scikit-hep/hypothesis-awkward/pull/177))
+- Bump awkward from 2.12.0 to 2.13.0 in /.github-deps/latest ([#180](https://github.com/scikit-hep/hypothesis-awkward/pull/180))
+
+
 ## [0.20.0] - 2026-08-07
 
 ### Features
