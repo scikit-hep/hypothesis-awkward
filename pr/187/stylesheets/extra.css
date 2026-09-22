@@ -1,8 +1,0 @@
-.md-typeset table:not([class]) tr:nth-child(2n) {
-  background-color: var(--md-typeset-table-color--light);
-}
-
-.md-typeset table:not([class]) th,
-.md-typeset table:not([class]) td {
-  padding: 6px 13px;
-}
