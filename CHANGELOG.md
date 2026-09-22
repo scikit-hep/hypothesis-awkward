@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.20.2] - 2026-09-22
+
+### Documentation
+
+- Add Zenodo DOI badge to README ([#188](https://github.com/scikit-hep/hypothesis-awkward/pull/188))
+
+### Build & CI
+
+- Bump astral-sh/setup-uv from 10.0.1 to 10.1.0 ([#184](https://github.com/scikit-hep/hypothesis-awkward/pull/184))
+- Bump awkward from 2.13.0 to 2.14.0 in /.github-deps/latest ([#186](https://github.com/scikit-hep/hypothesis-awkward/pull/186))
+- Add PyPI project links to `pyproject.toml` ([#189](https://github.com/scikit-hep/hypothesis-awkward/pull/189))
+
+
 ## [0.20.1] - 2026-09-22
 
 ### Documentation
