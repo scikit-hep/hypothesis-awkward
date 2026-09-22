@@ -3,7 +3,7 @@
 _Hypothesis strategies for Awkward Array._
 
 [![pypi-python-badge]][pypi] [![pypi-badge]][pypi]
-[![conda-forge-badge]][conda-forge]
+[![conda-forge-badge]][conda-forge] [![doi-badge]][doi]
 
 [![test-badge]][test] [![codecov-badge]][codecov]
 
@@ -14,6 +14,8 @@ _Hypothesis strategies for Awkward Array._
 [conda-forge-badge]:
   https://img.shields.io/conda/vn/conda-forge/hypothesis-awkward.svg
 [conda-forge]: https://anaconda.org/conda-forge/hypothesis-awkward
+[doi-badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.22896926.svg
+[doi]: https://doi.org/10.5281/zenodo.22896926
 [test-badge]:
   https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
 [test]:
