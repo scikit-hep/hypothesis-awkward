@@ -1,0 +1,18 @@
+{
+  "title": "Hypothesis-awkward",
+  "description": "<p>A collection of Hypothesis strategies for Awkward Array for property-based testing.</p><p>Documentation: <a href=\"https://scikit-hep.github.io/hypothesis-awkward/\">scikit-hep.github.io/hypothesis-awkward</a></p>",
+  "creators": [
+    {
+      "name": "Sakuma, Tai",
+      "affiliation": "Princeton University",
+      "orcid": "0000-0003-3225-9861"
+    }
+  ],
+  "keywords": [
+    "hypothesis",
+    "awkward-array",
+    "testing",
+    "property-based testing"
+  ],
+  "grants": [{ "id": "10.13039/100000001::2323298" }]
+}
