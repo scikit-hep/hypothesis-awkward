@@ -53,8 +53,10 @@ selected via the `HYPOTHESIS_PROFILE` environment variable).
   `github.repository_owner == 'scikit-hep'` so forks do not run it.
 - Matrix: Python 3.10 and 3.14 × `latest` and `min` deps (install steps mirror
   `unit-test.yml`).
-- Runs pytest with `--hypothesis-show-statistics`; no coverage upload. Use the
-  statistics output to tune the nightly budget.
+- Runs pytest with `--junitxml=junit.xml`; no coverage upload. A separate step
+  decodes the Hypothesis statistics from `junit.xml` and prints them, so the
+  test step's log shows failures without the statistics. Use the statistics
+  output to tune the nightly budget.
 
 ## Release Workflows (Two-Tag Pipeline)
 
