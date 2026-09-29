@@ -74,8 +74,13 @@ def safe_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
 
     >>> safe_max([], default=-1)
     -1
+
+    `0.0` is larger than `-0.0`, as in the bounds of `st.floats()`.
+
+    >>> safe_max([-0.0, None, 0.0])
+    0.0
     """
-    return max((v for v in vals if v is not None), default=default)  # type: ignore
+    return _signed_max((v for v in vals if v is not None), default=default)
 
 
 class GreaterAndLessThanAny:
@@ -172,6 +177,23 @@ def _signed_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
     None
     """
     return min(vals, key=_sign_aware_key, default=default)
+
+
+def _signed_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
+    """Like `max()`, but orders `-0.0` before `0.0`.
+
+    Examples
+    --------
+    >>> _signed_max([0.0, -0.0])
+    0.0
+
+    >>> _signed_max([-0.0, 0.0])
+    0.0
+
+    >>> print(_signed_max([]))
+    None
+    """
+    return max(vals, key=_sign_aware_key, default=default)
 
 
 def _sign_aware_key(v: Any) -> tuple[Any, float]:
