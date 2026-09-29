@@ -35,8 +35,13 @@ def safe_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
 
     >>> safe_min([], default=-1)
     -1
+
+    `-0.0` is smaller than `0.0`, as in the bounds of `st.floats()`.
+
+    >>> safe_min([0.0, None, -0.0])
+    -0.0
     """
-    return min((v for v in vals if v is not None), default=default)  # type: ignore
+    return _signed_min((v for v in vals if v is not None), default=default)
 
 
 def safe_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
