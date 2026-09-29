@@ -1,3 +1,4 @@
+import math
 from collections.abc import Iterable
 from typing import Any, Optional, TypeVar
 
@@ -148,3 +149,26 @@ def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
     if value is None:
         return GreaterAndLessThanAny()
     return value
+
+
+def _signed_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
+    """Like `min()`, but orders `-0.0` before `0.0`.
+
+    `min()` treats `-0.0` and `0.0` as equal and returns whichever comes first.
+    Hypothesis's float bounds treat `-0.0` as smaller, e.g., `st.floats(min_value=0.0)`
+    never generates `-0.0`.
+
+    Examples
+    --------
+    >>> _signed_min([0.0, -0.0])
+    -0.0
+
+    >>> print(_signed_min([]))
+    None
+    """
+    return min(vals, key=_sign_aware_key, default=default)
+
+
+def _sign_aware_key(v: Any) -> tuple[Any, float]:
+    """Sort key that breaks ties between zeros by their signs."""
+    return (v, math.copysign(1.0, v) if v == 0 else 0.0)
