@@ -7,22 +7,25 @@
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/roadmap/</loc>
-      </url>
-      <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/installation/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/generating-and-shrinking-samples/</loc>
       </url>
       <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/getting-started/</loc>
       </url>
       <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/installation/</loc>
+      </url>
+      <url>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/roadmap/</loc>
+      </url>
+      <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/testing-awkward-array/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/guide/generating-and-shrinking-samples/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/builtins/</loc>
       </url>
       <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/constructors/</loc>
@@ -32,9 +35,6 @@
       </url>
       <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/numpy/</loc>
-      </url>
-      <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/builtins/</loc>
       </url>
       <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/util/</loc>
