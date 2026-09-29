@@ -2,12 +2,13 @@ import sys
 from functools import partial
 from typing import Any, TypeVar, cast
 
-from hypothesis import given
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies import StMinMaxValuesFactory, none_or, ranges
 from hypothesis_awkward.util import safe_compare as sc
 from hypothesis_awkward.util import safe_max
+from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 
 if sys.version_info >= (3, 11):
@@ -206,3 +207,12 @@ def test_properties(data: st.DataObject) -> None:
     min_end = kwargs.get('min_end')
     max_end = kwargs.get('max_end')
     assert sc(min_end) <= sc(end) <= sc(max_end)
+
+
+def test_draw_equal() -> None:
+    """Assert that `start == end` can be drawn by default."""
+    find(
+        ranges(allow_start_none=False, allow_end_none=False),
+        lambda r: r[0] == r[1],
+        settings=FIND,
+    )
