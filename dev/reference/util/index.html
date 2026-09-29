@@ -4129,7 +4129,9 @@ dtype.</p>
 
 
 <a href="#hypothesis_awkward.util.safe_compare" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">safe_compare</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span> <span class="o">|</span> <span class="n">GreaterAndLessThanAny</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">safe_compare</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">value</span><span class="p">:</span> <span class="n">T</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span> <span class="o">|</span> <span class="n">GreaterAndLessThanAny</span> <span class="o">|</span> <span class="n">SignAwareZero</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4189,6 +4191,10 @@ are <code>None</code>.</p>
 </span></code></pre></div>
     <p>This function lets you write the same assertion in one line:</p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">safe_compare</span><span class="p">(</span><span class="n">min_</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="n">safe_compare</span><span class="p">(</span><span class="n">max_</span><span class="p">)</span>
+</span></code></pre></div>
+    <p><code>-0.0</code> is smaller than <code>0.0</code>, as in the bounds of <code>st.floats()</code>.</p>
+    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_compare</span><span class="p">(</span><span class="o">-</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">True</span>
 </span></code></pre></div>
 
 
@@ -4279,6 +4285,10 @@ are <code>None</code>.</p>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_max</span><span class="p">([],</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">-1</span>
 </span></code></pre></div>
+    <p><code>0.0</code> is larger than <code>-0.0</code>, as in the bounds of <code>st.floats()</code>.</p>
+    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_max</span><span class="p">([</span><span class="o">-</span><span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">0.0</span>
+</span></code></pre></div>
 
 
     </div>
@@ -4367,6 +4377,10 @@ are <code>None</code>.</p>
 </span></code></pre></div>
     <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_min</span><span class="p">([],</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">-1</span>
+</span></code></pre></div>
+    <p><code>-0.0</code> is smaller than <code>0.0</code>, as in the bounds of <code>st.floats()</code>.</p>
+    <div class="language-pycon highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">safe_min</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0</span><span class="p">])</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">-0.0</span>
 </span></code></pre></div>
 
 
