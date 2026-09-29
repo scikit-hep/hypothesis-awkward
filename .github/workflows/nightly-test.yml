@@ -57,6 +57,18 @@ jobs:
         run: uv pip list
 
       - name: Run tests
-        run: uv run --no-sync pytest -vv -rs --hypothesis-show-statistics
+        run: uv run --no-sync pytest -vv -rs --junitxml=junit.xml
         env:
           HYPOTHESIS_PROFILE: nightly
+
+      - name: Show Hypothesis statistics
+        if: ${{ !cancelled() && hashFiles('junit.xml') != '' }}
+        shell: uv run --no-sync python {0}
+        run: |
+          import base64
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse('junit.xml').getroot()
+          for p in root.iter('property'):
+              if p.get('name', '').startswith('hypothesis-statistics-'):
+                  print(base64.b64decode(p.get('value')).decode(), end='\n\n')
