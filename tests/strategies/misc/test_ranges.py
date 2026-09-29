@@ -2,12 +2,14 @@ import sys
 from functools import partial
 from typing import Any, TypeVar, cast
 
-from hypothesis import given
+import pytest
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 from hypothesis_awkward.strategies import StMinMaxValuesFactory, none_or, ranges
 from hypothesis_awkward.util import safe_compare as sc
 from hypothesis_awkward.util import safe_max
+from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 
 if sys.version_info >= (3, 11):
@@ -206,3 +208,60 @@ def test_properties(data: st.DataObject) -> None:
     min_end = kwargs.get('min_end')
     max_end = kwargs.get('max_end')
     assert sc(min_end) <= sc(end) <= sc(max_end)
+
+
+@pytest.mark.parametrize(
+    'max_start, max_end', [(-0.0, -0.0), (-0.0, 0.0), (0.0, -0.0), (0.0, 0.0)]
+)
+@given(data=st.data())
+def test_signed_zero_max_bounds(
+    data: st.DataObject, max_start: float, max_end: float
+) -> None:
+    """Assert that `0.0` and `-0.0` as maximums give ranges usable by `st.floats()`."""
+    start, end = data.draw(
+        ranges(
+            st_floats,
+            max_start=max_start,
+            max_end=max_end,
+            allow_start_none=False,
+            allow_end_none=False,
+        )
+    )
+
+    assert sc(start) <= sc(max_start)
+    assert sc(start) <= sc(end) <= sc(max_end)
+
+    data.draw(st.floats(min_value=start, max_value=end))
+
+
+@pytest.mark.parametrize(
+    'min_start, min_end', [(-0.0, -0.0), (-0.0, 0.0), (0.0, -0.0), (0.0, 0.0)]
+)
+@given(data=st.data())
+def test_signed_zero_min_bounds(
+    data: st.DataObject, min_start: float, min_end: float
+) -> None:
+    """Assert that `0.0` and `-0.0` as minimums give ranges usable by `st.floats()`."""
+    start, end = data.draw(
+        ranges(
+            st_floats,
+            min_start=min_start,
+            min_end=min_end,
+            allow_start_none=False,
+            allow_end_none=False,
+        )
+    )
+
+    assert sc(min_start) <= sc(start) <= sc(end)
+    assert sc(min_end) <= sc(end)
+
+    data.draw(st.floats(min_value=start, max_value=end))
+
+
+def test_draw_equal() -> None:
+    """Assert that `start == end` can be drawn by default."""
+    find(
+        ranges(allow_start_none=False, allow_end_none=False),
+        lambda r: r[0] == r[1],
+        settings=FIND,
+    )
