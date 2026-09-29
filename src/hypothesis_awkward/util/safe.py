@@ -120,7 +120,59 @@ class GreaterAndLessThanAny:
         return f'{self.__class__.__name__}()'
 
 
-def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
+class SignAwareZero:
+    """A zero that compares with `-0.0` below `0.0`, as in `st.floats()` bounds.
+
+    The integer `0` counts as `0.0`. Non-zero values compare as usual.
+
+    Examples
+    --------
+    >>> SignAwareZero(-0.0) < 0.0
+    True
+
+    >>> 0.0 <= SignAwareZero(-0.0)
+    False
+
+    >>> SignAwareZero(0) < 1
+    True
+    """
+
+    def __init__(self, value: Any) -> None:
+        assert value == 0
+        self.value = value
+        self.sign = math.copysign(1.0, value)
+
+    def __le__(self, other: Any) -> bool:
+        if other == 0:
+            return self.sign <= math.copysign(1.0, other)
+        return self.value <= other
+
+    def __lt__(self, other: Any) -> bool:
+        if other == 0:
+            return self.sign < math.copysign(1.0, other)
+        return self.value < other
+
+    def __ge__(self, other: Any) -> bool:
+        if other == 0:
+            return self.sign >= math.copysign(1.0, other)
+        return self.value >= other
+
+    def __gt__(self, other: Any) -> bool:
+        if other == 0:
+            return self.sign > math.copysign(1.0, other)
+        return self.value > other
+
+    def __float__(self) -> float:
+        return float(self.value)
+
+    def __eq__(self, other: object) -> bool:
+        return bool(self.value == other)
+
+    def __repr__(self) -> str:
+        return repr(self.value)
+
+
+def safe_compare(value: T | None) -> T | GreaterAndLessThanAny | SignAwareZero:
     """Return `value` if not `None`, else an object true for all comparisons.
 
     This function helps you concisely write assertions that compare
@@ -155,9 +207,16 @@ def safe_compare(value: T | None) -> T | GreaterAndLessThanAny:
     This function lets you write the same assertion in one line:
 
     >>> assert safe_compare(min_) <= val <= safe_compare(max_)
+
+    `-0.0` is smaller than `0.0`, as in the bounds of `st.floats()`.
+
+    >>> safe_compare(-0.0) < 0.0
+    True
     """
     if value is None:
         return GreaterAndLessThanAny()
+    if value == 0:
+        return SignAwareZero(value)
     return value
 
 
