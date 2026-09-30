@@ -13,6 +13,7 @@ license-files = ["LICENSE"]
 authors = [{ name = "Tai Sakuma" }]
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Framework :: Hypothesis",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Testing",
     "License :: OSI Approved :: MIT License",
