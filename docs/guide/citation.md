@@ -2,11 +2,11 @@
 
 <!-- diataxis: reference -->
 
-If you use Hypothesis-awkward in your research, please cite:
+The citation for Hypothesis-awkward is as follows:
 
-T. Sakuma, I. Osborne, and P. Elmer, "Hypothesis-awkward: Property-Based Testing
-Strategies for Awkward Array," submitted to EPJ Web of Conferences (CHEP 2026),
-[arXiv:2609.31820](https://arxiv.org/abs/2609.31820).
+T. Sakuma, I. Osborne, and P. Elmer, _Hypothesis-awkward: Property-Based Testing
+Strategies for Awkward Array_,
+[arXiv:2609.31820](https://arxiv.org/abs/2609.31820) (2026).
 
 The repository's
 [`CITATION.cff`](https://github.com/scikit-hep/hypothesis-awkward/blob/main/CITATION.cff)

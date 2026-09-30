@@ -3,7 +3,9 @@
 _Hypothesis strategies for Awkward Array._
 
 [![pypi-python-badge]][pypi] [![pypi-badge]][pypi]
-[![conda-forge-badge]][conda-forge] [![doi-badge]][doi] [![arxiv-badge]][arxiv]
+[![conda-forge-badge]][conda-forge]
+
+[![doi-badge]][doi] [![arxiv-badge]][arxiv]
 
 [![test-badge]][test] [![codecov-badge]][codecov]
 
@@ -142,8 +144,7 @@ Awkward Arrays and related data types, which can be found in the API reference:
 
 ## Citation
 
-If you use Hypothesis-awkward in your research, please cite:
+The citation for Hypothesis-awkward is as follows:
 
-T. Sakuma, I. Osborne, and P. Elmer, "Hypothesis-awkward: Property-Based Testing
-Strategies for Awkward Array," submitted to EPJ Web of Conferences (CHEP 2026),
-[arXiv:2609.31820][arxiv].
+T. Sakuma, I. Osborne, and P. Elmer, _Hypothesis-awkward: Property-Based Testing
+Strategies for Awkward Array_, [arXiv:2609.31820][arxiv] (2026).
