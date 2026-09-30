@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.20.3] - 2026-09-30
+
+### Bug Fixes
+
+- Order `-0.0` below `0.0` in `ranges()` float bounds ([#193](https://github.com/scikit-hep/hypothesis-awkward/pull/193))
+
+### Documentation
+
+- Add citation information ([#195](https://github.com/scikit-hep/hypothesis-awkward/pull/195))
+
+### Build & CI
+
+- Bump astral-sh/setup-uv from 10.1.0 to 10.2.0 ([#190](https://github.com/scikit-hep/hypothesis-awkward/pull/190))
+- Print Hypothesis statistics in a separate nightly step ([#192](https://github.com/scikit-hep/hypothesis-awkward/pull/192))
+- Bump hypothesis from 6.156.1 to 6.168.1 in /.github-deps/latest ([#191](https://github.com/scikit-hep/hypothesis-awkward/pull/191))
+- Add `Framework :: Hypothesis` classifier ([#196](https://github.com/scikit-hep/hypothesis-awkward/pull/196))
+
+
 ## [0.20.2] - 2026-09-22
 
 ### Documentation
