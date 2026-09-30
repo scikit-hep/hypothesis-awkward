@@ -3,7 +3,9 @@
 _Hypothesis strategies for Awkward Array._
 
 [![pypi-python-badge]][pypi] [![pypi-badge]][pypi]
-[![conda-forge-badge]][conda-forge] [![doi-badge]][doi]
+[![conda-forge-badge]][conda-forge]
+
+[![doi-badge]][doi] [![arxiv-badge]][arxiv]
 
 [![test-badge]][test] [![codecov-badge]][codecov]
 
@@ -16,6 +18,8 @@ _Hypothesis strategies for Awkward Array._
 [conda-forge]: https://anaconda.org/conda-forge/hypothesis-awkward
 [doi-badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.22896926.svg
 [doi]: https://doi.org/10.5281/zenodo.22896926
+[arxiv-badge]: https://img.shields.io/badge/arXiv-2609.31820-b31b1b.svg
+[arxiv]: https://arxiv.org/abs/2609.31820
 [test-badge]:
   https://github.com/scikit-hep/hypothesis-awkward/actions/workflows/unit-test.yml/badge.svg
 [test]:
@@ -137,3 +141,10 @@ Awkward Arrays and related data types, which can be found in the API reference:
 - [**API reference**][api-ref]
 
 [api-ref]: https://scikit-hep.github.io/hypothesis-awkward/dev/reference/
+
+## Citation
+
+The citation for Hypothesis-awkward is as follows:
+
+Tai Sakuma, Ianna Osborne, and Peter Elmer, _Hypothesis-awkward: Property-Based
+Testing Strategies for Awkward Array_, [arXiv:2609.31820][arxiv] (2026).

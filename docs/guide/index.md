@@ -14,3 +14,4 @@ This guide contains the following pages:
 - [Generating and Shrinking Samples](generating-and-shrinking-samples.md) — how
   the package builds a random array and shrinks a failing one to a minimal
   example
+- [Citation](citation.md) — how to cite the package

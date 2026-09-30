@@ -22,6 +22,7 @@ and the page backlog in
 | `guide/testing-awkward-array.md`            | Awkward core dev / Evaluator             | per release         |
 | `guide/roadmap.md`                          | Awkward core dev / Downstream dev        | per milestone       |
 | `guide/generating-and-shrinking-samples.md` | Hypothesis-PBT expert / Awkward core dev | on algorithm change |
+| `guide/citation.md`                         | Evaluator                                | on publication      |
 | `reference/index.md`                        | All                                      | on module added     |
 | `reference/util.md`                         | All                                      | auto (docstrings)   |
 | `reference/strategies/builtins.md`          | All                                      | auto (docstrings)   |

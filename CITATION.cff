@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: If you use this software, please cite the paper below.
+type: software
+title: Hypothesis-awkward
+abstract: Hypothesis strategies for Awkward Array.
+authors:
+  - family-names: Sakuma
+    given-names: Tai
+    affiliation: Princeton University
+    orcid: https://orcid.org/0000-0003-3225-9861
+repository-code: https://github.com/scikit-hep/hypothesis-awkward
+url: https://scikit-hep.github.io/hypothesis-awkward/
+license: MIT
+keywords:
+  - hypothesis
+  - awkward-array
+  - testing
+  - property-based testing
+preferred-citation:
+  type: conference-paper
+  title: "Hypothesis-awkward: Property-Based Testing Strategies for Awkward Array"
+  authors:
+    - family-names: Sakuma
+      given-names: Tai
+      affiliation: Princeton University
+      orcid: https://orcid.org/0000-0003-3225-9861
+    - family-names: Osborne
+      given-names: Ianna
+      affiliation: Princeton University
+      orcid: https://orcid.org/0000-0002-6955-1033
+    - family-names: Elmer
+      given-names: Peter
+      affiliation: Princeton University
+      orcid: https://orcid.org/0000-0001-6830-3356
+  year: 2026
+  status: preprint
+  doi: 10.48550/arXiv.2609.31820
+  url: https://arxiv.org/abs/2609.31820
+  conference:
+    name: 28th Conference on Computing in High Energy and Nuclear Physics (CHEP 2026)
+  collection-title: EPJ Web of Conferences
