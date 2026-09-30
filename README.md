@@ -146,5 +146,5 @@ Awkward Arrays and related data types, which can be found in the API reference:
 
 The citation for Hypothesis-awkward is as follows:
 
-T. Sakuma, I. Osborne, and P. Elmer, _Hypothesis-awkward: Property-Based Testing
-Strategies for Awkward Array_, [arXiv:2609.31820][arxiv] (2026).
+Tai Sakuma, Ianna Osborne, and Peter Elmer, _Hypothesis-awkward: Property-Based
+Testing Strategies for Awkward Array_, [arXiv:2609.31820][arxiv] (2026).
