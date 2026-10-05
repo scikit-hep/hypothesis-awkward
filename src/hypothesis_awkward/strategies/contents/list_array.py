@@ -177,22 +177,26 @@ def _st_starts_stops_unreachable(
     Guarantees at least unreachable tail.
 
     The leading draws match `_st_starts_stops_no_unreachable()`'s so that the shrinker
-    can switch to that branch by dropping the trailing head and tail draws.
+    can switch to that branch by dropping the two trailing draws. Those draws replace
+    its fixed first and last offsets, `0` and `content_len`.
     """
     ml = max_length if max_length is not None else max(content_len, min_length)
     n = draw(st.integers(min_value=max(1, min_length), max_value=ml))
-    splits = sorted(
-        draw(
-            st.lists(
-                st.integers(min_value=0, max_value=content_len),
-                min_size=n - 1,
-                max_size=n - 1,
-            )
+    splits = draw(
+        st.lists(
+            st.integers(min_value=0, max_value=content_len),
+            min_size=n - 1,
+            max_size=n - 1,
         )
     )
-    end = draw(st.integers(min_value=0, max_value=content_len - 1))
-    start = draw(st.integers(min_value=0, max_value=end))
-    offsets_list = [start, *(min(max(s, start), end) for s in splits), end]
+    ends = draw(
+        st.lists(
+            st.integers(min_value=0, max_value=content_len - 1),
+            min_size=2,
+            max_size=2,
+        )
+    )
+    offsets_list = sorted([*(min(s, content_len - 1) for s in splits), *ends])
     return offsets_list[:-1], offsets_list[1:]
 
 
