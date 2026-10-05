@@ -175,18 +175,24 @@ def _st_starts_stops_unreachable(
     """Strategy for starts and stops with unreachable data.
 
     Guarantees at least unreachable tail.
+
+    The leading draws match `_st_starts_stops_no_unreachable()`'s so that the shrinker
+    can switch to that branch by dropping the trailing head and tail draws.
     """
-    max_size = None if max_length is None else max_length + 1
-    min_size = max(2, min_length + 1)
-    offsets_list = sorted(
+    ml = max_length if max_length is not None else max(content_len, min_length)
+    n = draw(st.integers(min_value=max(1, min_length), max_value=ml))
+    splits = sorted(
         draw(
             st.lists(
-                st.integers(min_value=0, max_value=content_len - 1),
-                min_size=min_size,
-                max_size=max_size,
+                st.integers(min_value=0, max_value=content_len),
+                min_size=n - 1,
+                max_size=n - 1,
             )
         )
     )
+    end = draw(st.integers(min_value=0, max_value=content_len - 1))
+    start = draw(st.integers(min_value=0, max_value=end))
+    offsets_list = [start, *(min(max(s, start), end) for s in splits), end]
     return offsets_list[:-1], offsets_list[1:]
 
 
