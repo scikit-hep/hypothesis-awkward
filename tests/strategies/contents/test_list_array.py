@@ -134,7 +134,6 @@ def test_draw_unreachable() -> None:
     )
 
 
-@pytest.mark.xfail(reason='shrinker does not reliably reach no-unreachable layout')
 def test_shrink_no_unreachable() -> None:
     """Assert reachable data only is the simplest."""
     content = NumpyArray(np.arange(10))
