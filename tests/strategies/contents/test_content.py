@@ -470,7 +470,7 @@ def test_draw_max_record_fields(max_record_fields: int, nested: bool) -> None:
             and (n is not c) == nested
             for n in iter_contents(c)
         ),
-        settings=FIND,
+        settings=FIND_RARE,
     )
 
 

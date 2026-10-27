@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 from awkward.contents import Content, NumpyArray, RegularArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND, FIND_NO_SHRINK
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
 
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
@@ -131,7 +131,7 @@ def test_draw_max_length(max_length: int) -> None:
     find(
         st_ak.contents.regular_array_contents(max_length=max_length),
         lambda c: c.size > 0 and len(c) == max_length,
-        settings=FIND,
+        settings=FIND_RARE,
     )
 
 
