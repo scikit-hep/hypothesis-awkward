@@ -1430,16 +1430,17 @@ from
 because the generated arrays can contain both.</p>
 <p><strong>No-raise.</strong> When the operation is expected to accept a generated array — the
 test judges this from the array's form and the call's arguments — it must
-complete without raising an error. <code>ak.flatten()</code>, <code>ak.all()</code>, and <code>ak.ravel()</code>
-are tested this way.</p>
+complete without raising an error. <code>ak.flatten()</code>, <code>ak.all()</code>, <code>ak.any()</code>, and
+<code>ak.ravel()</code> are tested this way.</p>
 <p><strong>Kernel.</strong> Awkward Array specifies each low-level kernel with a pure-Python
 reference definition in
 <a href="https://github.com/scikit-hep/awkward/blob/main/kernel-specification.yml"><code>kernel-specification.yml</code></a>.
-One kernel is covered so far, <code>awkward_BitMaskedArray_to_ByteMaskedArray</code>: its
-test runs the compiled CPU kernel — and the CUDA kernel when a GPU is present —
-and compares the results with the reference definition. A kernel works below the
-layout level, so this test draws the kernel's own arguments — a bit mask and its
-flags — with plain Hypothesis strategies rather than with this package's.</p>
+Two kernels are covered so far, <code>awkward_BitMaskedArray_to_ByteMaskedArray</code> and
+<code>awkward_BitMaskedArray_to_IndexedOptionArray</code>: each test runs the compiled CPU
+kernel — and the CUDA kernel when a GPU is present — and compares the results
+with the reference definition. A kernel works below the layout level, so these
+tests draw the kernel's own arguments — a bit mask and its flags — with plain
+Hypothesis strategies rather than with this package's.</p>
 <p>The round-trip, equality, and no-raise properties need no reference
 implementation to compare against; the kernel property is the exception, and its
 oracle is the specification's reference definition. When a property fails,
@@ -1543,6 +1544,10 @@ one-line descriptions follow the pull-request titles. All are merged.</p>
   tests for <code>ak.flatten</code> and <code>ak.all</code>.</li>
 <li><a href="https://github.com/scikit-hep/awkward/pull/4284">#4284</a> — the no-raise
   property-test module for <code>ak.ravel</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4314">#4314</a> — the no-raise
+  property-test module for <code>ak.any</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4409">#4409</a> — a property-based
+  test for the <code>awkward_BitMaskedArray_to_IndexedOptionArray</code> kernel.</li>
 </ul>
 <p><strong>Test infrastructure:</strong></p>
 <ul>
@@ -1556,6 +1561,8 @@ one-line descriptions follow the pull-request titles. All are merged.</p>
   statistics in the nightly runs.</li>
 <li><a href="https://github.com/scikit-hep/awkward/pull/4147">#4147</a> — ran the GPU kernel
   property tests nightly under the nightly profile.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4406">#4406</a> — exempted
+  hypothesis-awkward from uv's <code>exclude-newer</code> cutoff.</li>
 </ul>
 <p><strong>Maintenance and documentation:</strong></p>
 <ul>
@@ -1567,6 +1574,16 @@ one-line descriptions follow the pull-request titles. All are merged.</p>
 <li><a href="https://github.com/scikit-hep/awkward/pull/4281">#4281</a> — added known-issue
   predicates for <a href="https://github.com/scikit-hep/awkward/issues/4278">#4278</a> and
   <a href="https://github.com/scikit-hep/awkward/issues/4280">#4280</a>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4306">#4306</a> — excluded layouts
+  affected by <a href="https://github.com/scikit-hep/awkward/issues/4305">#4305</a> from
+  the Parquet round-trip tests.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4309">#4309</a> — widened
+  <code>has_issue_4264</code> to lists under untrimmed regular content.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4317">#4317</a> — excluded layouts
+  affected by <a href="https://github.com/scikit-hep/awkward/issues/4316">#4316</a> from
+  the Arrow round-trip comparison.</li>
+<li><a href="https://github.com/scikit-hep/awkward/pull/4318">#4318</a> — widened
+  <code>_has_issue_4228</code> to union option children longer than their used length.</li>
 </ul>
 <h2 id="bugs-found">Bugs found<a class="headerlink" href="#bugs-found" title="Permanent link">&para;</a></h2>
 <!-- diataxis: reference -->
@@ -1595,6 +1612,9 @@ Awkward version.</p>
 <li><a href="https://github.com/scikit-hep/awkward/pull/3962">#3962</a> (reported and fixed
   in this pull request) — <code>ak.almost_equal()</code>, which backs <code>ak.array_equal()</code>,
   compared record-array fields incorrectly.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4316">#4316</a> (open) —
+  <code>ak.array_equal()</code> returns <code>False</code> for equal unions whose list-of-records
+  child is indexed in a different order.</li>
 </ul>
 <p><strong>NumPy conversion:</strong></p>
 <ul>
@@ -1604,20 +1624,23 @@ Awkward version.</p>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4226">#4226</a> (open) —
   <code>ak.from_numpy()</code> fails for multidimensional masked string arrays with no
   masked elements.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4227">#4227</a> (open) —
-  <code>ak.from_numpy()</code> raises a <code>ValueError</code> for masked arrays of three or more
-  dimensions with a zero-length dimension.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4227">#4227</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4423">#4423</a>) — <code>ak.from_numpy()</code>
+  raised a <code>ValueError</code> for masked arrays of three or more dimensions with a
+  zero-length dimension; the fix is not yet in a released version as of the last
+  review.</li>
 </ul>
 <p><strong>Arrow conversion:</strong></p>
 <ul>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4219">#4219</a> (open) —
-  <code>ak.to_arrow()</code> silently corrupts <code>datetime64[D]</code> values.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4219">#4219</a> (closed, no linked
+  fix) — <code>ak.to_arrow()</code> silently corrupted <code>datetime64[D]</code> values.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4221">#4221</a> (open) —
   <code>ak.to_arrow()</code> raises an <code>IndexError</code> for a non-empty option array with
   zero-length list content.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4222">#4222</a> (open) —
-  <code>ak.to_arrow()</code> silently shifts list values when a nullable list's offsets do
-  not start at zero.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4222">#4222</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4407">#4407</a>) — <code>ak.to_arrow()</code>
+  silently shifted list values when a nullable list's offsets did not start at
+  zero; the fix is not yet in a released version as of the last review.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4228">#4228</a> (open) —
   <code>ak.to_arrow()</code> raises an <code>IndexError</code> for valid unions with option-type
   children.</li>
@@ -1638,23 +1661,30 @@ Awkward version.</p>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4220">#4220</a> (open) —
   <code>ak.from_parquet()</code> fails on <code>NaT</code> or out-of-range <code>datetime64[ms]</code>/<code>[us]</code>
   row-group statistics.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4305">#4305</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4396">#4396</a>) — the
+  <code>ak.to_parquet()</code>/<code>ak.from_parquet()</code> round trip raised an <code>AssertionError</code> on
+  an <code>UnmaskedArray</code> field of a record with null rows; the fix is not yet in a
+  released version as of the last review.</li>
 </ul>
 <p><strong>Feather conversion:</strong></p>
 <ul>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4238">#4238</a> (open) —
-  <code>ak.to_feather()</code> writes union-type arrays as invalid files, and
-  <code>ak.from_feather()</code> crashes reading them; the cause is
+<li><a href="https://github.com/scikit-hep/awkward/issues/4238">#4238</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4441">#4441</a>) — <code>ak.to_feather()</code>
+  wrote union-type arrays as invalid files, and <code>ak.from_feather()</code> crashed
+  reading them; the cause was
   <a href="https://github.com/apache/arrow/issues/50623">#50623</a> in PyArrow's IPC
-  writer.</li>
+  writer. The fix is not yet in a released version as of the last review.</li>
 </ul>
 <p><strong>JSON conversion:</strong></p>
 <ul>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4241">#4241</a> (open) —
   <code>ak.from_json()</code> parses floats at reduced precision, so values drift on each
   reparse.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4242">#4242</a> (open) —
-  <code>ak.from_json()</code> raises a <code>TypeError</code> when JSON mixes null with heterogeneous
-  values.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4242">#4242</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4391">#4391</a>) — <code>ak.from_json()</code>
+  raised a <code>TypeError</code> when JSON mixed null with heterogeneous values; the fix
+  is not yet in a released version as of the last review.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4243">#4243</a> (open) —
   <code>ak.from_json()</code> silently wraps JSON integers in <code>[2**63, 2**64)</code> to negative
   int64 values.</li>
@@ -1666,8 +1696,7 @@ Awkward version.</p>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4214">#4214</a> (fixed in
   <a href="https://github.com/scikit-hep/awkward/pull/4246">#4246</a>) —
   <code>ak.flatten(axis=None)</code> dropped data or raised an <code>IndexError</code> on nested
-  unions, a regression in Awkward Array 2.11.0; the fix is not yet in a released
-  version as of the last review.</li>
+  unions, a regression in Awkward Array 2.11.0.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4247">#4247</a> (open) —
   <code>ak.broadcast_arrays()</code> silently skips broadcasting on some union-containing
   arrays.</li>
@@ -1679,27 +1708,37 @@ Awkward version.</p>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4262">#4262</a> (open) —
   <code>ak.broadcast_arrays()</code> fails for a flat array and a regular list of
   variable-length lists.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4263">#4263</a> (open) —
-  <code>ak.ravel()</code> raises an <code>AssertionError</code> with no message on a union that no
-  values reach.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4263">#4263</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4292">#4292</a>) — <code>ak.ravel()</code>
+  raised an <code>AssertionError</code> with no message on a union that no values reach.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4278">#4278</a> (open) —
   <code>ak.ravel()</code> raises an <code>OverflowError</code> when temporal leaves need an
   overflowing unit conversion.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4280">#4280</a> (open) —
   <code>ak.ravel()</code> raises an <code>OverflowError</code> when a temporal value does not fit the
   merged unit.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4282">#4282</a> (open) —
-  <code>ak.ravel()</code> fails or silently reorders values when a union branch is an
-  all-regular list.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4282">#4282</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4303">#4303</a>) — <code>ak.ravel()</code>
+  failed or silently reordered values when a union branch was an all-regular
+  list.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4283">#4283</a> (open) —
   <code>ak.ravel()</code> raises an <code>AssertionError</code> on a record under an option beside a
   non-record leaf.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4291">#4291</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4292">#4292</a>) — <code>ak.ravel()</code>
+  raised an <code>AssertionError</code> when zero-field records left nothing to merge.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4297">#4297</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4303">#4303</a>) — <code>ak.ravel()</code>
+  failed or silently dropped values when a union branch was a single-field
+  record.</li>
 </ul>
 <p><strong>Reducers and sorting:</strong></p>
 <ul>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4259">#4259</a> (open) — nearly all
-  reducers and sorting raise a <code>KeyError</code> on <code>float16</code>, <code>float128</code>, and
-  <code>complex256</code> leaves.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4259">#4259</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4270">#4270</a>) — nearly all
+  reducers and sorting raised a <code>KeyError</code> on <code>float16</code>, <code>float128</code>, and
+  <code>complex256</code> leaves; the fix is not yet in a released version as of the last
+  review.</li>
 <li><a href="https://github.com/scikit-hep/awkward/issues/4264">#4264</a> (open) — reducers
   fail on an option type inside a <code>RegularArray</code>'s untrimmed content.</li>
 </ul>
@@ -1710,8 +1749,9 @@ Awkward version.</p>
   <code>ak.contents.IndexedOptionArray.to_ByteMaskedArray</code> raised an unhelpful
   <code>TypeError</code> when a non-empty array's content was an <code>EmptyArray</code>; the fix
   rejects the conversion with a clear error.</li>
-<li><a href="https://github.com/scikit-hep/awkward/issues/4288">#4288</a> (open) — virtual
-  arrays lose the <code>length</code> of a nested zero-field <code>RecordArray</code>.</li>
+<li><a href="https://github.com/scikit-hep/awkward/issues/4288">#4288</a> (fixed in
+  <a href="https://github.com/scikit-hep/awkward/pull/4293">#4293</a>) — virtual arrays
+  lost the <code>length</code> of a nested zero-field <code>RecordArray</code>.</li>
 </ul>
 <p>A NumPy property test in
 <a href="https://github.com/scikit-hep/hypothesis-awkward/blob/main/tests/strategies/numpy/test_numpy_arrays.py"><code>test_numpy_arrays.py</code></a>
@@ -1721,11 +1761,13 @@ one-dimensional. This is a pre-existing limitation the tests work around, not a
 bug they found.</p>
 <h3 id="pyarrow">PyArrow<a class="headerlink" href="#pyarrow" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="https://github.com/apache/arrow/issues/50623">#50623</a> (open) — Arrow's IPC
-  serialization drops a union's buffers when the union is wrapped in an
-  extension type, producing invalid data that segfaults on read. Reported with a
-  pure-PyArrow reproduction after the Feather round trip surfaced it as
-  <a href="https://github.com/scikit-hep/awkward/issues/4238">#4238</a>.</li>
+<li><a href="https://github.com/apache/arrow/issues/50623">#50623</a> (fixed) — Arrow's IPC
+  serialization dropped a union's buffers when the union was wrapped in an
+  extension type, producing invalid data that segfaulted on read. Reported with
+  a pure-PyArrow reproduction after the Feather round trip surfaced it as
+  <a href="https://github.com/scikit-hep/awkward/issues/4238">#4238</a>. Fixed in
+  <a href="https://github.com/apache/arrow/pull/50927">#50927</a> and released in PyArrow
+  26.0.0.</li>
 </ul>
 <h3 id="hypothesis">Hypothesis<a class="headerlink" href="#hypothesis" title="Permanent link">&para;</a></h3>
 <ul>
