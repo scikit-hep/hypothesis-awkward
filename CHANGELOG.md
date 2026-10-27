@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.21.0] - 2026-10-27
+
+### Bug Fixes
+
+- Make `list_array_contents()` reliably shrink to reachable data ([#198](https://github.com/scikit-hep/hypothesis-awkward/pull/198))
+
+### Documentation
+
+- Update the bugs-found log and upstream pull requests ([#209](https://github.com/scikit-hep/hypothesis-awkward/pull/209))
+- Revise the docs landing page ([#210](https://github.com/scikit-hep/hypothesis-awkward/pull/210))
+- Update the README intro, sample output, and citation ([#211](https://github.com/scikit-hep/hypothesis-awkward/pull/211))
+
+### Testing
+
+- Use `FIND_RARE` for two flaky reachability tests ([#203](https://github.com/scikit-hep/hypothesis-awkward/pull/203))
+- Use `FIND_RARE_NO_SHRINK` for `test_draw_unique_bool` ([#206](https://github.com/scikit-hep/hypothesis-awkward/pull/206))
+
+### Build & CI
+
+- Drop support for Python 3.10 ([#204](https://github.com/scikit-hep/hypothesis-awkward/pull/204)) **BREAKING**
+- Bump hypothesis from 6.168.1 to 6.170.9 in /.github-deps/latest ([#205](https://github.com/scikit-hep/hypothesis-awkward/pull/205))
+- Bump minimum `awkward` version to 2.14.0 ([#207](https://github.com/scikit-hep/hypothesis-awkward/pull/207))
+- Bump astral-sh/setup-uv from 10.2.0 to 10.3.2 ([#202](https://github.com/scikit-hep/hypothesis-awkward/pull/202))
+- Add support for Python 3.15 ([#208](https://github.com/scikit-hep/hypothesis-awkward/pull/208))
+
+### Meta
+
+- Upgrade reviewed-writer to v0.5.1
+
+
 ## [0.20.3] - 2026-09-30
 
 ### Bug Fixes
