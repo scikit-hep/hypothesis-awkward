@@ -9,7 +9,7 @@ git clone https://github.com/scikit-hep/hypothesis-awkward.git
 cd hypothesis-awkward
 ```
 
-Create a virtual environment (Python ≥ 3.10):
+Create a virtual environment (Python ≥ 3.11):
 
 ```bash
 uv venv

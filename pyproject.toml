@@ -7,7 +7,7 @@ name = "hypothesis-awkward"
 dynamic = ["version"]
 description = "Hypothesis strategies for Awkward Array"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Tai Sakuma" }]
@@ -18,7 +18,6 @@ classifiers = [
     "Topic :: Software Development :: Testing",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -28,7 +27,6 @@ keywords = ["hypothesis", "awkward-array", "testing", "property-based testing"]
 dependencies = [
     "awkward>=2.9.1",
     "hypothesis>=6.152.4",
-    "typing-extensions>=4.7; python_version < '3.11'",
 ]
 
 [project.urls]
@@ -62,7 +60,7 @@ filterwarnings = ["ignore::hypothesis.errors.NonInteractiveExampleWarning"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [

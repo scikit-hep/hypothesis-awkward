@@ -1,5 +1,4 @@
-import sys
-from typing import cast
+from typing import TypedDict, cast
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -24,11 +23,6 @@ from hypothesis_awkward.util import (
     is_bytestring_leaf,
     is_string_leaf,
 )
-
-if sys.version_info >= (3, 11):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
 
 
 class GetContentsKwargs(TypedDict, total=False):

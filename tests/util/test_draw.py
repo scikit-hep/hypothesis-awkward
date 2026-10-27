@@ -1,8 +1,7 @@
-from typing import TypedDict, cast
+from typing import TypedDict, Unpack, cast
 
 from hypothesis import HealthCheck, find, given, settings
 from hypothesis import strategies as st
-from typing_extensions import Unpack
 
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import CountdownDrawer
