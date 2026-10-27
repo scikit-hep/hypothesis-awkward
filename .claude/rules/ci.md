@@ -34,7 +34,7 @@ These files are **not** used for local development. The project does not use
 
 Runs on push to `main` and PRs targeting `main`. Tests a matrix of:
 
-- **Python**: 3.11, 3.12, 3.13, 3.14
+- **Python**: 3.11, 3.12, 3.13, 3.14, 3.15
 - **Deps**: `default`, `latest`, `min`
 
 | Mode      | Install method                                                    |
@@ -51,7 +51,7 @@ selected via the `HYPOTHESIS_PROFILE` environment variable).
 
 - Triggers: daily cron and `workflow_dispatch`. The scheduled run is guarded by
   `github.repository_owner == 'scikit-hep'` so forks do not run it.
-- Matrix: Python 3.11 and 3.14 × `latest` and `min` deps (install steps mirror
+- Matrix: Python 3.11 and 3.15 × `latest` and `min` deps (install steps mirror
   `unit-test.yml`).
 - Runs pytest with `--junitxml=junit.xml`; no coverage upload. A separate step
   decodes the Hypothesis statistics from `junit.xml` and prints them, so the
