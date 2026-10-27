@@ -17,7 +17,7 @@ from hypothesis_awkward.util import (
     simple_dtype_kinds_in,
 )
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND_NO_SHRINK
+from tests.find_settings import FIND_NO_SHRINK, FIND_RARE_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature
 
 
@@ -380,5 +380,5 @@ def test_draw_unique_bool() -> None:
     find(
         st_ak.numpy_arrays(unique=True),
         lambda a: a.dtype.kind == 'b' and set(a.ravel().tolist()) == {True, False},
-        settings=FIND_NO_SHRINK,
+        settings=FIND_RARE_NO_SHRINK,
     )
