@@ -10,7 +10,7 @@ from awkward.contents import Content, IndexedArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
+from tests.find_settings import FIND, FIND_RARE, FIND_RARE_NO_SHRINK
 
 
 class IndexedArrayContentsKwargs(TypedDict, total=False):
@@ -161,7 +161,7 @@ def test_draw_permutation() -> None:
             len(c) == len(c.content) >= 2
             and sorted(c.index.data.tolist()) == list(range(len(c.content)))
         ),
-        settings=FIND,
+        settings=FIND_RARE,
     )
 
 
