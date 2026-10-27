@@ -1,9 +1,10 @@
 # Persona-review profile
 
-Repository-specific values for the `reviewed-writer` plugin's `write-doc`
-engine, invoked through `.claude/skills/write-docs-page/SKILL.md`. The engine
-reads this file first and refers to its sections by name; the section structure
-is shared with the counterpart profile in legendary-octo-happiness.
+Repository-specific values for the `reviewed-writer` plugin's `diataxis-writer`
+and `diataxis-persona-panel` agents and `persona-review` skill, invoked through
+`.claude/skills/write-docs-page/SKILL.md`. All three read this file first and
+refer to its sections by name; the section structure is shared with the
+counterpart profile in legendary-octo-happiness.
 
 ## Document
 
