@@ -2,7 +2,7 @@
 
 <!-- diataxis: how-to -->
 
-The package requires Python 3.10 or later.
+The package requires Python 3.11 or later.
 
 You can install the package from
 [PyPI](https://pypi.org/project/hypothesis-awkward) using pip:

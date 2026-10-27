@@ -1,6 +1,5 @@
-import sys
 from functools import partial
-from typing import Any, TypeVar, cast
+from typing import Any, Generic, TypedDict, TypeVar, cast
 
 import pytest
 from hypothesis import find, given
@@ -11,11 +10,6 @@ from hypothesis_awkward.util import safe_compare as sc
 from hypothesis_awkward.util import safe_max
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
-
-if sys.version_info >= (3, 11):
-    from typing import Generic, TypedDict
-else:
-    from typing_extensions import Generic, TypedDict
 
 T = TypeVar('T')
 
