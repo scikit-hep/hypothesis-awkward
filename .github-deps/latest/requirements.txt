@@ -2,4 +2,4 @@
 # Used in GitHub Actions for testing compatibility.
 # Monitored by Dependabot.
 awkward==2.14.0
-hypothesis==6.170.9
+hypothesis==6.170.11
