@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import any_nan_nat_in_numpy_array
+from tests.funcs import assert_kwargs_match_signature
 
 
 class FromListsKwargs(TypedDict, total=False):
@@ -15,6 +16,16 @@ class FromListsKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
     max_size: int
+
+
+DEFAULTS = FromListsKwargs(dtype=None, allow_nan=True, max_size=10)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `from_list()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.from_list, kwargs_cls=FromListsKwargs, defaults=DEFAULTS
+    )
 
 
 def from_lists_kwargs() -> st.SearchStrategy[FromListsKwargs]:
@@ -44,9 +55,9 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(a, ak.Array)
 
     # Assert the options were effective
-    dtype = kwargs.get('dtype', None)
-    allow_nan = kwargs.get('allow_nan', True)
-    max_size = kwargs.get('max_size', 10)
+    dtype = kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     n_flat = ak.flatten(a, axis=None).to_numpy()
 

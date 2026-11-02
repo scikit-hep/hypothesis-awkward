@@ -14,8 +14,7 @@ from hypothesis_awkward.util import (
     iter_numpy_arrays,
 )
 from tests.find_settings import FIND_NO_SHRINK
-
-DEFAULT_MAX_SIZE = 10
+from tests.funcs import assert_kwargs_match_signature
 
 
 class FromNumpyKwargs(TypedDict, total=False):
@@ -24,8 +23,20 @@ class FromNumpyKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_structured: bool
     allow_nan: bool
-    regulararray: bool
+    regulararray: bool | None
     max_size: int
+
+
+DEFAULTS = FromNumpyKwargs(
+    dtype=None, allow_structured=True, allow_nan=True, regulararray=None, max_size=10
+)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `from_numpy()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.from_numpy, kwargs_cls=FromNumpyKwargs, defaults=DEFAULTS
+    )
 
 
 @st.composite
@@ -70,11 +81,11 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(a, ak.Array)
 
     # Assert the options were effective
-    dtype = opts.kwargs.get('dtype', None)
-    allow_structured = opts.kwargs.get('allow_structured', True)
-    allow_nan = opts.kwargs.get('allow_nan', True)
-    regulararray = opts.kwargs.get('regulararray', None)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
+    dtype = opts.kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_structured = opts.kwargs.get('allow_structured', DEFAULTS['allow_structured'])
+    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    regulararray = opts.kwargs.get('regulararray', DEFAULTS['regulararray'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
 
     dtypes = _leaf_dtypes(a)
     structured = _is_structured(a)
@@ -164,7 +175,7 @@ def test_draw_max_size() -> None:
     """Assert that arrays with max_size elements can be drawn by default."""
     find(
         st_ak.from_numpy(allow_structured=False),
-        lambda a: _size(a) == DEFAULT_MAX_SIZE,
+        lambda a: _size(a) == DEFAULTS['max_size'],
         settings=FIND_NO_SHRINK,
     )
 

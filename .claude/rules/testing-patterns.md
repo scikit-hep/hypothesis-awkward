@@ -23,9 +23,8 @@ Reference implementations:
   (closest to the original template in awkward's
   `tests/properties/operations/test_flatten.py`)
 
-Test modules not listed above may predate this template; follow the references,
-not neighboring files. The remaining modules will be brought onto the template
-eventually.
+Every kwargs test module under `tests/strategies/` follows this template; the
+modules above are the examples to start from.
 
 ## 1. Option declarations
 
@@ -37,8 +36,9 @@ and a meta-test keeps them in sync with the strategy's signature:
   check — verify by reading; the meta-test compares only keys and defaults).
 - `DEFAULTS`: the TypedDict instantiated with the signature's default values.
 - `RelatedKwargs`: a second TypedDict naming the options drawn together (see
-  section 2). Omitted when the coupling takes another form, such as mode
-  selection.
+  section 2). Omitted when no options constrain each other
+  (`test_unmasked_array.py`) or when the coupling takes another form, such as
+  mode selection.
 
 The meta-test, named `test_kwargs_match_signature`, calls
 `assert_kwargs_match_signature()` from `tests/funcs.py`:
@@ -59,9 +59,13 @@ It asserts that the TypedDict keys equal the signature's parameters minus
 `exclude`, that `DEFAULTS` equals the signature's defaults, and that
 `RelatedKwargs` keys are a subset. `exclude` records the parameters the kwargs
 strategy deliberately does not draw: internal recursion controls (`allow_*_root`
-in `contents()`; `all_option_or_none` and `st_option` in `content_lists()`) or a
-positional factory (`st_` in `ranges()`). Adding a parameter to a strategy turns
-this test red first; update the declarations with it.
+in `contents()`; `all_option_or_none` and `st_option` in `content_lists()`), a
+positional factory (`st_` in `ranges()`), or a required positional argument
+(`content_len` in `_st_starts_stops()`). The test draws an excluded positional
+argument first and passes it to the kwargs strategy, which draws the other
+options within it (`test_ranges.py`, `test_list_array_starts_stops.py`). Adding
+a parameter to a strategy turns this test red first; update the declarations
+with it.
 
 A strategy that extends another subclasses the TypedDict and derives its
 `DEFAULTS` by unpacking the parent module's — see `ArraysKwargs` in
@@ -86,15 +90,30 @@ The body makes two draws and merges them:
 - An `st.fixed_dictionaries({}, optional={...})` draw for the independent
   options; whether each key appears is drawn separately from its value.
 
+When one group is empty, its draw is skipped (`test_bytestring.py`,
+`test_unmasked_array.py`).
+
+The kwargs strategy generates only options the strategy accepts. Options that
+decide whether a call is feasible, such as `allow_*` flags of which at least one
+must be `True`, are drawn together in `_st_related_kwargs()` so that every
+combination is valid (`test_content.py`, `test_option.py`, `test_leaf.py`);
+`test_properties` does not expect errors. When the strategy under test itself
+raises on infeasible options, a dedicated `test_raise_*` test checks the error
+(`test_option.py`, `test_leaf.py`); otherwise the `raise` line goes uncovered. A
+strategy that only passes on a callee's error needs none: `contents()` gets its
+`ValueError` from `leaf_contents()`, which `test_leaf.py` covers.
+
 Strategy-valued kwargs are registered on the chain so the test can later assert
 what was drawn: `chain.register(strategy)` returns a tracked `RecordDraws`
-wrapper (passed via `st.just(recorder)`), and `chain.register_callable(factory)`
-returns a `RecordCallDraws` wrapper for callable-valued kwargs, aggregating
-draws across all calls (`test_content_lists.py`). The option's pool typically
-mixes concrete values with the recorder — e.g.
-`st.one_of(_contents_list(), st.just(recorder))` in `test_record_array.py` — so
-the concrete-value path is exercised too. For mutually exclusive parameter
-groups, define mode functions selected with `st.one_of` (`test_numpy_forms.py`).
+wrapper (passed via `st.just(recorder)`; a plain-dict kwargs strategy creates
+the `RecordDraws` directly, as in `test_numpy_types.py`), and
+`chain.register_callable(factory)` returns a `RecordCallDraws` wrapper for
+callable-valued kwargs, aggregating draws across all calls
+(`test_content_lists.py`). The option's pool typically mixes concrete values
+with the recorder — e.g. `st.one_of(_contents_list(), st.just(recorder))` in
+`test_record_array.py` — so the concrete-value path is exercised too. For
+mutually exclusive parameter groups, define mode functions selected with
+`st.one_of` (`test_numpy_forms.py`).
 
 ## 3. Main property-based test
 
