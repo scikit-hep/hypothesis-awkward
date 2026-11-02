@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND_NO_SHRINK
+from tests.funcs import assert_kwargs_match_signature
 
 
 @given(data=st.data())
@@ -25,6 +26,16 @@ class NumpyTypesKwargs(TypedDict, total=False):
 
     dtypes: st.SearchStrategy[np.dtype] | None
     allow_datetime: bool
+
+
+DEFAULTS = NumpyTypesKwargs(dtypes=None, allow_datetime=True)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `numpy_types()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.numpy_types, kwargs_cls=NumpyTypesKwargs, defaults=DEFAULTS
+    )
 
 
 def numpy_types_kwargs() -> st.SearchStrategy[NumpyTypesKwargs]:
@@ -54,8 +65,8 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result, ak.types.NumpyType)
 
     # Assert the options were effective
-    dtypes = kwargs.get('dtypes', None)
-    allow_datetime = kwargs.get('allow_datetime', True)
+    dtypes = kwargs.get('dtypes', DEFAULTS['dtypes'])
+    allow_datetime = kwargs.get('allow_datetime', DEFAULTS['allow_datetime'])
 
     match dtypes:
         case None:

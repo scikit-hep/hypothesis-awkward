@@ -9,6 +9,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import n_scalars_in, simple_dtype_kinds_in
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 @given(name=st_ak.supported_dtype_names())
@@ -33,6 +34,16 @@ class NumpyDtypesKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_array: bool
     max_size: int
+
+
+DEFAULTS = NumpyDtypesKwargs(dtype=None, allow_array=True, max_size=5)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `numpy_dtypes()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.numpy_dtypes, kwargs_cls=NumpyDtypesKwargs, defaults=DEFAULTS
+    )
 
 
 def numpy_dtypes_kwargs() -> st.SearchStrategy[NumpyDtypesKwargs]:
@@ -61,9 +72,9 @@ def test_properties(data: st.DataObject) -> None:
     result = data.draw(st_ak.numpy_dtypes(**kwargs), label='dtype')
 
     # Assert the options were effective
-    dtype = kwargs.get('dtype', None)
-    allow_array = kwargs.get('allow_array', True)
-    max_size = kwargs.get('max_size', 5)
+    dtype = kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_array = kwargs.get('allow_array', DEFAULTS['allow_array'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     if dtype is not None and not isinstance(dtype, st.SearchStrategy):
         kinds = simple_dtype_kinds_in(result)

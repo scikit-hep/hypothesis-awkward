@@ -7,6 +7,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
+from tests.funcs import assert_kwargs_match_signature
 
 
 class ListsKwargs(TypedDict, total=False):
@@ -15,6 +16,16 @@ class ListsKwargs(TypedDict, total=False):
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None
     allow_nan: bool
     max_size: int
+
+
+DEFAULTS = ListsKwargs(dtype=None, allow_nan=True, max_size=10)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `lists()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.lists, kwargs_cls=ListsKwargs, defaults=DEFAULTS
+    )
 
 
 def lists_kwargs() -> st.SearchStrategy[ListsKwargs]:
@@ -43,9 +54,9 @@ def test_properties(data: st.DataObject) -> None:
     l = data.draw(st_ak.lists(**kwargs), label='l')
 
     # Assert the options were effective
-    dtype = kwargs.get('dtype', None)
-    allow_nan = kwargs.get('allow_nan', True)
-    max_size = kwargs.get('max_size', 10)
+    dtype = kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     def _is_nan(x: Any) -> bool:
         if x is None:
