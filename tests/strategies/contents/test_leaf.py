@@ -1,4 +1,3 @@
-from contextlib import ExitStack
 from typing import Any, TypedDict, cast
 
 import numpy as np
@@ -17,8 +16,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE
-
-DEFAULT_MAX_SIZE = 10
+from tests.funcs import assert_kwargs_match_signature
 
 
 class LeafContentsKwargs(TypedDict, total=False):
@@ -35,6 +33,54 @@ class LeafContentsKwargs(TypedDict, total=False):
     allow_zero_field_record: bool
 
 
+DEFAULTS = LeafContentsKwargs(
+    dtypes=None,
+    allow_nan=True,
+    min_size=0,
+    max_size=10,
+    allow_numpy=True,
+    allow_empty=True,
+    allow_string=True,
+    allow_bytestring=True,
+    allow_zero_field_record=True,
+)
+
+ALLOW_FLAGS = (
+    'allow_numpy',
+    'allow_empty',
+    'allow_string',
+    'allow_bytestring',
+    'allow_zero_field_record',
+)
+NON_EMPTY_FLAGS = tuple(f for f in ALLOW_FLAGS if f != 'allow_empty')
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together.
+
+    `min_size <= max_size`, and at least one leaf type is allowed that can have a
+    length in that range (`EmptyArray` only when `min_size` is 0).
+    """
+
+    min_size: int
+    max_size: int
+    allow_numpy: bool
+    allow_empty: bool
+    allow_string: bool
+    allow_bytestring: bool
+    allow_zero_field_record: bool
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `leaf_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.leaf_contents,
+        kwargs_cls=LeafContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
+
+
 @st.composite
 def leaf_contents_kwargs(
     draw: st.DrawFn,
@@ -45,36 +91,50 @@ def leaf_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_dtypes = chain.register(st_ak.supported_dtypes())
 
-    min_size, max_size = draw(
-        st_ak.ranges(
-            min_start=0, max_start=DEFAULT_MAX_SIZE, max_end=DEFAULT_MAX_SIZE + 50
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_size, max_size = draw(
+            st_ak.ranges(
+                min_start=0,
+                max_start=DEFAULTS['max_size'],
+                max_end=DEFAULTS['max_size'] + 50,
+            )
         )
-    )
+        ret = dict[str, Any]()
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        if min_size:
+            # `EmptyArray` is impossible; at least one non-empty type is needed.
+            allowed = draw(st.sets(st.sampled_from(NON_EMPTY_FLAGS), min_size=1))
+            if draw(st.booleans()):
+                allowed.add('allow_empty')
+        else:
+            allowed = draw(st.sets(st.sampled_from(ALLOW_FLAGS), min_size=1))
+        for flag in ALLOW_FLAGS:
+            # A disallowed flag must be passed; an allowed one may be omitted.
+            if flag not in allowed or draw(st.booleans()):
+                ret[flag] = flag in allowed
+        return cast(RelatedKwargs, ret)
 
-    drawn = (
-        ('min_size', min_size),
-        ('max_size', max_size),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'dtypes': st.one_of(
                     st.none(),
                     st.just(st_dtypes),
                 ),
                 'allow_nan': st.booleans(),
-                'allow_numpy': st.booleans(),
-                'allow_empty': st.booleans(),
-                'allow_string': st.booleans(),
-                'allow_bytestring': st.booleans(),
-                'allow_zero_field_record': st.booleans(),
             },
         )
     )
 
-    return chain.extend(cast(LeafContentsKwargs, kwargs))
+    return chain.extend(cast(LeafContentsKwargs, {**related, **optional_independent}))
 
 
 @given(data=st.data())
@@ -84,35 +144,18 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(leaf_contents_kwargs(), label='opts')
     opts.reset()
 
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
-    allow_numpy = opts.kwargs.get('allow_numpy', True)
-    allow_empty = opts.kwargs.get('allow_empty', True)
-    allow_string = opts.kwargs.get('allow_string', True)
-    allow_bytestring = opts.kwargs.get('allow_bytestring', True)
-    allow_zero_field_record = opts.kwargs.get('allow_zero_field_record', True)
-
-    def _is_allowed_any() -> bool:
-        return any(
-            (
-                min_size <= 0 <= max_size and allow_empty,
-                allow_numpy,
-                allow_string,
-                allow_bytestring,
-                allow_zero_field_record,
-            )
-        )
+    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    allow_numpy = opts.kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
+    allow_empty = opts.kwargs.get('allow_empty', DEFAULTS['allow_empty'])
+    allow_string = opts.kwargs.get('allow_string', DEFAULTS['allow_string'])
+    allow_bytestring = opts.kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
+    allow_zero_field_record = opts.kwargs.get(
+        'allow_zero_field_record', DEFAULTS['allow_zero_field_record']
+    )
 
     # Call the test subject
-    expect_raised = False
-    with ExitStack() as stack:
-        if not _is_allowed_any():
-            expect_raised = True
-            stack.enter_context(pytest.raises(ValueError))
-        result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
-
-    if expect_raised:
-        return
+    result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
 
     is_numpy = isinstance(result, NumpyArray)
     is_empty = isinstance(result, EmptyArray)
@@ -134,8 +177,8 @@ def test_properties(data: st.DataObject) -> None:
     if not allow_zero_field_record:
         assert not is_zero_field_record
 
-    dtypes = opts.kwargs.get('dtypes', None)
-    allow_nan = opts.kwargs.get('allow_nan', True)
+    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
+    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
 
     if is_empty:
         assert len(result) == 0
@@ -230,3 +273,21 @@ def test_shrink_leaf_contents_one() -> None:
     # another branch (the length draw falls back to 0). TODO: Revisit.
     c = find(st_ak.contents.leaf_contents(), lambda c: len(c) == 1, settings=FIND)
     assert c.to_list() == [b'']
+
+
+@pytest.mark.parametrize(
+    'kwargs',
+    [
+        pytest.param({flag: False for flag in ALLOW_FLAGS}, id='all-disallowed'),
+        pytest.param(
+            {'min_size': 1, **{flag: False for flag in NON_EMPTY_FLAGS}},
+            id='only-empty-with-min-size',
+        ),
+    ],
+)
+def test_raise_no_possible_type(kwargs: LeafContentsKwargs) -> None:
+    """Assert `ValueError` when no allowed leaf type can satisfy the options."""
+    with pytest.raises(
+        ValueError, match='no content types are possible with the given options'
+    ):
+        st_ak.contents.leaf_contents(**kwargs)
