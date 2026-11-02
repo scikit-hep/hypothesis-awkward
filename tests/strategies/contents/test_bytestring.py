@@ -9,8 +9,7 @@ from awkward.contents import ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-
-DEFAULT_MAX_SIZE = 10
+from tests.funcs import assert_kwargs_match_signature
 
 
 class BytestringContentsKwargs(TypedDict, total=False):
@@ -18,6 +17,26 @@ class BytestringContentsKwargs(TypedDict, total=False):
 
     min_size: int
     max_size: int
+
+
+DEFAULTS = BytestringContentsKwargs(min_size=0, max_size=10)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together as an ordered pair (`min_size <= max_size`)."""
+
+    min_size: int
+    max_size: int
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `bytestring_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.bytestring_contents,
+        kwargs_cls=BytestringContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -29,22 +48,22 @@ def bytestring_contents_kwargs(
     if chain is None:
         chain = st_ak.OptsChain({})
 
-    min_size, max_size = draw(
-        st_ak.ranges(min_start=0, max_start=DEFAULT_MAX_SIZE, max_end=100)
-    )
-
-    drawn = (
-        ('min_size', min_size),
-        ('max_size', max_size),
-    )
-
-    kwargs = draw(
-        st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_size, max_size = draw(
+            st_ak.ranges(min_start=0, max_start=DEFAULTS['max_size'], max_end=100)
         )
-    )
+        ret = RelatedKwargs()
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        return ret
 
-    return chain.extend(cast(BytestringContentsKwargs, kwargs))
+    related = draw(_st_related_kwargs())
+
+    return chain.extend(cast(BytestringContentsKwargs, related))
 
 
 @given(data=st.data())
@@ -75,8 +94,8 @@ def test_properties(data: st.DataObject) -> None:
     assert result.content.dtype == np.dtype(np.uint8)
 
     # Assert size bounds
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size', DEFAULT_MAX_SIZE)
+    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
 
     assert sc(min_size) <= len(result) <= sc(max_size)
 
@@ -95,7 +114,7 @@ def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size bytestrings can be drawn."""
     find(
         st_ak.contents.bytestring_contents(),
-        lambda c: len(c) == DEFAULT_MAX_SIZE,
+        lambda c: len(c) == DEFAULTS['max_size'],
         settings=FIND,
     )
 
