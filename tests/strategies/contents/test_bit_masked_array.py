@@ -9,12 +9,25 @@ from hypothesis import strategies as st
 from awkward.contents import BitMaskedArray, Content
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 class BitMaskedArrayContentsKwargs(TypedDict, total=False):
     """Options for `bit_masked_array_contents()` strategy."""
 
-    content: st.SearchStrategy[Content] | Content
+    content: st.SearchStrategy[Content] | Content | None
+
+
+DEFAULTS = BitMaskedArrayContentsKwargs(content=None)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `bit_masked_array_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.bit_masked_array_contents,
+        kwargs_cls=BitMaskedArrayContentsKwargs,
+        defaults=DEFAULTS,
+    )
 
 
 @st.composite
@@ -78,7 +91,7 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result.lsb_order, bool)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', None)
+    content = opts.kwargs.get('content', DEFAULTS['content'])
     match content:
         case Content():
             assert result.content is content

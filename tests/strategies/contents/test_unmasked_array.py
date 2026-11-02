@@ -6,12 +6,25 @@ from hypothesis import strategies as st
 from awkward.contents import Content, UnmaskedArray
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 class UnmaskedArrayContentsKwargs(TypedDict, total=False):
     """Options for `unmasked_array_contents()` strategy."""
 
-    content: st.SearchStrategy[Content] | Content
+    content: st.SearchStrategy[Content] | Content | None
+
+
+DEFAULTS = UnmaskedArrayContentsKwargs(content=None)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `unmasked_array_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.unmasked_array_contents,
+        kwargs_cls=UnmaskedArrayContentsKwargs,
+        defaults=DEFAULTS,
+    )
 
 
 @st.composite
@@ -65,7 +78,7 @@ def test_properties(data: st.DataObject) -> None:
     assert len(result) == len(result.content)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', None)
+    content = opts.kwargs.get('content', DEFAULTS['content'])
     match content:
         case Content():
             assert result.content is content

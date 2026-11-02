@@ -9,14 +9,39 @@ from awkward.contents import Content, IndexedOptionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 class IndexedOptionArrayContentsKwargs(TypedDict, total=False):
     """Options for `indexed_option_array_contents()` strategy."""
 
-    content: st.SearchStrategy[Content] | Content
+    content: st.SearchStrategy[Content] | Content | None
     min_size: int
-    max_size: int
+    max_size: int | None
+
+
+DEFAULTS = IndexedOptionArrayContentsKwargs(
+    content=None,
+    min_size=0,
+    max_size=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together as an ordered pair (`min_size <= max_size`)."""
+
+    min_size: int
+    max_size: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `indexed_option_array_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.indexed_option_array_contents,
+        kwargs_cls=IndexedOptionArrayContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -33,16 +58,22 @@ def indexed_option_array_contents_kwargs(
         )
     )
 
-    min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=50))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=50))
+        ret = RelatedKwargs()
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        return ret
 
-    drawn = (
-        ('min_size', min_size),
-        ('max_size', max_size),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(
@@ -56,7 +87,9 @@ def indexed_option_array_contents_kwargs(
         )
     )
 
-    return chain.extend(cast(IndexedOptionArrayContentsKwargs, kwargs))
+    return chain.extend(
+        cast(IndexedOptionArrayContentsKwargs, {**related, **optional_independent})
+    )
 
 
 @given(data=st.data())
@@ -74,8 +107,8 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result, IndexedOptionArray)
 
     # Assert index length is within bounds
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size')
+    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
     assert min_size <= len(result) <= sc(max_size)
 
     # Assert index dtype is int32 or int64
@@ -88,7 +121,7 @@ def test_properties(data: st.DataObject) -> None:
         assert index[i] == -1 or (0 <= index[i] < content_len)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', None)
+    content = opts.kwargs.get('content', DEFAULTS['content'])
     match content:
         case Content():
             assert result.content is content
