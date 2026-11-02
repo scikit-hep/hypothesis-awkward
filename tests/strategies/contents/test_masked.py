@@ -1,4 +1,3 @@
-from contextlib import ExitStack
 from typing import Any, TypedDict, cast
 
 import pytest
@@ -13,6 +12,7 @@ from awkward.contents import (
 )
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 MASKED_TYPES = (ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 
@@ -20,10 +20,38 @@ MASKED_TYPES = (ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 class MaskedContentsKwargs(TypedDict, total=False):
     """Options for `masked_contents()` strategy."""
 
-    content: st.SearchStrategy[Content] | Content
+    content: st.SearchStrategy[Content] | Content | None
     allow_byte_masked: bool
     allow_bit_masked: bool
     allow_unmasked: bool
+
+
+DEFAULTS = MaskedContentsKwargs(
+    content=None,
+    allow_byte_masked=True,
+    allow_bit_masked=True,
+    allow_unmasked=True,
+)
+
+ALLOW_FLAGS = ('allow_byte_masked', 'allow_bit_masked', 'allow_unmasked')
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together (at least one masked type is allowed)."""
+
+    allow_byte_masked: bool
+    allow_bit_masked: bool
+    allow_unmasked: bool
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `masked_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.masked_contents,
+        kwargs_cls=MaskedContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -40,7 +68,20 @@ def masked_contents_kwargs(
         )
     )
 
-    kwargs = draw(
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        ret = dict[str, Any]()
+        allowed = draw(st.sets(st.sampled_from(ALLOW_FLAGS), min_size=1))
+        for flag in ALLOW_FLAGS:
+            # A disallowed flag must be passed; an allowed one may be omitted.
+            if flag not in allowed or draw(st.booleans()):
+                ret[flag] = flag in allowed
+        return cast(RelatedKwargs, ret)
+
+    related = draw(_st_related_kwargs())
+
+    optional_independent = draw(
         st.fixed_dictionaries(
             {},
             optional={
@@ -52,14 +93,11 @@ def masked_contents_kwargs(
                     ),
                     st.just(st_content),
                 ),
-                'allow_byte_masked': st.booleans(),
-                'allow_bit_masked': st.booleans(),
-                'allow_unmasked': st.booleans(),
             },
         )
     )
 
-    return chain.extend(cast(MaskedContentsKwargs, kwargs))
+    return chain.extend(cast(MaskedContentsKwargs, {**related, **optional_independent}))
 
 
 @given(data=st.data())
@@ -69,27 +107,14 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(masked_contents_kwargs(), label='opts')
     opts.reset()
 
-    allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
-    allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
-    allow_unmasked = opts.kwargs.get('allow_unmasked', True)
+    allow_byte_masked = opts.kwargs.get(
+        'allow_byte_masked', DEFAULTS['allow_byte_masked']
+    )
+    allow_bit_masked = opts.kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
+    allow_unmasked = opts.kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
 
     # Call the test subject
-    expect_raised = False
-    with ExitStack() as stack:
-        if not any((allow_byte_masked, allow_bit_masked, allow_unmasked)):
-            expect_raised = True
-            stack.enter_context(
-                pytest.raises(
-                    ValueError,
-                    match='at least one masked content type must be allowed',
-                )
-            )
-        result = data.draw(
-            st_ak.contents.masked_contents(**opts.kwargs), label='result'
-        )
-
-    if expect_raised:
-        return
+    result = data.draw(st_ak.contents.masked_contents(**opts.kwargs), label='result')
 
     assert isinstance(result, MASKED_TYPES)
 
@@ -102,7 +127,7 @@ def test_properties(data: st.DataObject) -> None:
         assert not isinstance(result, UnmaskedArray)
 
     # Assert content identity
-    content = opts.kwargs.get('content', None)
+    content = opts.kwargs.get('content', DEFAULTS['content'])
     match content:
         case Content():
             assert result.content is content
@@ -131,3 +156,11 @@ def test_shrink_to_byte_masked() -> None:
         settings=FIND,
     )
     assert isinstance(c, ByteMaskedArray)
+
+
+def test_raise_all_disallowed() -> None:
+    """Assert `ValueError` when every masked type is disallowed."""
+    with pytest.raises(
+        ValueError, match='at least one masked content type must be allowed'
+    ):
+        st_ak.contents.masked_contents(**{flag: False for flag in ALLOW_FLAGS})

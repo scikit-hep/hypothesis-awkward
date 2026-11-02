@@ -14,6 +14,7 @@ from awkward.contents import (
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 OPTION_TYPES = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 
@@ -21,13 +22,55 @@ OPTION_TYPES = (IndexedOptionArray, ByteMaskedArray, BitMaskedArray, UnmaskedArr
 class OptionContentsKwargs(TypedDict, total=False):
     """Options for `option_contents()` strategy."""
 
-    content: st.SearchStrategy[Content] | Content
+    content: st.SearchStrategy[Content] | Content | None
     min_size: int
     max_size: int | None
     allow_indexed_option: bool
     allow_byte_masked: bool
     allow_bit_masked: bool
     allow_unmasked: bool
+
+
+DEFAULTS = OptionContentsKwargs(
+    content=None,
+    min_size=0,
+    max_size=None,
+    allow_indexed_option=True,
+    allow_byte_masked=True,
+    allow_bit_masked=True,
+    allow_unmasked=True,
+)
+
+ALLOW_FLAGS = (
+    'allow_indexed_option',
+    'allow_byte_masked',
+    'allow_bit_masked',
+    'allow_unmasked',
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together.
+
+    `min_size <= max_size`, and at least one option type is allowed.
+    """
+
+    min_size: int
+    max_size: int | None
+    allow_indexed_option: bool
+    allow_byte_masked: bool
+    allow_bit_masked: bool
+    allow_unmasked: bool
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `option_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.option_contents,
+        kwargs_cls=OptionContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -44,16 +87,27 @@ def option_contents_kwargs(
         )
     )
 
-    min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=50))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_size, max_size = draw(st_ak.ranges(min_start=0, max_end=50))
+        ret = dict[str, Any]()
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        allowed = draw(st.sets(st.sampled_from(ALLOW_FLAGS), min_size=1))
+        for flag in ALLOW_FLAGS:
+            # A disallowed flag must be passed; an allowed one may be omitted.
+            if flag not in allowed or draw(st.booleans()):
+                ret[flag] = flag in allowed
+        return cast(RelatedKwargs, ret)
 
-    drawn = (
-        ('min_size', min_size),
-        ('max_size', max_size),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(
@@ -63,15 +117,11 @@ def option_contents_kwargs(
                     ),
                     st.just(st_content),
                 ),
-                'allow_indexed_option': st.booleans(),
-                'allow_byte_masked': st.booleans(),
-                'allow_bit_masked': st.booleans(),
-                'allow_unmasked': st.booleans(),
             },
         )
     )
 
-    return chain.extend(cast(OptionContentsKwargs, kwargs))
+    return chain.extend(cast(OptionContentsKwargs, {**related, **optional_independent}))
 
 
 @given(data=st.data())
@@ -81,20 +131,14 @@ def test_properties(data: st.DataObject) -> None:
     opts = data.draw(option_contents_kwargs(), label='opts')
     opts.reset()
 
-    allow_indexed_option = opts.kwargs.get('allow_indexed_option', True)
-    allow_byte_masked = opts.kwargs.get('allow_byte_masked', True)
-    allow_bit_masked = opts.kwargs.get('allow_bit_masked', True)
-    allow_unmasked = opts.kwargs.get('allow_unmasked', True)
-
-    # If all are False, expect ValueError
-    if not any(
-        (allow_indexed_option, allow_byte_masked, allow_bit_masked, allow_unmasked)
-    ):
-        with pytest.raises(
-            ValueError, match='at least one option content type must be allowed'
-        ):
-            st_ak.contents.option_contents(**opts.kwargs)
-        return
+    allow_indexed_option = opts.kwargs.get(
+        'allow_indexed_option', DEFAULTS['allow_indexed_option']
+    )
+    allow_byte_masked = opts.kwargs.get(
+        'allow_byte_masked', DEFAULTS['allow_byte_masked']
+    )
+    allow_bit_masked = opts.kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
+    allow_unmasked = opts.kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
 
     # Call the test subject
     result = data.draw(st_ak.contents.option_contents(**opts.kwargs), label='result')
@@ -112,7 +156,7 @@ def test_properties(data: st.DataObject) -> None:
         assert not isinstance(result, UnmaskedArray)
 
     # Assert content identity
-    content = opts.kwargs.get('content', None)
+    content = opts.kwargs.get('content', DEFAULTS['content'])
     match content:
         case Content():
             assert result.content is content
@@ -121,8 +165,8 @@ def test_properties(data: st.DataObject) -> None:
             assert result.content is content.drawn[0]
 
     # Assert length is within bounds
-    min_size = opts.kwargs.get('min_size', 0)
-    max_size = opts.kwargs.get('max_size')
+    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
     assert min_size <= len(result) <= sc(max_size)
 
 
@@ -140,3 +184,11 @@ def test_draw_min_size(min_size: int) -> None:
 def test_draw_option_type(cls: type[Content]) -> None:
     """Assert the given option type can be drawn."""
     find(st_ak.contents.option_contents(), lambda c: isinstance(c, cls), settings=FIND)
+
+
+def test_raise_all_disallowed() -> None:
+    """Assert `ValueError` when every option type is disallowed."""
+    with pytest.raises(
+        ValueError, match='at least one option content type must be allowed'
+    ):
+        st_ak.contents.option_contents(**{flag: False for flag in ALLOW_FLAGS})
