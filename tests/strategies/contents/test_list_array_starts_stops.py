@@ -7,55 +7,85 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.list_array import _st_starts_stops
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 class StartsStopsKwargs(TypedDict, total=False):
     """Options for `_st_starts_stops()`."""
 
-    content_len: int
     min_length: int
     max_length: int | None
     allow_unreachable: bool
 
 
-@st.composite
-def starts_stops_kwargs(draw: st.DrawFn) -> StartsStopsKwargs:
-    """Strategy for options for `_st_starts_stops()`."""
-    content_len = draw(st.integers(min_value=0, max_value=50))
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=content_len))
+DEFAULTS = StartsStopsKwargs(min_length=0, max_length=None, allow_unreachable=True)
 
-    drawn = (
-        ('content_len', content_len),
-        ('min_length', min_length),
-        ('max_length', max_length),
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together (`min_length <= max_length <= content_len`)."""
+
+    min_length: int
+    max_length: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `_st_starts_stops()`."""
+    assert_kwargs_match_signature(
+        func=_st_starts_stops,
+        exclude={'content_len'},
+        kwargs_cls=StartsStopsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
     )
 
-    kwargs = draw(
+
+@st.composite
+def starts_stops_kwargs(draw: st.DrawFn, content_len: int) -> StartsStopsKwargs:
+    """Strategy for options for `_st_starts_stops()`.
+
+    The length bounds are drawn within `content_len`, the positional argument the
+    caller passes to `_st_starts_stops()`.
+    """
+
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=content_len))
+        ret = RelatedKwargs()
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
+
+    related = draw(_st_related_kwargs())
+
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'allow_unreachable': st.booleans(),
             },
         )
     )
 
-    return cast(StartsStopsKwargs, kwargs)
+    return cast(StartsStopsKwargs, {**related, **optional_independent})
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `_st_starts_stops()`."""
     # Draw options
-    kwargs = data.draw(starts_stops_kwargs(), label='kwargs')
+    content_len = data.draw(st.integers(min_value=0, max_value=50), label='content_len')
+    kwargs = data.draw(starts_stops_kwargs(content_len=content_len), label='kwargs')
 
     # Call the test subject
-    starts, stops = data.draw(_st_starts_stops(**kwargs), label='result')
+    starts, stops = data.draw(_st_starts_stops(content_len, **kwargs), label='result')
 
     # Assert the options were effective
-    content_len = kwargs['content_len']
-    min_length = kwargs.get('min_length', 0)
-    max_length = kwargs.get('max_length')
-    allow_unreachable = kwargs.get('allow_unreachable', True)
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
+    allow_unreachable = kwargs.get('allow_unreachable', DEFAULTS['allow_unreachable'])
 
     # Starts and stops have the same length and respect min_length / max_length
     assert min_length <= len(starts) == len(stops) <= sc(max_length)

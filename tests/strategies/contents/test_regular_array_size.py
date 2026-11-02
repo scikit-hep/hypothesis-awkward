@@ -7,12 +7,12 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.regular_array import _st_group_sizes
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 class GroupSizesKwargs(TypedDict, total=False):
     """Options for `_st_group_sizes()`."""
 
-    total_items: int
     min_group_size: int
     max_group_size: int | None
     min_length: int
@@ -20,51 +20,95 @@ class GroupSizesKwargs(TypedDict, total=False):
     allow_non_divisors: bool
 
 
+DEFAULTS = GroupSizesKwargs(
+    min_group_size=0,
+    max_group_size=None,
+    min_length=0,
+    max_length=None,
+    allow_non_divisors=True,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together as two ordered pairs bounded by `total_items`."""
+
+    min_group_size: int
+    max_group_size: int | None
+    min_length: int
+    max_length: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `_st_group_sizes()`."""
+    assert_kwargs_match_signature(
+        func=_st_group_sizes,
+        exclude={'total_items'},
+        kwargs_cls=GroupSizesKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
+
+
 @st.composite
-def group_sizes_kwargs(draw: st.DrawFn) -> GroupSizesKwargs:
-    """Strategy for options for `_st_group_sizes()`."""
-    total_items = draw(st.integers(min_value=0, max_value=100))
-    min_group_size, max_group_size = draw(
-        st_ak.ranges(min_start=0, max_end=total_items)
-    )
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=total_items))
+def group_sizes_kwargs(draw: st.DrawFn, total_items: int) -> GroupSizesKwargs:
+    """Strategy for options for `_st_group_sizes()`.
 
-    drawn = (
-        ('total_items', total_items),
-        ('min_group_size', min_group_size),
-        ('max_group_size', max_group_size),
-        ('min_length', min_length),
-        ('max_length', max_length),
-    )
+    The bounds are drawn within `total_items`, the positional argument the
+    caller passes to `_st_group_sizes()`.
+    """
 
-    kwargs = draw(
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_group_size, max_group_size = draw(
+            st_ak.ranges(min_start=0, max_end=total_items)
+        )
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=total_items))
+        ret = RelatedKwargs()
+        if min_group_size is not None:
+            ret['min_group_size'] = min_group_size
+        if max_group_size is not None:
+            ret['max_group_size'] = max_group_size
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
+
+    related = draw(_st_related_kwargs())
+
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'allow_non_divisors': st.booleans(),
             },
         )
     )
 
-    return cast(GroupSizesKwargs, kwargs)
+    return cast(GroupSizesKwargs, {**related, **optional_independent})
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `_st_group_sizes()`."""
     # Draw options
-    kwargs = data.draw(group_sizes_kwargs(), label='kwargs')
+    total_items = data.draw(
+        st.integers(min_value=0, max_value=100), label='total_items'
+    )
+    kwargs = data.draw(group_sizes_kwargs(total_items=total_items), label='kwargs')
 
     # Call the test subject
-    result = data.draw(_st_group_sizes(**kwargs), label='result')
+    result = data.draw(_st_group_sizes(total_items, **kwargs), label='result')
 
     # Assert the options were effective
-    total_items = kwargs['total_items']
-    min_group_size = kwargs.get('min_group_size', 0)
-    max_group_size = kwargs.get('max_group_size')
-    min_length = kwargs.get('min_length', 0)
-    max_length = kwargs.get('max_length')
-    allow_non_divisors = kwargs.get('allow_non_divisors', True)
+    min_group_size = kwargs.get('min_group_size', DEFAULTS['min_group_size'])
+    max_group_size = kwargs.get('max_group_size', DEFAULTS['max_group_size'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
+    allow_non_divisors = kwargs.get(
+        'allow_non_divisors', DEFAULTS['allow_non_divisors']
+    )
 
     # Result is bounded by min/max_group_size
     assert result >= 0
