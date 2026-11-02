@@ -7,55 +7,85 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.strategies.contents.list_offset_array import _st_offsets
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
+from tests.funcs import assert_kwargs_match_signature
 
 
 class OffsetsKwargs(TypedDict, total=False):
     """Options for `_st_offsets()`."""
 
-    content_len: int
     min_length: int
     max_length: int | None
     allow_unreachable: bool
 
 
-@st.composite
-def offsets_kwargs(draw: st.DrawFn) -> OffsetsKwargs:
-    """Strategy for options for `_st_offsets()`."""
-    content_len = draw(st.integers(min_value=0, max_value=50))
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=content_len))
+DEFAULTS = OffsetsKwargs(min_length=0, max_length=None, allow_unreachable=True)
 
-    drawn = (
-        ('content_len', content_len),
-        ('min_length', min_length),
-        ('max_length', max_length),
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together (`min_length <= max_length <= content_len`)."""
+
+    min_length: int
+    max_length: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `_st_offsets()`."""
+    assert_kwargs_match_signature(
+        func=_st_offsets,
+        exclude={'content_len'},
+        kwargs_cls=OffsetsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
     )
 
-    kwargs = draw(
+
+@st.composite
+def offsets_kwargs(draw: st.DrawFn, content_len: int) -> OffsetsKwargs:
+    """Strategy for options for `_st_offsets()`.
+
+    The length bounds are drawn within `content_len`, the positional argument the
+    caller passes to `_st_offsets()`.
+    """
+
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=content_len))
+        ret = RelatedKwargs()
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
+
+    related = draw(_st_related_kwargs())
+
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'allow_unreachable': st.booleans(),
             },
         )
     )
 
-    return cast(OffsetsKwargs, kwargs)
+    return cast(OffsetsKwargs, {**related, **optional_independent})
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `_st_offsets()`."""
     # Draw options
-    kwargs = data.draw(offsets_kwargs(), label='kwargs')
+    content_len = data.draw(st.integers(min_value=0, max_value=50), label='content_len')
+    kwargs = data.draw(offsets_kwargs(content_len=content_len), label='kwargs')
 
     # Call the test subject
-    result = data.draw(_st_offsets(**kwargs), label='result')
+    result = data.draw(_st_offsets(content_len, **kwargs), label='result')
 
     # Assert the options were effective
-    content_len = kwargs['content_len']
-    min_length = kwargs.get('min_length', 0)
-    max_length = kwargs.get('max_length')
-    allow_unreachable = kwargs.get('allow_unreachable', True)
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
+    allow_unreachable = kwargs.get('allow_unreachable', DEFAULTS['allow_unreachable'])
 
     # Offsets have at least one element
     assert len(result) >= 1
