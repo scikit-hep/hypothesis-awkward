@@ -9,16 +9,44 @@ from awkward.contents import Content, NumpyArray, RegularArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
+from tests.funcs import assert_kwargs_match_signature
 
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
     """Options for `regular_array_contents()` strategy."""
 
-    content: st.SearchStrategy[Content] | Content
+    content: st.SearchStrategy[Content] | Content | None
     max_size: int | None
     max_zeros_length: int | None
     min_length: int
     max_length: int | None
+
+
+DEFAULTS = RegularArrayContentsKwargs(
+    content=None,
+    max_size=None,
+    max_zeros_length=None,
+    min_length=0,
+    max_length=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together (`min_length` <= `max_length`, `max_zeros_length`)."""
+
+    max_zeros_length: int | None
+    min_length: int
+    max_length: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `regular_array_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.regular_array_contents,
+        kwargs_cls=RegularArrayContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
 
 
 @st.composite
@@ -31,30 +59,40 @@ def regular_array_contents_kwargs(
         chain = st_ak.OptsChain({})
     st_content = chain.register(st_ak.contents.contents())
 
-    min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=20))
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.ranges(min_start=0, max_end=20))
+        max_zeros_length = draw(
+            st_ak.none_or(st.integers(min_value=min_length or 0, max_value=50))
+        )
+        ret = RelatedKwargs()
+        if max_zeros_length is not None:
+            ret['max_zeros_length'] = max_zeros_length
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+        return ret
 
-    drawn = (
-        ('min_length', min_length),
-        ('max_length', max_length),
-    )
+    related = draw(_st_related_kwargs())
 
-    kwargs = draw(
+    optional_independent = draw(
         st.fixed_dictionaries(
-            {k: st.just(v) for k, v in drawn if v is not None},
+            {},
             optional={
                 'content': st.one_of(
                     st_ak.contents.contents(),
                     st.just(st_content),
                 ),
                 'max_size': st.integers(min_value=0, max_value=50),
-                'max_zeros_length': st.integers(
-                    min_value=min_length or 0, max_value=50
-                ),
             },
         )
     )
 
-    return chain.extend(cast(RegularArrayContentsKwargs, kwargs))
+    return chain.extend(
+        cast(RegularArrayContentsKwargs, {**related, **optional_independent})
+    )
 
 
 @given(data=st.data())
@@ -72,10 +110,10 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result, RegularArray)
 
     # Assert the options were effective
-    max_size = opts.kwargs.get('max_size')
-    max_zeros_length = opts.kwargs.get('max_zeros_length')
-    min_length = opts.kwargs.get('min_length', 0)
-    max_length = opts.kwargs.get('max_length')
+    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    max_zeros_length = opts.kwargs.get('max_zeros_length', DEFAULTS['max_zeros_length'])
+    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
 
     assert result.size <= sc(max_size)
 
@@ -91,7 +129,7 @@ def test_properties(data: st.DataObject) -> None:
     #     assert len(result) == len(result.content) // result.size
 
     # Assert content
-    content = opts.kwargs.get('content', None)
+    content = opts.kwargs.get('content', DEFAULTS['content'])
     match content:
         case Content():
             assert result.content is content
