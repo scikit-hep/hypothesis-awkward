@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 from hypothesis import find, given
@@ -13,7 +13,7 @@ from hypothesis_awkward.util import (
     any_nat_in_numpy_array,
 )
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class NumpyArrayContentsKwargs(TypedDict, total=False):
@@ -28,6 +28,12 @@ class NumpyArrayContentsKwargs(TypedDict, total=False):
 DEFAULTS = NumpyArrayContentsKwargs(
     dtypes=None, allow_nan=True, min_size=0, max_size=10
 )
+
+
+class NumpyArrayContentsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `numpy_array_contents()`."""
+
+    dtypes: np.dtype
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -50,12 +56,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def numpy_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[NumpyArrayContentsKwargs]:
+) -> KwargsDrawn[NumpyArrayContentsKwargs, NumpyArrayContentsDrawn]:
     """Strategy for options for `numpy_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_dtypes = chain.register(st_ak.supported_dtypes())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -70,37 +72,45 @@ def numpy_array_contents_kwargs(
             ret['max_size'] = max_size
         return ret
 
-    related = draw(_st_related_kwargs())
+    @st.composite
+    def _st_drawn(draw: st.DrawFn) -> NumpyArrayContentsDrawn:
+        """Strategy for the values drawn in advance for the options."""
+        ret = NumpyArrayContentsDrawn()
+        if draw(st.booleans()):
+            ret['dtypes'] = draw(st_ak.supported_dtypes())
+        return ret
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'dtypes': st.one_of(
-                    st.none(),
-                    st.just(st_dtypes),
-                ),
-                'allow_nan': st.booleans(),
-            },
+    @st.composite
+    def _st_optional_independent(
+        draw: st.DrawFn, drawn: NumpyArrayContentsDrawn
+    ) -> NumpyArrayContentsKwargs:
+        """Strategy for the options that are drawn independently, if at all."""
+        ret = cast(
+            NumpyArrayContentsKwargs,
+            draw(st.fixed_dictionaries({}, optional={'allow_nan': st.booleans()})),
         )
-    )
+        if 'dtypes' in drawn:
+            ret['dtypes'] = st.just(drawn['dtypes'])
+        elif draw(st.booleans()):
+            ret['dtypes'] = None
+        return ret
 
-    return chain.extend(
-        cast(NumpyArrayContentsKwargs, {**related, **optional_independent})
-    )
+    related = draw(_st_related_kwargs())
+    drawn = draw(_st_drawn())
+    optional_independent = draw(_st_optional_independent(drawn))
+
+    kwargs = NumpyArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_array_contents()`."""
     # Draw options
-    opts = data.draw(numpy_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(numpy_array_contents_kwargs(), label='opts')
 
     # Call the test subject
-    result = data.draw(
-        st_ak.contents.numpy_array_contents(**opts.kwargs), label='result'
-    )
+    result = data.draw(st_ak.contents.numpy_array_contents(**kwargs), label='result')
 
     # Assert the result is always a NumpyArray content
     assert isinstance(result, ak.contents.NumpyArray)
@@ -112,10 +122,9 @@ def test_properties(data: st.DataObject) -> None:
     assert result.data.dtype.names is None
 
     # Assert size bounds
-    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
-    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
-    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     assert min_size <= len(result) <= max_size
 
@@ -124,10 +133,8 @@ def test_properties(data: st.DataObject) -> None:
         assert not any_nan_nat_in_numpy_array(result.data)
 
     # Assert dtypes
-    match dtypes:
-        case st_ak.RecordDraws():
-            drawn_kinds = {d.kind for d in dtypes.drawn}
-            assert result.data.dtype.kind in drawn_kinds
+    if 'dtypes' in drawn:
+        assert result.data.dtype == drawn['dtypes']
 
 
 def test_draw_from_contents() -> None:
