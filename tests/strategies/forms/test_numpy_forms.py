@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 from hypothesis import find, given
@@ -8,7 +8,7 @@ import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import SUPPORTED_DTYPE_NAMES
 from tests.find_settings import FIND_NO_SHRINK
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class NumpyFormsKwargs(TypedDict, total=False):
@@ -28,6 +28,14 @@ DEFAULTS = NumpyFormsKwargs(
     inner_shape=None,
     allow_inner_shape=True,
 )
+
+
+class NumpyFormsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `numpy_forms()`."""
+
+    type_: ak.types.NumpyType
+    dtypes: np.dtype
+    inner_shape: tuple[int, ...]
 
 
 def test_kwargs_match_signature() -> None:
@@ -51,54 +59,71 @@ def _inner_shape_strategies() -> st.SearchStrategy[tuple[int, ...]]:
 @st.composite
 def numpy_forms_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[NumpyFormsKwargs]:
+) -> KwargsDrawn[NumpyFormsKwargs, NumpyFormsDrawn]:
     """Strategy for options for `numpy_forms()` strategy.
 
     Two modes:
     - type_ mode: type_ is set, other params omitted.
     - dtypes mode: type_ omitted, dtypes/allow_datetime/inner_shape/allow_inner_shape drawn.
     """
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_type = chain.register(st_ak.numpy_types())
-    st_dtypes = chain.register(st_ak.supported_dtypes())
-    st_inner_shape = chain.register(_inner_shape_strategies())
 
-    def type_mode() -> st.SearchStrategy[NumpyFormsKwargs]:
-        return st.fixed_dictionaries(
-            {
-                'type_': st.one_of(
-                    st_ak.numpy_types(),
-                    st.just(st_type),
-                ),
-            },
-        ).map(lambda d: cast(NumpyFormsKwargs, d))
+    @st.composite
+    def _st_type_mode(
+        draw: st.DrawFn,
+    ) -> KwargsDrawn[NumpyFormsKwargs, NumpyFormsDrawn]:
+        type_ = draw(st_ak.numpy_types())
+        choices = list[ak.types.NumpyType | st.SearchStrategy[ak.types.NumpyType]](
+            [type_, st.just(type_)]
+        )
+        kwargs = NumpyFormsKwargs(type_=draw(st.sampled_from(choices)))
+        return KwargsDrawn(kwargs, NumpyFormsDrawn(type_=type_))
 
-    def dtypes_mode() -> st.SearchStrategy[NumpyFormsKwargs]:
-        return st.fixed_dictionaries(
-            {},
-            optional={
-                'dtypes': st.one_of(
-                    st.none(),
-                    st.just(st_dtypes),
-                ),
-                'allow_datetime': st.booleans(),
-                'inner_shape': st.one_of(
-                    st.none(),
-                    st.lists(
-                        st.integers(min_value=1, max_value=5),
-                        min_size=0,
-                        max_size=3,
-                    ).map(tuple),
-                    st.just(st_inner_shape),
-                ),
-                'allow_inner_shape': st.booleans(),
-            },
-        ).map(lambda d: cast(NumpyFormsKwargs, d))
+    @st.composite
+    def _st_dtypes_mode(
+        draw: st.DrawFn,
+    ) -> KwargsDrawn[NumpyFormsKwargs, NumpyFormsDrawn]:
+        kwargs = cast(
+            NumpyFormsKwargs,
+            draw(
+                st.fixed_dictionaries(
+                    {},
+                    optional={
+                        'allow_datetime': st.booleans(),
+                        'allow_inner_shape': st.booleans(),
+                    },
+                )
+            ),
+        )
+        drawn = NumpyFormsDrawn()
+        if draw(st.booleans()):
+            match draw(st.sampled_from(['none', 'strategy'])):
+                case 'none':
+                    kwargs['dtypes'] = None
+                case 'strategy':
+                    dtype = draw(st_ak.supported_dtypes())
+                    kwargs['dtypes'] = st.just(dtype)
+                    drawn['dtypes'] = dtype
+        if draw(st.booleans()):
+            match draw(st.sampled_from(['none', 'value', 'strategy'])):
+                case 'none':
+                    kwargs['inner_shape'] = None
+                case 'value':
+                    shape = draw(
+                        st.lists(
+                            st.integers(min_value=1, max_value=5),
+                            min_size=0,
+                            max_size=3,
+                        ).map(tuple)
+                    )
+                    kwargs['inner_shape'] = shape
+                    drawn['inner_shape'] = shape
+                case 'strategy':
+                    shape = draw(_inner_shape_strategies())
+                    kwargs['inner_shape'] = st.just(shape)
+                    drawn['inner_shape'] = shape
+        return KwargsDrawn(kwargs, drawn)
 
-    kwargs = draw(st.one_of(type_mode(), dtypes_mode()))
-    return chain.extend(kwargs)
+    return draw(st.one_of(_st_type_mode(), _st_dtypes_mode()))
 
 
 DATETIME_PRIMITIVES = frozenset(
@@ -110,11 +135,10 @@ DATETIME_PRIMITIVES = frozenset(
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_forms()`."""
     # Draw options
-    opts = data.draw(numpy_forms_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(numpy_forms_kwargs(), label='opts')
 
     # Call the test subject
-    result = data.draw(st_ak.numpy_forms(**opts.kwargs), label='result')
+    result = data.draw(st_ak.numpy_forms(**kwargs), label='result')
 
     # Assert the result is always a NumpyForm
     assert isinstance(result, ak.forms.NumpyForm)
@@ -124,43 +148,26 @@ def test_properties(data: st.DataObject) -> None:
     assert result._form_key is None
 
     # Assert the options were effective
-    type_ = opts.kwargs.get('type_', DEFAULTS['type_'])
-    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
-    allow_datetime = opts.kwargs.get('allow_datetime', DEFAULTS['allow_datetime'])
-    inner_shape = opts.kwargs.get('inner_shape', DEFAULTS['inner_shape'])
-    allow_inner_shape = opts.kwargs.get(
-        'allow_inner_shape', DEFAULTS['allow_inner_shape']
-    )
+    allow_datetime = kwargs.get('allow_datetime', DEFAULTS['allow_datetime'])
+    allow_inner_shape = kwargs.get('allow_inner_shape', DEFAULTS['allow_inner_shape'])
 
-    if type_ is not None:
+    if 'type_' in drawn:
         # type_ mode: primitive matches type, inner_shape is ()
-        match type_:
-            case ak.types.NumpyType():
-                assert result.primitive == type_.primitive
-            case st_ak.RecordDraws():
-                drawn_primitives = {t.primitive for t in type_.drawn}
-                assert result.primitive in drawn_primitives
+        assert result.primitive == drawn['type_'].primitive
         assert result.inner_shape == ()
     else:
         # dtypes mode
-        match dtypes:
-            case None:
-                assert result.primitive in SUPPORTED_DTYPE_NAMES
-                if not allow_datetime:
-                    assert result.primitive not in DATETIME_PRIMITIVES
-            case st_ak.RecordDraws():
-                drawn_dtype_names = {d.name for d in dtypes.drawn}
-                assert result.primitive in drawn_dtype_names
+        if 'dtypes' in drawn:
+            assert result.primitive == drawn['dtypes'].name
+        else:
+            assert result.primitive in SUPPORTED_DTYPE_NAMES
+            if not allow_datetime:
+                assert result.primitive not in DATETIME_PRIMITIVES
 
-        match inner_shape:
-            case None:
-                if not allow_inner_shape:
-                    assert result.inner_shape == ()
-            case st_ak.RecordDraws():
-                drawn_shapes = set(inner_shape.drawn)
-                assert result.inner_shape in drawn_shapes
-            case tuple():
-                assert result.inner_shape == inner_shape
+        if 'inner_shape' in drawn:
+            assert result.inner_shape == drawn['inner_shape']
+        elif not allow_inner_shape:
+            assert result.inner_shape == ()
 
 
 def test_draw_empty_inner_shape() -> None:
