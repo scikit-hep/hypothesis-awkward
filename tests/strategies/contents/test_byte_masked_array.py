@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict
 
 import numpy as np
 import pytest
@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 from awkward.contents import ByteMaskedArray, Content
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class ByteMaskedArrayContentsKwargs(TypedDict, total=False):
@@ -18,6 +18,12 @@ class ByteMaskedArrayContentsKwargs(TypedDict, total=False):
 
 
 DEFAULTS = ByteMaskedArrayContentsKwargs(content=None)
+
+
+class ByteMaskedArrayContentsDrawn(TypedDict):
+    """Values drawn in advance for the options of `byte_masked_array_contents()`."""
+
+    content: Content | None
 
 
 def test_kwargs_match_signature() -> None:
@@ -32,46 +38,32 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def byte_masked_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ByteMaskedArrayContentsKwargs]:
+) -> KwargsDrawn[ByteMaskedArrayContentsKwargs, ByteMaskedArrayContentsDrawn]:
     """Strategy for options for `byte_masked_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register(
-        st_ak.contents.contents(
-            allow_union_root=False, allow_option_root=False, allow_indexed_root=False
+    kwargs = ByteMaskedArrayContentsKwargs()
+    drawn = ByteMaskedArrayContentsDrawn(content=None)
+    if draw(st.booleans()):
+        content = draw(
+            st_ak.contents.contents(
+                allow_union_root=False,
+                allow_option_root=False,
+                allow_indexed_root=False,
+            )
         )
-    )
-
-    kwargs = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'content': st.one_of(
-                    st_ak.contents.contents(
-                        allow_union_root=False,
-                        allow_option_root=False,
-                        allow_indexed_root=False,
-                    ),
-                    st.just(st_content),
-                ),
-            },
-        )
-    )
-
-    return chain.extend(cast(ByteMaskedArrayContentsKwargs, kwargs))
+        kwargs['content'] = draw(st.sampled_from([content, st.just(content)]))
+        drawn['content'] = content
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `byte_masked_array_contents()`."""
     # Draw options
-    opts = data.draw(byte_masked_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(byte_masked_array_contents_kwargs(), label='opts')
 
     # Call the test subject
     result = data.draw(
-        st_ak.contents.byte_masked_array_contents(**opts.kwargs), label='result'
+        st_ak.contents.byte_masked_array_contents(**kwargs), label='result'
     )
 
     assert isinstance(result, ByteMaskedArray)
@@ -89,13 +81,8 @@ def test_properties(data: st.DataObject) -> None:
     assert isinstance(result.valid_when, bool)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', DEFAULTS['content'])
-    match content:
-        case Content():
-            assert result.content is content
-        case st_ak.RecordDraws():
-            assert len(content.drawn) == 1
-            assert result.content is content.drawn[0]
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 
 
 @pytest.mark.parametrize('valid_when', [True, False])
