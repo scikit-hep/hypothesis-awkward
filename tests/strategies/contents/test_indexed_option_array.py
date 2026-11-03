@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict
 
 import numpy as np
 import pytest
@@ -9,7 +9,7 @@ from awkward.contents import Content, IndexedOptionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class IndexedOptionArrayContentsKwargs(TypedDict, total=False):
@@ -25,6 +25,12 @@ DEFAULTS = IndexedOptionArrayContentsKwargs(
     min_size=0,
     max_size=None,
 )
+
+
+class IndexedOptionArrayContentsDrawn(TypedDict):
+    """Values drawn in advance for the options of `indexed_option_array_contents()`."""
+
+    content: Content | None
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -47,16 +53,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def indexed_option_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[IndexedOptionArrayContentsKwargs]:
+) -> KwargsDrawn[IndexedOptionArrayContentsKwargs, IndexedOptionArrayContentsDrawn]:
     """Strategy for options for `indexed_option_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register(
-        st_ak.contents.contents(
-            allow_union_root=False, allow_option_root=False, allow_indexed_root=False
-        )
-    )
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -71,44 +69,41 @@ def indexed_option_array_contents_kwargs(
 
     related = draw(_st_related_kwargs())
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'content': st.one_of(
-                    st_ak.contents.contents(
-                        allow_union_root=False,
-                        allow_option_root=False,
-                        allow_indexed_root=False,
-                    ),
-                    st.just(st_content),
-                ),
-            },
+    optional_independent = IndexedOptionArrayContentsKwargs()
+    drawn = IndexedOptionArrayContentsDrawn(content=None)
+    if draw(st.booleans()):
+        content = draw(
+            st_ak.contents.contents(
+                allow_union_root=False,
+                allow_option_root=False,
+                allow_indexed_root=False,
+            )
         )
-    )
+        optional_independent['content'] = draw(
+            st.sampled_from([content, st.just(content)])
+        )
+        drawn['content'] = content
 
-    return chain.extend(
-        cast(IndexedOptionArrayContentsKwargs, {**related, **optional_independent})
-    )
+    kwargs = IndexedOptionArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `indexed_option_array_contents()`."""
     # Draw options
-    opts = data.draw(indexed_option_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(indexed_option_array_contents_kwargs(), label='opts')
 
     # Call the test subject
     result = data.draw(
-        st_ak.contents.indexed_option_array_contents(**opts.kwargs), label='result'
+        st_ak.contents.indexed_option_array_contents(**kwargs), label='result'
     )
 
     assert isinstance(result, IndexedOptionArray)
 
     # Assert index length is within bounds
-    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
     assert min_size <= len(result) <= sc(max_size)
 
     # Assert index dtype is int32 or int64
@@ -121,13 +116,8 @@ def test_properties(data: st.DataObject) -> None:
         assert index[i] == -1 or (0 <= index[i] < content_len)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', DEFAULTS['content'])
-    match content:
-        case Content():
-            assert result.content is content
-        case st_ak.RecordDraws():
-            assert len(content.drawn) == 1
-            assert result.content is content.drawn[0]
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 
 
 @pytest.mark.parametrize('min_size', [1, 2, 10])
