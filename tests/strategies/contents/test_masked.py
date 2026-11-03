@@ -12,7 +12,7 @@ from awkward.contents import (
 )
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 MASKED_TYPES = (ByteMaskedArray, BitMaskedArray, UnmaskedArray)
 
@@ -36,6 +36,12 @@ DEFAULTS = MaskedContentsKwargs(
 ALLOW_FLAGS = ('allow_byte_masked', 'allow_bit_masked', 'allow_unmasked')
 
 
+class MaskedContentsDrawn(TypedDict):
+    """Values drawn in advance for the options of `masked_contents()`."""
+
+    content: Content | None
+
+
 class RelatedKwargs(TypedDict, total=False):
     """Options drawn together (at least one masked type is allowed)."""
 
@@ -57,16 +63,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def masked_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[MaskedContentsKwargs]:
+) -> KwargsDrawn[MaskedContentsKwargs, MaskedContentsDrawn]:
     """Strategy for options for `masked_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register(
-        st_ak.contents.contents(
-            allow_union_root=False, allow_option_root=False, allow_indexed_root=False
-        )
-    )
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -81,40 +79,37 @@ def masked_contents_kwargs(
 
     related = draw(_st_related_kwargs())
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'content': st.one_of(
-                    st_ak.contents.contents(
-                        allow_union_root=False,
-                        allow_option_root=False,
-                        allow_indexed_root=False,
-                    ),
-                    st.just(st_content),
-                ),
-            },
+    optional_independent = MaskedContentsKwargs()
+    drawn = MaskedContentsDrawn(content=None)
+    if draw(st.booleans()):
+        content = draw(
+            st_ak.contents.contents(
+                allow_union_root=False,
+                allow_option_root=False,
+                allow_indexed_root=False,
+            )
         )
-    )
+        optional_independent['content'] = draw(
+            st.sampled_from([content, st.just(content)])
+        )
+        drawn['content'] = content
 
-    return chain.extend(cast(MaskedContentsKwargs, {**related, **optional_independent}))
+    kwargs = MaskedContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `masked_contents()`."""
     # Draw options
-    opts = data.draw(masked_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(masked_contents_kwargs(), label='opts')
 
-    allow_byte_masked = opts.kwargs.get(
-        'allow_byte_masked', DEFAULTS['allow_byte_masked']
-    )
-    allow_bit_masked = opts.kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
-    allow_unmasked = opts.kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
+    allow_byte_masked = kwargs.get('allow_byte_masked', DEFAULTS['allow_byte_masked'])
+    allow_bit_masked = kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
+    allow_unmasked = kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
 
     # Call the test subject
-    result = data.draw(st_ak.contents.masked_contents(**opts.kwargs), label='result')
+    result = data.draw(st_ak.contents.masked_contents(**kwargs), label='result')
 
     assert isinstance(result, MASKED_TYPES)
 
@@ -127,13 +122,8 @@ def test_properties(data: st.DataObject) -> None:
         assert not isinstance(result, UnmaskedArray)
 
     # Assert content identity
-    content = opts.kwargs.get('content', DEFAULTS['content'])
-    match content:
-        case Content():
-            assert result.content is content
-        case st_ak.RecordDraws():
-            assert len(content.drawn) == 1
-            assert result.content is content.drawn[0]
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 
 
 @pytest.mark.parametrize('cls', MASKED_TYPES)
