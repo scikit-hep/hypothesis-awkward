@@ -16,7 +16,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class LeafContentsKwargs(TypedDict, total=False):
@@ -55,6 +55,12 @@ ALLOW_FLAGS = (
 NON_EMPTY_FLAGS = tuple(f for f in ALLOW_FLAGS if f != 'allow_empty')
 
 
+class LeafContentsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `leaf_contents()`."""
+
+    dtypes: np.dtype
+
+
 class RelatedKwargs(TypedDict, total=False):
     """Options drawn together.
 
@@ -84,12 +90,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def leaf_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[LeafContentsKwargs]:
+) -> KwargsDrawn[LeafContentsKwargs, LeafContentsDrawn]:
     """Strategy for options for `leaf_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_dtypes = chain.register(st_ak.supported_dtypes())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -119,43 +121,55 @@ def leaf_contents_kwargs(
                 ret[flag] = flag in allowed
         return cast(RelatedKwargs, ret)
 
-    related = draw(_st_related_kwargs())
+    @st.composite
+    def _st_drawn(draw: st.DrawFn) -> LeafContentsDrawn:
+        """Strategy for the values drawn in advance for the options."""
+        ret = LeafContentsDrawn()
+        if draw(st.booleans()):
+            ret['dtypes'] = draw(st_ak.supported_dtypes())
+        return ret
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'dtypes': st.one_of(
-                    st.none(),
-                    st.just(st_dtypes),
-                ),
-                'allow_nan': st.booleans(),
-            },
+    @st.composite
+    def _st_optional_independent(
+        draw: st.DrawFn, drawn: LeafContentsDrawn
+    ) -> LeafContentsKwargs:
+        """Strategy for the options that are drawn independently, if at all."""
+        ret = cast(
+            LeafContentsKwargs,
+            draw(st.fixed_dictionaries({}, optional={'allow_nan': st.booleans()})),
         )
-    )
+        if 'dtypes' in drawn:
+            ret['dtypes'] = st.just(drawn['dtypes'])
+        elif draw(st.booleans()):
+            ret['dtypes'] = None
+        return ret
 
-    return chain.extend(cast(LeafContentsKwargs, {**related, **optional_independent}))
+    related = draw(_st_related_kwargs())
+    drawn = draw(_st_drawn())
+    optional_independent = draw(_st_optional_independent(drawn))
+
+    kwargs = LeafContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `leaf_contents()`."""
     # Draw options
-    opts = data.draw(leaf_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(leaf_contents_kwargs(), label='opts')
 
-    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
-    allow_numpy = opts.kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
-    allow_empty = opts.kwargs.get('allow_empty', DEFAULTS['allow_empty'])
-    allow_string = opts.kwargs.get('allow_string', DEFAULTS['allow_string'])
-    allow_bytestring = opts.kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
-    allow_zero_field_record = opts.kwargs.get(
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    allow_numpy = kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
+    allow_empty = kwargs.get('allow_empty', DEFAULTS['allow_empty'])
+    allow_string = kwargs.get('allow_string', DEFAULTS['allow_string'])
+    allow_bytestring = kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
+    allow_zero_field_record = kwargs.get(
         'allow_zero_field_record', DEFAULTS['allow_zero_field_record']
     )
 
     # Call the test subject
-    result = data.draw(st_ak.contents.leaf_contents(**opts.kwargs), label='result')
+    result = data.draw(st_ak.contents.leaf_contents(**kwargs), label='result')
 
     is_numpy = isinstance(result, NumpyArray)
     is_empty = isinstance(result, EmptyArray)
@@ -177,8 +191,7 @@ def test_properties(data: st.DataObject) -> None:
     if not allow_zero_field_record:
         assert not is_zero_field_record
 
-    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
-    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
 
     if is_empty:
         assert len(result) == 0
@@ -189,10 +202,8 @@ def test_properties(data: st.DataObject) -> None:
         assert isinstance(result, NumpyArray)
         if not allow_nan:
             assert not any_nan_nat_in_numpy_array(result.data)
-        match dtypes:
-            case st_ak.RecordDraws():
-                drawn_kinds = {d.kind for d in dtypes.drawn}
-                assert result.data.dtype.kind in drawn_kinds
+        if 'dtypes' in drawn:
+            assert result.data.dtype == drawn['dtypes']
 
 
 def test_draw_numpy_array() -> None:
