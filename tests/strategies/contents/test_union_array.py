@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 import pytest
@@ -10,7 +10,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class UnionArrayContentsKwargs(TypedDict, total=False):
@@ -28,6 +28,12 @@ DEFAULTS = UnionArrayContentsKwargs(
     min_length=0,
     max_length=None,
 )
+
+
+class UnionArrayContentsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `union_array_contents()`."""
+
+    contents: list[Content]
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -70,12 +76,8 @@ def _contents_list(
 @st.composite
 def union_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[UnionArrayContentsKwargs]:
+) -> KwargsDrawn[UnionArrayContentsKwargs, UnionArrayContentsDrawn]:
     """Strategy for options for `union_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_contents = chain.register(_contents_list())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -88,78 +90,80 @@ def union_array_contents_kwargs(
             ret['max_length'] = max_length
         return ret
 
-    related = draw(_st_related_kwargs())
+    @st.composite
+    def _st_drawn(draw: st.DrawFn) -> UnionArrayContentsDrawn:
+        """Strategy for the values drawn in advance for the options."""
+        ret = UnionArrayContentsDrawn()
+        if draw(st.booleans()):
+            ret['contents'] = draw(_contents_list())
+        return ret
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'contents': st.one_of(_contents_list(), st.just(st_contents)),
-                'max_contents': st.integers(min_value=0, max_value=10),
-            },
+    @st.composite
+    def _st_optional_independent(
+        draw: st.DrawFn, drawn: UnionArrayContentsDrawn
+    ) -> UnionArrayContentsKwargs:
+        """Strategy for the options that are drawn independently, if at all."""
+        ret = cast(
+            UnionArrayContentsKwargs,
+            draw(
+                st.fixed_dictionaries(
+                    {},
+                    optional={'max_contents': st.integers(min_value=0, max_value=10)},
+                )
+            ),
         )
-    )
+        if 'contents' in drawn:
+            contents = drawn['contents']
+            choices = list[list[Content] | st.SearchStrategy[list[Content]]](
+                [contents, st.just(contents)]
+            )
+            ret['contents'] = draw(st.sampled_from(choices))
+        return ret
 
-    return chain.extend(
-        cast(UnionArrayContentsKwargs, {**related, **optional_independent})
-    )
+    related = draw(_st_related_kwargs())
+    drawn = draw(_st_drawn())
+    optional_independent = draw(_st_optional_independent(drawn))
+
+    kwargs = UnionArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `union_array_contents()`."""
     # Draw options
-    opts = data.draw(union_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(union_array_contents_kwargs(), label='opts')
 
-    max_contents = opts.kwargs.get('max_contents', DEFAULTS['max_contents'])
-    contents = opts.kwargs.get('contents', DEFAULTS['contents'])
+    max_contents = kwargs.get('max_contents', DEFAULTS['max_contents'])
 
-    def _expect_raised() -> bool:
-        """`UnionArray` requires at least two contents.
-
-        For the recorder arm, callable only after the draw: `RecordDraws` records
-        the drawn list before the constructor raises.
-        """
-        match contents:
-            case None:
-                return max_contents < 2
-            case list():
-                return len(contents) < 2
-            case st_ak.RecordDraws():
-                return len(contents.drawn[0]) < 2
-        raise AssertionError(f'unhandled contents: {contents!r}')  # pragma: no cover
+    # `UnionArray` requires at least two contents.
+    if 'contents' in kwargs:
+        expect_raised = len(drawn['contents']) < 2
+    else:
+        expect_raised = max_contents < 2
 
     # Call the test subject
     try:
         result = data.draw(
-            st_ak.contents.union_array_contents(**opts.kwargs), label='result'
+            st_ak.contents.union_array_contents(**kwargs), label='result'
         )
     except TypeError as e:
-        assert _expect_raised()
+        assert expect_raised
         assert 'at least 2' in str(e)
         return
 
-    assert not _expect_raised()
+    assert not expect_raised
 
     assert isinstance(result, UnionArray)
 
     # Assert the options were effective
-    # Contents dispatch
-    match contents:
-        case None:
-            assert len(result.contents) <= max_contents
-        case list():
-            # Concrete list: contents should be the same objects
-            assert len(result.contents) == len(contents)
-            for r_content, given_content in zip(result.contents, contents):
-                assert r_content is given_content
-        case st_ak.RecordDraws():
-            assert len(contents.drawn) == 1
-            drawn_list = contents.drawn[0]
-            assert len(result.contents) == len(drawn_list)
-            for r_content, drawn_content in zip(result.contents, drawn_list):
-                assert r_content is drawn_content
+    if 'contents' in kwargs:
+        # Given contents: the contents are the same objects
+        assert len(result.contents) == len(drawn['contents'])
+        for r_content, drawn_content in zip(result.contents, drawn['contents']):
+            assert r_content is drawn_content
+    else:
+        assert len(result.contents) <= max_contents
 
     # Tags validity: dtype is int8, values in [0, len(contents))
     tags = result.tags.data
@@ -182,7 +186,7 @@ def test_properties(data: st.DataObject) -> None:
     assert len(result) == len(tags)
 
     # Compact indexing holds unless max_length is given
-    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
     if max_length is None:
         for tag_val in range(len(result.contents)):
             indices_for_tag = index[tags == tag_val]
@@ -191,7 +195,7 @@ def test_properties(data: st.DataObject) -> None:
             assert set(indices_for_tag.tolist()) == set(range(content_len))
 
     # Assert length is within bounds
-    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
     assert min_length <= len(result) <= sc(max_length)
 
 
