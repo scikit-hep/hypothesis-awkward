@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 from hypothesis import find, given
@@ -40,22 +40,15 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def from_numpy_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[FromNumpyKwargs]:
+def from_numpy_kwargs(draw: st.DrawFn) -> FromNumpyKwargs:
     """Strategy for options for `from_numpy()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_dtypes = chain.register(st_ak.supported_dtypes())
-
     kwargs = draw(
         st.fixed_dictionaries(
             {},
             optional={
                 'dtype': st.one_of(
                     st.none(),
-                    st.just(st_dtypes),
+                    st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
                     st_ak.supported_dtypes(),
                 ),
                 'allow_structured': st.booleans(),
@@ -66,26 +59,25 @@ def from_numpy_kwargs(
         )
     )
 
-    return chain.extend(cast(FromNumpyKwargs, kwargs))
+    return cast(FromNumpyKwargs, kwargs)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `from_numpy()`."""
     # Draw options
-    opts = data.draw(from_numpy_kwargs(), label='opts')
-    opts.reset()
+    kwargs = data.draw(from_numpy_kwargs(), label='kwargs')
 
     # Call the test subject
-    a = data.draw(st_ak.from_numpy(**opts.kwargs), label='a')
+    a = data.draw(st_ak.from_numpy(**kwargs), label='a')
     assert isinstance(a, ak.Array)
 
     # Assert the options were effective
-    dtype = opts.kwargs.get('dtype', DEFAULTS['dtype'])
-    allow_structured = opts.kwargs.get('allow_structured', DEFAULTS['allow_structured'])
-    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
-    regulararray = opts.kwargs.get('regulararray', DEFAULTS['regulararray'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    dtype = kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_structured = kwargs.get('allow_structured', DEFAULTS['allow_structured'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    regulararray = kwargs.get('regulararray', DEFAULTS['regulararray'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     dtypes = _leaf_dtypes(a)
     structured = _is_structured(a)
