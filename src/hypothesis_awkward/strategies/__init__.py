@@ -6,7 +6,6 @@ __all__ = [
     'from_list',
     'items_from_dtype',
     'lists',
-    'OptsChain',
     'RecordCallDraws',
     'RecordDraws',
     'StMinMaxValuesFactory',
@@ -31,7 +30,6 @@ from .builtins_ import (
 )
 from .forms import numpy_forms
 from .misc import (
-    OptsChain,
     RecordCallDraws,
     RecordDraws,
     StMinMaxValuesFactory,
