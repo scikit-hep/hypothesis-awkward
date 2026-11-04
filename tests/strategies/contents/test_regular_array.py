@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 import pytest
@@ -9,7 +9,7 @@ from awkward.contents import Content, NumpyArray, RegularArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class RegularArrayContentsKwargs(TypedDict, total=False):
@@ -29,6 +29,12 @@ DEFAULTS = RegularArrayContentsKwargs(
     min_length=0,
     max_length=None,
 )
+
+
+class RegularArrayContentsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `regular_array_contents()`."""
+
+    content: Content
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -52,12 +58,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def regular_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[RegularArrayContentsKwargs]:
+) -> KwargsDrawn[RegularArrayContentsKwargs, RegularArrayContentsDrawn]:
     """Strategy for options for `regular_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register(st_ak.contents.contents())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -75,45 +77,56 @@ def regular_array_contents_kwargs(
             ret['max_length'] = max_length
         return ret
 
-    related = draw(_st_related_kwargs())
+    @st.composite
+    def _st_drawn(draw: st.DrawFn) -> RegularArrayContentsDrawn:
+        """Strategy for the values drawn in advance for the options."""
+        ret = RegularArrayContentsDrawn()
+        if draw(st.booleans()):
+            ret['content'] = draw(st_ak.contents.contents())
+        return ret
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'content': st.one_of(
-                    st_ak.contents.contents(),
-                    st.just(st_content),
-                ),
-                'max_size': st.integers(min_value=0, max_value=50),
-            },
+    @st.composite
+    def _st_optional_independent(
+        draw: st.DrawFn, drawn: RegularArrayContentsDrawn
+    ) -> RegularArrayContentsKwargs:
+        """Strategy for the options that are drawn independently, if at all."""
+        ret = cast(
+            RegularArrayContentsKwargs,
+            draw(
+                st.fixed_dictionaries(
+                    {}, optional={'max_size': st.integers(min_value=0, max_value=50)}
+                )
+            ),
         )
-    )
+        if 'content' in drawn:
+            content = drawn['content']
+            ret['content'] = draw(st.sampled_from([content, st.just(content)]))
+        return ret
 
-    return chain.extend(
-        cast(RegularArrayContentsKwargs, {**related, **optional_independent})
-    )
+    related = draw(_st_related_kwargs())
+    drawn = draw(_st_drawn())
+    optional_independent = draw(_st_optional_independent(drawn))
+
+    kwargs = RegularArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `regular_array_contents()`."""
     # Draw options
-    opts = data.draw(regular_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(regular_array_contents_kwargs(), label='opts')
 
     # Call the test subject
-    result = data.draw(
-        st_ak.contents.regular_array_contents(**opts.kwargs), label='result'
-    )
+    result = data.draw(st_ak.contents.regular_array_contents(**kwargs), label='result')
 
     assert isinstance(result, RegularArray)
 
     # Assert the options were effective
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
-    max_zeros_length = opts.kwargs.get('max_zeros_length', DEFAULTS['max_zeros_length'])
-    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
-    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    max_zeros_length = kwargs.get('max_zeros_length', DEFAULTS['max_zeros_length'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
 
     assert result.size <= sc(max_size)
 
@@ -129,13 +142,8 @@ def test_properties(data: st.DataObject) -> None:
     #     assert len(result) == len(result.content) // result.size
 
     # Assert content
-    content = opts.kwargs.get('content', DEFAULTS['content'])
-    match content:
-        case Content():
-            assert result.content is content
-        case st_ak.RecordDraws():
-            assert len(content.drawn) == 1
-            assert result.content is content.drawn[0]
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 
 
 def test_draw_size_zero() -> None:

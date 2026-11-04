@@ -1,4 +1,4 @@
-"""Tests for `RecordCallDraws` and `OptsChain.register_callable()`."""
+"""Tests for `RecordCallDraws`."""
 
 from hypothesis import given
 from hypothesis import strategies as st

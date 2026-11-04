@@ -1,5 +1,5 @@
 import math
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 import pytest
@@ -72,13 +72,8 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def numpy_arrays_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[NumpyArraysKwargs]:
+def numpy_arrays_kwargs(draw: st.DrawFn) -> NumpyArraysKwargs:
     """Strategy for options for `numpy_arrays()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -92,7 +87,7 @@ def numpy_arrays_kwargs(
         st_dtypes = st_ak.supported_dtypes()
         if unique and not sc(min_size) <= 2:
             st_dtypes = st_dtypes.filter(lambda d: d.kind != 'b')
-        registered_st_dtypes = chain.register(st_dtypes)
+        registered_st_dtypes = st_ak.RecordDraws(st_dtypes)
         dtype = draw(st.one_of(st.none(), st.just(registered_st_dtypes), st_dtypes))
 
         ret = RelatedKwargs()
@@ -122,7 +117,7 @@ def numpy_arrays_kwargs(
         )
     )
 
-    return chain.extend(cast(NumpyArraysKwargs, {**related, **optional_independent}))
+    return NumpyArraysKwargs(**related, **cast(NumpyArraysKwargs, optional_independent))
 
 
 def _all_distinct(a: np.ndarray) -> bool:
@@ -144,21 +139,20 @@ def _all_distinct(a: np.ndarray) -> bool:
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_arrays()`."""
     # Draw options
-    opts = data.draw(numpy_arrays_kwargs(), label='opts')
-    opts.reset()
+    kwargs = data.draw(numpy_arrays_kwargs(), label='kwargs')
 
     # Call the test subject
-    n = data.draw(st_ak.numpy_arrays(**opts.kwargs), label='n')
+    n = data.draw(st_ak.numpy_arrays(**kwargs), label='n')
 
     # Assert the options were effective
-    dtype = opts.kwargs.get('dtype', DEFAULTS['dtype'])
-    allow_structured = opts.kwargs.get('allow_structured', DEFAULTS['allow_structured'])
-    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
-    min_dims = opts.kwargs.get('min_dims', DEFAULTS['min_dims'])
-    max_dims = opts.kwargs.get('max_dims', DEFAULTS['max_dims'])
-    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
-    unique = opts.kwargs.get('unique', DEFAULTS['unique'])
+    dtype = kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_structured = kwargs.get('allow_structured', DEFAULTS['allow_structured'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    min_dims = kwargs.get('min_dims', DEFAULTS['min_dims'])
+    max_dims = kwargs.get('max_dims', DEFAULTS['max_dims'])
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    unique = kwargs.get('unique', DEFAULTS['unique'])
 
     match dtype:
         case np.dtype():

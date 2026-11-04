@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 from hypothesis import find, given
@@ -40,13 +40,8 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def bytestring_contents_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[BytestringContentsKwargs]:
+def bytestring_contents_kwargs(draw: st.DrawFn) -> BytestringContentsKwargs:
     """Strategy for options for `bytestring_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -63,20 +58,17 @@ def bytestring_contents_kwargs(
 
     related = draw(_st_related_kwargs())
 
-    return chain.extend(cast(BytestringContentsKwargs, related))
+    return cast(BytestringContentsKwargs, related)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `bytestring_contents()`."""
     # Draw options
-    opts = data.draw(bytestring_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs = data.draw(bytestring_contents_kwargs(), label='kwargs')
 
     # Call the test subject
-    result = data.draw(
-        st_ak.contents.bytestring_contents(**opts.kwargs), label='result'
-    )
+    result = data.draw(st_ak.contents.bytestring_contents(**kwargs), label='result')
 
     # Assert the result is always a ListOffsetArray
     assert isinstance(result, ListOffsetArray)
@@ -94,8 +86,8 @@ def test_properties(data: st.DataObject) -> None:
     assert result.content.dtype == np.dtype(np.uint8)
 
     # Assert size bounds
-    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     assert sc(min_size) <= len(result) <= sc(max_size)
 

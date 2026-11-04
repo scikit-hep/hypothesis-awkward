@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 import pytest
@@ -112,14 +112,8 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def contents_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ContentsKwargs]:
+def contents_kwargs(draw: st.DrawFn) -> ContentsKwargs:
     """Strategy for options for `contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_dtypes = chain.register(st_ak.supported_dtypes())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -178,7 +172,7 @@ def contents_kwargs(
         st.fixed_dictionaries(
             {},
             optional={
-                'dtypes': st.just(st_dtypes),
+                'dtypes': st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
                 'allow_nan': st.booleans(),
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
@@ -196,7 +190,7 @@ def contents_kwargs(
         )
     )
 
-    return chain.extend(cast(ContentsKwargs, {**related, **optional_independent}))
+    return ContentsKwargs(**related, **cast(ContentsKwargs, optional_independent))
 
 
 @scaled(2.5)  # `contents()` composes every strategy; interaction bugs live here
@@ -204,49 +198,40 @@ def contents_kwargs(
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `contents()`."""
     # Draw options
-    opts = data.draw(contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs = data.draw(contents_kwargs(), label='kwargs')
 
     # Call the test subject
-    c = data.draw(st_ak.contents.contents(**opts.kwargs), label='c')
+    c = data.draw(st_ak.contents.contents(**kwargs), label='c')
 
     # Assert the result is always an ak.contents.Content
     assert isinstance(c, ak.contents.Content)
 
     # Assert the options were effective
-    dtypes = opts.kwargs.get('dtypes', DEFAULTS['dtypes'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
-    allow_nan = opts.kwargs.get('allow_nan', DEFAULTS['allow_nan'])
-    allow_numpy = opts.kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
-    allow_empty = opts.kwargs.get('allow_empty', DEFAULTS['allow_empty'])
-    allow_string = opts.kwargs.get('allow_string', DEFAULTS['allow_string'])
-    allow_bytestring = opts.kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
-    allow_regular = opts.kwargs.get('allow_regular', DEFAULTS['allow_regular'])
-    allow_list_offset = opts.kwargs.get(
-        'allow_list_offset', DEFAULTS['allow_list_offset']
-    )
-    allow_list = opts.kwargs.get('allow_list', DEFAULTS['allow_list'])
-    allow_record = opts.kwargs.get('allow_record', DEFAULTS['allow_record'])
-    allow_union = opts.kwargs.get('allow_union', DEFAULTS['allow_union'])
-    allow_indexed = opts.kwargs.get('allow_indexed', DEFAULTS['allow_indexed'])
-    allow_indexed_option = opts.kwargs.get(
+    dtypes = kwargs.get('dtypes', DEFAULTS['dtypes'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    allow_numpy = kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
+    allow_empty = kwargs.get('allow_empty', DEFAULTS['allow_empty'])
+    allow_string = kwargs.get('allow_string', DEFAULTS['allow_string'])
+    allow_bytestring = kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
+    allow_regular = kwargs.get('allow_regular', DEFAULTS['allow_regular'])
+    allow_list_offset = kwargs.get('allow_list_offset', DEFAULTS['allow_list_offset'])
+    allow_list = kwargs.get('allow_list', DEFAULTS['allow_list'])
+    allow_record = kwargs.get('allow_record', DEFAULTS['allow_record'])
+    allow_union = kwargs.get('allow_union', DEFAULTS['allow_union'])
+    allow_indexed = kwargs.get('allow_indexed', DEFAULTS['allow_indexed'])
+    allow_indexed_option = kwargs.get(
         'allow_indexed_option', DEFAULTS['allow_indexed_option']
     )
-    allow_byte_masked = opts.kwargs.get(
-        'allow_byte_masked', DEFAULTS['allow_byte_masked']
-    )
-    allow_bit_masked = opts.kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
-    allow_unmasked = opts.kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
-    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
-    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
-    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
-    max_depth = opts.kwargs.get('max_depth', DEFAULTS['max_depth'])
-    min_record_fields = opts.kwargs.get(
-        'min_record_fields', DEFAULTS['min_record_fields']
-    )
-    max_record_fields = opts.kwargs.get(
-        'max_record_fields', DEFAULTS['max_record_fields']
-    )
+    allow_byte_masked = kwargs.get('allow_byte_masked', DEFAULTS['allow_byte_masked'])
+    allow_bit_masked = kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
+    allow_unmasked = kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
+    max_leaf_size = kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
+    max_depth = kwargs.get('max_depth', DEFAULTS['max_depth'])
+    min_record_fields = kwargs.get('min_record_fields', DEFAULTS['min_record_fields'])
+    max_record_fields = kwargs.get('max_record_fields', DEFAULTS['max_record_fields'])
 
     allow_any_nesting = any(
         (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)

@@ -2,7 +2,10 @@
 
 import inspect
 from collections.abc import Callable, Mapping, Set
-from typing import Any
+from typing import Any, Generic, NamedTuple, TypeVar
+
+K = TypeVar('K')
+D = TypeVar('D')
 
 
 def assert_kwargs_match_signature(
@@ -36,3 +39,15 @@ def assert_kwargs_match_signature(
     if related_cls is not None:
         related_keys = related_cls.__required_keys__ | related_cls.__optional_keys__
         assert related_keys <= keys
+
+
+class KwargsDrawn(NamedTuple, Generic[K, D]):
+    """Options for a strategy, with the values drawn in advance for them.
+
+    `kwargs` are passed to the strategy under test. `drawn` holds, per option, the
+    value drawn in the kwargs strategy that the result must contain, e.g. the content
+    behind a `st.just(content)` option.
+    """
+
+    kwargs: K
+    drawn: D

@@ -7,19 +7,26 @@ paths:
 
 Reference implementations:
 
-- `tests/strategies/contents/test_content.py` — full template with `OptsChain`;
+- `tests/strategies/contents/test_unmasked_array.py` — smallest example of
+  drawing a strategy-valued option in advance (`KwargsDrawn`, no
+  `RelatedKwargs`)
+- `tests/strategies/contents/test_indexed_array.py` — drawing in advance with
+  `RelatedKwargs`; `optional_independent` merged with `related`
+- `tests/strategies/contents/test_regular_array.py` — drawing in advance when
+  the drawn option shares `optional_independent` with other options
+  (`_st_drawn()` and `_st_optional_independent(drawn)`)
+- `tests/strategies/forms/test_numpy_forms.py` — mode selection, with each mode
+  drawing its strategy-valued options in advance (no `RelatedKwargs`)
+- `tests/strategies/contents/test_content.py` — full template with a recorder;
   `exclude` for internal recursion params
 - `tests/strategies/constructors/test_array.py` — kwargs inheritance; `DEFAULTS`
-  derived from the parent module's
-- `tests/strategies/contents/test_record_array.py` — smallest full-template
-  example
+  derived from the parent module's; the kwargs strategy draws the parent's and
+  extends them
 - `tests/strategies/numpy/test_numpy_arrays.py` — min/max pairs with `ranges()`;
   the dtype pool depends on other drawn options
-- `tests/strategies/forms/test_numpy_forms.py` — mode selection for
-  strategy-valued kwargs (no `RelatedKwargs`)
 - `tests/strategies/contents/test_content_lists.py` — callable-valued kwargs
-  with `register_callable()`
-- `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without `OptsChain`
+  with `RecordCallDraws`
+- `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without recorders
   (closest to the original template in awkward's
   `tests/properties/operations/test_flatten.py`)
 
@@ -28,8 +35,8 @@ modules above are the examples to start from.
 
 ## 1. Option declarations
 
-Each kwargs test module declares a strategy's options in up to three objects,
-and a meta-test keeps them in sync with the strategy's signature:
+Each kwargs test module declares a strategy's options in up to four objects, and
+a meta-test keeps them in sync with the strategy's signature:
 
 - A `TypedDict` (`total=False`) with one key per signature parameter;
   annotations match the signature exactly (a convention the meta-test does not
@@ -39,6 +46,9 @@ and a meta-test keeps them in sync with the strategy's signature:
   section 2). Omitted when no options constrain each other
   (`test_unmasked_array.py`) or when the coupling takes another form, such as
   mode selection.
+- `<Name>Drawn`: a TypedDict of the values drawn in advance for strategy-valued
+  options (see section 2), e.g. `content: Content` in
+  `RegularArrayContentsDrawn`. Only in modules that draw in advance.
 
 The meta-test, named `test_kwargs_match_signature`, calls
 `assert_kwargs_match_signature()` from `tests/funcs.py`:
@@ -73,11 +83,27 @@ A strategy that extends another subclasses the TypedDict and derives its
 
 ## 2. Strategy for kwargs
 
-`<strategy>_kwargs()` is a `@st.composite` returning
-`st_ak.OptsChain[MyKwargs]`, with a `chain` parameter so composable strategies
-can delegate kwargs (`arrays_kwargs` chains `contents_kwargs`). When nothing
-needs recorders or chaining, it returns a plain kwargs dict instead
-(`test_ranges.py`).
+`<strategy>_kwargs()` is a `@st.composite`. Its return type depends on the
+strategy-valued options:
+
+- **No strategy-valued options:** a plain kwargs dict (`test_ranges.py`,
+  `test_bytestring.py`).
+- **Strategy-valued options the strategy under test draws exactly once, without
+  arguments** (e.g. `content` in the content wrappers, `dtypes` in
+  `numpy_array_contents()`): `KwargsDrawn[MyKwargs, MyDrawn]` from
+  `tests/funcs.py`, a `NamedTuple` of `kwargs` and `drawn`. The kwargs strategy
+  draws the value itself and passes it either as the value or as
+  `st.just(value)`; `drawn` holds the value for the assertions. No recorder is
+  needed: the test does not check that the strategy draws once, which is not
+  part of its contract.
+- **Strategy-valued options drawn many times or called with arguments** (e.g.
+  `dtypes` in `contents()`, `alphabet` in `string_contents()`, `st_content` in
+  `content_lists()`): a plain kwargs dict whose option holds a recorder (see
+  "Recorders" below).
+
+A kwargs strategy for a strategy that extends another draws the parent's kwargs
+strategy and adds its own options (`arrays_kwargs()` draws `contents_kwargs()`
+and adds `allow_virtual`).
 
 The body makes two draws and merges them:
 
@@ -87,11 +113,14 @@ The body makes two draws and merges them:
   depend on other drawn values (`test_numpy_arrays.py`). A value that can be
   `None` is added to the dict only when it is not `None`, so the omitted-key
   path exercises the strategy's default.
-- An `st.fixed_dictionaries({}, optional={...})` draw for the independent
-  options; whether each key appears is drawn separately from its value.
+- The independent options (`optional_independent`), where whether each key
+  appears is drawn separately from its value, either with
+  `st.fixed_dictionaries({}, optional={...})` or with `if draw(st.booleans()):`.
 
 When one group is empty, its draw is skipped (`test_bytestring.py`,
-`test_unmasked_array.py`).
+`test_unmasked_array.py`). Merge with
+`MyKwargs(**related, **optional_independent)`; both must be TypedDicts for mypy,
+so `cast` a `fixed_dictionaries` result to `MyKwargs` first.
 
 The kwargs strategy generates only options the strategy accepts. Options that
 decide whether a call is feasible, such as `allow_*` flags of which at least one
@@ -103,17 +132,74 @@ raises on infeasible options, a dedicated `test_raise_*` test checks the error
 strategy that only passes on a callee's error needs none: `contents()` gets its
 `ValueError` from `leaf_contents()`, which `test_leaf.py` covers.
 
-Strategy-valued kwargs are registered on the chain so the test can later assert
-what was drawn: `chain.register(strategy)` returns a tracked `RecordDraws`
-wrapper (passed via `st.just(recorder)`; a plain-dict kwargs strategy creates
-the `RecordDraws` directly, as in `test_numpy_types.py`), and
-`chain.register_callable(factory)` returns a `RecordCallDraws` wrapper for
-callable-valued kwargs, aggregating draws across all calls
-(`test_content_lists.py`). The option's pool typically mixes concrete values
-with the recorder — e.g. `st.one_of(_contents_list(), st.just(recorder))` in
-`test_record_array.py` — so the concrete-value path is exercised too. For
-mutually exclusive parameter groups, define mode functions selected with
-`st.one_of` (`test_numpy_forms.py`).
+### Drawing in advance
+
+Draw the value only when the option is passed, so the omitted path draws nothing
+extra:
+
+```python
+    optional_independent = IndexedArrayContentsKwargs()
+    drawn = IndexedArrayContentsDrawn(content=None)
+    if draw(st.booleans()):
+        content = draw(st_ak.contents.contents(...))
+        optional_independent['content'] = draw(
+            st.sampled_from([content, st.just(content)])
+        )
+        drawn['content'] = content
+
+    kwargs = IndexedArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
+```
+
+Here `drawn` always has the key, with `content: Content | None`, and the test
+decides from `kwargs` whether the option was passed. This inline form fits when
+the drawn option is the only independent option.
+
+When the drawn option shares `optional_independent` with other options, split
+the draw: `_st_drawn()` returns the drawn values, and
+`_st_optional_independent(drawn)` builds the independent options from them, so
+each composite returns one thing (`test_regular_array.py`,
+`test_record_array.py`, `test_numpy_array.py`). In this form `<Name>Drawn` is
+`total=False`, and its keys decide which options are passed:
+
+```python
+    related = draw(_st_related_kwargs())
+    drawn = draw(_st_drawn())
+    optional_independent = draw(_st_optional_independent(drawn))
+
+    kwargs = RegularArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
+```
+
+An option that takes only a strategy or `None` (`dtypes`) is passed as
+`st.just(value)` when drawn, and otherwise as `None` or omitted
+(`test_numpy_array.py`). When the value is a list, build the `st.sampled_from()`
+choices as an explicitly typed list, or mypy infers `object`
+(`test_record_array.py`). For mutually exclusive parameter groups, define mode
+composites selected with `st.one_of`, each returning its own `KwargsDrawn`
+(`test_numpy_forms.py`).
+
+A change to these draws can shift how often each form of an option is generated.
+Before committing, compare a sample of the old and new kwargs strategies, with
+the test subject drawn after the options as in `test_properties`; drawing the
+options alone can exhaust short paths, such as an omitted option.
+
+### Recorders
+
+Strategy-valued kwargs that cannot be drawn in advance are wrapped in a recorder
+so the test can later assert what was drawn: `st_ak.RecordDraws(strategy)`
+records every value drawn from the strategy, and
+`st_ak.RecordCallDraws(factory)` wraps a callable-valued kwarg, aggregating
+draws across all calls (`test_content_lists.py`). Pass the recorder via
+`st.just(recorder)`, e.g. `st.just(st_ak.RecordDraws(st_ak.supported_dtypes()))`
+in `test_content.py`.
+
+Create recorders inside the composite body, so each example gets new ones and no
+reset is needed. A recorder created once, outside the per-example code (at
+module level, or in a non-composite helper drawn by `@given`), is shared by
+every example and accumulates draws across them. The option's pool typically
+mixes concrete values with the recorder, so the concrete-value path is exercised
+too.
 
 ## 3. Main property-based test
 
@@ -124,22 +210,26 @@ and asserts every option was effective:
 ```python
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    """Assert the results of `numpy_arrays()`."""
-    opts = data.draw(numpy_arrays_kwargs(), label='opts')
-    opts.reset()  # clear recorders before each draw
+    """Assert the results of `regular_array_contents()`."""
+    kwargs, drawn = data.draw(regular_array_contents_kwargs(), label='opts')
 
-    n = data.draw(st_ak.numpy_arrays(**opts.kwargs), label='n')
+    result = data.draw(st_ak.contents.regular_array_contents(**kwargs), label='result')
 
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
     ...
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 ```
 
-Defaults are read as `opts.kwargs.get(k, DEFAULTS[k])`, never as literals. A
-kwarg that can hold either a concrete value or a recorder is distinguished with
-`match` / `case`: the recorder arms (`st_ak.RecordDraws()` /
-`RecordCallDraws()`) assert against the recorded draws, and a concrete-value arm
-(e.g. `case list():` in `test_record_array.py`) asserts the result uses the
-passed objects.
+Defaults are read as `kwargs.get(k, DEFAULTS[k])`, never as literals. A value
+drawn in advance is checked against `drawn`, whether it was passed as the value
+or as `st.just(value)`, so one check covers both forms.
+
+In a module with recorders, the kwargs strategy returns plain kwargs, so the
+test draws `kwargs` alone. A kwarg that can hold either a concrete value or a
+recorder is distinguished with `match` / `case`: the recorder arms
+(`st_ak.RecordDraws()` / `RecordCallDraws()`) assert against the recorded draws,
+and a concrete-value arm asserts the result uses the passed objects.
 
 Do not set `max_examples` on `@given` tests. The profiles registered in
 `tests/conftest.py` supply it — 200 by default (PRs and local runs), 10,000

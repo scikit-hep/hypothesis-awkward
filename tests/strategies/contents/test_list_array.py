@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict
 
 import numpy as np
 import pytest
@@ -10,7 +10,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class ListArrayContentsKwargs(TypedDict, total=False):
@@ -26,6 +26,12 @@ DEFAULTS = ListArrayContentsKwargs(
     min_length=0,
     max_length=None,
 )
+
+
+class ListArrayContentsDrawn(TypedDict):
+    """Values drawn in advance for the options of `list_array_contents()`."""
+
+    content: Content | None
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -48,12 +54,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def list_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ListArrayContentsKwargs]:
+) -> KwargsDrawn[ListArrayContentsKwargs, ListArrayContentsDrawn]:
     """Strategy for options for `list_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register(st_ak.contents.contents())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -68,40 +70,33 @@ def list_array_contents_kwargs(
 
     related = draw(_st_related_kwargs())
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'content': st.one_of(
-                    st_ak.contents.contents(),
-                    st.just(st_content),
-                ),
-            },
+    optional_independent = ListArrayContentsKwargs()
+    drawn = ListArrayContentsDrawn(content=None)
+    if draw(st.booleans()):
+        content = draw(st_ak.contents.contents())
+        optional_independent['content'] = draw(
+            st.sampled_from([content, st.just(content)])
         )
-    )
+        drawn['content'] = content
 
-    return chain.extend(
-        cast(ListArrayContentsKwargs, {**related, **optional_independent})
-    )
+    kwargs = ListArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `list_array_contents()`."""
     # Draw options
-    opts = data.draw(list_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(list_array_contents_kwargs(), label='opts')
 
     # Call the test subject
-    result = data.draw(
-        st_ak.contents.list_array_contents(**opts.kwargs), label='result'
-    )
+    result = data.draw(st_ak.contents.list_array_contents(**kwargs), label='result')
 
     assert isinstance(result, ListArray)
 
     # Assert the options were effective
-    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
-    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
 
     assert min_length <= len(result) <= sc(max_length)
 
@@ -116,13 +111,8 @@ def test_properties(data: st.DataObject) -> None:
         assert stops[i] <= len(result.content)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', DEFAULTS['content'])
-    match content:
-        case Content():
-            assert result.content is content
-        case st_ak.RecordDraws():
-            assert len(content.drawn) == 1
-            assert result.content is content.drawn[0]
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 
 
 @pytest.mark.parametrize('min_length', [1, 2, 10])

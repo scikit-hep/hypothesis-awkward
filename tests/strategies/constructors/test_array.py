@@ -33,12 +33,9 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def arrays_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ArraysKwargs]:
+def arrays_kwargs(draw: st.DrawFn) -> ArraysKwargs:
     """Strategy for options for `arrays()` strategy."""
-    opts = draw(contents_kwargs(chain=chain))
+    contents_kwargs_ = draw(contents_kwargs())
     extra = draw(
         st.fixed_dictionaries(
             {},
@@ -47,7 +44,7 @@ def arrays_kwargs(
             },
         )
     )
-    return opts.extend(cast(ArraysKwargs, extra))
+    return ArraysKwargs(**contents_kwargs_, **cast(ArraysKwargs, extra))
 
 
 @given(data=st.data())
@@ -56,9 +53,7 @@ def test_properties(data: st.DataObject) -> None:
     from hypothesis_awkward.strategies.constructors import array_ as array_module
 
     # Draw options
-    opts = data.draw(arrays_kwargs(), label='opts')
-    opts.reset()
-    kwargs = opts.kwargs
+    kwargs = data.draw(arrays_kwargs(), label='kwargs')
 
     spy = ContentsSpy()
     mock_st_ak = Mock(wraps=st_ak)

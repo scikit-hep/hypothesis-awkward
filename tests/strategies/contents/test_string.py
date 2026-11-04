@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import numpy as np
 from hypothesis import find, given
@@ -41,14 +41,8 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def string_contents_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[StringContentsKwargs]:
+def string_contents_kwargs(draw: st.DrawFn) -> StringContentsKwargs:
     """Strategy for options for `string_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_alphabet = chain.register(st.characters(codec='utf-8'))
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -71,24 +65,25 @@ def string_contents_kwargs(
             optional={
                 'alphabet': st.one_of(
                     st.none(),
-                    st.just(st_alphabet),
+                    st.just(st_ak.RecordDraws(st.characters(codec='utf-8'))),
                 ),
             },
         )
     )
 
-    return chain.extend(cast(StringContentsKwargs, {**related, **optional_independent}))
+    return StringContentsKwargs(
+        **related, **cast(StringContentsKwargs, optional_independent)
+    )
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `string_contents()`."""
     # Draw options
-    opts = data.draw(string_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs = data.draw(string_contents_kwargs(), label='kwargs')
 
     # Call the test subject
-    result = data.draw(st_ak.contents.string_contents(**opts.kwargs), label='result')
+    result = data.draw(st_ak.contents.string_contents(**kwargs), label='result')
 
     # Assert the result is always a ListOffsetArray
     assert isinstance(result, ListOffsetArray)
@@ -106,9 +101,9 @@ def test_properties(data: st.DataObject) -> None:
     assert result.content.dtype == np.dtype(np.uint8)
 
     # Assert size bounds
-    alphabet = opts.kwargs.get('alphabet', DEFAULTS['alphabet'])
-    min_size = opts.kwargs.get('min_size', DEFAULTS['min_size'])
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
+    alphabet = kwargs.get('alphabet', DEFAULTS['alphabet'])
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
 
     assert sc(min_size) <= len(result) <= sc(max_size)
 

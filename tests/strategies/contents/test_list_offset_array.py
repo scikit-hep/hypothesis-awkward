@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict
 
 import numpy as np
 import pytest
@@ -9,7 +9,7 @@ from awkward.contents import Content, ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class ListOffsetArrayContentsKwargs(TypedDict, total=False):
@@ -25,6 +25,12 @@ DEFAULTS = ListOffsetArrayContentsKwargs(
     min_length=0,
     max_length=None,
 )
+
+
+class ListOffsetArrayContentsDrawn(TypedDict):
+    """Values drawn in advance for the options of `list_offset_array_contents()`."""
+
+    content: Content | None
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -47,12 +53,8 @@ def test_kwargs_match_signature() -> None:
 @st.composite
 def list_offset_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ListOffsetArrayContentsKwargs]:
+) -> KwargsDrawn[ListOffsetArrayContentsKwargs, ListOffsetArrayContentsDrawn]:
     """Strategy for options for `list_offset_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register(st_ak.contents.contents())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -67,40 +69,35 @@ def list_offset_array_contents_kwargs(
 
     related = draw(_st_related_kwargs())
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'content': st.one_of(
-                    st_ak.contents.contents(),
-                    st.just(st_content),
-                ),
-            },
+    optional_independent = ListOffsetArrayContentsKwargs()
+    drawn = ListOffsetArrayContentsDrawn(content=None)
+    if draw(st.booleans()):
+        content = draw(st_ak.contents.contents())
+        optional_independent['content'] = draw(
+            st.sampled_from([content, st.just(content)])
         )
-    )
+        drawn['content'] = content
 
-    return chain.extend(
-        cast(ListOffsetArrayContentsKwargs, {**related, **optional_independent})
-    )
+    kwargs = ListOffsetArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `list_offset_array_contents()`."""
     # Draw options
-    opts = data.draw(list_offset_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(list_offset_array_contents_kwargs(), label='opts')
 
     # Call the test subject
     result = data.draw(
-        st_ak.contents.list_offset_array_contents(**opts.kwargs), label='result'
+        st_ak.contents.list_offset_array_contents(**kwargs), label='result'
     )
 
     assert isinstance(result, ListOffsetArray)
 
     # Assert the options were effective
-    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
-    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
     assert min_length <= len(result) <= sc(max_length)
 
     # Assert offsets are monotonically non-decreasing
@@ -117,13 +114,8 @@ def test_properties(data: st.DataObject) -> None:
     assert offsets[-1] <= len(result.content)
 
     # Assert the options were effective
-    content = opts.kwargs.get('content', DEFAULTS['content'])
-    match content:
-        case Content():
-            assert result.content is content
-        case st_ak.RecordDraws():
-            assert len(content.drawn) == 1
-            assert result.content is content.drawn[0]
+    if 'content' in kwargs:
+        assert result.content is drawn['content']
 
 
 @pytest.mark.parametrize('min_length', [1, 2, 10])

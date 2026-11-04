@@ -1,4 +1,4 @@
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 import pytest
 from hypothesis import find, given
@@ -8,7 +8,7 @@ from awkward.contents import Content, RecordArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
 class RecordArrayContentsKwargs(TypedDict, total=False):
@@ -28,6 +28,12 @@ DEFAULTS = RecordArrayContentsKwargs(
     min_length=0,
     max_length=None,
 )
+
+
+class RecordArrayContentsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `record_array_contents()`."""
+
+    contents: list[Content]
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -61,12 +67,8 @@ def _contents_list(
 @st.composite
 def record_array_contents_kwargs(
     draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[RecordArrayContentsKwargs]:
+) -> KwargsDrawn[RecordArrayContentsKwargs, RecordArrayContentsDrawn]:
     """Strategy for options for `record_array_contents()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_contents = chain.register(_contents_list())
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -79,61 +81,70 @@ def record_array_contents_kwargs(
             ret['max_length'] = max_length
         return ret
 
-    related = draw(_st_related_kwargs())
+    @st.composite
+    def _st_drawn(draw: st.DrawFn) -> RecordArrayContentsDrawn:
+        """Strategy for the values drawn in advance for the options."""
+        ret = RecordArrayContentsDrawn()
+        if draw(st.booleans()):
+            ret['contents'] = draw(_contents_list())
+        return ret
 
-    optional_independent = draw(
-        st.fixed_dictionaries(
-            {},
-            optional={
-                'contents': st.one_of(
-                    _contents_list(),
-                    st.just(st_contents),
-                ),
-                'max_fields': st.integers(min_value=0, max_value=10),
-                'allow_tuple': st.booleans(),
-            },
+    @st.composite
+    def _st_optional_independent(
+        draw: st.DrawFn, drawn: RecordArrayContentsDrawn
+    ) -> RecordArrayContentsKwargs:
+        """Strategy for the options that are drawn independently, if at all."""
+        ret = cast(
+            RecordArrayContentsKwargs,
+            draw(
+                st.fixed_dictionaries(
+                    {},
+                    optional={
+                        'max_fields': st.integers(min_value=0, max_value=10),
+                        'allow_tuple': st.booleans(),
+                    },
+                )
+            ),
         )
-    )
+        if 'contents' in drawn:
+            contents = drawn['contents']
+            choices = list[list[Content] | st.SearchStrategy[list[Content]]](
+                [contents, st.just(contents)]
+            )
+            ret['contents'] = draw(st.sampled_from(choices))
+        return ret
 
-    return chain.extend(
-        cast(RecordArrayContentsKwargs, {**related, **optional_independent})
-    )
+    related = draw(_st_related_kwargs())
+    drawn = draw(_st_drawn())
+    optional_independent = draw(_st_optional_independent(drawn))
+
+    kwargs = RecordArrayContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `record_array_contents()`."""
     # Draw options
-    opts = data.draw(record_array_contents_kwargs(), label='opts')
-    opts.reset()
+    kwargs, drawn = data.draw(record_array_contents_kwargs(), label='opts')
 
     # Call the test subject
-    result = data.draw(
-        st_ak.contents.record_array_contents(**opts.kwargs), label='result'
-    )
+    result = data.draw(st_ak.contents.record_array_contents(**kwargs), label='result')
 
     assert isinstance(result, RecordArray)
 
     # Assert the options were effective
-    max_fields = opts.kwargs.get('max_fields', DEFAULTS['max_fields'])
-    allow_tuple = opts.kwargs.get('allow_tuple', DEFAULTS['allow_tuple'])
-    contents = opts.kwargs.get('contents', DEFAULTS['contents'])
+    max_fields = kwargs.get('max_fields', DEFAULTS['max_fields'])
+    allow_tuple = kwargs.get('allow_tuple', DEFAULTS['allow_tuple'])
 
-    # When auto-generating contents, field count is bounded by max_fields
-    match contents:
-        case None:
-            assert len(result.contents) <= max_fields
-        case list():
-            # Concrete list: contents should be the same objects
-            assert len(result.contents) == len(contents)
-            for r_content, given_content in zip(result.contents, contents):
-                assert r_content is given_content
-        case st_ak.RecordDraws():
-            assert len(contents.drawn) == 1
-            drawn_list = contents.drawn[0]
-            assert len(result.contents) == len(drawn_list)
-            for r_content, drawn_content in zip(result.contents, drawn_list):
-                assert r_content is drawn_content
+    if 'contents' in kwargs:
+        # Given contents: the fields are the same objects
+        assert len(result.contents) == len(drawn['contents'])
+        for r_content, drawn_content in zip(result.contents, drawn['contents']):
+            assert r_content is drawn_content
+    else:
+        # When auto-generating contents, field count is bounded by max_fields
+        assert len(result.contents) <= max_fields
 
     # allow_tuple=False means the result must be a named record
     if not allow_tuple:
@@ -145,8 +156,8 @@ def test_properties(data: st.DataObject) -> None:
         assert len(set(result.fields)) == len(result.fields)
 
     # Assert length is within bounds
-    min_length = opts.kwargs.get('min_length', DEFAULTS['min_length'])
-    max_length = opts.kwargs.get('max_length', DEFAULTS['max_length'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
     assert min_length <= len(result) <= sc(max_length)
 
     # Non-empty records: length equals the minimum content length, capped by max_length

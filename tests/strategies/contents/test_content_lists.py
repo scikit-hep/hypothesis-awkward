@@ -1,4 +1,4 @@
-from typing import Any, Callable, TypedDict, cast
+from typing import Callable, TypedDict, cast
 
 from hypothesis import find, given
 from hypothesis import strategies as st
@@ -50,14 +50,8 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def content_lists_kwargs(
-    draw: st.DrawFn,
-    chain: st_ak.OptsChain[Any] | None = None,
-) -> st_ak.OptsChain[ContentListsKwargs]:
+def content_lists_kwargs(draw: st.DrawFn) -> ContentListsKwargs:
     """Strategy for options for `content_lists()` strategy."""
-    if chain is None:
-        chain = st_ak.OptsChain({})
-    st_content = chain.register_callable(st_ak.contents.contents)
 
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
@@ -76,7 +70,7 @@ def content_lists_kwargs(
         st.fixed_dictionaries(
             {},
             optional={
-                'st_content': st.just(st_content),
+                'st_content': st.just(RecordCallDraws(st_ak.contents.contents)),
                 'max_size': st.integers(min_value=0, max_value=200),
                 'max_leaf_size': st.one_of(
                     st.none(), st.integers(min_value=0, max_value=50)
@@ -85,24 +79,25 @@ def content_lists_kwargs(
         )
     )
 
-    return chain.extend(cast(ContentListsKwargs, {**related, **optional_independent}))
+    return ContentListsKwargs(
+        **related, **cast(ContentListsKwargs, optional_independent)
+    )
 
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `content_lists()`."""
     # Draw options
-    opts = data.draw(content_lists_kwargs(), label='opts')
-    opts.reset()
+    kwargs = data.draw(content_lists_kwargs(), label='kwargs')
 
-    max_size = opts.kwargs.get('max_size', DEFAULTS['max_size'])
-    max_leaf_size = opts.kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
-    min_len = opts.kwargs.get('min_len', DEFAULTS['min_len'])
-    max_len = opts.kwargs.get('max_len', DEFAULTS['max_len'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    max_leaf_size = kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
+    min_len = kwargs.get('min_len', DEFAULTS['min_len'])
+    max_len = kwargs.get('max_len', DEFAULTS['max_len'])
 
     # Call the test subject
     result = data.draw(
-        st_ak.contents.content_lists(**opts.kwargs),
+        st_ak.contents.content_lists(**kwargs),
         label='result',
     )
 
@@ -114,7 +109,7 @@ def test_properties(data: st.DataObject) -> None:
     if max_leaf_size is not None:
         assert sum(leaf_size(c) for c in result) <= max_leaf_size
 
-    match opts.kwargs.get('st_content'):
+    match kwargs.get('st_content'):
         case RecordCallDraws() as st_content:
             assert len(st_content.drawn) == len(result)
             assert all(d is r for d, r in zip(st_content.drawn, result))

@@ -1,6 +1,5 @@
 __all__ = [
     'none_or',
-    'OptsChain',
     'RecordCallDraws',
     'RecordDraws',
     'StMinMaxValuesFactory',
@@ -9,4 +8,4 @@ __all__ = [
 
 from .idiom import none_or
 from .range import StMinMaxValuesFactory, ranges
-from .record import OptsChain, RecordCallDraws, RecordDraws
+from .record import RecordCallDraws, RecordDraws
