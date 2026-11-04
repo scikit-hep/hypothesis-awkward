@@ -17,15 +17,16 @@ Reference implementations:
   (`_st_drawn()` and `_st_optional_independent(drawn)`)
 - `tests/strategies/forms/test_numpy_forms.py` — mode selection, with each mode
   drawing its strategy-valued options in advance (no `RelatedKwargs`)
-- `tests/strategies/contents/test_content.py` — full template with `OptsChain`
-  recorders; `exclude` for internal recursion params
+- `tests/strategies/contents/test_content.py` — full template with a recorder;
+  `exclude` for internal recursion params
 - `tests/strategies/constructors/test_array.py` — kwargs inheritance; `DEFAULTS`
-  derived from the parent module's; the only kwargs strategy that chains another
+  derived from the parent module's; the kwargs strategy draws the parent's and
+  extends them
 - `tests/strategies/numpy/test_numpy_arrays.py` — min/max pairs with `ranges()`;
   the dtype pool depends on other drawn options
 - `tests/strategies/contents/test_content_lists.py` — callable-valued kwargs
-  with `register_callable()`
-- `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without `OptsChain`
+  with `RecordCallDraws`
+- `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without recorders
   (closest to the original template in awkward's
   `tests/properties/operations/test_flatten.py`)
 
@@ -97,9 +98,12 @@ strategy-valued options:
   part of its contract.
 - **Strategy-valued options drawn many times or called with arguments** (e.g.
   `dtypes` in `contents()`, `alphabet` in `string_contents()`, `st_content` in
-  `content_lists()`): `st_ak.OptsChain[MyKwargs]`, with a `chain` parameter so
-  composable strategies can delegate kwargs (`arrays_kwargs` chains
-  `contents_kwargs`).
+  `content_lists()`): a plain kwargs dict whose option holds a recorder (see
+  "Recorders" below).
+
+A kwargs strategy for a strategy that extends another draws the parent's kwargs
+strategy and adds its own options (`arrays_kwargs()` draws `contents_kwargs()`
+and adds `allow_virtual`).
 
 The body makes two draws and merges them:
 
@@ -182,15 +186,20 @@ options alone can exhaust short paths, such as an omitted option.
 
 ### Recorders
 
-Strategy-valued kwargs that cannot be drawn in advance are registered on the
-chain so the test can later assert what was drawn: `chain.register(strategy)`
-returns a tracked `RecordDraws` wrapper (passed via `st.just(recorder)`; a
-plain-dict kwargs strategy creates the `RecordDraws` directly, as in
-`test_numpy_types.py`), and `chain.register_callable(factory)` returns a
-`RecordCallDraws` wrapper for callable-valued kwargs, aggregating draws across
-all calls (`test_content_lists.py`). Create recorders inside the composite body,
-so each example gets new ones. The option's pool typically mixes concrete values
-with the recorder, so the concrete-value path is exercised too.
+Strategy-valued kwargs that cannot be drawn in advance are wrapped in a recorder
+so the test can later assert what was drawn: `st_ak.RecordDraws(strategy)`
+records every value drawn from the strategy, and
+`st_ak.RecordCallDraws(factory)` wraps a callable-valued kwarg, aggregating
+draws across all calls (`test_content_lists.py`). Pass the recorder via
+`st.just(recorder)`, e.g. `st.just(st_ak.RecordDraws(st_ak.supported_dtypes()))`
+in `test_content.py`.
+
+Create recorders inside the composite body, so each example gets new ones and no
+reset is needed. A recorder created once, outside the per-example code (at
+module level, or in a non-composite helper drawn by `@given`), is shared by
+every example and accumulates draws across them. The option's pool typically
+mixes concrete values with the recorder, so the concrete-value path is exercised
+too.
 
 ## 3. Main property-based test
 
@@ -216,8 +225,8 @@ Defaults are read as `kwargs.get(k, DEFAULTS[k])`, never as literals. A value
 drawn in advance is checked against `drawn`, whether it was passed as the value
 or as `st.just(value)`, so one check covers both forms.
 
-With `OptsChain`, the test reads `opts.kwargs` instead, and calls `opts.reset()`
-after drawing the options. A kwarg that can hold either a concrete value or a
+In a module with recorders, the kwargs strategy returns plain kwargs, so the
+test draws `kwargs` alone. A kwarg that can hold either a concrete value or a
 recorder is distinguished with `match` / `case`: the recorder arms
 (`st_ak.RecordDraws()` / `RecordCallDraws()`) assert against the recorded draws,
 and a concrete-value arm asserts the result uses the passed objects.
