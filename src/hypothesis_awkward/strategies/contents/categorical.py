@@ -17,18 +17,21 @@ def categorical_contents(
 
     Categorical data is an [`IndexedArray`][ak.contents.IndexedArray] or an
     [`IndexedOptionArray`][ak.contents.IndexedOptionArray] with the parameter
-    `__array__` set to `'categorical'`. Its content holds the categories, no two of
-    which are equal; the index refers to them. The categories are a
-    [`NumpyArray`][ak.contents.NumpyArray], an
-    [`EmptyArray`][ak.contents.EmptyArray], string content, or bytestring content.
+    `__array__` set to `'categorical'`. Its content holds the categories, which are
+    unique as Awkward Array defines it: `0.0` and `-0.0` are equal, `NaN`s are
+    distinct, and at most one `NaT` occurs. The index refers to the categories.
 
     Parameters
     ----------
     content
         The categories. Can be a strategy for [`Content`][ak.contents.Content], a
         concrete [`Content`][ak.contents.Content] instance, or `None` to draw from
-        `leaf_contents()` with `unique=True`. Draws from a strategy that are not
-        valid categories are rejected.
+        `leaf_contents()` with `unique=True`; a draw with more than one `NaT` is
+        rejected. The categories must be a 1-D
+        [`NumpyArray`][ak.contents.NumpyArray], an
+        [`EmptyArray`][ak.contents.EmptyArray], string content, or bytestring
+        content, and unique as above. A concrete `content` that is not raises
+        `ValueError`; draws from a strategy that are not are rejected.
     allow_indexed
         No [`IndexedArray`][ak.contents.IndexedArray] is generated if `False`.
     allow_indexed_option
@@ -44,7 +47,7 @@ def categorical_contents(
     ------
     ValueError
         If both `allow_indexed` and `allow_indexed_option` are `False`, or if a
-        concrete `content` is not valid categories.
+        concrete `content` is not valid as categories.
 
     Returns
     -------
