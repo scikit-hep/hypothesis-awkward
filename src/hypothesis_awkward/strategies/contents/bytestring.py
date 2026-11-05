@@ -11,6 +11,7 @@ def bytestring_contents(
     *,
     min_size: int = 0,
     max_size: int = 10,
+    unique: bool = False,
 ) -> ListOffsetArray:
     """Strategy for bytestring [`ak.contents.ListOffsetArray`][] instances.
 
@@ -20,6 +21,8 @@ def bytestring_contents(
         Minimum number of bytestrings.
     max_size
         Maximum number of bytestrings.
+    unique
+        No two bytestrings are equal if `True`.
 
     Returns
     -------
@@ -31,7 +34,9 @@ def bytestring_contents(
     >>> isinstance(c, ListOffsetArray)
     True
     """
-    bytestrings = draw(st.lists(st.binary(), min_size=min_size, max_size=max_size))
+    bytestrings = draw(
+        st.lists(st.binary(), min_size=min_size, max_size=max_size, unique=unique)
+    )
     offsets = np.zeros(len(bytestrings) + 1, dtype=np.int64)
     for i, b in enumerate(bytestrings):
         offsets[i + 1] = offsets[i] + len(b)

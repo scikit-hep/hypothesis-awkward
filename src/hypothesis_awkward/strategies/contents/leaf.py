@@ -11,6 +11,7 @@ def leaf_contents(
     allow_nan: bool = True,
     min_size: int = 0,
     max_size: int = 10,
+    unique: bool = False,
     allow_numpy: bool = True,
     allow_empty: bool = True,
     allow_string: bool = True,
@@ -38,6 +39,15 @@ def leaf_contents(
         Minimum number of elements.
     max_size
         Maximum number of elements.
+    unique
+        No two elements are equal if `True`. Passed on to the
+        [`NumpyArray`][ak.contents.NumpyArray], string, and bytestring strategies. A
+        zero-field [`RecordArray`][ak.contents.RecordArray], whose elements are all
+        equal, is then at most one element long and is not generated if
+        `min_size > 1`. With a given `dtypes`, a drawn dtype that cannot supply
+        `min_size` distinct values is rejected; if every drawn dtype is rejected, no
+        [`NumpyArray`][ak.contents.NumpyArray] is generated, and Hypothesis raises
+        `Unsatisfiable` if no other leaf type is allowed.
     allow_numpy
         No [`NumpyArray`][ak.contents.NumpyArray] is generated if `False`.
     allow_empty
@@ -67,20 +77,30 @@ def leaf_contents(
     # Append strategies in optimal order for shrinking.
     if allow_empty and min_size <= 0 <= max_size:
         options.append(st_ak.contents.empty_array_contents())
-    if allow_zero_field_record:
+    if allow_zero_field_record and not (unique and min_size > 1):
+        # All elements of a zero-field record are equal; under `unique`, at most one.
+        max_length = min(max_size, 1) if unique else max_size
         s = st_ak.contents.record_array_contents(
-            max_fields=0, min_length=min_size, max_length=max_size
+            max_fields=0, min_length=min_size, max_length=max_length
         )
         options.append(s)
     if allow_bytestring:
-        s = st_ak.contents.bytestring_contents(min_size=min_size, max_size=max_size)
+        s = st_ak.contents.bytestring_contents(
+            min_size=min_size, max_size=max_size, unique=unique
+        )
         options.append(s)
     if allow_string:
-        s = st_ak.contents.string_contents(min_size=min_size, max_size=max_size)
+        s = st_ak.contents.string_contents(
+            min_size=min_size, max_size=max_size, unique=unique
+        )
         options.append(s)
     if allow_numpy:
         s = st_ak.contents.numpy_array_contents(
-            dtypes=dtypes, allow_nan=allow_nan, min_size=min_size, max_size=max_size
+            dtypes=dtypes,
+            allow_nan=allow_nan,
+            min_size=min_size,
+            max_size=max_size,
+            unique=unique,
         )
         options.append(s)
 

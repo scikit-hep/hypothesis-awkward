@@ -5,6 +5,7 @@ import pytest
 from hypothesis import find, given
 from hypothesis import strategies as st
 
+import awkward as ak
 from awkward.contents import EmptyArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import (
@@ -16,7 +17,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE
-from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, all_distinct, assert_kwargs_match_signature
 
 
 class LeafContentsKwargs(TypedDict, total=False):
@@ -26,6 +27,7 @@ class LeafContentsKwargs(TypedDict, total=False):
     allow_nan: bool
     min_size: int
     max_size: int
+    unique: bool
     allow_numpy: bool
     allow_empty: bool
     allow_string: bool
@@ -38,6 +40,7 @@ DEFAULTS = LeafContentsKwargs(
     allow_nan=True,
     min_size=0,
     max_size=10,
+    unique=False,
     allow_numpy=True,
     allow_empty=True,
     allow_string=True,
@@ -53,6 +56,8 @@ ALLOW_FLAGS = (
     'allow_zero_field_record',
 )
 NON_EMPTY_FLAGS = tuple(f for f in ALLOW_FLAGS if f != 'allow_empty')
+# Leaf types that can hold more than one distinct element.
+DISTINCT_FLAGS = tuple(f for f in NON_EMPTY_FLAGS if f != 'allow_zero_field_record')
 
 
 class LeafContentsDrawn(TypedDict, total=False):
@@ -65,11 +70,16 @@ class RelatedKwargs(TypedDict, total=False):
     """Options drawn together.
 
     `min_size <= max_size`, and at least one leaf type is allowed that can have a
-    length in that range (`EmptyArray` only when `min_size` is 0).
+    length in that range (`EmptyArray` only when `min_size` is 0, a zero-field record
+    under `unique` only when `min_size` is at most 1). They depend on the dtype drawn
+    in advance: under `unique`, a `bool` dtype limits `min_size` to the two distinct
+    `bool` values.
     """
 
+    dtypes: st.SearchStrategy[np.dtype] | None
     min_size: int
     max_size: int
+    unique: bool
     allow_numpy: bool
     allow_empty: bool
     allow_string: bool
@@ -94,34 +104,6 @@ def leaf_contents_kwargs(
     """Strategy for options for `leaf_contents()` strategy."""
 
     @st.composite
-    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
-        """Strategy for the options that are drawn together."""
-        min_size, max_size = draw(
-            st_ak.ranges(
-                min_start=0,
-                max_start=DEFAULTS['max_size'],
-                max_end=DEFAULTS['max_size'] + 50,
-            )
-        )
-        ret = dict[str, Any]()
-        if min_size is not None:
-            ret['min_size'] = min_size
-        if max_size is not None:
-            ret['max_size'] = max_size
-        if min_size:
-            # `EmptyArray` is impossible; at least one non-empty type is needed.
-            allowed = draw(st.sets(st.sampled_from(NON_EMPTY_FLAGS), min_size=1))
-            if draw(st.booleans()):
-                allowed.add('allow_empty')
-        else:
-            allowed = draw(st.sets(st.sampled_from(ALLOW_FLAGS), min_size=1))
-        for flag in ALLOW_FLAGS:
-            # A disallowed flag must be passed; an allowed one may be omitted.
-            if flag not in allowed or draw(st.booleans()):
-                ret[flag] = flag in allowed
-        return cast(RelatedKwargs, ret)
-
-    @st.composite
     def _st_drawn(draw: st.DrawFn) -> LeafContentsDrawn:
         """Strategy for the values drawn in advance for the options."""
         ret = LeafContentsDrawn()
@@ -130,23 +112,55 @@ def leaf_contents_kwargs(
         return ret
 
     @st.composite
-    def _st_optional_independent(
-        draw: st.DrawFn, drawn: LeafContentsDrawn
-    ) -> LeafContentsKwargs:
-        """Strategy for the options that are drawn independently, if at all."""
-        ret = cast(
-            LeafContentsKwargs,
-            draw(st.fixed_dictionaries({}, optional={'allow_nan': st.booleans()})),
+    def _st_related_kwargs(draw: st.DrawFn, drawn: LeafContentsDrawn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        unique = draw(st_ak.none_or(st.booleans()))
+        max_start = DEFAULTS['max_size']
+        if unique and 'dtypes' in drawn and drawn['dtypes'].kind == 'b':
+            max_start = 2  # the number of distinct `bool` values
+        min_size, max_size = draw(
+            st_ak.ranges(
+                min_start=0,
+                max_start=max_start,
+                max_end=DEFAULTS['max_size'] + 50,
+            )
         )
+        ret = dict[str, Any]()
         if 'dtypes' in drawn:
             ret['dtypes'] = st.just(drawn['dtypes'])
         elif draw(st.booleans()):
             ret['dtypes'] = None
-        return ret
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        if unique is not None:
+            ret['unique'] = unique
+        if unique and (min_size or 0) > 1:
+            # A zero-field record, whose elements are all equal, is impossible too.
+            feasible = DISTINCT_FLAGS
+        elif min_size:
+            # `EmptyArray` is impossible; at least one non-empty type is needed.
+            feasible = NON_EMPTY_FLAGS
+        else:
+            feasible = ALLOW_FLAGS
+        allowed = draw(st.sets(st.sampled_from(feasible), min_size=1))
+        infeasible = [f for f in ALLOW_FLAGS if f not in feasible]
+        if infeasible:
+            # The impossible types may be allowed as well.
+            allowed |= draw(st.sets(st.sampled_from(infeasible)))
+        for flag in ALLOW_FLAGS:
+            # A disallowed flag must be passed; an allowed one may be omitted.
+            if flag not in allowed or draw(st.booleans()):
+                ret[flag] = flag in allowed
+        return cast(RelatedKwargs, ret)
 
-    related = draw(_st_related_kwargs())
     drawn = draw(_st_drawn())
-    optional_independent = draw(_st_optional_independent(drawn))
+    related = draw(_st_related_kwargs(drawn))
+    optional_independent = cast(
+        LeafContentsKwargs,
+        draw(st.fixed_dictionaries({}, optional={'allow_nan': st.booleans()})),
+    )
 
     kwargs = LeafContentsKwargs(**related, **optional_independent)
     return KwargsDrawn(kwargs, drawn)
@@ -160,6 +174,7 @@ def test_properties(data: st.DataObject) -> None:
 
     min_size = kwargs.get('min_size', DEFAULTS['min_size'])
     max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    unique = kwargs.get('unique', DEFAULTS['unique'])
     allow_numpy = kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
     allow_empty = kwargs.get('allow_empty', DEFAULTS['allow_empty'])
     allow_string = kwargs.get('allow_string', DEFAULTS['allow_string'])
@@ -204,6 +219,13 @@ def test_properties(data: st.DataObject) -> None:
             assert not any_nan_nat_in_numpy_array(result.data)
         if 'dtypes' in drawn:
             assert result.data.dtype == drawn['dtypes']
+
+    if unique:
+        match result:
+            case NumpyArray():
+                assert all_distinct(list(result.data))
+            case _:
+                assert all_distinct(ak.Array(result).to_list())
 
 
 def test_draw_numpy_array() -> None:
@@ -256,6 +278,15 @@ def test_draw_max_size() -> None:
     )
 
 
+def test_draw_unique_zero_field_record() -> None:
+    """Assert a one-element zero-field record can be drawn when unique is True."""
+    find(
+        st_ak.contents.leaf_contents(unique=True),
+        lambda c: is_zero_field_record_leaf(c) and len(c) == 1,
+        settings=FIND,
+    )
+
+
 def test_draw_nan() -> None:
     """Assert that leaf content with NaN can be drawn."""
     c = find(
@@ -293,6 +324,14 @@ def test_shrink_leaf_contents_one() -> None:
         pytest.param(
             {'min_size': 1, **{flag: False for flag in NON_EMPTY_FLAGS}},
             id='only-empty-with-min-size',
+        ),
+        pytest.param(
+            {
+                'min_size': 2,
+                'unique': True,
+                **{flag: False for flag in DISTINCT_FLAGS},
+            },
+            id='only-empty-and-zero-field-record-with-unique',
         ),
     ],
 )

@@ -13,7 +13,7 @@ from hypothesis_awkward.util import (
     any_nat_in_numpy_array,
 )
 from tests.find_settings import FIND
-from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
+from tests.funcs import KwargsDrawn, all_distinct, assert_kwargs_match_signature
 
 
 class NumpyArrayContentsKwargs(TypedDict, total=False):
@@ -23,10 +23,11 @@ class NumpyArrayContentsKwargs(TypedDict, total=False):
     allow_nan: bool
     min_size: int
     max_size: int
+    unique: bool
 
 
 DEFAULTS = NumpyArrayContentsKwargs(
-    dtypes=None, allow_nan=True, min_size=0, max_size=10
+    dtypes=None, allow_nan=True, min_size=0, max_size=10, unique=False
 )
 
 
@@ -37,10 +38,16 @@ class NumpyArrayContentsDrawn(TypedDict, total=False):
 
 
 class RelatedKwargs(TypedDict, total=False):
-    """Options drawn together as an ordered pair (`min_size <= max_size`)."""
+    """Options drawn together: `dtypes`, `unique`, and `min_size <= max_size`.
 
+    They depend on the dtype drawn in advance: under `unique`, a `bool` dtype limits
+    `min_size` to the two distinct `bool` values.
+    """
+
+    dtypes: st.SearchStrategy[np.dtype] | None
     min_size: int
     max_size: int
+    unique: bool
 
 
 def test_kwargs_match_signature() -> None:
@@ -60,19 +67,6 @@ def numpy_array_contents_kwargs(
     """Strategy for options for `numpy_array_contents()` strategy."""
 
     @st.composite
-    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
-        """Strategy for the options that are drawn together."""
-        min_size, max_size = draw(
-            st_ak.ranges(min_start=0, max_start=DEFAULTS['max_size'], max_end=100)
-        )
-        ret = RelatedKwargs()
-        if min_size is not None:
-            ret['min_size'] = min_size
-        if max_size is not None:
-            ret['max_size'] = max_size
-        return ret
-
-    @st.composite
     def _st_drawn(draw: st.DrawFn) -> NumpyArrayContentsDrawn:
         """Strategy for the values drawn in advance for the options."""
         ret = NumpyArrayContentsDrawn()
@@ -81,23 +75,36 @@ def numpy_array_contents_kwargs(
         return ret
 
     @st.composite
-    def _st_optional_independent(
+    def _st_related_kwargs(
         draw: st.DrawFn, drawn: NumpyArrayContentsDrawn
-    ) -> NumpyArrayContentsKwargs:
-        """Strategy for the options that are drawn independently, if at all."""
-        ret = cast(
-            NumpyArrayContentsKwargs,
-            draw(st.fixed_dictionaries({}, optional={'allow_nan': st.booleans()})),
+    ) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        unique = draw(st_ak.none_or(st.booleans()))
+        max_start = DEFAULTS['max_size']
+        if unique and 'dtypes' in drawn and drawn['dtypes'].kind == 'b':
+            max_start = 2  # the number of distinct `bool` values
+        min_size, max_size = draw(
+            st_ak.ranges(min_start=0, max_start=max_start, max_end=100)
         )
+        ret = RelatedKwargs()
         if 'dtypes' in drawn:
             ret['dtypes'] = st.just(drawn['dtypes'])
         elif draw(st.booleans()):
             ret['dtypes'] = None
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        if unique is not None:
+            ret['unique'] = unique
         return ret
 
-    related = draw(_st_related_kwargs())
     drawn = draw(_st_drawn())
-    optional_independent = draw(_st_optional_independent(drawn))
+    related = draw(_st_related_kwargs(drawn))
+    optional_independent = cast(
+        NumpyArrayContentsKwargs,
+        draw(st.fixed_dictionaries({}, optional={'allow_nan': st.booleans()})),
+    )
 
     kwargs = NumpyArrayContentsKwargs(**related, **optional_independent)
     return KwargsDrawn(kwargs, drawn)
@@ -125,6 +132,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
     min_size = kwargs.get('min_size', DEFAULTS['min_size'])
     max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    unique = kwargs.get('unique', DEFAULTS['unique'])
 
     assert min_size <= len(result) <= max_size
 
@@ -135,6 +143,9 @@ def test_properties(data: st.DataObject) -> None:
     # Assert dtypes
     if 'dtypes' in drawn:
         assert result.data.dtype == drawn['dtypes']
+
+    if unique:
+        assert all_distinct(list(result.data))
 
 
 def test_draw_from_contents() -> None:
@@ -180,6 +191,15 @@ def test_draw_min_size() -> None:
     find(
         st_ak.contents.numpy_array_contents(min_size=min_size),
         lambda c: len(c) == min_size,
+        settings=FIND,
+    )
+
+
+def test_draw_unique_max_size() -> None:
+    """Assert that unique arrays with exactly max_size elements can be drawn."""
+    find(
+        st_ak.contents.numpy_array_contents(unique=True),
+        lambda c: len(c) == DEFAULTS['max_size'],
         settings=FIND,
     )
 

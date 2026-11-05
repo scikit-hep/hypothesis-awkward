@@ -12,6 +12,7 @@ def string_contents(
     alphabet: st.SearchStrategy[str] | None = None,
     min_size: int = 0,
     max_size: int = 10,
+    unique: bool = False,
 ) -> ListOffsetArray:
     """Strategy for string [`ak.contents.ListOffsetArray`][] instances.
 
@@ -24,6 +25,9 @@ def string_contents(
         Minimum number of strings.
     max_size
         Maximum number of strings.
+    unique
+        No two strings are equal if `True`. Strings are compared by code point, without
+        Unicode normalization.
 
     Returns
     -------
@@ -36,7 +40,9 @@ def string_contents(
     True
     """
     text_st = st.text() if alphabet is None else st.text(alphabet=alphabet)
-    strings = draw(st.lists(text_st, min_size=min_size, max_size=max_size))
+    strings = draw(
+        st.lists(text_st, min_size=min_size, max_size=max_size, unique=unique)
+    )
     encoded = [s.encode('utf-8') for s in strings]
     offsets = np.zeros(len(encoded) + 1, dtype=np.int64)
     for i, b in enumerate(encoded):

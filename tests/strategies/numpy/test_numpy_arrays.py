@@ -18,7 +18,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND_NO_SHRINK, FIND_RARE_NO_SHRINK
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import all_distinct, assert_kwargs_match_signature
 
 
 class NumpyArraysKwargs(TypedDict, total=False):
@@ -120,21 +120,6 @@ def numpy_arrays_kwargs(draw: st.DrawFn) -> NumpyArraysKwargs:
     return NumpyArraysKwargs(**related, **cast(NumpyArraysKwargs, optional_independent))
 
 
-def _all_distinct(a: np.ndarray) -> bool:
-    """Return True if all elements of `a` are pairwise distinct.
-
-    Compares NumPy scalars (not `a.tolist()`) so that `NaN`/`NaT` count as distinct,
-    matching how Hypothesis generates `unique=True` arrays. `a.tolist()` maps `NaT` to
-    `None`, and `None == None` is `True`, which would collapse distinct `NaT`s.
-    """
-    vals = list(a.ravel())
-    return all(
-        not bool(vals[i] == vals[j])
-        for i in range(len(vals))
-        for j in range(i + 1, len(vals))
-    )
-
-
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_arrays()`."""
@@ -179,7 +164,7 @@ def test_properties(data: st.DataObject) -> None:
     assert min_dims <= len(n.shape) <= sc(max_dims)
 
     if unique:
-        assert _all_distinct(n)
+        assert all_distinct(list(n.ravel()))
 
     # Assert an Awkward Array can be created.
     a = ak.from_numpy(n)

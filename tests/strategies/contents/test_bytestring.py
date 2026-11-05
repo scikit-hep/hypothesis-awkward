@@ -9,7 +9,7 @@ from awkward.contents import ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import all_distinct, assert_kwargs_match_signature
 
 
 class BytestringContentsKwargs(TypedDict, total=False):
@@ -17,9 +17,10 @@ class BytestringContentsKwargs(TypedDict, total=False):
 
     min_size: int
     max_size: int
+    unique: bool
 
 
-DEFAULTS = BytestringContentsKwargs(min_size=0, max_size=10)
+DEFAULTS = BytestringContentsKwargs(min_size=0, max_size=10, unique=False)
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -58,7 +59,13 @@ def bytestring_contents_kwargs(draw: st.DrawFn) -> BytestringContentsKwargs:
 
     related = draw(_st_related_kwargs())
 
-    return cast(BytestringContentsKwargs, related)
+    optional_independent = draw(
+        st.fixed_dictionaries({}, optional={'unique': st.booleans()})
+    )
+
+    return BytestringContentsKwargs(
+        **related, **cast(BytestringContentsKwargs, optional_independent)
+    )
 
 
 @given(data=st.data())
@@ -88,6 +95,7 @@ def test_properties(data: st.DataObject) -> None:
     # Assert size bounds
     min_size = kwargs.get('min_size', DEFAULTS['min_size'])
     max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    unique = kwargs.get('unique', DEFAULTS['unique'])
 
     assert sc(min_size) <= len(result) <= sc(max_size)
 
@@ -95,6 +103,9 @@ def test_properties(data: st.DataObject) -> None:
     arr = ak.Array(result)
     for b in arr.to_list():
         assert isinstance(b, bytes)
+
+    if unique:
+        assert all_distinct(arr.to_list())
 
 
 def test_draw_empty() -> None:
@@ -106,6 +117,15 @@ def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size bytestrings can be drawn."""
     find(
         st_ak.contents.bytestring_contents(),
+        lambda c: len(c) == DEFAULTS['max_size'],
+        settings=FIND,
+    )
+
+
+def test_draw_unique_max_size() -> None:
+    """Assert that unique arrays with exactly max_size bytestrings can be drawn."""
+    find(
+        st_ak.contents.bytestring_contents(unique=True),
         lambda c: len(c) == DEFAULTS['max_size'],
         settings=FIND,
     )
