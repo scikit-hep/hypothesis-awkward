@@ -48,12 +48,13 @@ def numpy_arrays(
         Maximum number of scalars in the array. For structured dtypes, each
         element counts as multiple scalars (one per field).
     unique
-        Generate arrays whose elements are pairwise distinct if `True`. Only simple
-        dtypes are generated (no structured dtypes). The achievable size is bounded by
-        the number of distinct values the dtype can represent; when `dtype` is `None`,
-        dtypes that cannot supply `min_size` distinct values (for example `bool` when
-        `min_size > 2`) are not drawn. A pinned `dtype` that cannot satisfy the request
-        raises.
+        No two elements are equal if `True`. Only simple dtypes are generated (no
+        structured dtypes). The achievable size is bounded by the number of distinct
+        values the dtype can represent; when `dtype` is `None` or a strategy, dtypes
+        that cannot supply `min_size` distinct values (for example `bool` when
+        `min_size > 2`) are not drawn, and Hypothesis raises `Unsatisfiable` if the
+        strategy draws only such dtypes. A single `dtype` that cannot supply them
+        raises `ValueError`.
 
     Examples
     --------
@@ -62,13 +63,27 @@ def numpy_arrays(
     <Array ... type='...'>
     """
     if unique:
-        # Uniqueness is defined for simple dtypes only; drop structured dtypes and,
-        # when the dtype is free, any that cannot supply `min_size` distinct values.
+        # Uniqueness is defined for simple dtypes only; drop structured dtypes and
+        # dtypes that cannot supply `min_size` distinct values, or raise if `dtype` is
+        # a single such dtype.
         allow_structured = False
-        if dtype is None:
-            dtype = supported_dtypes().filter(
-                lambda d: _n_distinct_values(d) >= min_size
-            )
+
+        def _has_enough_values(d: np.dtype) -> bool:
+            return _n_distinct_values(d) >= min_size
+
+        match dtype:
+            case None:
+                dtype = supported_dtypes().filter(_has_enough_values)
+            case st.SearchStrategy():
+                dtype = dtype.filter(_has_enough_values)
+            case _:
+                dtype = np.dtype(dtype)
+                n = _n_distinct_values(dtype)
+                if n < min_size:
+                    raise ValueError(
+                        f'dtype {dtype} has {n} distinct values; '
+                        f'cannot generate min_size={min_size} unique elements'
+                    )
 
     # Limit dtype_size so that the size can be between min_size and max_size
     max_dtype_size = max_size // min_size if min_size > 0 else max_size

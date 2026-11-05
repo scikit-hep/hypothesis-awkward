@@ -1,5 +1,5 @@
 import math
-from typing import TypedDict, cast
+from typing import Any, TypedDict, cast
 
 import numpy as np
 import pytest
@@ -361,3 +361,39 @@ def test_draw_unique_bool() -> None:
         lambda a: a.dtype.kind == 'b' and set(a.ravel().tolist()) == {True, False},
         settings=FIND_RARE_NO_SHRINK,
     )
+
+
+@pytest.mark.parametrize('max_dims', [None, 1])
+@given(data=st.data())
+def test_unique_mixed_dtypes(max_dims: int | None, data: st.DataObject) -> None:
+    """Assert a strategy's dtypes with too few distinct values are not drawn.
+
+    `bool` has two distinct values, so only `int8` can supply `min_size=3`.
+    """
+    dtypes = st.sampled_from([np.dtype(bool), np.dtype(np.int8)])
+    a = data.draw(
+        st_ak.numpy_arrays(dtype=dtypes, unique=True, min_size=3, max_dims=max_dims)
+    )
+    assert a.dtype == np.dtype(np.int8)
+    assert all_distinct(list(a.ravel()))
+
+
+@pytest.mark.parametrize('max_dims', [None, 1])
+@pytest.mark.parametrize(
+    'dtype',
+    [
+        pytest.param(np.dtype(bool), id='dtype'),
+        # Outside the annotated type, but accepted by `np.dtype()`.
+        pytest.param(cast(Any, 'bool'), id='str'),
+    ],
+)
+def test_raise_unique_dtype_too_few_values(
+    dtype: np.dtype, max_dims: int | None
+) -> None:
+    """Assert `ValueError` if a single dtype cannot supply `min_size` unique values."""
+    with pytest.raises(ValueError, match='distinct values'):
+        find(
+            st_ak.numpy_arrays(dtype=dtype, unique=True, min_size=3, max_dims=max_dims),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
