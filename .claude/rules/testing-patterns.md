@@ -15,6 +15,8 @@ Reference implementations:
 - `tests/strategies/contents/test_regular_array.py` — drawing in advance when
   the drawn option shares `optional_independent` with other options
   (`_st_drawn()` and `_st_optional_independent(drawn)`)
+- `tests/strategies/contents/test_numpy_array.py` — drawing in advance when
+  related options must fit the drawn value (`_st_related_kwargs(drawn)`)
 - `tests/strategies/forms/test_numpy_forms.py` — mode selection, with each mode
   drawing its strategy-valued options in advance (no `RelatedKwargs`)
 - `tests/strategies/contents/test_content.py` — full template with a recorder;
@@ -159,8 +161,8 @@ When the drawn option shares `optional_independent` with other options, split
 the draw: `_st_drawn()` returns the drawn values, and
 `_st_optional_independent(drawn)` builds the independent options from them, so
 each composite returns one thing (`test_regular_array.py`,
-`test_record_array.py`, `test_numpy_array.py`). In this form `<Name>Drawn` is
-`total=False`, and its keys decide which options are passed:
+`test_record_array.py`). In this form `<Name>Drawn` is `total=False`, and its
+keys decide which options are passed:
 
 ```python
     related = draw(_st_related_kwargs())
@@ -169,6 +171,17 @@ each composite returns one thing (`test_regular_array.py`,
 
     kwargs = RegularArrayContentsKwargs(**related, **optional_independent)
     return KwargsDrawn(kwargs, drawn)
+```
+
+When other options must fit the drawn value, the drawn option is a related
+option. Draw `_st_drawn()` first and pass it to `_st_related_kwargs(drawn)`,
+which constrains the other options to fit the value and builds the drawn option
+itself; the value's pool stays unfiltered (`test_numpy_array.py`,
+`test_leaf.py`: under `unique`, a drawn `bool` dtype caps `min_size` at 2):
+
+```python
+    drawn = draw(_st_drawn())
+    related = draw(_st_related_kwargs(drawn))
 ```
 
 An option that takes only a strategy or `None` (`dtypes`) is passed as
