@@ -1689,12 +1689,13 @@ element counts as multiple scalars (one per field).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Generate arrays whose elements are pairwise distinct if <code>True</code>. Only simple
-dtypes are generated (no structured dtypes). The achievable size is bounded by
-the number of distinct values the dtype can represent; when <code>dtype</code> is <code>None</code>,
-dtypes that cannot supply <code>min_size</code> distinct values (for example <code>bool</code> when
-<code>min_size &gt; 2</code>) are not drawn. A pinned <code>dtype</code> that cannot satisfy the request
-raises.</p>
+                <p>No two elements are equal if <code>True</code>. Only simple dtypes are generated (no
+structured dtypes). The achievable size is bounded by the number of distinct
+values the dtype can represent; when <code>dtype</code> is <code>None</code> or a strategy, dtypes
+that cannot supply <code>min_size</code> distinct values (for example <code>bool</code> when
+<code>min_size &gt; 2</code>) are not drawn, and Hypothesis raises <code>Unsatisfiable</code> if the
+strategy draws only such dtypes. A single <code>dtype</code> that cannot supply them
+raises <code>ValueError</code>.</p>
               </div>
             </td>
             <td>
