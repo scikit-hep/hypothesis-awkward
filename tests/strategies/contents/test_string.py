@@ -9,7 +9,7 @@ from awkward.contents import ListOffsetArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import all_distinct, assert_kwargs_match_signature
 
 
 class StringContentsKwargs(TypedDict, total=False):
@@ -18,9 +18,10 @@ class StringContentsKwargs(TypedDict, total=False):
     alphabet: st.SearchStrategy[str] | None
     min_size: int
     max_size: int
+    unique: bool
 
 
-DEFAULTS = StringContentsKwargs(alphabet=None, min_size=0, max_size=10)
+DEFAULTS = StringContentsKwargs(alphabet=None, min_size=0, max_size=10, unique=False)
 
 
 class RelatedKwargs(TypedDict, total=False):
@@ -67,6 +68,7 @@ def string_contents_kwargs(draw: st.DrawFn) -> StringContentsKwargs:
                     st.none(),
                     st.just(st_ak.RecordDraws(st.characters(codec='utf-8'))),
                 ),
+                'unique': st.booleans(),
             },
         )
     )
@@ -104,6 +106,7 @@ def test_properties(data: st.DataObject) -> None:
     alphabet = kwargs.get('alphabet', DEFAULTS['alphabet'])
     min_size = kwargs.get('min_size', DEFAULTS['min_size'])
     max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    unique = kwargs.get('unique', DEFAULTS['unique'])
 
     assert sc(min_size) <= len(result) <= sc(max_size)
 
@@ -121,6 +124,9 @@ def test_properties(data: st.DataObject) -> None:
                 for ch in s:
                     assert ch in drawn_chars
 
+    if unique:
+        assert all_distinct(arr.to_list())
+
 
 def test_draw_empty() -> None:
     """Assert that empty arrays (zero strings) can be drawn."""
@@ -131,6 +137,15 @@ def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size strings can be drawn."""
     find(
         st_ak.contents.string_contents(),
+        lambda c: len(c) == DEFAULTS['max_size'],
+        settings=FIND,
+    )
+
+
+def test_draw_unique_max_size() -> None:
+    """Assert that unique arrays with exactly max_size strings can be drawn."""
+    find(
+        st_ak.contents.string_contents(unique=True),
         lambda c: len(c) == DEFAULTS['max_size'],
         settings=FIND,
     )

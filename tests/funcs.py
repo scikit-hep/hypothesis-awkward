@@ -1,7 +1,7 @@
 """Helpers shared by the strategy test modules."""
 
 import inspect
-from collections.abc import Callable, Mapping, Set
+from collections.abc import Callable, Mapping, Sequence, Set
 from typing import Any, Generic, NamedTuple, TypeVar
 
 K = TypeVar('K')
@@ -51,3 +51,18 @@ class KwargsDrawn(NamedTuple, Generic[K, D]):
 
     kwargs: K
     drawn: D
+
+
+def all_distinct(values: Sequence[Any]) -> bool:
+    """Return True if no two elements of `values` are equal.
+
+    Compares with `==`, so `NaN`/`NaT` count as distinct from each other, matching how
+    Hypothesis generates `unique=True` data. For a NumPy array, pass `list(a.ravel())`
+    (NumPy scalars), not `a.tolist()`: `tolist()` maps `NaT` to `None`, and
+    `None == None` is `True`, which would collapse distinct `NaT`s.
+    """
+    return all(
+        not bool(values[i] == values[j])
+        for i in range(len(values))
+        for j in range(i + 1, len(values))
+    )
