@@ -1,15 +1,25 @@
+import itertools
 from typing import TypedDict, cast
 
 import numpy as np
 import pytest
 from hypothesis import find, given
 from hypothesis import strategies as st
+from hypothesis.errors import Unsatisfiable
 
-from awkward.contents import Content, UnionArray
+import awkward as ak
+from awkward._do import mergeable
+from awkward.contents import (
+    Content,
+    EmptyArray,
+    IndexedOptionArray,
+    NumpyArray,
+    UnionArray,
+)
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE_NO_SHRINK
 from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
 
@@ -20,6 +30,7 @@ class UnionArrayContentsKwargs(TypedDict, total=False):
     max_contents: int
     min_length: int
     max_length: int | None
+    allow_invalid: bool
 
 
 DEFAULTS = UnionArrayContentsKwargs(
@@ -27,12 +38,14 @@ DEFAULTS = UnionArrayContentsKwargs(
     max_contents=4,
     min_length=0,
     max_length=None,
+    allow_invalid=True,
 )
 
 
 class UnionArrayContentsDrawn(TypedDict, total=False):
     """Values drawn in advance for the options of `union_array_contents()`."""
 
+    allow_invalid: bool
     contents: list[Content]
 
 
@@ -54,13 +67,15 @@ def test_kwargs_match_signature() -> None:
 
 
 @st.composite
-def _contents_list(
-    draw: st.DrawFn,
-) -> list[Content]:
-    """Draw a list of Content objects for testing."""
+def _contents_list(draw: st.DrawFn, *, allow_invalid: bool) -> list[Content]:
+    """Draw a list of Content objects for testing.
+
+    No two of them are mergeable if `allow_invalid` is `False`.
+    """
     n = draw(st.integers(min_value=0, max_value=5))
-    return [
-        draw(
+    ret = list[Content]()
+    for _ in range(n):
+        c = draw(
             st_ak.contents.contents(
                 max_leaf_size=5,
                 max_depth=2,
@@ -69,8 +84,9 @@ def _contents_list(
                 allow_indexed_root=False,
             )
         )
-        for _ in range(n)
-    ]
+        if allow_invalid or not any(_is_mergeable(r, c) for r in ret):
+            ret.append(c)
+    return ret
 
 
 @st.composite
@@ -92,10 +108,17 @@ def union_array_contents_kwargs(
 
     @st.composite
     def _st_drawn(draw: st.DrawFn) -> UnionArrayContentsDrawn:
-        """Strategy for the values drawn in advance for the options."""
+        """Strategy for the values drawn in advance for the options.
+
+        The content list depends on `allow_invalid`: if `False`, it has no two
+        mergeable contents.
+        """
         ret = UnionArrayContentsDrawn()
         if draw(st.booleans()):
-            ret['contents'] = draw(_contents_list())
+            ret['allow_invalid'] = draw(st.booleans())
+        allow_invalid = ret.get('allow_invalid', DEFAULTS['allow_invalid'])
+        if draw(st.booleans()):
+            ret['contents'] = draw(_contents_list(allow_invalid=allow_invalid))
         return ret
 
     @st.composite
@@ -118,6 +141,8 @@ def union_array_contents_kwargs(
                 [contents, st.just(contents)]
             )
             ret['contents'] = draw(st.sampled_from(choices))
+        if 'allow_invalid' in drawn:
+            ret['allow_invalid'] = drawn['allow_invalid']
         return ret
 
     related = draw(_st_related_kwargs())
@@ -198,6 +223,13 @@ def test_properties(data: st.DataObject) -> None:
     min_length = kwargs.get('min_length', DEFAULTS['min_length'])
     assert min_length <= len(result) <= sc(max_length)
 
+    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
+    if not allow_invalid:
+        # TODO: Assert `ak.validity_error(result) == ''` when `contents()` has the
+        # option. Until then, the children can contain invalid nested unions.
+        for one, two in itertools.combinations(result.contents, 2):
+            assert not _is_mergeable(one, two)
+
 
 @pytest.mark.parametrize('max_contents', [2, 3, 4])
 def test_draw_max_contents(max_contents: int) -> None:
@@ -236,6 +268,88 @@ def test_draw_max_length(max_length: int) -> None:
         lambda u: len(u) == max_length,
         settings=FIND,
     )
+
+
+def test_draw_mergeable_contents() -> None:
+    """Assert mergeable child contents can be drawn by default."""
+    find(
+        st_ak.contents.union_array_contents(),
+        lambda u: any(
+            _is_mergeable(one, two)
+            for one, two in itertools.combinations(u.contents, 2)
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('max_contents', [2, 3])
+def test_draw_max_contents_not_allow_invalid(max_contents: int) -> None:
+    """Assert the content count can reach `max_contents` if not `allow_invalid`."""
+    find(
+        st_ak.contents.union_array_contents(
+            max_contents=max_contents, allow_invalid=False
+        ),
+        lambda u: len(u.contents) == max_contents,
+        settings=FIND,
+    )
+
+
+def test_draw_all_option_not_allow_invalid() -> None:
+    """Assert all-option children can be drawn if not `allow_invalid`."""
+    find(
+        st_ak.contents.union_array_contents(allow_invalid=False),
+        lambda u: all(child.is_option for child in u.contents),
+        settings=FIND_RARE_NO_SHRINK,
+    )
+
+
+@pytest.mark.parametrize(
+    'contents',
+    [
+        pytest.param([EmptyArray(), NumpyArray(np.array([1]))], id='empty-numpy'),
+        pytest.param(
+            [NumpyArray(np.array([1])), NumpyArray(np.array([1.0]))], id='int-float'
+        ),
+        pytest.param(
+            [
+                NumpyArray(np.array([True])),
+                NumpyArray(np.array([1])),
+                NumpyArray(np.array([1.0])),
+            ],
+            id='last-two',
+        ),
+        pytest.param(
+            [
+                IndexedOptionArray(
+                    ak.index.Index64(np.array([0])), NumpyArray(np.array([1]))
+                ),
+                IndexedOptionArray(
+                    ak.index.Index64(np.array([0])), NumpyArray(np.array([1.0]))
+                ),
+            ],
+            id='option',
+        ),
+    ],
+)
+def test_raise_mergeable_contents(contents: list[Content]) -> None:
+    """Assert `ValueError` if a concrete `contents` has mergeable child contents."""
+    with pytest.raises(ValueError):
+        find(
+            st_ak.contents.union_array_contents(contents, allow_invalid=False),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
+
+
+def test_reject_mergeable_contents_from_strategy() -> None:
+    """Assert draws of mergeable child contents from a strategy are rejected."""
+    contents = list[Content]([EmptyArray(), NumpyArray(np.array([1]))])
+    with pytest.raises(Unsatisfiable):
+        find(
+            st_ak.contents.union_array_contents(st.just(contents), allow_invalid=False),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
 
 
 def test_draw_from_contents() -> None:
@@ -335,3 +449,7 @@ def _has_all_option_union(c: Content) -> bool:
         if all(child.is_option for child in node.contents):
             return True
     return False
+
+
+def _is_mergeable(one: Content, two: Content) -> bool:
+    return bool(mergeable(one, two, mergebool=False))

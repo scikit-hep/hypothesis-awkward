@@ -6,6 +6,7 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 import awkward as ak
+from awkward._do import mergeable
 from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import content_size
@@ -25,6 +26,7 @@ def union_array_contents(
     max_contents: int = 4,
     min_length: int = 0,
     max_length: int | None = None,
+    allow_invalid: bool = True,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances.
 
@@ -43,12 +45,20 @@ def union_array_contents(
     max_length
         Upper bound on the union length, i.e., `len(result)`. Unbounded if
         `None`.
+    allow_invalid
+        Mergeable child contents can occur if `True`, which [`ak.validity_error`][]
+        and [`ak.is_valid`][] consider invalid. No two child contents are mergeable
+        if `False`: a concrete `contents` with mergeable ones raises `ValueError`,
+        and such draws from a strategy are rejected.
 
     Raises
     ------
     TypeError
         If fewer than two child contents result, whether from `max_contents` or
         from `contents`. Raised by [`UnionArray`][ak.contents.UnionArray].
+    ValueError
+        If `allow_invalid` is `False` and a concrete `contents` has mergeable
+        child contents.
 
     Returns
     -------
@@ -86,46 +96,24 @@ def union_array_contents(
                     st_option=option_from_contents,
                 )
             )
+            if not allow_invalid:
+                kept = _non_mergeable(contents)
+                # Fewer than two drawn is left for `UnionArray` to reject.
+                assume(len(kept) >= min(2, len(contents)))
+                contents = kept
             if max_length is not None:
                 assume(sum(len(c) for c in contents) <= max_length)
         case st.SearchStrategy():
             contents = draw(contents)
+            if not allow_invalid:
+                assume(len(_non_mergeable(contents)) == len(contents))
         case list():
-            pass
+            if not allow_invalid and len(_non_mergeable(contents)) < len(contents):
+                raise ValueError(f'mergeable child contents: {contents!r}')
     assert isinstance(contents, list)
 
-    # min_length applies to all branches; pre-truncation sum floor.
-    assume(sum(len(c) for c in contents) >= min_length)
-
-    # Build tags and index arrays
-    tags_parts: list[np.ndarray] = []
-    index_parts: list[np.ndarray] = []
-    for k, content in enumerate(contents):
-        length = len(content)
-        tags_parts.append(np.full(length, k, dtype=np.int8))
-        index_parts.append(np.arange(length, dtype=np.int64))
-
-    if tags_parts:
-        tags_flat = np.concatenate(tags_parts)
-        index_flat = np.concatenate(index_parts)
-
-        # Shuffle to interleave contents
-        perm = draw(st.permutations(range(len(tags_flat))))
-        tags_flat = tags_flat[list(perm)]
-        index_flat = index_flat[list(perm)]
-
-        # Truncate if concrete/strategy contents exceed max_length
-        if max_length is not None and len(tags_flat) > max_length:
-            tags_flat = tags_flat[:max_length]
-            index_flat = index_flat[:max_length]
-    else:
-        tags_flat = np.array([], dtype=np.int8)
-        index_flat = np.array([], dtype=np.int64)
-
-    return UnionArray(
-        tags=ak.index.Index8(tags_flat),
-        index=ak.index.Index64(index_flat),
-        contents=contents,
+    return draw(
+        _union_from_children(contents, min_length=min_length, max_length=max_length)
     )
 
 
@@ -138,6 +126,7 @@ def union_array_from_contents(
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    allow_invalid: bool = True,
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
@@ -163,6 +152,9 @@ def union_array_from_contents(
         Lower bound on `len(result)`.
     max_length
         Upper bound on `len(result)`. Unbounded if `None`.
+    allow_invalid
+        Mergeable child contents can occur if `True`. No two child contents are
+        mergeable if `False`.
     st_option
         A callable conforming to `StOption` that wraps content in an option
         type. Used for all-or-none option coordination.
@@ -207,8 +199,69 @@ def union_array_from_contents(
             st_option=st_option,
         )
     )
+    if not allow_invalid:
+        children = _non_mergeable(children)
+        assume(len(children) >= 2)
     result = draw(
-        union_array_contents(children, min_length=min_length, max_length=max_length)
+        _union_from_children(children, min_length=min_length, max_length=max_length)
     )
     assume(content_size(result) <= max_size)
     return result
+
+
+def _non_mergeable(children: list[Content]) -> list[Content]:
+    """Return `children` without those that merge with an earlier one."""
+    kept = list[Content]()
+    for c in children:
+        if not any(mergeable(k, c, mergebool=False) for k in kept):
+            kept.append(c)
+    return kept
+
+
+@st.composite
+def _union_from_children(
+    draw: st.DrawFn,
+    children: list[Content],
+    *,
+    min_length: int = 0,
+    max_length: int | None = None,
+) -> UnionArray:
+    """Strategy for a [`ak.contents.UnionArray`][] of `children`.
+
+    Each element of `children` is referred to once, in a shuffled order, before
+    truncation to `max_length`. The draw is rejected if `children` are too short for
+    `min_length`.
+    """
+    # A pre-truncation sum floor.
+    assume(sum(len(c) for c in children) >= min_length)
+
+    # Build tags and index arrays
+    tags_parts: list[np.ndarray] = []
+    index_parts: list[np.ndarray] = []
+    for k, content in enumerate(children):
+        length = len(content)
+        tags_parts.append(np.full(length, k, dtype=np.int8))
+        index_parts.append(np.arange(length, dtype=np.int64))
+
+    if tags_parts:
+        tags_flat = np.concatenate(tags_parts)
+        index_flat = np.concatenate(index_parts)
+
+        # Shuffle to interleave contents
+        perm = draw(st.permutations(range(len(tags_flat))))
+        tags_flat = tags_flat[list(perm)]
+        index_flat = index_flat[list(perm)]
+
+        # Truncate if the children exceed max_length
+        if max_length is not None and len(tags_flat) > max_length:
+            tags_flat = tags_flat[:max_length]
+            index_flat = index_flat[:max_length]
+    else:
+        tags_flat = np.array([], dtype=np.int8)
+        index_flat = np.array([], dtype=np.int64)
+
+    return UnionArray(
+        tags=ak.index.Index8(tags_flat),
+        index=ak.index.Index64(index_flat),
+        contents=children,
+    )
