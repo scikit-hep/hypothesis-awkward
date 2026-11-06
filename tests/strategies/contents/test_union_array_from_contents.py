@@ -26,6 +26,7 @@ class UnionArrayFromContentsKwargs(TypedDict, total=False):
     max_leaf_size: int | None
     min_length: int
     max_length: int | None
+    allow_invalid: bool
     st_option: StOption | None
 
 
@@ -33,6 +34,7 @@ DEFAULTS = UnionArrayFromContentsKwargs(
     max_leaf_size=None,
     min_length=0,
     max_length=None,
+    allow_invalid=True,
     st_option=None,
 )
 
@@ -87,6 +89,7 @@ def union_array_from_contents_kwargs(
                     'max_leaf_size': st.one_of(
                         st.none(), st.integers(min_value=0, max_value=20)
                     ),
+                    'allow_invalid': st.booleans(),
                 },
             )
         ),
@@ -137,11 +140,20 @@ def test_properties(data: st.DataObject) -> None:
     max_length = kwargs.get('max_length', DEFAULTS['max_length'])
     assert min_length <= len(result) <= sc(max_length)
 
+    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
+    if not allow_invalid:
+        # TODO: Assert `ak.validity_error(result) == ''` when `contents()` has the
+        # option. Until then, the children can contain invalid nested unions.
+        assert not _has_mergeable_contents(result)
+
     # Assert the children are what `content` drew. Those wrapped in an option type
-    # by `st_option` are not the same objects as the draws.
-    assert len(content.drawn) == len(children)
+    # by `st_option` are not the same objects as the draws. Mergeable draws can be
+    # dropped if not `allow_invalid`.
+    if allow_invalid:
+        assert len(content.drawn) == len(children)
     if not allow_option:
-        assert all(d is c for d, c in zip(content.drawn, children))
+        drawn_ids = [id(d) for d in content.drawn]
+        assert all(id(c) in drawn_ids for c in children)
 
 
 @pytest.mark.parametrize('n_contents', [2, 3])
@@ -162,6 +174,25 @@ def test_draw_all_option() -> None:
 def test_draw_mergeable_contents() -> None:
     """Assert mergeable child contents can be drawn by default."""
     find(_st_union(), _has_mergeable_contents, settings=FIND)
+
+
+@pytest.mark.parametrize('n_contents', [2, 3])
+def test_draw_n_contents_not_allow_invalid(n_contents: int) -> None:
+    """Assert `n_contents` child contents can be drawn if not `allow_invalid`."""
+    find(
+        _st_union(allow_invalid=False),
+        lambda u: len(u.contents) == n_contents,
+        settings=FIND,
+    )
+
+
+def test_draw_all_option_not_allow_invalid() -> None:
+    """Assert all-option children can be drawn if not `allow_invalid`."""
+    find(
+        _st_union(allow_invalid=False),
+        lambda u: all(c.is_option for c in u.contents),
+        settings=FIND_RARE_NO_SHRINK,
+    )
 
 
 def _contents_with_no_option(**kwargs: Any) -> st.SearchStrategy[Content]:

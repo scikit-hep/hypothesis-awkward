@@ -126,6 +126,7 @@ def union_array_from_contents(
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
+    allow_invalid: bool = True,
     st_option: 'StOption | None' = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
@@ -151,6 +152,9 @@ def union_array_from_contents(
         Lower bound on `len(result)`.
     max_length
         Upper bound on `len(result)`. Unbounded if `None`.
+    allow_invalid
+        Mergeable child contents can occur if `True`. No two child contents are
+        mergeable if `False`.
     st_option
         A callable conforming to `StOption` that wraps content in an option
         type. Used for all-or-none option coordination.
@@ -195,6 +199,9 @@ def union_array_from_contents(
             st_option=st_option,
         )
     )
+    if not allow_invalid:
+        children = _non_mergeable(children)
+        assume(len(children) >= 2)
     result = draw(
         _union_from_children(children, min_length=min_length, max_length=max_length)
     )
