@@ -395,7 +395,7 @@ def test_draw_from_contents_not_allow_invalid(nested: bool) -> None:
             isinstance(n, UnionArray) and (n is not c) == nested
             for n in iter_contents(c)
         ),
-        settings=FIND,
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 
