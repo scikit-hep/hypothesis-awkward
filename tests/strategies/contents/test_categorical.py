@@ -29,7 +29,7 @@ class CategoricalContentsKwargs(TypedDict, total=False):
     content: st.SearchStrategy[Content] | Content | None
     min_size: int
     max_size: int | None
-    unique: bool
+    allow_invalid: bool
     allow_indexed: bool
     allow_indexed_option: bool
 
@@ -38,7 +38,7 @@ DEFAULTS = CategoricalContentsKwargs(
     content=None,
     min_size=0,
     max_size=None,
-    unique=False,
+    allow_invalid=True,
     allow_indexed=True,
     allow_indexed_option=True,
 )
@@ -49,7 +49,7 @@ ALLOW_FLAGS = ('allow_indexed', 'allow_indexed_option')
 class CategoricalContentsDrawn(TypedDict, total=False):
     """Values drawn in advance for the options of `categorical_contents()`."""
 
-    unique: bool
+    allow_invalid: bool
     content: Content
 
 
@@ -87,18 +87,18 @@ def categorical_contents_kwargs(
     def _st_drawn(draw: st.DrawFn) -> CategoricalContentsDrawn:
         """Strategy for the values drawn in advance for the options.
 
-        The content depends on `unique`: under `unique`, it has no two categories
+        The content depends on `allow_invalid`: if `False`, it has no two categories
         equal as Awkward Array defines it, which allows at most one `NaT`.
         """
         ret = CategoricalContentsDrawn()
         if draw(st.booleans()):
-            ret['unique'] = draw(st.booleans())
-        unique = ret.get('unique', DEFAULTS['unique'])
+            ret['allow_invalid'] = draw(st.booleans())
+        allow_invalid = ret.get('allow_invalid', DEFAULTS['allow_invalid'])
         if draw(st.booleans()):
             leaf = st_ak.contents.leaf_contents(
-                unique=unique, allow_zero_field_record=False
+                unique=not allow_invalid, allow_zero_field_record=False
             )
-            if unique:
+            if not allow_invalid:
                 leaf = leaf.filter(lambda c: _n_nat(c) <= 1)
             ret['content'] = draw(leaf)
         return ret
@@ -134,8 +134,8 @@ def categorical_contents_kwargs(
     related = draw(_st_related_kwargs(drawn))
 
     optional_independent = CategoricalContentsKwargs()
-    if 'unique' in drawn:
-        optional_independent['unique'] = drawn['unique']
+    if 'allow_invalid' in drawn:
+        optional_independent['allow_invalid'] = drawn['allow_invalid']
     if 'content' in drawn:
         content = drawn['content']
         optional_independent['content'] = draw(
@@ -176,8 +176,8 @@ def test_properties(data: st.DataObject) -> None:
     assert all(lowest <= i < len(categories) for i in index.tolist())
 
     # Assert the options were effective
-    unique = kwargs.get('unique', DEFAULTS['unique'])
-    if unique:
+    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
+    if not allow_invalid:
         if _awkward_can_check_unique(categories):
             # Awkward checks that the categories are unique
             assert ak.validity_error(result) == ''
@@ -232,7 +232,7 @@ def test_draw_min_size(min_size: int) -> None:
     )
 
 
-@pytest.mark.parametrize('unique', [False, True])
+@pytest.mark.parametrize('allow_invalid', [False, True])
 @pytest.mark.parametrize(
     'is_kind',
     [
@@ -242,10 +242,10 @@ def test_draw_min_size(min_size: int) -> None:
         pytest.param(is_bytestring_leaf, id='bytestring'),
     ],
 )
-def test_draw_categories(is_kind: Any, unique: bool) -> None:
+def test_draw_categories(is_kind: Any, allow_invalid: bool) -> None:
     """Assert each kind of categories can be drawn."""
     find(
-        st_ak.contents.categorical_contents(unique=unique),
+        st_ak.contents.categorical_contents(allow_invalid=allow_invalid),
         lambda c: is_kind(c.content),
         settings=FIND,
     )
@@ -265,21 +265,21 @@ def test_draw_duplicate_categories() -> None:
 
 
 def test_draw_nat() -> None:
-    """Assert a `NaT` category can be drawn under `unique`."""
+    """Assert a `NaT` category can be drawn under `allow_invalid=False`."""
     find(
-        st_ak.contents.categorical_contents(unique=True),
+        st_ak.contents.categorical_contents(allow_invalid=False),
         lambda c: _n_nat(c.content) == 1,
         settings=FIND,
     )
 
 
 def test_draw_multiple_nan() -> None:
-    """Assert more than one `NaN` category can be drawn under `unique`.
+    """Assert more than one `NaN` category can be drawn under `allow_invalid=False`.
 
     Awkward Array counts `NaN`s as distinct, unlike `NaT`s.
     """
     find(
-        st_ak.contents.categorical_contents(unique=True),
+        st_ak.contents.categorical_contents(allow_invalid=False),
         lambda c: _n_nan(c.content) >= 2,
         settings=FIND_RARE,
     )
@@ -318,7 +318,7 @@ def test_raise_no_flavor() -> None:
         )
 
 
-@pytest.mark.parametrize('unique', [False, True])
+@pytest.mark.parametrize('allow_invalid', [False, True])
 @pytest.mark.parametrize(
     'content',
     [
@@ -332,11 +332,11 @@ def test_raise_no_flavor() -> None:
         pytest.param(RecordArray([], fields=[], length=1), id='zero-field-record'),
     ],
 )
-def test_raise_invalid_kind(content: Content, unique: bool) -> None:
+def test_raise_invalid_kind(content: Content, allow_invalid: bool) -> None:
     """Assert `ValueError` if a concrete `content` is not a kind of categories."""
     with pytest.raises(ValueError):
         find(
-            st_ak.contents.categorical_contents(content, unique=unique),
+            st_ak.contents.categorical_contents(content, allow_invalid=allow_invalid),
             lambda _: True,
             settings=FIND_NO_SHRINK,
         )
@@ -352,24 +352,26 @@ def test_raise_invalid_kind(content: Content, unique: bool) -> None:
     ],
 )
 def test_raise_non_unique_content(content: Content) -> None:
-    """Assert `ValueError` if a concrete `content` is not unique under `unique`."""
+    """Assert `ValueError` if a concrete `content` is not unique."""
     with pytest.raises(ValueError):
         find(
-            st_ak.contents.categorical_contents(content, unique=True),
+            st_ak.contents.categorical_contents(content, allow_invalid=False),
             lambda _: True,
             settings=FIND_NO_SHRINK,
         )
 
 
-@pytest.mark.parametrize('unique', [False, True])
-def test_reject_invalid_kind_from_strategy(unique: bool) -> None:
+@pytest.mark.parametrize('allow_invalid', [False, True])
+def test_reject_invalid_kind_from_strategy(allow_invalid: bool) -> None:
     """Assert draws of a content that is not a kind of categories are rejected."""
     content = ListOffsetArray(
         ak.index.Index64(np.array([0, 1, 3])), NumpyArray(np.array([1, 2, 3]))
     )
     with pytest.raises(Unsatisfiable):
         find(
-            st_ak.contents.categorical_contents(st.just(content), unique=unique),
+            st_ak.contents.categorical_contents(
+                st.just(content), allow_invalid=allow_invalid
+            ),
             lambda _: True,
             settings=FIND_NO_SHRINK,
         )
@@ -380,7 +382,7 @@ def test_reject_non_unique_content_from_strategy() -> None:
     content = NumpyArray(np.array([1, 2, 1]))
     with pytest.raises(Unsatisfiable):
         find(
-            st_ak.contents.categorical_contents(st.just(content), unique=True),
+            st_ak.contents.categorical_contents(st.just(content), allow_invalid=False),
             lambda _: True,
             settings=FIND_NO_SHRINK,
         )

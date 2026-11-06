@@ -23,7 +23,7 @@ def categorical_contents(
     *,
     min_size: int = 0,
     max_size: int | None = None,
-    unique: bool = False,
+    allow_invalid: bool = True,
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
 ) -> IndexedArray | IndexedOptionArray:
@@ -41,8 +41,8 @@ def categorical_contents(
     content
         The categories. Can be a strategy for [`Content`][ak.contents.Content], a
         concrete [`Content`][ak.contents.Content] instance, or `None` to draw from
-        `leaf_contents()`. They must be of a kind listed above and, if `unique` is
-        `True`, unique. A concrete `content` that is not raises `ValueError`; draws
+        `leaf_contents()`. They must be of a kind listed above and, if `allow_invalid`
+        is `False`, unique. A concrete `content` that is not raises `ValueError`; draws
         from a strategy that are not are rejected. Empty categories can be referred
         to only by missing entries, so they are rejected if `min_size > 0` and
         `allow_indexed_option` is `False`.
@@ -51,11 +51,12 @@ def categorical_contents(
     max_size
         Upper bound on the index length, i.e., `len(result)`. If `None`, twice the
         content length is used.
-    unique
-        No two categories are equal if `True`, as Awkward Array defines it: `0.0` and
-        `-0.0` are equal, `NaN`s are distinct, and at most one `NaT` occurs.
-        [`ak.validity_error`][] and [`ak.is_valid`][] consider categorical data with
-        duplicate categories invalid.
+    allow_invalid
+        Duplicate categories can occur if `True`, which [`ak.validity_error`][] and
+        [`ak.is_valid`][] consider invalid. No two categories are equal if `False`, as
+        Awkward Array defines it: `0.0` and `-0.0` are equal, `NaN`s are distinct, and
+        at most one `NaT` occurs. A `content` of a kind not listed above is rejected
+        regardless of this option.
     allow_indexed
         No [`IndexedArray`][ak.contents.IndexedArray] is generated if `False`.
     allow_indexed_option
@@ -82,6 +83,8 @@ def categorical_contents(
         raise ValueError(
             'at least one of allow_indexed and allow_indexed_option must be True'
         )
+
+    unique = not allow_invalid
 
     match content:
         case None:
