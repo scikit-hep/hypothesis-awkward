@@ -30,6 +30,7 @@ def contents(
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     max_size: int = 50,
     allow_nan: bool = True,
+    allow_invalid: bool = True,
     allow_numpy: bool = True,
     allow_empty: bool = True,
     allow_string: bool = True,
@@ -93,6 +94,10 @@ def contents(
     allow_nan
         No `NaN`/`NaT` values are generated in [`NumpyArray`][ak.contents.NumpyArray]
         if `False`.
+    allow_invalid
+        Layouts that [`ak.validity_error`][] and [`ak.is_valid`][] consider invalid can
+        be generated if `True`: [`UnionArray`][ak.contents.UnionArray] with mergeable
+        contents. Every generated layout is valid if `False`.
     allow_numpy
         No [`NumpyArray`][ak.contents.NumpyArray] is generated if `False`.
     allow_empty
@@ -274,6 +279,7 @@ def contents(
         contents,
         dtypes=dtypes,
         allow_nan=allow_nan,
+        allow_invalid=allow_invalid,
         allow_numpy=allow_numpy,
         allow_empty=allow_empty,
         allow_string=allow_string,
@@ -310,7 +316,9 @@ def contents(
             )
         )
     if allow_union and allow_union_root:
-        candidates.append(union_array_from_contents)
+        candidates.append(
+            functools.partial(union_array_from_contents, allow_invalid=allow_invalid)
+        )
     if allow_indexed and allow_indexed_root:
         candidates.append(indexed_array_from_contents)
     if allow_indexed_option and allow_option_root:

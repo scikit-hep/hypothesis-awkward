@@ -225,10 +225,13 @@ def test_properties(data: st.DataObject) -> None:
 
     allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
     if not allow_invalid:
-        # TODO: Assert `ak.validity_error(result) == ''` when `contents()` has the
-        # option. Until then, the children can contain invalid nested unions.
-        for one, two in itertools.combinations(result.contents, 2):
-            assert not _is_mergeable(one, two)
+        assert ak.validity_error(result) == ''
+
+
+@given(u=st_ak.contents.union_array_contents(allow_invalid=False))
+def test_valid_not_allow_invalid(u: UnionArray) -> None:
+    """Assert the union is valid if not `allow_invalid`, with no other options."""
+    assert ak.validity_error(u) == ''
 
 
 @pytest.mark.parametrize('max_contents', [2, 3, 4])
@@ -379,6 +382,19 @@ def test_draw_from_contents_nested_union() -> None:
     find(
         st_ak.contents.contents(max_leaf_size=20, max_depth=5),
         _has_nested_union,
+        settings=FIND_RARE_NO_SHRINK,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+def test_draw_from_contents_not_allow_invalid(nested: bool) -> None:
+    """Assert a `UnionArray` at each position can be drawn if not `allow_invalid`."""
+    find(
+        st_ak.contents.contents(allow_invalid=False),
+        lambda c: any(
+            isinstance(n, UnionArray) and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
         settings=FIND_RARE_NO_SHRINK,
     )
 
