@@ -94,38 +94,8 @@ def union_array_contents(
             pass
     assert isinstance(contents, list)
 
-    # min_length applies to all branches; pre-truncation sum floor.
-    assume(sum(len(c) for c in contents) >= min_length)
-
-    # Build tags and index arrays
-    tags_parts: list[np.ndarray] = []
-    index_parts: list[np.ndarray] = []
-    for k, content in enumerate(contents):
-        length = len(content)
-        tags_parts.append(np.full(length, k, dtype=np.int8))
-        index_parts.append(np.arange(length, dtype=np.int64))
-
-    if tags_parts:
-        tags_flat = np.concatenate(tags_parts)
-        index_flat = np.concatenate(index_parts)
-
-        # Shuffle to interleave contents
-        perm = draw(st.permutations(range(len(tags_flat))))
-        tags_flat = tags_flat[list(perm)]
-        index_flat = index_flat[list(perm)]
-
-        # Truncate if concrete/strategy contents exceed max_length
-        if max_length is not None and len(tags_flat) > max_length:
-            tags_flat = tags_flat[:max_length]
-            index_flat = index_flat[:max_length]
-    else:
-        tags_flat = np.array([], dtype=np.int8)
-        index_flat = np.array([], dtype=np.int64)
-
-    return UnionArray(
-        tags=ak.index.Index8(tags_flat),
-        index=ak.index.Index64(index_flat),
-        contents=contents,
+    return draw(
+        _union_from_children(contents, min_length=min_length, max_length=max_length)
     )
 
 
@@ -208,7 +178,56 @@ def union_array_from_contents(
         )
     )
     result = draw(
-        union_array_contents(children, min_length=min_length, max_length=max_length)
+        _union_from_children(children, min_length=min_length, max_length=max_length)
     )
     assume(content_size(result) <= max_size)
     return result
+
+
+@st.composite
+def _union_from_children(
+    draw: st.DrawFn,
+    children: list[Content],
+    *,
+    min_length: int = 0,
+    max_length: int | None = None,
+) -> UnionArray:
+    """Strategy for a [`ak.contents.UnionArray`][] of `children`.
+
+    Each element of `children` is referred to once, in a shuffled order, before
+    truncation to `max_length`. The draw is rejected if `children` are too short for
+    `min_length`.
+    """
+    # A pre-truncation sum floor.
+    assume(sum(len(c) for c in children) >= min_length)
+
+    # Build tags and index arrays
+    tags_parts: list[np.ndarray] = []
+    index_parts: list[np.ndarray] = []
+    for k, content in enumerate(children):
+        length = len(content)
+        tags_parts.append(np.full(length, k, dtype=np.int8))
+        index_parts.append(np.arange(length, dtype=np.int64))
+
+    if tags_parts:
+        tags_flat = np.concatenate(tags_parts)
+        index_flat = np.concatenate(index_parts)
+
+        # Shuffle to interleave contents
+        perm = draw(st.permutations(range(len(tags_flat))))
+        tags_flat = tags_flat[list(perm)]
+        index_flat = index_flat[list(perm)]
+
+        # Truncate if the children exceed max_length
+        if max_length is not None and len(tags_flat) > max_length:
+            tags_flat = tags_flat[:max_length]
+            index_flat = index_flat[:max_length]
+    else:
+        tags_flat = np.array([], dtype=np.int8)
+        index_flat = np.array([], dtype=np.int64)
+
+    return UnionArray(
+        tags=ak.index.Index8(tags_flat),
+        index=ak.index.Index64(index_flat),
+        contents=children,
+    )
