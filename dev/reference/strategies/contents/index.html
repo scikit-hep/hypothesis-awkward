@@ -4835,7 +4835,8 @@ It simply wraps content, adding option-type semantics without a mask buffer.</p>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">max_contents</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">min_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 </span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnionArray</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">allow_invalid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnionArray</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4923,6 +4924,25 @@ pre-truncation sum of children lengths; never satisfied by truncation.</p>
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>allow_invalid</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#bool">bool</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mergeable child contents can occur if <code>True</code>, which <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.validity_error.html#ak.validity_error"><code>ak.validity_error</code></a>
+and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.is_valid.html#ak.is_valid"><code>ak.is_valid</code></a> consider invalid. No two child contents are mergeable
+if <code>False</code>: a concrete <code>contents</code> with mergeable ones raises <code>ValueError</code>,
+and such draws from a strategy are rejected.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -4944,6 +4964,17 @@ pre-truncation sum of children lengths; never satisfied by truncation.</p>
               <div class="doc-md-description">
                 <p>If fewer than two child contents result, whether from <code>max_contents</code> or
 from <code>contents</code>. Raised by <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.UnionArray.html#ak.contents.UnionArray"><code>UnionArray</code></a>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError">ValueError</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>allow_invalid</code> is <code>False</code> and a concrete <code>contents</code> has mergeable
+child contents.</p>
               </div>
             </td>
           </tr>
