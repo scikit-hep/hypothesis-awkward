@@ -33,6 +33,7 @@ class ContentsKwargs(TypedDict, total=False):
     dtypes: st.SearchStrategy[np.dtype] | None
     max_size: int
     allow_nan: bool
+    allow_invalid: bool
     allow_numpy: bool
     allow_empty: bool
     allow_string: bool
@@ -59,6 +60,7 @@ DEFAULTS = ContentsKwargs(
     dtypes=None,
     max_size=50,
     allow_nan=True,
+    allow_invalid=True,
     allow_numpy=True,
     allow_empty=True,
     allow_string=True,
@@ -174,6 +176,7 @@ def contents_kwargs(draw: st.DrawFn) -> ContentsKwargs:
             optional={
                 'dtypes': st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
                 'allow_nan': st.booleans(),
+                'allow_invalid': st.booleans(),
                 'allow_regular': st.booleans(),
                 'allow_list_offset': st.booleans(),
                 'allow_list': st.booleans(),
@@ -210,6 +213,7 @@ def test_properties(data: st.DataObject) -> None:
     dtypes = kwargs.get('dtypes', DEFAULTS['dtypes'])
     max_size = kwargs.get('max_size', DEFAULTS['max_size'])
     allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
     allow_numpy = kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
     allow_empty = kwargs.get('allow_empty', DEFAULTS['allow_empty'])
     allow_string = kwargs.get('allow_string', DEFAULTS['allow_string'])
@@ -279,6 +283,9 @@ def test_properties(data: st.DataObject) -> None:
     if not allow_nan:
         assert not any_nan_nat_in_awkward_array(c)
 
+    if not allow_invalid:
+        assert ak.validity_error(c) == ''
+
     if max_leaf_size is not None:
         assert leaf_size(c) <= max_leaf_size
     assert _nesting_depth(c) <= sc(max_depth)
@@ -297,6 +304,11 @@ def test_draw_max_size() -> None:
         lambda c: content_size(c) == max_size,
         settings=FIND,
     )
+
+
+def test_draw_invalid() -> None:
+    """Assert that invalid content can be drawn by default."""
+    find(st_ak.contents.contents(), lambda c: not ak.is_valid(c), settings=FIND)
 
 
 def test_draw_max_leaf_size() -> None:

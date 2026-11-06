@@ -49,7 +49,8 @@ def union_array_contents(
         Mergeable child contents can occur if `True`, which [`ak.validity_error`][]
         and [`ak.is_valid`][] consider invalid. No two child contents are mergeable
         if `False`: a concrete `contents` with mergeable ones raises `ValueError`,
-        and such draws from a strategy are rejected.
+        and such draws from a strategy are rejected. If `contents` is `None`, the
+        child contents are also valid. Given child contents are not otherwise checked.
 
     Raises
     ------
@@ -82,6 +83,7 @@ def union_array_contents(
                 st_ak.contents.content_lists(
                     functools.partial(
                         st_ak.contents.contents,
+                        allow_invalid=allow_invalid,
                         allow_union_root=False,
                         allow_indexed_root=False,
                     ),

@@ -14,6 +14,7 @@ def arrays(
     dtypes: st.SearchStrategy[np.dtype] | None = None,
     max_size: int = 50,
     allow_nan: bool = True,
+    allow_invalid: bool = True,
     allow_numpy: bool = True,
     allow_empty: bool = True,
     allow_string: bool = True,
@@ -93,6 +94,10 @@ def arrays(
         elements, offsets, indices, field names, and parameters.
     allow_nan
         No `NaN`/`NaT` values are generated in [`NumpyArray`][ak.contents.NumpyArray] if `False`.
+    allow_invalid
+        Layouts that [`ak.validity_error`][] and [`ak.is_valid`][] consider invalid can
+        be generated if `True`: [`UnionArray`][ak.contents.UnionArray] with mergeable
+        contents. Every generated layout is valid if `False`.
     allow_numpy
         No [`NumpyArray`][ak.contents.NumpyArray] is generated if `False`.
     allow_empty
@@ -184,6 +189,7 @@ def arrays(
             max_size=max_size,
             max_leaf_size=max_leaf_size,
             allow_nan=allow_nan,
+            allow_invalid=allow_invalid,
             allow_numpy=allow_numpy,
             allow_empty=allow_empty,
             allow_regular=allow_regular,

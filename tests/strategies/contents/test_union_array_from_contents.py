@@ -3,9 +3,10 @@ import itertools
 from typing import Any, TypedDict, cast
 
 import pytest
-from hypothesis import find, given
+from hypothesis import HealthCheck, find, given, settings
 from hypothesis import strategies as st
 
+import awkward as ak
 from awkward._do import mergeable
 from awkward.contents import Content, IndexedArray, UnionArray
 from hypothesis_awkward import strategies as st_ak
@@ -107,12 +108,14 @@ def test_properties(data: st.DataObject) -> None:
     """Assert the results of `union_array_from_contents()`."""
     # Draw options
     allow_option = data.draw(st.booleans(), label='allow_option')
-    content = RecordCallDraws(
-        st_ak.contents.contents if allow_option else _contents_with_no_option
-    )
     max_size = data.draw(st.integers(min_value=0, max_value=50), label='max_size')
     kwargs = data.draw(
         union_array_from_contents_kwargs(allow_option=allow_option), label='kwargs'
+    )
+    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
+    st_content = st_ak.contents.contents if allow_option else _contents_with_no_option
+    content = RecordCallDraws(
+        functools.partial(st_content, allow_invalid=allow_invalid)
     )
 
     # Call the test subject
@@ -140,11 +143,8 @@ def test_properties(data: st.DataObject) -> None:
     max_length = kwargs.get('max_length', DEFAULTS['max_length'])
     assert min_length <= len(result) <= sc(max_length)
 
-    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
     if not allow_invalid:
-        # TODO: Assert `ak.validity_error(result) == ''` when `contents()` has the
-        # option. Until then, the children can contain invalid nested unions.
-        assert not _has_mergeable_contents(result)
+        assert ak.validity_error(result) == ''
 
     # Assert the children are what `content` drew. Those wrapped in an option type
     # by `st_option` are not the same objects as the draws. Mergeable draws can be
@@ -154,6 +154,21 @@ def test_properties(data: st.DataObject) -> None:
     if not allow_option:
         drawn_ids = [id(d) for d in content.drawn]
         assert all(id(c) in drawn_ids for c in children)
+
+
+# Draws with too few non-mergeable children are rejected, and most draws have too few.
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
+@given(
+    u=union_array_from_contents(
+        functools.partial(st_ak.contents.contents, allow_invalid=False),
+        max_size=50,
+        allow_invalid=False,
+        st_option=option_from_contents,
+    )
+)
+def test_valid_not_allow_invalid(u: UnionArray) -> None:
+    """Assert the union is valid if neither it nor `content` allows invalid data."""
+    assert ak.validity_error(u) == ''
 
 
 @pytest.mark.parametrize('n_contents', [2, 3])
