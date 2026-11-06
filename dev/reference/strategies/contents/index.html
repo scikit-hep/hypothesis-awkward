@@ -5006,7 +5006,7 @@ from <code>contents</code>. Raised by <a class="autorefs autorefs-external" href
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="o">*</span><span class="p">,</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">min_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">max_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">allow_invalid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">allow_indexed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">allow_indexed_option</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IndexedArray</span> <span class="o">|</span> <span class="n">IndexedOptionArray</span>
@@ -5045,8 +5045,8 @@ index refers to them. The categories are a 1-D
               <div class="doc-md-description">
                 <p>The categories. Can be a strategy for <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a>, a
 concrete <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.contents.Content.html#ak.contents.Content"><code>Content</code></a> instance, or <code>None</code> to draw from
-<code>leaf_contents()</code>. They must be of a kind listed above and, if <code>unique</code> is
-<code>True</code>, unique. A concrete <code>content</code> that is not raises <code>ValueError</code>; draws
+<code>leaf_contents()</code>. They must be of a kind listed above and, if <code>allow_invalid</code>
+is <code>False</code>, unique. A concrete <code>content</code> that is not raises <code>ValueError</code>; draws
 from a strategy that are not are rejected. Empty categories can be referred
 to only by missing entries, so they are rejected if <code>min_size &gt; 0</code> and
 <code>allow_indexed_option</code> is <code>False</code>.</p>
@@ -5091,21 +5091,22 @@ content length is used.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>unique</code>
+                <code>allow_invalid</code>
             </td>
             <td>
                   <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/builtins/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>No two categories are equal if <code>True</code>, as Awkward Array defines it: <code>0.0</code> and
-<code>-0.0</code> are equal, <code>NaN</code>s are distinct, and at most one <code>NaT</code> occurs.
-<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.validity_error.html#ak.validity_error"><code>ak.validity_error</code></a> and <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.is_valid.html#ak.is_valid"><code>ak.is_valid</code></a> consider categorical data with
-duplicate categories invalid.</p>
+                <p>Duplicate categories can occur if <code>True</code>, which <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.validity_error.html#ak.validity_error"><code>ak.validity_error</code></a> and
+<a class="autorefs autorefs-external" href="https://awkward-array.org/doc/main/reference/generated/ak.is_valid.html#ak.is_valid"><code>ak.is_valid</code></a> consider invalid. No two categories are equal if <code>False</code>, as
+Awkward Array defines it: <code>0.0</code> and <code>-0.0</code> are equal, <code>NaN</code>s are distinct, and
+at most one <code>NaT</code> occurs. A <code>content</code> of a kind not listed above is rejected
+regardless of this option.</p>
               </div>
             </td>
             <td>
-                  <code>False</code>
+                  <code>True</code>
             </td>
           </tr>
           <tr class="doc-section-item">
