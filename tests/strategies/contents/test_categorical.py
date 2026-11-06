@@ -259,8 +259,17 @@ def test_draw_duplicate_categories() -> None:
     """
     find(
         st_ak.contents.categorical_contents(),
-        lambda c: _has_duplicate_category(c.content),
+        lambda c: _has_duplicate_category(c.content) and not _is_bool(c.content),
         settings=FIND,
+    )
+
+
+def test_draw_more_bool_categories_than_values() -> None:
+    """Assert `bool` categories can outnumber the two `bool` values by default."""
+    find(
+        st_ak.contents.categorical_contents(),
+        lambda c: _is_bool(c.content) and len(c.content) > 2,
+        settings=FIND_RARE,
     )
 
 
@@ -414,6 +423,10 @@ def _n_nan(c: Content) -> int:
     return int(np.isnan(c.data).sum())
 
 
+def _is_bool(c: Content) -> bool:
+    return isinstance(c, NumpyArray) and c.data.dtype == np.bool_
+
+
 def _has_duplicate_category(c: Content) -> bool:
     values = ak.Array(c).to_list()
     return any(values[i] == values[j] for j in range(len(values)) for i in range(j))
@@ -427,3 +440,17 @@ def _has_repeated_category(c: Content) -> bool:
 def _has_unused_category(c: Content) -> bool:
     entries = {i for i in cast(Any, c).index.data.tolist() if i >= 0}
     return len(entries) < len(cast(Any, c).content)
+
+
+@pytest.mark.parametrize('n_categories', [0, 1, 2, 3])
+def test_shrink_valid(n_categories: int) -> None:
+    """Assert the content shrinks to valid one if invalid one is not needed."""
+    c = find(
+        st_ak.contents.categorical_contents(),
+        lambda c: len(c.content) == n_categories,
+        settings=FIND,
+    )
+    if _awkward_can_check_unique(c.content):
+        assert ak.is_valid(c)
+    else:
+        assert not _has_duplicate_category(c.content)
