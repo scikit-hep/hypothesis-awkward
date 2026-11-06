@@ -19,7 +19,7 @@ from awkward.contents import (
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import is_bytestring_leaf, is_string_leaf
 from hypothesis_awkward.util import safe_compare as sc
-from tests.find_settings import FIND, FIND_NO_SHRINK
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
 from tests.funcs import KwargsDrawn, all_distinct, assert_kwargs_match_signature
 
 
@@ -281,7 +281,7 @@ def test_draw_multiple_nan() -> None:
     find(
         st_ak.contents.categorical_contents(unique=True),
         lambda c: _n_nan(c.content) >= 2,
-        settings=FIND,
+        settings=FIND_RARE,
     )
 
 
