@@ -1,0 +1,427 @@
+from typing import Any, TypedDict, cast
+
+import numpy as np
+import pytest
+from hypothesis import find, given
+from hypothesis import strategies as st
+from hypothesis.errors import Unsatisfiable
+
+import awkward as ak
+from awkward.contents import (
+    Content,
+    EmptyArray,
+    IndexedArray,
+    IndexedOptionArray,
+    ListOffsetArray,
+    NumpyArray,
+    RecordArray,
+)
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.util import is_bytestring_leaf, is_string_leaf
+from hypothesis_awkward.util import safe_compare as sc
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
+from tests.funcs import KwargsDrawn, all_distinct, assert_kwargs_match_signature
+
+
+class CategoricalContentsKwargs(TypedDict, total=False):
+    """Options for `categorical_contents()` strategy."""
+
+    content: st.SearchStrategy[Content] | Content | None
+    min_size: int
+    max_size: int | None
+    unique: bool
+    allow_indexed: bool
+    allow_indexed_option: bool
+
+
+DEFAULTS = CategoricalContentsKwargs(
+    content=None,
+    min_size=0,
+    max_size=None,
+    unique=False,
+    allow_indexed=True,
+    allow_indexed_option=True,
+)
+
+ALLOW_FLAGS = ('allow_indexed', 'allow_indexed_option')
+
+
+class CategoricalContentsDrawn(TypedDict, total=False):
+    """Values drawn in advance for the options of `categorical_contents()`."""
+
+    unique: bool
+    content: Content
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together.
+
+    At least one flavor is allowed, and `min_size <= max_size`. They depend on the
+    content drawn in advance: empty categories can be referenced only by `-1`
+    entries, so `min_size` is 0 unless `IndexedOptionArray` is allowed.
+    """
+
+    min_size: int
+    max_size: int | None
+    allow_indexed: bool
+    allow_indexed_option: bool
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `categorical_contents()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents.categorical_contents,
+        kwargs_cls=CategoricalContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
+
+
+@st.composite
+def categorical_contents_kwargs(
+    draw: st.DrawFn,
+) -> KwargsDrawn[CategoricalContentsKwargs, CategoricalContentsDrawn]:
+    """Strategy for options for `categorical_contents()` strategy."""
+
+    @st.composite
+    def _st_drawn(draw: st.DrawFn) -> CategoricalContentsDrawn:
+        """Strategy for the values drawn in advance for the options.
+
+        The content depends on `unique`: under `unique`, it has no two categories
+        equal as Awkward Array defines it, which allows at most one `NaT`.
+        """
+        ret = CategoricalContentsDrawn()
+        if draw(st.booleans()):
+            ret['unique'] = draw(st.booleans())
+        unique = ret.get('unique', DEFAULTS['unique'])
+        if draw(st.booleans()):
+            leaf = st_ak.contents.leaf_contents(
+                unique=unique, allow_zero_field_record=False
+            )
+            if unique:
+                leaf = leaf.filter(lambda c: _n_nat(c) <= 1)
+            ret['content'] = draw(leaf)
+        return ret
+
+    @st.composite
+    def _st_related_kwargs(
+        draw: st.DrawFn, drawn: CategoricalContentsDrawn
+    ) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        ret = dict[str, Any]()
+        allowed = draw(st.sets(st.sampled_from(ALLOW_FLAGS), min_size=1))
+        for flag in ALLOW_FLAGS:
+            # A disallowed flag must be passed; an allowed one may be omitted.
+            if flag not in allowed or draw(st.booleans()):
+                ret[flag] = flag in allowed
+        max_start = 50
+        if (
+            'content' in drawn
+            and len(drawn['content']) == 0
+            and 'allow_indexed_option' not in allowed
+        ):
+            max_start = 0  # an empty index is the only one possible
+        min_size, max_size = draw(
+            st_ak.ranges(min_start=0, max_start=max_start, max_end=50)
+        )
+        if min_size is not None:
+            ret['min_size'] = min_size
+        if max_size is not None:
+            ret['max_size'] = max_size
+        return cast(RelatedKwargs, ret)
+
+    drawn = draw(_st_drawn())
+    related = draw(_st_related_kwargs(drawn))
+
+    optional_independent = CategoricalContentsKwargs()
+    if 'unique' in drawn:
+        optional_independent['unique'] = drawn['unique']
+    if 'content' in drawn:
+        content = drawn['content']
+        optional_independent['content'] = draw(
+            st.sampled_from([content, st.just(content)])
+        )
+    elif draw(st.booleans()):
+        optional_independent['content'] = None
+
+    kwargs = CategoricalContentsKwargs(**related, **optional_independent)
+    return KwargsDrawn(kwargs, drawn)
+
+
+@given(data=st.data())
+def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `categorical_contents()`."""
+    # Draw options
+    kwargs, drawn = data.draw(categorical_contents_kwargs(), label='opts')
+
+    # Call the test subject
+    result = data.draw(st_ak.contents.categorical_contents(**kwargs), label='result')
+
+    assert isinstance(result, (IndexedArray, IndexedOptionArray))
+    assert result.parameter('__array__') == 'categorical'
+
+    # Assert the categories are a 1-D NumPy array, empty, strings, or bytestrings
+    categories = result.content
+    match categories:
+        case NumpyArray():
+            assert categories.data.ndim == 1
+        case EmptyArray():
+            pass
+        case _:
+            assert is_string_leaf(categories) or is_bytestring_leaf(categories)
+
+    # Assert all index entries refer to a category or are missing (-1)
+    index = result.index.data
+    lowest = -1 if isinstance(result, IndexedOptionArray) else 0
+    assert all(lowest <= i < len(categories) for i in index.tolist())
+
+    # Assert the options were effective
+    unique = kwargs.get('unique', DEFAULTS['unique'])
+    if unique:
+        if _awkward_can_check_unique(categories):
+            # Awkward checks that the categories are unique
+            assert ak.validity_error(result) == ''
+        else:
+            # Without `NaT`, `==` agrees with Awkward's definition of unique.
+            assert isinstance(categories, NumpyArray)
+            assert all_distinct(list(categories.data))
+
+    allow_indexed = kwargs.get('allow_indexed', DEFAULTS['allow_indexed'])
+    allow_indexed_option = kwargs.get(
+        'allow_indexed_option', DEFAULTS['allow_indexed_option']
+    )
+    if not allow_indexed:
+        assert not isinstance(result, IndexedArray)
+    if not allow_indexed_option:
+        assert not isinstance(result, IndexedOptionArray)
+
+    min_size = kwargs.get('min_size', DEFAULTS['min_size'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    assert min_size <= len(result) <= sc(max_size)
+
+    if 'content' in drawn:
+        assert result.content is drawn['content']
+
+
+@pytest.mark.parametrize('type_', [IndexedArray, IndexedOptionArray])
+def test_draw_flavor(type_: type[Content]) -> None:
+    """Assert each flavor can be drawn by default."""
+    find(
+        st_ak.contents.categorical_contents(),
+        lambda c: isinstance(c, type_),
+        settings=FIND,
+    )
+
+
+def test_draw_missing() -> None:
+    """Assert a missing entry (-1) can be drawn."""
+    find(
+        st_ak.contents.categorical_contents(),
+        lambda c: isinstance(c, IndexedOptionArray) and -1 in c.index.data.tolist(),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('min_size', [1, 2, 10])
+def test_draw_min_size(min_size: int) -> None:
+    """Assert the index length can reach `min_size`."""
+    find(
+        st_ak.contents.categorical_contents(min_size=min_size),
+        lambda c: len(c) == min_size,
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('unique', [False, True])
+@pytest.mark.parametrize(
+    'is_kind',
+    [
+        pytest.param(lambda c: isinstance(c, NumpyArray), id='numpy'),
+        pytest.param(lambda c: isinstance(c, EmptyArray), id='empty'),
+        pytest.param(is_string_leaf, id='string'),
+        pytest.param(is_bytestring_leaf, id='bytestring'),
+    ],
+)
+def test_draw_categories(is_kind: Any, unique: bool) -> None:
+    """Assert each kind of categories can be drawn."""
+    find(
+        st_ak.contents.categorical_contents(unique=unique),
+        lambda c: is_kind(c.content),
+        settings=FIND,
+    )
+
+
+def test_draw_duplicate_categories() -> None:
+    """Assert categories with two equal elements can be drawn by default.
+
+    Awkward Array builds and loads such categorical data without an error, although
+    `ak.is_valid()` returns `False` for it.
+    """
+    find(
+        st_ak.contents.categorical_contents(),
+        lambda c: _has_duplicate_category(c.content),
+        settings=FIND,
+    )
+
+
+def test_draw_nat() -> None:
+    """Assert a `NaT` category can be drawn under `unique`."""
+    find(
+        st_ak.contents.categorical_contents(unique=True),
+        lambda c: _n_nat(c.content) == 1,
+        settings=FIND,
+    )
+
+
+def test_draw_multiple_nan() -> None:
+    """Assert more than one `NaN` category can be drawn under `unique`.
+
+    Awkward Array counts `NaN`s as distinct, unlike `NaT`s.
+    """
+    find(
+        st_ak.contents.categorical_contents(unique=True),
+        lambda c: _n_nan(c.content) >= 2,
+        settings=FIND_RARE,
+    )
+
+
+def test_draw_repeated_category() -> None:
+    """Assert a category referred to by more than one entry can be drawn."""
+    find(
+        st_ak.contents.categorical_contents(),
+        lambda c: _has_repeated_category(c),
+        settings=FIND,
+    )
+
+
+def test_draw_unused_category() -> None:
+    """Assert a category referred to by no entry can be drawn.
+
+    Slicing categorical data keeps all categories, so unused ones are common.
+    """
+    find(
+        st_ak.contents.categorical_contents(),
+        lambda c: _has_unused_category(c),
+        settings=FIND,
+    )
+
+
+def test_raise_no_flavor() -> None:
+    """Assert `ValueError` if both flavors are disallowed."""
+    with pytest.raises(ValueError):
+        find(
+            st_ak.contents.categorical_contents(
+                allow_indexed=False, allow_indexed_option=False
+            ),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
+
+
+@pytest.mark.parametrize('unique', [False, True])
+@pytest.mark.parametrize(
+    'content',
+    [
+        pytest.param(NumpyArray(np.array([[1, 2], [3, 4]])), id='2d'),
+        pytest.param(
+            ListOffsetArray(
+                ak.index.Index64(np.array([0, 1, 3])), NumpyArray(np.array([1, 2, 3]))
+            ),
+            id='list',
+        ),
+        pytest.param(RecordArray([], fields=[], length=1), id='zero-field-record'),
+    ],
+)
+def test_raise_invalid_kind(content: Content, unique: bool) -> None:
+    """Assert `ValueError` if a concrete `content` is not a kind of categories."""
+    with pytest.raises(ValueError):
+        find(
+            st_ak.contents.categorical_contents(content, unique=unique),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
+
+
+@pytest.mark.parametrize(
+    'content',
+    [
+        pytest.param(NumpyArray(np.array([1, 2, 1])), id='duplicate'),
+        pytest.param(
+            NumpyArray(np.array(['NaT', 'NaT'], dtype='datetime64[s]')), id='two-nat'
+        ),
+    ],
+)
+def test_raise_non_unique_content(content: Content) -> None:
+    """Assert `ValueError` if a concrete `content` is not unique under `unique`."""
+    with pytest.raises(ValueError):
+        find(
+            st_ak.contents.categorical_contents(content, unique=True),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
+
+
+@pytest.mark.parametrize('unique', [False, True])
+def test_reject_invalid_kind_from_strategy(unique: bool) -> None:
+    """Assert draws of a content that is not a kind of categories are rejected."""
+    content = ListOffsetArray(
+        ak.index.Index64(np.array([0, 1, 3])), NumpyArray(np.array([1, 2, 3]))
+    )
+    with pytest.raises(Unsatisfiable):
+        find(
+            st_ak.contents.categorical_contents(st.just(content), unique=unique),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
+
+
+def test_reject_non_unique_content_from_strategy() -> None:
+    """Assert draws of non-unique categories from a strategy are rejected."""
+    content = NumpyArray(np.array([1, 2, 1]))
+    with pytest.raises(Unsatisfiable):
+        find(
+            st_ak.contents.categorical_contents(st.just(content), unique=True),
+            lambda _: True,
+            settings=FIND_NO_SHRINK,
+        )
+
+
+def _awkward_can_check_unique(categories: Content) -> bool:
+    """Return True unless Awkward's uniqueness check fails on the dtype."""
+    if not isinstance(categories, NumpyArray):
+        return True
+    dtype = categories.data.dtype
+    # TODO: Remove when the fix of scikit-hep/awkward#4259 is released.
+    if dtype == np.float16:
+        return False
+    # TODO: Remove when scikit-hep/awkward#4509 is fixed.
+    if dtype.kind == 'c':
+        return False
+    return True
+
+
+def _n_nat(c: Content) -> int:
+    if not isinstance(c, NumpyArray) or c.data.dtype.kind not in 'mM':
+        return 0
+    return int(np.isnat(c.data).sum())
+
+
+def _n_nan(c: Content) -> int:
+    if not isinstance(c, NumpyArray) or c.data.dtype.kind not in 'fc':
+        return 0
+    return int(np.isnan(c.data).sum())
+
+
+def _has_duplicate_category(c: Content) -> bool:
+    values = ak.Array(c).to_list()
+    return any(values[i] == values[j] for j in range(len(values)) for i in range(j))
+
+
+def _has_repeated_category(c: Content) -> bool:
+    entries = [i for i in cast(Any, c).index.data.tolist() if i >= 0]
+    return len(set(entries)) < len(entries)
+
+
+def _has_unused_category(c: Content) -> bool:
+    entries = {i for i in cast(Any, c).index.data.tolist() if i >= 0}
+    return len(entries) < len(cast(Any, c).content)

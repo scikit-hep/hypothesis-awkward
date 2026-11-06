@@ -27,11 +27,13 @@ __all__ = [
     'bit_masked_array_contents',
     'unmasked_array_contents',
     'union_array_contents',
+    'categorical_contents',
 ]
 
 from .bit_masked_array import bit_masked_array_contents
 from .byte_masked_array import byte_masked_array_contents
 from .bytestring import bytestring_contents
+from .categorical import categorical_contents
 from .content import content_lists, contents
 from .empty_array import empty_array_contents
 from .indexed_array import indexed_array_contents
