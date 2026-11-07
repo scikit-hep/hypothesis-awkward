@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
@@ -10,9 +8,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import safe_compare as sc
 from hypothesis_awkward._util import safe_min
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
 
 @st.composite
@@ -177,13 +173,13 @@ def _st_offsets_unreachable(
 @st.composite
 def list_offset_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> ListOffsetArray:
     """Strategy for inner [`ak.contents.ListOffsetArray`][] within an outer layout.
 

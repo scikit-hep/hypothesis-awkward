@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING, Protocol
-
 from hypothesis import assume
 from hypothesis import strategies as st
 
@@ -7,11 +5,9 @@ from awkward.contents import Content
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import safe_compare as sc
 
+from ._types import StContent
 from .indexed_option_array import indexed_option_array_contents
 from .masked import masked_contents
-
-if TYPE_CHECKING:
-    from .content import StContent
 
 
 def option_contents(
@@ -138,22 +134,10 @@ def _option_contents(
     return draw(st.one_of(options))
 
 
-class StOption(Protocol):
-    """Callable that wraps content drawn from a `StContent` in an option type."""
-
-    def __call__(
-        self,
-        content: 'StContent',
-        *,
-        max_size: int,
-        max_leaf_size: int | None,
-    ) -> st.SearchStrategy[Content]: ...
-
-
 @st.composite
 def option_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None,

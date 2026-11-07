@@ -12,10 +12,10 @@ from awkward.contents import Content, IndexedArray, IndexedOptionArray, NumpyArr
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size, leaf_size
 from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward.strategies.contents._types import StOption
 from hypothesis_awkward.strategies.contents.categorical import (
     categorical_from_contents,
 )
-from hypothesis_awkward.strategies.contents.option import StOption
 from tests.find_settings import FIND, FIND_NO_SHRINK
 from tests.funcs import (
     all_distinct,

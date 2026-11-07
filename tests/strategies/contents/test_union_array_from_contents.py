@@ -12,7 +12,8 @@ from awkward.contents import Content, IndexedArray, UnionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size, leaf_size
 from hypothesis_awkward._util import safe_compare as sc
-from hypothesis_awkward.strategies.contents.option import StOption, option_from_contents
+from hypothesis_awkward.strategies.contents._types import StOption
+from hypothesis_awkward.strategies.contents.option import option_from_contents
 from hypothesis_awkward.strategies.contents.union_array import (
     union_array_from_contents,
 )

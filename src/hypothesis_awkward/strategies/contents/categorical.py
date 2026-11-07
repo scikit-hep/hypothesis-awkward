@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
@@ -15,9 +13,7 @@ from awkward.contents import (
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size, is_bytestring_leaf, is_string_leaf
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
 _CATEGORICAL = {'__array__': 'categorical'}
 
@@ -142,7 +138,7 @@ def categorical_contents(
 @st.composite
 def categorical_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
@@ -151,7 +147,7 @@ def categorical_from_contents(
     allow_invalid: bool = True,
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> IndexedArray | IndexedOptionArray:
     """Strategy for categorical data within a size budget.
 

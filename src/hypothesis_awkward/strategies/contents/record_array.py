@@ -1,5 +1,4 @@
 import string
-from typing import TYPE_CHECKING
 
 from hypothesis import assume
 from hypothesis import strategies as st
@@ -8,9 +7,7 @@ from awkward.contents import Content, RecordArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
 _MAX_LENGTH_NO_FIELDS = 5
 
@@ -123,7 +120,7 @@ def record_array_contents(
 @st.composite
 def record_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
@@ -131,7 +128,7 @@ def record_array_from_contents(
     max_fields: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> RecordArray:
     """Strategy for [`ak.contents.RecordArray`][] instances within a size budget.
 

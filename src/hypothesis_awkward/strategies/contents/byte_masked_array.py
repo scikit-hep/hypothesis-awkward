@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
@@ -9,9 +7,7 @@ from awkward.contents import ByteMaskedArray, Content
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
 
 @st.composite
@@ -64,13 +60,13 @@ def byte_masked_array_contents(
 @st.composite
 def byte_masked_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> ByteMaskedArray:
     """Strategy for [`ak.contents.ByteMaskedArray`][] instances within a size budget.
 

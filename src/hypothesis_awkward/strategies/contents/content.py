@@ -10,6 +10,7 @@ from awkward.contents import Content
 from hypothesis_awkward._util import content_size, leaf_size
 from hypothesis_awkward._util import safe_compare as sc
 
+from ._types import StContent, StOption
 from .bit_masked_array import bit_masked_array_from_contents
 from .byte_masked_array import byte_masked_array_from_contents
 from .categorical import categorical_from_contents
@@ -18,7 +19,7 @@ from .indexed_option_array import indexed_option_array_from_contents
 from .leaf import leaf_contents
 from .list_array import list_array_from_contents
 from .list_offset_array import list_offset_array_from_contents
-from .option import StOption, option_from_contents
+from .option import option_from_contents
 from .record_array import record_array_from_contents
 from .regular_array import regular_array_from_contents
 from .union_array import union_array_from_contents
@@ -423,21 +424,6 @@ def _categorical_from_leaves(
         )
 
     return categorical_from_contents(leaves, allow_invalid=allow_invalid, **kwargs)
-
-
-class StContent(Protocol):
-    def __call__(
-        self,
-        *,
-        max_size: int,
-        max_leaf_size: int | None,
-        min_length: int = ...,
-        max_length: int | None = ...,
-        allow_union_root: bool = ...,
-        allow_option_root: bool = ...,
-        allow_indexed_root: bool = ...,
-        allow_categorical_root: bool = ...,
-    ) -> st.SearchStrategy[Content]: ...
 
 
 class _StFromContents(Protocol):

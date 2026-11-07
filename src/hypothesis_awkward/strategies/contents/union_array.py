@@ -1,5 +1,4 @@
 import functools
-from typing import TYPE_CHECKING
 
 import numpy as np
 from hypothesis import assume
@@ -11,11 +10,8 @@ from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size
 
+from ._types import StContent, StOption
 from .option import option_from_contents
-
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
 
 
 @st.composite
@@ -123,14 +119,14 @@ def union_array_contents(
 @st.composite
 def union_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
     allow_invalid: bool = True,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
 
