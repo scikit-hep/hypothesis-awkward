@@ -57,6 +57,7 @@ def contents(
     allow_union_root: bool = True,
     allow_option_root: bool = True,
     allow_indexed_root: bool = True,
+    allow_categorical_root: bool = False,
 ) -> Content:
     """Strategy for Awkward Array content layouts.
 
@@ -194,6 +195,11 @@ def contents(
         [`IndexedArray`][ak.contents.IndexedArray] at deeper levels. Awkward Array does not
         allow an [`IndexedArray`][ak.contents.IndexedArray] to directly contain another
         [`IndexedArray`][ak.contents.IndexedArray].
+    allow_categorical_root
+        The outermost content node can be a non-optional categorical node even if
+        `allow_indexed_root` is `False`. For children of a
+        [`UnionArray`][ak.contents.UnionArray], which accept categorical data but not
+        other [`IndexedArray`][ak.contents.IndexedArray].
 
     Returns
     -------
@@ -240,7 +246,13 @@ def contents(
         )
         and allow_option_root
     )
-    any_indexed = allow_indexed and allow_indexed_root
+    categorical_indexed = allow_indexed and (
+        allow_indexed_root or allow_categorical_root
+    )
+    categorical_option = allow_indexed_option and allow_option_root
+    any_indexed = (allow_indexed and allow_indexed_root) or (
+        allow_categorical and categorical_indexed
+    )
     leaf_only = (
         not any_wrapper
         and not any_option
@@ -340,8 +352,6 @@ def contents(
         candidates.append(bit_masked_array_from_contents)
     if allow_unmasked and allow_option_root:
         candidates.append(unmasked_array_from_contents)
-    categorical_indexed = allow_indexed and allow_indexed_root
-    categorical_option = allow_indexed_option and allow_option_root
     if allow_categorical and (categorical_indexed or categorical_option):
         candidates.append(
             functools.partial(
@@ -402,6 +412,7 @@ class StContent(Protocol):
         allow_union_root: bool = ...,
         allow_option_root: bool = ...,
         allow_indexed_root: bool = ...,
+        allow_categorical_root: bool = ...,
     ) -> st.SearchStrategy[Content]: ...
 
 
@@ -475,7 +486,9 @@ def content_lists(
         assert st_option is not None
         return draw(
             st_option(
-                functools.partial(st_content, allow_option_root=False),
+                functools.partial(
+                    st_content, allow_option_root=False, allow_categorical_root=False
+                ),
                 max_size=max(remaining_total, 0),
                 max_leaf_size=_remaining_max_leaf_size(),
             )

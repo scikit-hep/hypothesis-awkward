@@ -347,6 +347,19 @@ def test_draw_from_contents_one_flavor(type_: type[Content], flag: str) -> None:
     )
 
 
+def test_draw_from_contents_categorical_root() -> None:
+    """Assert `allow_categorical_root` overrides `allow_indexed_root`."""
+    find(
+        _st_contents_categorical(
+            allow_indexed_option=False,
+            allow_indexed_root=False,
+            allow_categorical_root=True,
+        ),
+        _is_categorical,
+        settings=FIND,
+    )
+
+
 def test_draw_from_contents_nested() -> None:
     """Assert `contents()` can generate categorical data below the outermost node."""
     find(
