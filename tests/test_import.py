@@ -1,16 +1,28 @@
 import subprocess
 import sys
+from types import ModuleType
+
+import pytest
+
+import hypothesis_awkward.strategies
+import hypothesis_awkward.strategies.constructors
+import hypothesis_awkward.strategies.contents
 
 
-def test_strategies_attribute() -> None:
-    """Test if `strategies` is an attribute after importing only the package.
+@pytest.mark.parametrize(
+    'subpackage',
+    [
+        hypothesis_awkward.strategies,
+        hypothesis_awkward.strategies.constructors,
+        hypothesis_awkward.strategies.contents,
+    ],
+    ids=lambda m: m.__name__,
+)
+def test_subpackage_attribute(subpackage: ModuleType) -> None:
+    """Test if `subpackage` is an attribute after importing only its parent.
 
-    Run in a fresh interpreter, where no other import has loaded `strategies`.
+    Run in a fresh interpreter, where no other import has loaded `subpackage`.
     """
-    import hypothesis_awkward
-    import hypothesis_awkward.strategies
-
-    package = hypothesis_awkward.__name__
-    module = hypothesis_awkward.strategies.__name__
-    code = f'import {package}; {module}'
+    parent, _, _ = subpackage.__name__.rpartition('.')
+    code = f'import {parent}; {subpackage.__name__}'
     subprocess.run([sys.executable, '-c', code], check=True)
