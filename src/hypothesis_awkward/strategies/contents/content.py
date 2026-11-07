@@ -356,6 +356,8 @@ def contents(
         candidates.append(
             functools.partial(
                 _categorical_from_leaves,
+                st_leaf=st_leaf,
+                allow_nonempty_leaf=allow_numpy or allow_string or allow_bytestring,
                 allow_invalid=allow_invalid,
                 allow_indexed=categorical_indexed,
                 allow_indexed_option=categorical_option,
@@ -394,11 +396,33 @@ def contents(
 
 
 def _categorical_from_leaves(
-    content: Callable[..., st.SearchStrategy[Content]], **kwargs: Any
+    content: Callable[..., st.SearchStrategy[Content]],
+    *,
+    st_leaf: Callable[..., st.SearchStrategy[Content]],
+    allow_nonempty_leaf: bool,
+    allow_invalid: bool,
+    **kwargs: Any,
 ) -> st.SearchStrategy[Content]:
-    """Return `categorical_from_contents()` with leaves of `content` as categories."""
-    leaves = functools.partial(content, max_depth=0, allow_record=False)
-    return categorical_from_contents(leaves, **kwargs)
+    """Return `categorical_from_contents()` with leaves from `st_leaf` as categories.
+
+    `content` is ignored. Categories are drawn unique unless `allow_invalid`.
+    """
+
+    def leaves(
+        *, max_size: int, max_leaf_size: int | None, min_length: int = 0, **_: Any
+    ) -> st.SearchStrategy[Content]:
+        if max_leaf_size is not None:
+            max_size = min(max_size, max_leaf_size)
+        if min_length > max_size or (min_length > 0 and not allow_nonempty_leaf):
+            return st.nothing()
+        return st_leaf(
+            min_size=min_length,
+            max_size=max_size,
+            unique=not allow_invalid,
+            allow_zero_field_record=False,
+        )
+
+    return categorical_from_contents(leaves, allow_invalid=allow_invalid, **kwargs)
 
 
 class StContent(Protocol):
