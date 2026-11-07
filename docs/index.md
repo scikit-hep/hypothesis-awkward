@@ -50,8 +50,7 @@ reference][api-ref], allow or exclude kinds of layout nodes and limit sizes, so
 a test can restrict it to the arrays the code under test accepts. [Generating
 and Shrinking Samples][gen-shrink] explains how it builds and shrinks samples.
 Strategies that generate arrays of a given type are planned; the
-[Roadmap][roadmap] describes them and names what the current strategy cannot
-generate yet, such as categorical data.
+[Roadmap][roadmap] describes them.
 
 [awkward-array]: https://awkward-array.org/
 [hypothesis]: https://hypothesis.readthedocs.io/
