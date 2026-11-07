@@ -4,8 +4,6 @@ import inspect
 from collections.abc import Callable, Mapping, Sequence, Set
 from typing import Any, Generic, NamedTuple, TypeVar
 
-import numpy as np
-
 from awkward.contents import Content, NumpyArray
 from hypothesis_awkward.util import iter_contents
 
@@ -78,8 +76,9 @@ def awkward_can_check_unique(categories: Content) -> bool:
     if not isinstance(categories, NumpyArray):
         return True
     dtype = categories.data.dtype
-    # TODO: Remove when the fix of scikit-hep/awkward#4259 is released.
-    if dtype == np.float16:
+    # TODO: Remove when the fix of scikit-hep/awkward#4259 is released. `float128` is
+    # `numpy.longdouble` where it has more than 64 bits, e.g., on x86-64 Linux.
+    if dtype.kind == 'f' and dtype.itemsize not in (4, 8):
         return False
     # TODO: Remove when scikit-hep/awkward#4509 is fixed.
     if dtype.kind == 'c':
