@@ -4,6 +4,9 @@ import inspect
 from collections.abc import Callable, Mapping, Sequence, Set
 from typing import Any, Generic, NamedTuple, TypeVar
 
+from awkward.contents import Content, NumpyArray
+from hypothesis_awkward.util import iter_contents
+
 K = TypeVar('K')
 D = TypeVar('D')
 
@@ -65,4 +68,28 @@ def all_distinct(values: Sequence[Any]) -> bool:
         not bool(values[i] == values[j])
         for i in range(len(values))
         for j in range(i + 1, len(values))
+    )
+
+
+def awkward_can_check_unique(categories: Content) -> bool:
+    """Return True unless Awkward's uniqueness check fails on the dtype."""
+    if not isinstance(categories, NumpyArray):
+        return True
+    dtype = categories.data.dtype
+    # TODO: Remove when the fix of scikit-hep/awkward#4259 is released. `float128` is
+    # `numpy.longdouble` where it has more than 64 bits, e.g., on x86-64 Linux.
+    if dtype.kind == 'f' and dtype.itemsize not in (4, 8):
+        return False
+    # TODO: Remove when scikit-hep/awkward#4509 is fixed.
+    if dtype.kind == 'c':
+        return False
+    return True
+
+
+def awkward_can_check_validity(c: Content) -> bool:
+    """Return True unless `ak.is_valid()` fails on categorical data in `c`."""
+    return all(
+        awkward_can_check_unique(n.content)
+        for n in iter_contents(c)
+        if n.parameter('__array__') == 'categorical'
     )

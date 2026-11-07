@@ -18,7 +18,7 @@ from hypothesis_awkward.strategies.contents.union_array import (
 from hypothesis_awkward.util import content_size, leaf_size
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import assert_kwargs_match_signature, awkward_can_check_validity
 
 
 class UnionArrayFromContentsKwargs(TypedDict, total=False):
@@ -143,7 +143,7 @@ def test_properties(data: st.DataObject) -> None:
     max_length = kwargs.get('max_length', DEFAULTS['max_length'])
     assert min_length <= len(result) <= sc(max_length)
 
-    if not allow_invalid:
+    if not allow_invalid and awkward_can_check_validity(result):
         assert ak.validity_error(result) == ''
 
     # Assert the children are what `content` drew. Those wrapped in an option type
@@ -168,7 +168,8 @@ def test_properties(data: st.DataObject) -> None:
 )
 def test_valid_not_allow_invalid(u: UnionArray) -> None:
     """Assert the union is valid if neither it nor `content` allows invalid data."""
-    assert ak.validity_error(u) == ''
+    if awkward_can_check_validity(u):
+        assert ak.validity_error(u) == ''
 
 
 @pytest.mark.parametrize('n_contents', [2, 3])

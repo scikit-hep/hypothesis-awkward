@@ -23,7 +23,7 @@ from hypothesis_awkward.util import (
 )
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
-from tests.funcs import assert_kwargs_match_signature
+from tests.funcs import assert_kwargs_match_signature, awkward_can_check_validity
 from tests.scaled_settings import scaled
 
 
@@ -45,6 +45,7 @@ class ContentsKwargs(TypedDict, total=False):
     allow_union: bool
     allow_indexed: bool
     allow_indexed_option: bool
+    allow_categorical: bool
     allow_byte_masked: bool
     allow_bit_masked: bool
     allow_unmasked: bool
@@ -72,6 +73,7 @@ DEFAULTS = ContentsKwargs(
     allow_union=True,
     allow_indexed=True,
     allow_indexed_option=True,
+    allow_categorical=True,
     allow_byte_masked=True,
     allow_bit_masked=True,
     allow_unmasked=True,
@@ -184,6 +186,7 @@ def contents_kwargs(draw: st.DrawFn) -> ContentsKwargs:
                 'allow_union': st.booleans(),
                 'allow_indexed': st.booleans(),
                 'allow_indexed_option': st.booleans(),
+                'allow_categorical': st.booleans(),
                 'allow_byte_masked': st.booleans(),
                 'allow_bit_masked': st.booleans(),
                 'allow_unmasked': st.booleans(),
@@ -227,6 +230,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_indexed_option = kwargs.get(
         'allow_indexed_option', DEFAULTS['allow_indexed_option']
     )
+    allow_categorical = kwargs.get('allow_categorical', DEFAULTS['allow_categorical'])
     allow_byte_masked = kwargs.get('allow_byte_masked', DEFAULTS['allow_byte_masked'])
     allow_bit_masked = kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
     allow_unmasked = kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
@@ -259,6 +263,7 @@ def test_properties(data: st.DataObject) -> None:
         'union': allow_union,
         'indexed': allow_indexed,
         'indexed_option': allow_indexed_option,
+        'categorical': allow_categorical,
         'byte_masked': allow_byte_masked,
         'bit_masked': allow_bit_masked,
         'unmasked': allow_unmasked,
@@ -283,7 +288,7 @@ def test_properties(data: st.DataObject) -> None:
     if not allow_nan:
         assert not any_nan_nat_in_awkward_array(c)
 
-    if not allow_invalid:
+    if not allow_invalid and awkward_can_check_validity(c):
         assert ak.validity_error(c) == ''
 
     if max_leaf_size is not None:
@@ -308,7 +313,11 @@ def test_draw_max_size() -> None:
 
 def test_draw_invalid() -> None:
     """Assert that invalid content can be drawn by default."""
-    find(st_ak.contents.contents(), lambda c: not ak.is_valid(c), settings=FIND)
+    find(
+        st_ak.contents.contents(),
+        lambda c: awkward_can_check_validity(c) and not ak.is_valid(c),
+        settings=FIND,
+    )
 
 
 def test_draw_max_leaf_size() -> None:
@@ -558,6 +567,8 @@ def _present_types(c: ak.contents.Content) -> set[str]:
     """Collect the gated layout-type tags present anywhere in `c`."""
     present = set[str]()
     for n in iter_contents(c):
+        if n.parameter('__array__') == 'categorical':
+            present.add('categorical')
         if is_string_leaf(n):
             present.add('string')
             continue

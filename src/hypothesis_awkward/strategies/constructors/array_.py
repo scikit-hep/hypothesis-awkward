@@ -26,6 +26,7 @@ def arrays(
     allow_union: bool = True,
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
+    allow_categorical: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
@@ -71,6 +72,7 @@ def arrays(
     - [`BitMaskedArray`][ak.contents.BitMaskedArray]
     - [`UnmaskedArray`][ak.contents.UnmaskedArray]
     - [`UnionArray`][ak.contents.UnionArray]
+    - Categorical data
 
     Each type can be excluded separately with the corresponding `allow_*` argument.
 
@@ -97,7 +99,8 @@ def arrays(
     allow_invalid
         Layouts that [`ak.validity_error`][] and [`ak.is_valid`][] consider invalid can
         be generated if `True`: [`UnionArray`][ak.contents.UnionArray] with mergeable
-        contents. Every generated layout is valid if `False`.
+        contents and categorical data with duplicate categories. Examples can shrink
+        to such layouts. Every generated layout is valid if `False`.
     allow_numpy
         No [`NumpyArray`][ak.contents.NumpyArray] is generated if `False`.
     allow_empty
@@ -139,6 +142,11 @@ def arrays(
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
         `False`.
+    allow_categorical
+        No categorical data is generated if `False`. Categorical data is an
+        [`IndexedArray`][ak.contents.IndexedArray] or an
+        [`IndexedOptionArray`][ak.contents.IndexedOptionArray], so `allow_indexed` and
+        `allow_indexed_option` also apply to it.
     allow_byte_masked
         No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if `False`.
     allow_bit_masked
@@ -201,6 +209,7 @@ def arrays(
             allow_union=allow_union,
             allow_indexed=allow_indexed,
             allow_indexed_option=allow_indexed_option,
+            allow_categorical=allow_categorical,
             allow_byte_masked=allow_byte_masked,
             allow_bit_masked=allow_bit_masked,
             allow_unmasked=allow_unmasked,
