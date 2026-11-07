@@ -23,7 +23,10 @@ of `EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`, `ListArray`,
 `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as well as for strings,
 bytestrings, and categorical data. The main strategy `arrays()` generates nested
 combinations of these, and can also generate arrays backed by virtual (lazy)
-buffers. [Getting Started](getting-started.md) shows sample outputs, and the
+buffers. Some variants of these, such as other index types and parameters, are
+not generated yet; they are tracked in
+[issue #238](https://github.com/scikit-hep/hypothesis-awkward/issues/238).
+[Getting Started](getting-started.md) shows sample outputs, and the
 [API reference](../reference/strategies/constructors.md) lists the available
 options.
 
