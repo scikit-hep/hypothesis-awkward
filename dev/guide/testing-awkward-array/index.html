@@ -1375,10 +1375,16 @@ inputs are generated. This package supplies the generation. Its main strategy is
 general Awkward Arrays, including virtual arrays — arrays whose buffers are not
 yet materialized. A generated array has either all buffers virtual or none; it
 lives on the CPU backend and carries no node parameters other than the
-<code>__array__</code> markers that make strings and bytestrings, so categorical data (the
-main remaining gap; see the <a href="../roadmap/">Roadmap</a>), named record types, and
-custom behaviors are not yet generated. See
+<code>__array__</code> markers that make strings, bytestrings, and categorical data, so
+named record types and custom behaviors are not yet generated. See
 <a href="../getting-started/">Getting Started</a> for what it produces.</p>
+<p>By default, <code>arrays()</code> can generate layouts that Awkward builds without an error
+but <code>ak.is_valid()</code> considers invalid: a <code>UnionArray</code> with mergeable contents
+and categorical data with duplicate categories. A failing example can shrink to
+such a layout. Pass <code>allow_invalid=False</code> to exclude such layouts.
+<code>ak.is_valid()</code> currently raises <code>KeyError</code> on categorical data with some
+dtypes, including complex
+(<a href="https://github.com/scikit-hep/awkward/issues/4509">Awkward issue #4509</a>).</p>
 <p>Four kinds of properties are checked:</p>
 <p><strong>Round-trip.</strong> Converting an array to another representation and back
 reconstructs an equal array. The first property test covered <code>ak.to_buffers()</code>

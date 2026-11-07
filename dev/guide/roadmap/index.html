@@ -1281,12 +1281,12 @@ section of the Awkward Array documentation.</p>
 <p>The library includes <a href="../../reference/strategies/contents/">strategies</a> for each
 of <code>EmptyArray</code>, <code>NumpyArray</code>, <code>RegularArray</code>, <code>ListOffsetArray</code>, <code>ListArray</code>,
 <code>RecordArray</code>, <code>UnionArray</code>, <code>IndexedArray</code>, <code>IndexedOptionArray</code>,
-<code>ByteMaskedArray</code>, <code>BitMaskedArray</code>, <code>UnmaskedArray</code>, as well as for strings and
-bytestrings. The main strategy <code>arrays()</code> generates nested combinations of
-these, and can also generate arrays backed by virtual (lazy) buffers.
-<a href="../getting-started/">Getting Started</a> shows sample outputs, and the
+<code>ByteMaskedArray</code>, <code>BitMaskedArray</code>, <code>UnmaskedArray</code>, as well as for strings,
+bytestrings, and categorical data. The main strategy <code>arrays()</code> generates nested
+combinations of these, and can also generate arrays backed by virtual (lazy)
+buffers. <a href="../getting-started/">Getting Started</a> shows sample outputs, and the
 <a href="../../reference/strategies/constructors/">API reference</a> lists the available
-options. The strategy for categorical data has not yet been implemented.</p>
+options.</p>
 <p>The current <code>arrays()</code> is not exported from the top-level package, so it must be
 called as <code>st_ak.constructors.arrays()</code>. The bare name <code>st_ak.arrays()</code>, without
 <code>constructors</code>, is <strong>reserved</strong> for the type- and form-directed strategy
@@ -1308,13 +1308,6 @@ buffers). Every generated array has all three. What changes across the
 directions below is the level you describe it in terms of: today its layout,
 next its type, and later its form.</p>
 <h3 id="near-term">Near-term<a class="headerlink" href="#near-term" title="Permanent link">&para;</a></h3>
-<p><strong>Cover categorical data.</strong> In Awkward, categorical data is not a separate
-<code>Content</code> class: it is an <code>IndexedArray</code> or <code>IndexedOptionArray</code> whose node
-carries the
-<a href="https://awkward-array.org/doc/stable/reference/generated/ak.str.to_categorical.html"><code>__array__ = 'categorical'</code></a>
-parameter. The remaining gap is at the parameter level, not a missing node type:
-the parameter requires the node's content to hold unique category values, which
-is what the strategy must guarantee.</p>
 <p><strong>Generate arrays from a type.</strong> Add strategies that generate Awkward <em>types</em>
 (building on the existing <code>st_ak.numpy_types()</code>), then strategies that generate
 arrays matching a given type. This is the planned home of the reserved
