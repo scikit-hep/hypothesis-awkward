@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
@@ -11,7 +13,11 @@ from awkward.contents import (
     NumpyArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import is_bytestring_leaf, is_string_leaf
+from hypothesis_awkward.util import content_size, is_bytestring_leaf, is_string_leaf
+
+if TYPE_CHECKING:
+    from .content import StContent
+    from .option import StOption
 
 CATEGORICAL = {'__array__': 'categorical'}
 
@@ -131,6 +137,114 @@ def categorical_contents(
                 )
             )
             return IndexedOptionArray(o.index, o.content, parameters=CATEGORICAL)
+
+
+@st.composite
+def categorical_from_contents(
+    draw: st.DrawFn,
+    content: 'StContent',
+    *,
+    max_size: int,
+    max_leaf_size: int | None = None,
+    min_length: int = 0,
+    max_length: int | None = None,
+    allow_invalid: bool = True,
+    allow_indexed: bool = True,
+    allow_indexed_option: bool = True,
+    st_option: 'StOption | None' = None,
+) -> IndexedArray | IndexedOptionArray:
+    """Strategy for categorical data within a size budget.
+
+    Draws the index length first, then gives the remainder of the budget to the
+    categories.
+
+    Called by `contents()` during recursive tree generation.
+
+    Parameters
+    ----------
+    content
+        A callable that accepts `max_size`, `max_leaf_size`, and `min_length` and
+        returns a strategy for the categories. Draws that are not valid as categories
+        are rejected, as in `categorical_contents()`.
+    max_size
+        Upper bound on `content_size()` of the result.
+    max_leaf_size
+        Upper bound on total leaf elements. Unbounded if `None`.
+    min_length
+        Lower bound on `len(result)`.
+    max_length
+        Upper bound on `len(result)`. Unbounded if `None`.
+    allow_invalid
+        Duplicate categories can occur if `True`, which [`ak.validity_error`][] and
+        [`ak.is_valid`][] consider invalid. Non-unique draws from `content` are
+        rejected if `False`.
+    allow_indexed
+        No [`IndexedArray`][ak.contents.IndexedArray] is generated if `False`.
+    allow_indexed_option
+        No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
+        `False`.
+    st_option
+        Accepted for `_StFromContents` compatibility; unused in this strategy.
+
+    Raises
+    ------
+    ValueError
+        If both `allow_indexed` and `allow_indexed_option` are `False`.
+
+    Returns
+    -------
+    IndexedArray | IndexedOptionArray
+
+    Examples
+    --------
+    >>> import functools
+    >>> from hypothesis_awkward.util import content_size
+    >>> leaves = functools.partial(
+    ...     st_ak.contents.contents, max_depth=0, allow_record=False
+    ... )
+    >>> c = categorical_from_contents(
+    ...     leaves, max_size=20, min_length=2, max_length=5
+    ... ).example()
+    >>> c.parameter('__array__')
+    'categorical'
+
+    >>> content_size(c) <= 20
+    True
+
+    >>> 2 <= len(c) <= 5
+    True
+    """
+    if not (allow_indexed or allow_indexed_option):
+        raise ValueError(
+            'at least one of allow_indexed and allow_indexed_option must be True'
+        )
+
+    ml = max_length if max_length is not None else max_size
+    assume(min_length <= ml)
+    n = draw(st.integers(min_value=min_length, max_value=ml))
+    max_content_size = max(max_size - n, 0)
+    # Without missing entries, a non-empty index needs a category to refer to.
+    min_categories = 1 if n > 0 and not allow_indexed_option else 0
+    assume(max_content_size >= min_categories)
+    categories = draw(
+        content(
+            max_size=max_content_size,
+            max_leaf_size=max_leaf_size,
+            min_length=min_categories,
+        )
+    )
+    result = draw(
+        categorical_contents(
+            st.just(categories),
+            min_size=n,
+            max_size=n,
+            allow_invalid=allow_invalid,
+            allow_indexed=allow_indexed,
+            allow_indexed_option=allow_indexed_option,
+        )
+    )
+    assume(content_size(result) <= max_size)
+    return result
 
 
 def _is_valid_categories(c: Content, *, unique: bool) -> bool:
