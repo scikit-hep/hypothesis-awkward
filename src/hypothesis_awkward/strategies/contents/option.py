@@ -173,9 +173,11 @@ def option_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`. Forwarded to the inner `content(...)` call
         so the inner content meets the floor, and to `option_contents` as

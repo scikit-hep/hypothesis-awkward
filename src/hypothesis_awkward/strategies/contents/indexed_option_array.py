@@ -109,9 +109,11 @@ def indexed_option_array_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`. Forwarded to `min_size` of the wrapper.
     max_length
@@ -125,18 +127,11 @@ def indexed_option_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = indexed_option_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, min_length=2, max_length=5
     ... ).example()
     >>> isinstance(c, IndexedOptionArray)
-    True
-
-    >>> content_size(c) <= 20
-    True
-
-    >>> leaf_size(c) <= 10
     True
 
     >>> 2 <= len(c) <= 5

@@ -473,9 +473,11 @@ def content_lists(
         A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on total `content_size()` across all contents in the list.
+        Upper bound on the number of scalars summed over all contents in the list,
+        counted as for `max_size` in `contents()`.
     max_leaf_size
-        Maximum total number of leaf elements across all contents in the list.
+        Upper bound on the number of leaf elements summed over all contents in the list,
+        counted as for `max_leaf_size` in `contents()`.
     min_len
         Minimum number of contents in the list.
     max_len

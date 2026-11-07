@@ -167,9 +167,11 @@ def categorical_from_contents(
         returns a strategy for the categories. Draws that are not valid as categories
         are rejected, as in `categorical_contents()`.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`.
     max_length
@@ -198,7 +200,6 @@ def categorical_from_contents(
     Examples
     --------
     >>> import functools
-    >>> from hypothesis_awkward.util import content_size
     >>> leaves = functools.partial(
     ...     st_ak.contents.contents, max_depth=0, allow_record=False
     ... )
@@ -207,9 +208,6 @@ def categorical_from_contents(
     ... ).example()
     >>> c.parameter('__array__')
     'categorical'
-
-    >>> content_size(c) <= 20
-    True
 
     >>> 2 <= len(c) <= 5
     True
