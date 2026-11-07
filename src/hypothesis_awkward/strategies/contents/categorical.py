@@ -91,14 +91,14 @@ def categorical_contents(
             # Without missing entries, a non-empty index needs a category to refer to.
             min_categories = 1 if min_size > 0 and not allow_indexed_option else 0
             st_categories = st_ak.contents.leaf_contents(
-                min_size=min_categories, unique=True, allow_zero_field_record=False
+                min_size=min_categories, unique=unique, allow_zero_field_record=False
             )
-            # Hypothesis counts `NaT`s as distinct; Awkward Array does not.
-            categories = draw(
-                st_categories.filter(lambda c: _is_valid_categories(c, unique=True))
-            )
-            if not unique:
-                categories = draw(_with_duplicates(categories))
+            if unique:
+                # Hypothesis counts `NaT`s as distinct; Awkward Array does not.
+                st_categories = st_categories.filter(
+                    lambda c: _is_valid_categories(c, unique=True)
+                )
+            categories = draw(st_categories)
         case st.SearchStrategy():
             categories = draw(content)
             assume(_is_valid_categories(categories, unique=unique))
@@ -131,30 +131,6 @@ def categorical_contents(
                 )
             )
             return IndexedOptionArray(o.index, o.content, parameters=CATEGORICAL)
-
-
-@st.composite
-def _with_duplicates(draw: st.DrawFn, categories: Content) -> Content:
-    """Strategy for `categories`, distinct ones, with possible duplicates.
-
-    Each duplicate overwrites a distinct category or, for `bool`, which has only two
-    values, is appended. The distinct categories stay among the draws, so each
-    duplicate shrinks away on its own and the result shrinks to valid categories
-    unless the duplicates are needed.
-    """
-    n = len(categories)
-    if n < 2 or not draw(st.booleans()):
-        return categories
-    index = list(range(n))
-    for i in range(1, n):
-        if draw(st.booleans()):
-            index[i] = draw(st.integers(min_value=0, max_value=i - 1))
-    if isinstance(categories, NumpyArray) and categories.data.dtype == np.bool_:
-        index += draw(st.lists(st.integers(min_value=0, max_value=1), max_size=8))
-    if index == list(range(n)):
-        return categories
-    duplicated = categories[np.array(index)]
-    return duplicated.to_ListOffsetArray64(True) if duplicated.is_list else duplicated
 
 
 def _is_valid_categories(c: Content, *, unique: bool) -> bool:
