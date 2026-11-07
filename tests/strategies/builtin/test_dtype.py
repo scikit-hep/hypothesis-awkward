@@ -5,7 +5,11 @@ import numpy as np
 from hypothesis import find, given
 from hypothesis import strategies as st
 
-from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.strategies.builtin.dtype import (
+    builtin_safe_dtype_names,
+    builtin_safe_dtypes,
+    items_from_dtype,
+)
 from tests.find_settings import FIND, FIND_NO_SHRINK
 
 
@@ -22,11 +26,9 @@ def _is_nan(item: Any) -> bool:
 
 @given(data=st.data())
 def test_items_from_dtype(data: st.DataObject) -> None:
-    dtype = data.draw(st_ak.builtin.builtin_safe_dtypes(), label='dtype')
+    dtype = data.draw(builtin_safe_dtypes(), label='dtype')
     allow_nan = data.draw(st.booleans(), label='allow_nan')
-    item = data.draw(
-        st_ak.builtin.items_from_dtype(dtype, allow_nan=allow_nan), label='item'
-    )
+    item = data.draw(items_from_dtype(dtype, allow_nan=allow_nan), label='item')
 
     assert type(item).__module__ in ('builtins', 'datetime')
 
@@ -52,22 +54,20 @@ def test_items_from_dtype(data: st.DataObject) -> None:
 
 def test_builtin_safe_dtype_names_shrinks_to_bool() -> None:
     """Assert that builtin_safe_dtype_names() shrinks to bool."""
-    result = find(
-        st_ak.builtin.builtin_safe_dtype_names(), lambda _: True, settings=FIND
-    )
+    result = find(builtin_safe_dtype_names(), lambda _: True, settings=FIND)
     assert result == 'bool'
 
 
 def test_builtin_safe_dtypes_shrinks_to_bool() -> None:
     """Assert that builtin_safe_dtypes() shrinks to bool."""
-    result = find(st_ak.builtin.builtin_safe_dtypes(), lambda _: True, settings=FIND)
+    result = find(builtin_safe_dtypes(), lambda _: True, settings=FIND)
     assert result == np.dtype('bool')
 
 
 def test_draw_nan() -> None:
     """Assert that NaN can be drawn by default."""
     find(
-        st_ak.builtin.items_from_dtype(np.dtype('float64')),
+        items_from_dtype(np.dtype('float64')),
         lambda item: isinstance(item, float) and math.isnan(item),
         settings=FIND_NO_SHRINK,
     )
@@ -76,7 +76,7 @@ def test_draw_nan() -> None:
 def test_draw_nat() -> None:
     """Assert that NaT can be drawn by default."""
     find(
-        st_ak.builtin.items_from_dtype(np.dtype('datetime64[us]')),
+        items_from_dtype(np.dtype('datetime64[us]')),
         lambda item: item is None,
         settings=FIND_NO_SHRINK,
     )

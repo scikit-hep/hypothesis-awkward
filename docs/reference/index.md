@@ -9,5 +9,4 @@ The pages follow the import structure of `hypothesis_awkward.strategies`:
   - [`constructors`](strategies/constructors.md): the main strategy
   - [`content`](strategies/content.md): other content strategies
   - [`numpy`](strategies/numpy.md): strategies related to NumPy
-  - [`builtin`](strategies/builtin.md): strategies for built-in Python objects
   - [`misc`](strategies/misc.md): general helpers

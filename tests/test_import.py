@@ -5,7 +5,6 @@ from types import ModuleType
 import pytest
 
 import hypothesis_awkward.strategies
-import hypothesis_awkward.strategies.builtin
 import hypothesis_awkward.strategies.constructors
 import hypothesis_awkward.strategies.content
 import hypothesis_awkward.strategies.misc
@@ -16,7 +15,6 @@ import hypothesis_awkward.strategies.numpy
     'subpackage',
     [
         hypothesis_awkward.strategies,
-        hypothesis_awkward.strategies.builtin,
         hypothesis_awkward.strategies.constructors,
         hypothesis_awkward.strategies.content,
         hypothesis_awkward.strategies.misc,

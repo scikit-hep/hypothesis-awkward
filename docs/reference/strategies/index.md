@@ -7,7 +7,6 @@ Strategies for Awkward Array classes. Other strategies are in the subpackages:
 - [`hypothesis_awkward.strategies.constructors`](constructors.md)
 - [`hypothesis_awkward.strategies.content`](content.md)
 - [`hypothesis_awkward.strategies.numpy`](numpy.md)
-- [`hypothesis_awkward.strategies.builtin`](builtin.md)
 - [`hypothesis_awkward.strategies.misc`](misc.md)
 
 <!-- prettier-ignore -->

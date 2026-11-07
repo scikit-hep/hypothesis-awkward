@@ -5,8 +5,9 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 import awkward as ak
-from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import any_nan_nat_in_numpy_array
+from hypothesis_awkward.strategies.builtin.dtype import builtin_safe_dtypes
+from hypothesis_awkward.strategies.builtin.list_ import from_list
 from tests.funcs import assert_kwargs_match_signature
 
 
@@ -24,7 +25,7 @@ DEFAULTS = FromListsKwargs(dtype=None, allow_nan=True, max_size=10)
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `from_list()`."""
     assert_kwargs_match_signature(
-        func=st_ak.builtin.from_list, kwargs_cls=FromListsKwargs, defaults=DEFAULTS
+        func=from_list, kwargs_cls=FromListsKwargs, defaults=DEFAULTS
     )
 
 
@@ -35,8 +36,8 @@ def from_lists_kwargs() -> st.SearchStrategy[FromListsKwargs]:
         optional={
             'dtype': st.one_of(
                 st.none(),
-                st.just(st_ak.builtin.builtin_safe_dtypes()),
-                st_ak.builtin.builtin_safe_dtypes(),
+                st.just(builtin_safe_dtypes()),
+                builtin_safe_dtypes(),
             ),
             'allow_nan': st.booleans(),
             'max_size': st.integers(min_value=0, max_value=25),
@@ -51,7 +52,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs = data.draw(from_lists_kwargs(), label='kwargs')
 
     # Call the test subject
-    a = data.draw(st_ak.builtin.from_list(**kwargs), label='a')
+    a = data.draw(from_list(**kwargs), label='a')
     assert isinstance(a, ak.Array)
 
     # Assert the options were effective

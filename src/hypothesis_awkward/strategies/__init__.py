@@ -1,5 +1,4 @@
 __all__ = [
-    'builtin',
     'constructors',
     'content',
     'misc',
@@ -22,7 +21,7 @@ __all__ = [
     'categorical_contents',
 ]
 
-from . import builtin, constructors, content, misc, numpy
+from . import constructors, content, misc, numpy
 from .content.bit_masked_array import bit_masked_array_contents
 from .content.byte_masked_array import byte_masked_array_contents
 from .content.bytestring import bytestring_contents

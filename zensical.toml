@@ -22,7 +22,6 @@ nav = [
             { "constructors" = "reference/strategies/constructors.md" },
             { "content" = "reference/strategies/content.md" },
             { "numpy" = "reference/strategies/numpy.md" },
-            { "builtin" = "reference/strategies/builtin.md" },
             { "misc" = "reference/strategies/misc.md" },
         ] },
     ] },
