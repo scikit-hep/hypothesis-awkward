@@ -20,12 +20,12 @@ section of the Awkward Array documentation.
 The library includes [strategies](../reference/strategies/contents.md) for each
 of `EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`, `ListArray`,
 `RecordArray`, `UnionArray`, `IndexedArray`, `IndexedOptionArray`,
-`ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as well as for strings and
-bytestrings. The main strategy `arrays()` generates nested combinations of
-these, and can also generate arrays backed by virtual (lazy) buffers.
-[Getting Started](getting-started.md) shows sample outputs, and the
+`ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as well as for strings,
+bytestrings, and categorical data. The main strategy `arrays()` generates nested
+combinations of these, and can also generate arrays backed by virtual (lazy)
+buffers. [Getting Started](getting-started.md) shows sample outputs, and the
 [API reference](../reference/strategies/constructors.md) lists the available
-options. The strategy for categorical data has not yet been implemented.
+options.
 
 The current `arrays()` is not exported from the top-level package, so it must be
 called as `st_ak.constructors.arrays()`. The bare name `st_ak.arrays()`, without
@@ -52,14 +52,6 @@ directions below is the level you describe it in terms of: today its layout,
 next its type, and later its form.
 
 ### Near-term
-
-**Cover categorical data.** In Awkward, categorical data is not a separate
-`Content` class: it is an `IndexedArray` or `IndexedOptionArray` whose node
-carries the
-[`__array__ = 'categorical'`](https://awkward-array.org/doc/stable/reference/generated/ak.str.to_categorical.html)
-parameter. The remaining gap is at the parameter level, not a missing node type:
-the parameter requires the node's content to hold unique category values, which
-is what the strategy must guarantee.
 
 **Generate arrays from a type.** Add strategies that generate Awkward _types_
 (building on the existing `st_ak.numpy_types()`), then strategies that generate
