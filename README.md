@@ -53,13 +53,13 @@ Array with a collection of strategies for generating Awkward Arrays. Its main
 strategy, [`arrays()`][api-ref-arrays], generates nearly fully general Awkward
 Arrays: called with no arguments, it produces nested, variable-length, record,
 and union layouts; leaf values of any NumPy dtype Awkward Array supports, as
-well as strings and bytestrings; optional, masked, and missing values; and
-virtual arrays — with options to constrain any of these. With this generality,
-these strategies can surface edge cases in tools that use Awkward Array, and in
-Awkward Array itself. Tests written with these strategies run in Awkward Array's
-continuous integration (CI). Together with this package's own tests, they have
-found bugs in Awkward Array, PyArrow, and Hypothesis; the [bugs-found
-log][bugs-found] lists them.
+well as strings and bytestrings; categorical data; optional, masked, and missing
+values; and virtual arrays — with options to constrain any of these. With this
+generality, these strategies can surface edge cases in tools that use Awkward
+Array, and in Awkward Array itself. Tests written with these strategies run in
+Awkward Array's continuous integration (CI). Together with this package's own
+tests, they have found bugs in Awkward Array, PyArrow, and Hypothesis; the
+[bugs-found log][bugs-found] lists them.
 
 The [documentation][docs] has a guide and the API reference.
 
