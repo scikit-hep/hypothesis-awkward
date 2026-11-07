@@ -370,10 +370,17 @@ def test_draw_from_contents_nested() -> None:
 
 
 def test_draw_from_contents_duplicate_categories() -> None:
-    """Assert `contents()` can generate duplicate categories by default."""
+    """Assert `contents()` can generate duplicate categories by default.
+
+    Categories with `NaT` are excluded: `NaT`s can repeat even in unique draws.
+    """
     find(
         st_ak.contents.contents(),
-        lambda c: _is_categorical(c) and _has_duplicate_category(c.content),
+        lambda c: (
+            _is_categorical(c)
+            and _has_duplicate_category(c.content)
+            and not _has_nat(c.content)
+        ),
         settings=FIND,
     )
 
@@ -504,6 +511,15 @@ def _n_nan(c: Content) -> int:
 def _has_duplicate_category(c: Content) -> bool:
     values = ak.Array(c).to_list()
     return any(values[i] == values[j] for j in range(len(values)) for i in range(j))
+
+
+def _has_nat(c: Content) -> bool:
+    """True if `c` contains a `NaT`."""
+    return (
+        isinstance(c, NumpyArray)
+        and c.data.dtype.kind in 'mM'
+        and bool(np.isnat(c.data).any())
+    )
 
 
 def _has_repeated_category(c: Content) -> bool:
