@@ -8,9 +8,16 @@ from hypothesis_awkward.util import (
     n_scalars_in,
 )
 
+# TODO: Draw datetime and timedelta units with multipliers, e.g., `datetime64[10m]`, in
+# `supported_dtype_names()` and `supported_dtypes()`, and update their docstrings.
+
 
 def supported_dtype_names() -> st.SearchStrategy[str]:
     """Strategy for names of NumPy dtypes supported by Awkward Array.
+
+    Datetime and timedelta dtypes are drawn with single units only, e.g.,
+    `datetime64[m]`, not with multiples such as `datetime64[10m]`, which Awkward Array
+    also supports.
 
     Examples
     --------
@@ -22,6 +29,10 @@ def supported_dtype_names() -> st.SearchStrategy[str]:
 
 def supported_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for NumPy dtypes supported by Awkward Array.
+
+    Datetime and timedelta dtypes are drawn with single units only, e.g.,
+    `datetime64[m]`, not with multiples such as `datetime64[10m]`, which Awkward Array
+    also supports.
 
     Examples
     --------
