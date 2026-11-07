@@ -7,7 +7,7 @@ import awkward as ak
 
 from .dtype import builtin_safe_dtypes, items_from_dtype
 
-NestedList: TypeAlias = 'list[Any | NestedList]'
+_NestedList: TypeAlias = 'list[Any | _NestedList]'
 
 
 @st.composite
@@ -17,7 +17,7 @@ def lists(
     dtype: np.dtype | st.SearchStrategy[np.dtype] | None = None,
     allow_nan: bool = True,
     max_size: int = 10,
-) -> NestedList:
+) -> _NestedList:
     """Strategy for nested Python lists for which Awkward Arrays can be created.
 
     Parameters

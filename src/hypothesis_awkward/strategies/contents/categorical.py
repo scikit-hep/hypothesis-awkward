@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from .content import StContent
     from .option import StOption
 
-CATEGORICAL = {'__array__': 'categorical'}
+_CATEGORICAL = {'__array__': 'categorical'}
 
 
 @st.composite
@@ -129,14 +129,14 @@ def categorical_contents(
                     categories, min_size=min_size, max_size=max_size
                 )
             )
-            return IndexedArray(c.index, c.content, parameters=CATEGORICAL)
+            return IndexedArray(c.index, c.content, parameters=_CATEGORICAL)
         case _:
             o = draw(
                 st_ak.contents.indexed_option_array_contents(
                     categories, min_size=min_size, max_size=max_size
                 )
             )
-            return IndexedOptionArray(o.index, o.content, parameters=CATEGORICAL)
+            return IndexedOptionArray(o.index, o.content, parameters=_CATEGORICAL)
 
 
 @st.composite

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .content import StContent
     from .option import StOption
 
-MAX_LENGTH_NO_FIELDS = 5
+_MAX_LENGTH_NO_FIELDS = 5
 
 
 @st.composite
@@ -50,8 +50,8 @@ def record_array_contents(
     With at least one field, the length is derived from the children as
     `min(len(c) for c in contents)`, capped by `max_length`. A record with no fields has
     no children and stores no data, so nothing derives its length; it is drawn between
-    `min_length` and `max_length` instead. When `max_length` is `None`, the ceiling is
-    `MAX_LENGTH_NO_FIELDS`, raised to `min_length` if that is larger.
+    `min_length` and `max_length` instead. When `max_length` is `None`, the ceiling is an
+    internal value, raised to `min_length` if that is larger.
 
     Examples
     --------
@@ -114,7 +114,7 @@ def record_array_contents(
     else:
         # A record with no fields stores no data, so nothing derives its length.
         if max_length is None:
-            max_length = max(min_length, MAX_LENGTH_NO_FIELDS)
+            max_length = max(min_length, _MAX_LENGTH_NO_FIELDS)
         assume(min_length <= max_length)
         length = draw(st.integers(min_value=min_length, max_value=max_length))
     return RecordArray(contents, fields=fields, length=length)

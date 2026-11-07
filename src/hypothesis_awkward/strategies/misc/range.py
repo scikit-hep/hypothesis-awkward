@@ -6,16 +6,16 @@ from hypothesis_awkward._util import safe_max, safe_min
 
 from .idiom import none_or
 
-T = TypeVar('T')
+_T = TypeVar('_T')
 
 
-class _StMinMaxValuesFactory(Protocol[T]):  # pragma: no cover
+class _StMinMaxValuesFactory(Protocol[_T]):  # pragma: no cover
     def __call__(
-        self, min_value: Optional[T] = None, max_value: Optional[T] = None
-    ) -> st.SearchStrategy[T]: ...
+        self, min_value: Optional[_T] = None, max_value: Optional[_T] = None
+    ) -> st.SearchStrategy[_T]: ...
 
 
-# For the default `st_=st.integers`, which mypy rejects for generic `T`.
+# For the default `st_=st.integers`, which mypy rejects for generic `_T`.
 @overload
 def ranges(
     *,
@@ -32,18 +32,18 @@ def ranges(
 
 @overload
 def ranges(
-    st_: _StMinMaxValuesFactory[T],
+    st_: _StMinMaxValuesFactory[_T],
     /,
     *,
-    min_start: Optional[T] = None,
-    max_start: Optional[T] = None,
-    min_end: Optional[T] = None,
-    max_end: Optional[T] = None,
+    min_start: Optional[_T] = None,
+    max_start: Optional[_T] = None,
+    min_end: Optional[_T] = None,
+    max_end: Optional[_T] = None,
     allow_start_none: bool = True,
     allow_end_none: bool = True,
     let_end_none_if_start_none: bool = False,
     allow_equal: bool = True,
-) -> st.SearchStrategy[tuple[Optional[T], Optional[T]]]: ...
+) -> st.SearchStrategy[tuple[Optional[_T], Optional[_T]]]: ...
 
 
 def ranges(
