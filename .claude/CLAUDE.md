@@ -66,11 +66,11 @@ inherited `VIRTUAL_ENV`.
 ### Source Layout (`src/hypothesis_awkward/`)
 
 - **`strategies/`** — public Hypothesis strategies (imported as
-  `hypothesis_awkward.strategies`). Strategies for Awkward classes (`Content`
-  and its subclasses, string, bytestring, and categorical layouts, and NumPy
-  forms and types) are at the top level; others are in the namespaces `numpy`,
-  `builtin`, `content`, `constructors`, and `misc`. Subpackages: `numpy/`,
-  `builtin/`, `content/`, `constructors/`, `form/`, `type_/`, `misc/`.
+  `hypothesis_awkward.strategies`). Strategies for `Content` and its subclasses,
+  and string, bytestring, and categorical layouts, are at the top level; others
+  are in the namespaces `numpy`, `builtin`, `content`, `constructors`, and
+  `misc`. Subpackages: `numpy/`, `builtin/`, `content/`, `constructors/`,
+  `form/`, `type_/`, `misc/`.
 - **`_util/`** — internal utilities for dtype handling, safe comparisons, layout
   iteration, and array introspection.
 

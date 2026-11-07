@@ -20,8 +20,6 @@ __all__ = [
     'string_contents',
     'bytestring_contents',
     'categorical_contents',
-    'numpy_forms',
-    'numpy_types',
 ]
 
 from . import builtin, constructors, content, misc, numpy
@@ -41,5 +39,3 @@ from .content.regular_array import regular_array_contents
 from .content.string import string_contents
 from .content.union_array import union_array_contents
 from .content.unmasked_array import unmasked_array_contents
-from .form.numpy_ import numpy_forms
-from .type_.numpy_ import numpy_types

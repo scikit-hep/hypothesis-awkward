@@ -7,6 +7,8 @@ from hypothesis import strategies as st
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import SUPPORTED_DTYPE_NAMES
+from hypothesis_awkward.strategies.form.numpy_ import numpy_forms
+from hypothesis_awkward.strategies.type_.numpy_ import numpy_types
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
@@ -41,7 +43,7 @@ class NumpyFormsDrawn(TypedDict, total=False):
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `numpy_forms()`'s parameters."""
     assert_kwargs_match_signature(
-        func=st_ak.numpy_forms,
+        func=numpy_forms,
         kwargs_cls=NumpyFormsKwargs,
         defaults=DEFAULTS,
     )
@@ -71,7 +73,7 @@ def numpy_forms_kwargs(
     def _st_type_mode(
         draw: st.DrawFn,
     ) -> KwargsDrawn[NumpyFormsKwargs, NumpyFormsDrawn]:
-        type_ = draw(st_ak.numpy_types())
+        type_ = draw(numpy_types())
         choices = list[ak.types.NumpyType | st.SearchStrategy[ak.types.NumpyType]](
             [type_, st.just(type_)]
         )
@@ -138,7 +140,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs, drawn = data.draw(numpy_forms_kwargs(), label='opts')
 
     # Call the test subject
-    result = data.draw(st_ak.numpy_forms(**kwargs), label='result')
+    result = data.draw(numpy_forms(**kwargs), label='result')
 
     # Assert the result is always a NumpyForm
     assert isinstance(result, ak.forms.NumpyForm)
@@ -172,18 +174,18 @@ def test_properties(data: st.DataObject) -> None:
 
 def test_draw_empty_inner_shape() -> None:
     """Assert that forms with empty inner_shape can be drawn."""
-    find(st_ak.numpy_forms(), lambda f: f.inner_shape == (), settings=FIND_NO_SHRINK)
+    find(numpy_forms(), lambda f: f.inner_shape == (), settings=FIND_NO_SHRINK)
 
 
 def test_draw_nonempty_inner_shape() -> None:
     """Assert that forms with non-empty inner_shape can be drawn."""
-    find(st_ak.numpy_forms(), lambda f: len(f.inner_shape) > 0, settings=FIND_NO_SHRINK)
+    find(numpy_forms(), lambda f: len(f.inner_shape) > 0, settings=FIND_NO_SHRINK)
 
 
 def test_draw_datetime_primitive() -> None:
     """Assert that datetime64 primitive can be drawn."""
     find(
-        st_ak.numpy_forms(),
+        numpy_forms(),
         lambda f: f.primitive.startswith('datetime64'),
         settings=FIND_NO_SHRINK,
     )
@@ -192,7 +194,7 @@ def test_draw_datetime_primitive() -> None:
 def test_draw_integer_primitive() -> None:
     """Assert that integer primitives can be drawn."""
     find(
-        st_ak.numpy_forms(),
+        numpy_forms(),
         lambda f: f.primitive in ('int8', 'int16', 'int32', 'int64'),
         settings=FIND_NO_SHRINK,
     )
@@ -201,6 +203,6 @@ def test_draw_integer_primitive() -> None:
 def test_draw_from_type() -> None:
     """Assert that a form from a NumpyType matches the type."""
     t = ak.types.NumpyType('float64')
-    f = find(st_ak.numpy_forms(type_=t), lambda f: True, settings=FIND_NO_SHRINK)
+    f = find(numpy_forms(type_=t), lambda f: True, settings=FIND_NO_SHRINK)
     assert f.primitive == 'float64'
     assert f.inner_shape == ()

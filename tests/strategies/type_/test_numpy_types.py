@@ -6,6 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.strategies.type_.numpy_ import numpy_types
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature
 from tests.record import RecordDraws
@@ -24,7 +25,7 @@ DEFAULTS = NumpyTypesKwargs(dtypes=None, allow_datetime=True)
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `numpy_types()`."""
     assert_kwargs_match_signature(
-        func=st_ak.numpy_types, kwargs_cls=NumpyTypesKwargs, defaults=DEFAULTS
+        func=numpy_types, kwargs_cls=NumpyTypesKwargs, defaults=DEFAULTS
     )
 
 
@@ -49,7 +50,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs = data.draw(numpy_types_kwargs(), label='kwargs')
 
     # Call the test subject
-    result = data.draw(st_ak.numpy_types(**kwargs), label='result')
+    result = data.draw(numpy_types(**kwargs), label='result')
 
     # Assert the result is a NumpyType
     assert isinstance(result, ak.types.NumpyType)
@@ -72,7 +73,7 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_integer_type() -> None:
     """Assert that integer NumpyType can be drawn."""
     find(
-        st_ak.numpy_types(),
+        numpy_types(),
         lambda t: t.primitive in ('int8', 'int16', 'int32', 'int64'),
         settings=FIND_NO_SHRINK,
     )
@@ -81,7 +82,7 @@ def test_draw_integer_type() -> None:
 def test_draw_unsigned_integer_type() -> None:
     """Assert that unsigned integer NumpyType can be drawn."""
     find(
-        st_ak.numpy_types(),
+        numpy_types(),
         lambda t: t.primitive in ('uint8', 'uint16', 'uint32', 'uint64'),
         settings=FIND_NO_SHRINK,
     )
@@ -90,7 +91,7 @@ def test_draw_unsigned_integer_type() -> None:
 def test_draw_float_type() -> None:
     """Assert that floating point NumpyType can be drawn."""
     find(
-        st_ak.numpy_types(),
+        numpy_types(),
         lambda t: t.primitive in ('float16', 'float32', 'float64'),
         settings=FIND_NO_SHRINK,
     )
@@ -99,7 +100,7 @@ def test_draw_float_type() -> None:
 def test_draw_complex_type() -> None:
     """Assert that complex NumpyType can be drawn."""
     find(
-        st_ak.numpy_types(),
+        numpy_types(),
         lambda t: t.primitive in ('complex64', 'complex128'),
         settings=FIND_NO_SHRINK,
     )
@@ -107,13 +108,13 @@ def test_draw_complex_type() -> None:
 
 def test_draw_bool_type() -> None:
     """Assert that bool NumpyType can be drawn."""
-    find(st_ak.numpy_types(), lambda t: t.primitive == 'bool', settings=FIND_NO_SHRINK)
+    find(numpy_types(), lambda t: t.primitive == 'bool', settings=FIND_NO_SHRINK)
 
 
 def test_draw_datetime64_type() -> None:
     """Assert that datetime64 NumpyType can be drawn by default."""
     find(
-        st_ak.numpy_types(),
+        numpy_types(),
         lambda t: t.primitive.startswith('datetime64'),
         settings=FIND_NO_SHRINK,
     )
@@ -122,7 +123,7 @@ def test_draw_datetime64_type() -> None:
 def test_draw_timedelta64_type() -> None:
     """Assert that timedelta64 NumpyType can be drawn by default."""
     find(
-        st_ak.numpy_types(),
+        numpy_types(),
         lambda t: t.primitive.startswith('timedelta64'),
         settings=FIND_NO_SHRINK,
     )
