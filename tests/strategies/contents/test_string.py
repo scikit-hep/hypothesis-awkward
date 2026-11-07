@@ -10,6 +10,7 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND
 from tests.funcs import all_distinct, assert_kwargs_match_signature
+from tests.record import RecordDraws
 
 
 class StringContentsKwargs(TypedDict, total=False):
@@ -66,7 +67,7 @@ def string_contents_kwargs(draw: st.DrawFn) -> StringContentsKwargs:
             optional={
                 'alphabet': st.one_of(
                     st.none(),
-                    st.just(st_ak.RecordDraws(st.characters(codec='utf-8'))),
+                    st.just(RecordDraws(st.characters(codec='utf-8'))),
                 ),
                 'unique': st.booleans(),
             },
@@ -118,7 +119,7 @@ def test_properties(data: st.DataObject) -> None:
 
     # Assert alphabet constraint
     match alphabet:
-        case st_ak.RecordDraws():
+        case RecordDraws():
             drawn_chars = set(alphabet.drawn)
             for s in arr.to_list():
                 for ch in s:

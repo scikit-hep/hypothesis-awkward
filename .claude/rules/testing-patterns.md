@@ -200,12 +200,12 @@ options alone can exhaust short paths, such as an omitted option.
 ### Recorders
 
 Strategy-valued kwargs that cannot be drawn in advance are wrapped in a recorder
-so the test can later assert what was drawn: `st_ak.RecordDraws(strategy)`
-records every value drawn from the strategy, and
-`st_ak.RecordCallDraws(factory)` wraps a callable-valued kwarg, aggregating
-draws across all calls (`test_content_lists.py`). Pass the recorder via
-`st.just(recorder)`, e.g. `st.just(st_ak.RecordDraws(st_ak.supported_dtypes()))`
-in `test_content.py`.
+so the test can later assert what was drawn. The recorders are test helpers in
+`tests/record.py`, not part of the package: `RecordDraws(strategy)` records
+every value drawn from the strategy, and `RecordCallDraws(factory)` wraps a
+callable-valued kwarg, aggregating draws across all calls
+(`test_content_lists.py`). Pass the recorder via `st.just(recorder)`, e.g.
+`st.just(RecordDraws(st_ak.supported_dtypes()))` in `test_content.py`.
 
 Create recorders inside the composite body, so each example gets new ones and no
 reset is needed. A recorder created once, outside the per-example code (at
@@ -241,8 +241,8 @@ or as `st.just(value)`, so one check covers both forms.
 In a module with recorders, the kwargs strategy returns plain kwargs, so the
 test draws `kwargs` alone. A kwarg that can hold either a concrete value or a
 recorder is distinguished with `match` / `case`: the recorder arms
-(`st_ak.RecordDraws()` / `RecordCallDraws()`) assert against the recorded draws,
-and a concrete-value arm asserts the result uses the passed objects.
+(`RecordDraws()` / `RecordCallDraws()`) assert against the recorded draws, and a
+concrete-value arm asserts the result uses the passed objects.
 
 Do not set `max_examples` on `@given` tests. The profiles registered in
 `tests/conftest.py` supply it — 200 by default (PRs and local runs), 10,000
@@ -295,7 +295,7 @@ When an option like `max_size` or `min_size` may be `None`, use
 `safe_compare as sc` to write concise range assertions:
 
 ```python
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import safe_compare as sc
 
 assert sc(min_size) <= len(result) <= sc(max_size)
 ```

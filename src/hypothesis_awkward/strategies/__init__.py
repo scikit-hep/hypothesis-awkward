@@ -6,8 +6,6 @@ __all__ = [
     'from_list',
     'items_from_dtype',
     'lists',
-    'RecordCallDraws',
-    'RecordDraws',
     'StMinMaxValuesFactory',
     'none_or',
     'ranges',
@@ -30,8 +28,6 @@ from .builtins_ import (
 )
 from .forms import numpy_forms
 from .misc import (
-    RecordCallDraws,
-    RecordDraws,
     StMinMaxValuesFactory,
     none_or,
     ranges,

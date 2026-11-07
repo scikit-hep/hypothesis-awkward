@@ -8,17 +8,7 @@ import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature
-
-
-@given(data=st.data())
-def test_record_draws(data: st.DataObject) -> None:
-    """Test that st_ak.RecordDraws records drawn values."""
-    recorder = st_ak.RecordDraws(st_ak.supported_dtypes())
-    n = data.draw(st.integers(min_value=0, max_value=10), label='n')
-    expected = []
-    for i in range(n):
-        expected.append(data.draw(recorder, label=f'{i}'))
-    assert recorder.drawn == expected
+from tests.record import RecordDraws
 
 
 class NumpyTypesKwargs(TypedDict, total=False):
@@ -45,7 +35,7 @@ def numpy_types_kwargs() -> st.SearchStrategy[NumpyTypesKwargs]:
         optional={
             'dtypes': st.one_of(
                 st.none(),
-                st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
+                st.just(RecordDraws(st_ak.supported_dtypes())),
             ),
             'allow_datetime': st.booleans(),
         },
@@ -74,7 +64,7 @@ def test_properties(data: st.DataObject) -> None:
             if not allow_datetime:
                 assert not result.primitive.startswith('datetime64')
                 assert not result.primitive.startswith('timedelta64')
-        case st_ak.RecordDraws():
+        case RecordDraws():
             drawn_dtypes = {d.name for d in dtypes.drawn}
             assert result.primitive in drawn_dtypes
 

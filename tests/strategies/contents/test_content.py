@@ -24,6 +24,7 @@ from hypothesis_awkward._util import (
 from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
 from tests.funcs import assert_kwargs_match_signature, awkward_can_check_validity
+from tests.record import RecordDraws
 from tests.scaled_settings import scaled
 
 
@@ -181,7 +182,7 @@ def contents_kwargs(draw: st.DrawFn) -> ContentsKwargs:
         st.fixed_dictionaries(
             {},
             optional={
-                'dtypes': st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
+                'dtypes': st.just(RecordDraws(st_ak.supported_dtypes())),
                 'allow_nan': st.booleans(),
                 'allow_invalid': st.booleans(),
                 'allow_regular': st.booleans(),
@@ -283,7 +284,7 @@ def test_properties(data: st.DataObject) -> None:
     match dtypes:
         case None:
             pass
-        case st_ak.RecordDraws():
+        case RecordDraws():
             drawn_dtype_names = {d.name for d in dtypes.drawn}
             leaf_dtype_names = {d.name for d in _leaf_dtypes(c)}
             assert leaf_dtype_names <= drawn_dtype_names

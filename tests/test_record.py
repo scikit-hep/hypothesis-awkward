@@ -1,14 +1,26 @@
-"""Tests for `RecordCallDraws`."""
+"""Tests for `RecordDraws` and `RecordCallDraws`."""
 
 from hypothesis import given
 from hypothesis import strategies as st
 
-from hypothesis_awkward.strategies import RecordCallDraws, RecordDraws
+import hypothesis_awkward.strategies as st_ak
+from tests.record import RecordCallDraws, RecordDraws
 
 
 @given(data=st.data())
-def test_properties(data: st.DataObject) -> None:
-    """Calling a RecordCallDraws records every drawn value in order."""
+def test_record_draws(data: st.DataObject) -> None:
+    """Test that `RecordDraws` records drawn values."""
+    recorder = RecordDraws(st_ak.supported_dtypes())
+    n = data.draw(st.integers(min_value=0, max_value=10), label='n')
+    expected = []
+    for i in range(n):
+        expected.append(data.draw(recorder, label=f'{i}'))
+    assert recorder.drawn == expected
+
+
+@given(data=st.data())
+def test_record_call_draws(data: st.DataObject) -> None:
+    """Calling a `RecordCallDraws` records every drawn value in order."""
     recorder = RecordCallDraws(st.integers)
 
     n_resets = data.draw(st.integers(min_value=0, max_value=3), label='n_resets')

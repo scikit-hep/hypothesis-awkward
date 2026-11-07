@@ -12,7 +12,6 @@ from awkward.contents import Content, IndexedArray, IndexedOptionArray, NumpyArr
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size, leaf_size
 from hypothesis_awkward._util import safe_compare as sc
-from hypothesis_awkward.strategies import RecordCallDraws
 from hypothesis_awkward.strategies.contents.categorical import (
     categorical_from_contents,
 )
@@ -23,6 +22,7 @@ from tests.funcs import (
     assert_kwargs_match_signature,
     awkward_can_check_unique,
 )
+from tests.record import RecordCallDraws
 from tests.strategies.contents.test_categorical import _has_duplicate_category
 
 
