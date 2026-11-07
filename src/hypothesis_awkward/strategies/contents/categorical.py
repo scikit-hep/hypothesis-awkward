@@ -13,7 +13,7 @@ from awkward.contents import (
     NumpyArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import content_size, is_bytestring_leaf, is_string_leaf
+from hypothesis_awkward._util import content_size, is_bytestring_leaf, is_string_leaf
 
 if TYPE_CHECKING:
     from .content import StContent

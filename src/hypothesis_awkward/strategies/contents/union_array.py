@@ -9,7 +9,7 @@ import awkward as ak
 from awkward._do import mergeable
 from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import content_size
+from hypothesis_awkward._util import content_size
 
 from .option import option_from_contents
 

@@ -4,7 +4,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from hypothesis_awkward.util.safe import _signed_max, _signed_min
+from hypothesis_awkward._util.safe import _signed_max, _signed_min
 
 st_integers = st.integers()
 st_floats = st.floats(allow_nan=False)

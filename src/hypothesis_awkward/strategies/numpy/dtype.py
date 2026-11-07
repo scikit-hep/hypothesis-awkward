@@ -2,7 +2,7 @@ import numpy as np
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
-from hypothesis_awkward.util import (
+from hypothesis_awkward._util import (
     SUPPORTED_DTYPE_NAMES,
     SUPPORTED_DTYPES,
     n_scalars_in,

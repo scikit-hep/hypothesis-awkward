@@ -23,9 +23,6 @@ nav = [
             { "NumPy" = "reference/strategies/numpy.md" },
             { "Builtins" = "reference/strategies/builtins.md" },
         ] },
-        { "Util" = [
-            { "Util" = "reference/util.md" },
-        ] },
     ] },
 ]
 extra_css = ["stylesheets/extra.css"]

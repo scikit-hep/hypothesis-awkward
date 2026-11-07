@@ -3,7 +3,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import (
+from hypothesis_awkward._util import (
     iter_contents,
     iter_leaf_contents,
     leaf_size,

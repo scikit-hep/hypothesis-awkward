@@ -7,7 +7,7 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 from numpy.typing import NDArray
 
-from hypothesis_awkward.util import (
+from hypothesis_awkward._util import (
     any_nan_in_numpy_array,
     any_nan_nat_in_numpy_array,
     any_nat_in_numpy_array,

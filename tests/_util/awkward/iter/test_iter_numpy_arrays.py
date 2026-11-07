@@ -9,7 +9,7 @@ from awkward.contents import (
     RegularArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import iter_contents, iter_numpy_arrays
+from hypothesis_awkward._util import iter_contents, iter_numpy_arrays
 
 
 @given(data=st.data())

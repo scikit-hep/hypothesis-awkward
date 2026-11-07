@@ -7,8 +7,8 @@ from hypothesis import strategies as st
 import awkward as ak
 from awkward.contents import Content, ListOffsetArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import safe_compare as sc
-from hypothesis_awkward.util import safe_min
+from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward._util import safe_min
 
 if TYPE_CHECKING:
     from .content import StContent

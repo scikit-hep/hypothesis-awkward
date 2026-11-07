@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import any_nan_nat_in_numpy_array
+from hypothesis_awkward._util import any_nan_nat_in_numpy_array
 from tests.funcs import assert_kwargs_match_signature
 
 

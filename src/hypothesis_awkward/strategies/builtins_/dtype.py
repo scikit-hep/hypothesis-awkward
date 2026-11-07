@@ -6,7 +6,7 @@ import numpy as np
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
-from hypothesis_awkward.util import BUILTIN_SAFE_DTYPE_NAMES, BUILTIN_SAFE_DTYPES
+from hypothesis_awkward._util import BUILTIN_SAFE_DTYPE_NAMES, BUILTIN_SAFE_DTYPES
 
 
 def builtin_safe_dtype_names() -> st.SearchStrategy[str]:

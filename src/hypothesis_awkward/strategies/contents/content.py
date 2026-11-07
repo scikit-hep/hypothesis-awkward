@@ -7,8 +7,8 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content
-from hypothesis_awkward.util import content_size, leaf_size
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import content_size, leaf_size
+from hypothesis_awkward._util import safe_compare as sc
 
 from .bit_masked_array import bit_masked_array_from_contents
 from .byte_masked_array import byte_masked_array_from_contents

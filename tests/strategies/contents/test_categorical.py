@@ -18,8 +18,8 @@ from awkward.contents import (
     RecordArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import is_bytestring_leaf, is_string_leaf, iter_contents
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import is_bytestring_leaf, is_string_leaf, iter_contents
+from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
 from tests.funcs import (
     KwargsDrawn,

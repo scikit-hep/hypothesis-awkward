@@ -10,13 +10,13 @@ from hypothesis.errors import Unsatisfiable
 import awkward as ak
 from awkward.contents import Content, IndexedArray, IndexedOptionArray, NumpyArray
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward._util import content_size, leaf_size
+from hypothesis_awkward._util import safe_compare as sc
 from hypothesis_awkward.strategies import RecordCallDraws
 from hypothesis_awkward.strategies.contents.categorical import (
     categorical_from_contents,
 )
 from hypothesis_awkward.strategies.contents.option import StOption
-from hypothesis_awkward.util import content_size, leaf_size
-from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK
 from tests.funcs import (
     all_distinct,

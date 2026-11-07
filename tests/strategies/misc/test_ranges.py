@@ -5,9 +5,9 @@ import pytest
 from hypothesis import find, given
 from hypothesis import strategies as st
 
+from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward._util import safe_max
 from hypothesis_awkward.strategies import StMinMaxValuesFactory, none_or, ranges
-from hypothesis_awkward.util import safe_compare as sc
-from hypothesis_awkward.util import safe_max
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 

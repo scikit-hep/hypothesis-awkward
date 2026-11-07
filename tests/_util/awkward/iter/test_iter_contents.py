@@ -4,7 +4,7 @@ from hypothesis import strategies as st
 import awkward as ak
 from awkward.contents import Content
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import iter_contents
+from hypothesis_awkward._util import iter_contents
 
 
 @given(data=st.data())

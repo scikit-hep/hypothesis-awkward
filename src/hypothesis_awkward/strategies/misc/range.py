@@ -2,7 +2,7 @@ from typing import Optional, Protocol, TypeVar
 
 from hypothesis import strategies as st
 
-from hypothesis_awkward.util import safe_max, safe_min
+from hypothesis_awkward._util import safe_max, safe_min
 
 from .idiom import none_or
 

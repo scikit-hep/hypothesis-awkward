@@ -10,7 +10,7 @@ from awkward.contents import (
     RegularArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import is_zero_field_record_leaf, iter_leaf_contents
+from hypothesis_awkward._util import is_zero_field_record_leaf, iter_leaf_contents
 
 
 @given(data=st.data())

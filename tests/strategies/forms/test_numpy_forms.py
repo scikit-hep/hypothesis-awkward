@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import SUPPORTED_DTYPE_NAMES
+from hypothesis_awkward._util import SUPPORTED_DTYPE_NAMES
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 

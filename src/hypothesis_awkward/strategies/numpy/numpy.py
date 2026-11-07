@@ -5,7 +5,7 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
 import awkward as ak
-from hypothesis_awkward.util import n_scalars_in
+from hypothesis_awkward._util import n_scalars_in
 
 from .dtype import numpy_dtypes, supported_dtypes
 

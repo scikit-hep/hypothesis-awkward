@@ -17,7 +17,7 @@ from awkward.contents import (
     UnmaskedArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import content_own_size
+from hypothesis_awkward._util import content_own_size
 
 
 @given(data=st.data())

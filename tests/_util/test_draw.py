@@ -4,8 +4,8 @@ from hypothesis import HealthCheck, find, given, settings
 from hypothesis import strategies as st
 
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import CountdownDrawer
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import CountdownDrawer
+from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND_NO_SHRINK
 
 DEFAULT_MIN_SIZE_EACH = 0

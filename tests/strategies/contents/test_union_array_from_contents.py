@@ -10,13 +10,13 @@ import awkward as ak
 from awkward._do import mergeable
 from awkward.contents import Content, IndexedArray, UnionArray
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward._util import content_size, leaf_size
+from hypothesis_awkward._util import safe_compare as sc
 from hypothesis_awkward.strategies import RecordCallDraws
 from hypothesis_awkward.strategies.contents.option import StOption, option_from_contents
 from hypothesis_awkward.strategies.contents.union_array import (
     union_array_from_contents,
 )
-from hypothesis_awkward.util import content_size, leaf_size
-from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature, awkward_can_check_validity
 from tests.strategies.contents.test_categorical import _is_categorical
