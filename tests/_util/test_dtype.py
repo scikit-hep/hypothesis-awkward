@@ -18,7 +18,7 @@ def _is_dtype_in(s: np.dtype, d: np.dtype) -> bool:
     return s == d
 
 
-@given(d=st_ak.numpy_dtypes())
+@given(d=st_ak.numpy.numpy_dtypes())
 def test_simple_dtype_in(d: np.dtype) -> None:
     simple_dtypes = simple_dtypes_in(d)
     for s in simple_dtypes:
@@ -41,7 +41,7 @@ def _is_kind_in(k: str, d: np.dtype) -> bool:
 ALL_SIMPLE_DTYPE_KINDS = set('biufcmMOSU')
 
 
-@given(d=st_ak.numpy_dtypes())
+@given(d=st_ak.numpy.numpy_dtypes())
 def test_simple_dtype_kinds_in(d: np.dtype) -> None:
     kinds = simple_dtype_kinds_in(d)
     assert 'V' not in kinds
@@ -51,7 +51,7 @@ def test_simple_dtype_kinds_in(d: np.dtype) -> None:
         assert not _is_kind_in(k, d)
 
 
-@given(dtype=st_ak.numpy_dtypes())
+@given(dtype=st_ak.numpy.numpy_dtypes())
 def test_n_scalars_in(dtype: np.dtype) -> None:
     num = n_scalars_in(dtype)
     note(f'{num=}')

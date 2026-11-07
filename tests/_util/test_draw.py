@@ -35,7 +35,7 @@ def countdown_drawer_kwargs(draw: st.DrawFn) -> CountdownDrawerKwargs:
     # Draw total bounds first so per-draw bounds can be constrained
     max_end = 50
     min_size_total, max_size_total = draw(
-        st_ak.ranges(st.integers, min_start=0, max_start=1, max_end=max_end)
+        st_ak.misc.ranges(st.integers, min_start=0, max_start=1, max_end=max_end)
     )
     eff_min_total = (
         min_size_total if min_size_total is not None else DEFAULT_MIN_SIZE_TOTAL
@@ -51,7 +51,7 @@ def countdown_drawer_kwargs(draw: st.DrawFn) -> CountdownDrawerKwargs:
     each_min_end = 1 if eff_min_total > 0 else 0
 
     min_size_each, max_size_each = draw(
-        st_ak.ranges(
+        st_ak.misc.ranges(
             st.integers,
             min_start=0,
             max_start=each_max_start,

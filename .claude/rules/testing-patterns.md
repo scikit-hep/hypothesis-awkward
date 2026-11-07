@@ -7,27 +7,27 @@ paths:
 
 Reference implementations:
 
-- `tests/strategies/contents/test_unmasked_array.py` — smallest example of
+- `tests/strategies/content/test_unmasked_array.py` — smallest example of
   drawing a strategy-valued option in advance (`KwargsDrawn`, no
   `RelatedKwargs`)
-- `tests/strategies/contents/test_indexed_array.py` — drawing in advance with
+- `tests/strategies/content/test_indexed_array.py` — drawing in advance with
   `RelatedKwargs`; `optional_independent` merged with `related`
-- `tests/strategies/contents/test_regular_array.py` — drawing in advance when
-  the drawn option shares `optional_independent` with other options
-  (`_st_drawn()` and `_st_optional_independent(drawn)`)
-- `tests/strategies/contents/test_numpy_array.py` — drawing in advance when
+- `tests/strategies/content/test_regular_array.py` — drawing in advance when the
+  drawn option shares `optional_independent` with other options (`_st_drawn()`
+  and `_st_optional_independent(drawn)`)
+- `tests/strategies/content/test_numpy_array.py` — drawing in advance when
   related options must fit the drawn value (`_st_related_kwargs(drawn)`)
-- `tests/strategies/forms/test_numpy_forms.py` — mode selection, with each mode
+- `tests/strategies/form/test_numpy_forms.py` — mode selection, with each mode
   drawing its strategy-valued options in advance (no `RelatedKwargs`)
-- `tests/strategies/contents/test_content.py` — full template with a recorder;
+- `tests/strategies/content/test_content.py` — full template with a recorder;
   `exclude` for internal recursion params
 - `tests/strategies/constructors/test_array.py` — kwargs inheritance; `DEFAULTS`
   derived from the parent module's; the kwargs strategy draws the parent's and
   extends them
 - `tests/strategies/numpy/test_numpy_arrays.py` — min/max pairs with `ranges()`;
   the dtype pool depends on other drawn options
-- `tests/strategies/contents/test_content_lists.py` — callable-valued kwargs
-  with `RecordCallDraws`
+- `tests/strategies/content/test_content_lists.py` — callable-valued kwargs with
+  `RecordCallDraws`
 - `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without recorders
   (closest to the original template in awkward's
   `tests/properties/operations/test_flatten.py`)
@@ -59,7 +59,7 @@ The meta-test, named `test_kwargs_match_signature`, calls
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `contents()`'s parameters."""
     assert_kwargs_match_signature(
-        func=st_ak.contents.contents,
+        func=st_ak.contents,
         exclude={'allow_union_root', 'allow_option_root', 'allow_indexed_root'},
         kwargs_cls=ContentsKwargs,
         defaults=DEFAULTS,
@@ -111,9 +111,9 @@ The body makes two draws and merges them:
 
 - A nested `_st_related_kwargs()` composite returns `RelatedKwargs` — the
   options whose values constrain each other: min/max pairs from
-  `st_ak.ranges()`, feasibility-coupled flags (`test_content.py`), or pools that
-  depend on other drawn values (`test_numpy_arrays.py`). A value that can be
-  `None` is added to the dict only when it is not `None`, so the omitted-key
+  `st_ak.misc.ranges()`, feasibility-coupled flags (`test_content.py`), or pools
+  that depend on other drawn values (`test_numpy_arrays.py`). A value that can
+  be `None` is added to the dict only when it is not `None`, so the omitted-key
   path exercises the strategy's default.
 - The independent options (`optional_independent`), where whether each key
   appears is drawn separately from its value, either with
@@ -143,7 +143,7 @@ extra:
     optional_independent = IndexedArrayContentsKwargs()
     drawn = IndexedArrayContentsDrawn(content=None)
     if draw(st.booleans()):
-        content = draw(st_ak.contents.contents(...))
+        content = draw(st_ak.contents(...))
         optional_independent['content'] = draw(
             st.sampled_from([content, st.just(content)])
         )
@@ -205,7 +205,7 @@ so the test can later assert what was drawn. The recorders are test helpers in
 every value drawn from the strategy, and `RecordCallDraws(factory)` wraps a
 callable-valued kwarg, aggregating draws across all calls
 (`test_content_lists.py`). Pass the recorder via `st.just(recorder)`, e.g.
-`st.just(RecordDraws(st_ak.supported_dtypes()))` in `test_content.py`.
+`st.just(RecordDraws(st_ak.numpy.supported_dtypes()))` in `test_content.py`.
 
 Create recorders inside the composite body, so each example gets new ones and no
 reset is needed. A recorder created once, outside the per-example code (at
@@ -226,7 +226,7 @@ def test_properties(data: st.DataObject) -> None:
     """Assert the results of `regular_array_contents()`."""
     kwargs, drawn = data.draw(regular_array_contents_kwargs(), label='opts')
 
-    result = data.draw(st_ak.contents.regular_array_contents(**kwargs), label='result')
+    result = data.draw(st_ak.regular_array_contents(**kwargs), label='result')
 
     max_size = kwargs.get('max_size', DEFAULTS['max_size'])
     ...
@@ -272,7 +272,7 @@ from tests.find_settings import FIND
 
 def test_draw_empty() -> None:
     """Assert that empty arrays can be drawn by default."""
-    find(st_ak.numpy_arrays(), lambda a: math.prod(a.shape) == 0, settings=FIND)
+    find(st_ak.numpy.numpy_arrays(), lambda a: math.prod(a.shape) == 0, settings=FIND)
 ```
 
 - Never call `find()` without `settings`: Hypothesis then falls back to an

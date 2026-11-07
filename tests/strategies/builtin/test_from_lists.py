@@ -1,0 +1,73 @@
+from typing import TypedDict, cast
+
+import numpy as np
+from hypothesis import given
+from hypothesis import strategies as st
+
+import awkward as ak
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward._util import any_nan_nat_in_numpy_array
+from tests.funcs import assert_kwargs_match_signature
+
+
+class FromListsKwargs(TypedDict, total=False):
+    """Options for `from_list()` strategy."""
+
+    dtype: np.dtype | st.SearchStrategy[np.dtype] | None
+    allow_nan: bool
+    max_size: int
+
+
+DEFAULTS = FromListsKwargs(dtype=None, allow_nan=True, max_size=10)
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `from_list()`."""
+    assert_kwargs_match_signature(
+        func=st_ak.builtin.from_list, kwargs_cls=FromListsKwargs, defaults=DEFAULTS
+    )
+
+
+def from_lists_kwargs() -> st.SearchStrategy[FromListsKwargs]:
+    """Strategy for options for `from_list()` strategy."""
+    return st.fixed_dictionaries(
+        {},
+        optional={
+            'dtype': st.one_of(
+                st.none(),
+                st.just(st_ak.builtin.builtin_safe_dtypes()),
+                st_ak.builtin.builtin_safe_dtypes(),
+            ),
+            'allow_nan': st.booleans(),
+            'max_size': st.integers(min_value=0, max_value=25),
+        },
+    ).map(lambda d: cast(FromListsKwargs, d))
+
+
+@given(data=st.data())
+def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `from_list()`."""
+    # Draw options
+    kwargs = data.draw(from_lists_kwargs(), label='kwargs')
+
+    # Call the test subject
+    a = data.draw(st_ak.builtin.from_list(**kwargs), label='a')
+    assert isinstance(a, ak.Array)
+
+    # Assert the options were effective
+    dtype = kwargs.get('dtype', DEFAULTS['dtype'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+
+    n_flat = ak.flatten(a, axis=None).to_numpy()
+
+    types = {type(x) for x in n_flat}
+    assert len(types) <= 1  # All same type unless empty
+    if isinstance(dtype, np.dtype) and types:
+        assert dtype.type in types
+
+    has_nan = any_nan_nat_in_numpy_array(n_flat)
+    if not allow_nan:
+        assert not has_nan
+
+    assert len(n_flat) <= max_size

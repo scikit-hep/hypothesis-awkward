@@ -27,7 +27,7 @@ from hypothesis_awkward._util import (
 
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
-    content = data.draw(st_ak.contents.contents(), label='content')
+    content = data.draw(st_ak.contents(), label='content')
     string_as_leaf = data.draw(st.booleans(), label='string_as_leaf')
     bytestring_as_leaf = data.draw(st.booleans(), label='bytestring_as_leaf')
 

@@ -50,7 +50,7 @@ def get_contents_kwargs(draw: st.DrawFn) -> GetContentsKwargs:
 @given(data=st.data())
 def test_get_contents(data: st.DataObject) -> None:
 
-    layout = data.draw(st_ak.contents.contents(), label='content')
+    layout = data.draw(st_ak.contents(), label='content')
 
     # Draw options
     kwargs = data.draw(get_contents_kwargs(), label='kwargs')

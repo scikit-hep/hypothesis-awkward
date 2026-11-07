@@ -5,16 +5,22 @@ from types import ModuleType
 import pytest
 
 import hypothesis_awkward.strategies
+import hypothesis_awkward.strategies.builtin
 import hypothesis_awkward.strategies.constructors
-import hypothesis_awkward.strategies.contents
+import hypothesis_awkward.strategies.content
+import hypothesis_awkward.strategies.misc
+import hypothesis_awkward.strategies.numpy
 
 
 @pytest.mark.parametrize(
     'subpackage',
     [
         hypothesis_awkward.strategies,
+        hypothesis_awkward.strategies.builtin,
         hypothesis_awkward.strategies.constructors,
-        hypothesis_awkward.strategies.contents,
+        hypothesis_awkward.strategies.content,
+        hypothesis_awkward.strategies.misc,
+        hypothesis_awkward.strategies.numpy,
     ],
     ids=lambda m: m.__name__,
 )

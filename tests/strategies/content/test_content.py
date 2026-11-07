@@ -1,0 +1,622 @@
+from __future__ import annotations
+
+from typing import TypedDict, cast
+
+import numpy as np
+import pytest
+from hypothesis import HealthCheck, find, given, settings
+from hypothesis import strategies as st
+
+import awkward as ak
+from awkward.contents import EmptyArray
+from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward._util import (
+    any_nan_nat_in_awkward_array,
+    content_size,
+    is_bytestring_leaf,
+    is_leaf,
+    is_string_leaf,
+    iter_contents,
+    iter_numpy_arrays,
+    leaf_size,
+    safe_max,
+)
+from hypothesis_awkward._util import safe_compare as sc
+from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
+from tests.funcs import assert_kwargs_match_signature, awkward_can_check_validity
+from tests.record import RecordDraws
+from tests.scaled_settings import scaled
+
+
+class ContentsKwargs(TypedDict, total=False):
+    """Options for `contents()` strategy."""
+
+    dtypes: st.SearchStrategy[np.dtype] | None
+    max_size: int
+    allow_nan: bool
+    allow_invalid: bool
+    allow_numpy: bool
+    allow_empty: bool
+    allow_string: bool
+    allow_bytestring: bool
+    allow_regular: bool
+    allow_list_offset: bool
+    allow_list: bool
+    allow_record: bool
+    allow_union: bool
+    allow_indexed: bool
+    allow_indexed_option: bool
+    allow_categorical: bool
+    allow_byte_masked: bool
+    allow_bit_masked: bool
+    allow_unmasked: bool
+    max_leaf_size: int | None
+    max_depth: int | None
+    min_length: int
+    max_length: int | None
+    min_record_fields: int
+    max_record_fields: int | None
+
+
+DEFAULTS = ContentsKwargs(
+    dtypes=None,
+    max_size=50,
+    allow_nan=True,
+    allow_invalid=True,
+    allow_numpy=True,
+    allow_empty=True,
+    allow_string=True,
+    allow_bytestring=True,
+    allow_regular=True,
+    allow_list_offset=True,
+    allow_list=True,
+    allow_record=True,
+    allow_union=True,
+    allow_indexed=True,
+    allow_indexed_option=True,
+    allow_categorical=True,
+    allow_byte_masked=True,
+    allow_bit_masked=True,
+    allow_unmasked=True,
+    max_leaf_size=None,
+    max_depth=None,
+    min_length=0,
+    max_length=None,
+    min_record_fields=0,
+    max_record_fields=None,
+)
+
+
+class RelatedKwargs(TypedDict, total=False):
+    """Options drawn together: feasibility couples them.
+
+    `min_length > 0` requires a non-empty leaf type to be allowed, and
+    `max_size` must be at least `min_length`.
+    """
+
+    min_length: int
+    max_length: int | None
+    max_size: int
+    allow_numpy: bool
+    allow_empty: bool
+    allow_string: bool
+    allow_bytestring: bool
+    min_record_fields: int
+    max_record_fields: int | None
+
+
+def test_kwargs_match_signature() -> None:
+    """Assert the option declarations agree with `contents()`'s parameters."""
+    assert_kwargs_match_signature(
+        func=st_ak.contents,
+        exclude={
+            'allow_union_root',
+            'allow_option_root',
+            'allow_indexed_root',
+            'allow_categorical_root',
+        },
+        kwargs_cls=ContentsKwargs,
+        defaults=DEFAULTS,
+        related_cls=RelatedKwargs,
+    )
+
+
+@st.composite
+def contents_kwargs(draw: st.DrawFn) -> ContentsKwargs:
+    """Strategy for options for `contents()` strategy."""
+
+    @st.composite
+    def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
+        """Strategy for the options that are drawn together."""
+        min_length, max_length = draw(st_ak.misc.ranges(min_start=0, max_end=10))
+        max_size = draw(st.integers(min_value=safe_max([min_length, 0]), max_value=200))
+
+        non_empty_leaves = {'numpy', 'string', 'bytestring'}
+        all_leaves = non_empty_leaves | {'empty'}
+        if min_length:
+            # At least one non-empty leaf must be allowed.
+            allowed = draw(
+                st.sets(
+                    st.sampled_from(list(non_empty_leaves)),
+                    min_size=1,
+                    max_size=len(non_empty_leaves),
+                )
+            )
+            if draw(st.booleans()):
+                allowed.add('empty')
+        else:
+            # The length zero is possible.
+            # At least any one leaf must be allowed.
+            allowed = draw(
+                st.sets(
+                    st.sampled_from(list(all_leaves)),
+                    min_size=1,
+                    max_size=len(all_leaves),
+                )
+            )
+
+        ret = RelatedKwargs(
+            max_size=max_size,
+            allow_numpy='numpy' in allowed,
+            allow_empty='empty' in allowed,
+            allow_string='string' in allowed,
+            allow_bytestring='bytestring' in allowed,
+        )
+        if min_length is not None:
+            ret['min_length'] = min_length
+        if max_length is not None:
+            ret['max_length'] = max_length
+
+        min_record_fields, max_record_fields = draw(
+            st_ak.misc.ranges(min_start=0, max_end=5)
+        )
+        if min_record_fields is not None:
+            ret['min_record_fields'] = min_record_fields
+        if max_record_fields is not None:
+            ret['max_record_fields'] = max_record_fields
+        return ret
+
+    related = draw(_st_related_kwargs())
+
+    optional_independent = draw(
+        st.fixed_dictionaries(
+            {},
+            optional={
+                'dtypes': st.just(RecordDraws(st_ak.numpy.supported_dtypes())),
+                'allow_nan': st.booleans(),
+                'allow_invalid': st.booleans(),
+                'allow_regular': st.booleans(),
+                'allow_list_offset': st.booleans(),
+                'allow_list': st.booleans(),
+                'allow_record': st.booleans(),
+                'allow_union': st.booleans(),
+                'allow_indexed': st.booleans(),
+                'allow_indexed_option': st.booleans(),
+                'allow_categorical': st.booleans(),
+                'allow_byte_masked': st.booleans(),
+                'allow_bit_masked': st.booleans(),
+                'allow_unmasked': st.booleans(),
+                'max_leaf_size': st.integers(min_value=0, max_value=50),
+                'max_depth': st.integers(min_value=0, max_value=5),
+            },
+        )
+    )
+
+    return ContentsKwargs(**related, **cast(ContentsKwargs, optional_independent))
+
+
+@scaled(2.5)  # `contents()` composes every strategy; interaction bugs live here
+@given(data=st.data())
+def test_properties(data: st.DataObject) -> None:
+    """Assert the results of `contents()`."""
+    # Draw options
+    kwargs = data.draw(contents_kwargs(), label='kwargs')
+
+    # Call the test subject
+    c = data.draw(st_ak.contents(**kwargs), label='c')
+
+    # Assert the result is always an ak.contents.Content
+    assert isinstance(c, ak.contents.Content)
+
+    # Assert the options were effective
+    dtypes = kwargs.get('dtypes', DEFAULTS['dtypes'])
+    max_size = kwargs.get('max_size', DEFAULTS['max_size'])
+    allow_nan = kwargs.get('allow_nan', DEFAULTS['allow_nan'])
+    allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
+    allow_numpy = kwargs.get('allow_numpy', DEFAULTS['allow_numpy'])
+    allow_empty = kwargs.get('allow_empty', DEFAULTS['allow_empty'])
+    allow_string = kwargs.get('allow_string', DEFAULTS['allow_string'])
+    allow_bytestring = kwargs.get('allow_bytestring', DEFAULTS['allow_bytestring'])
+    allow_regular = kwargs.get('allow_regular', DEFAULTS['allow_regular'])
+    allow_list_offset = kwargs.get('allow_list_offset', DEFAULTS['allow_list_offset'])
+    allow_list = kwargs.get('allow_list', DEFAULTS['allow_list'])
+    allow_record = kwargs.get('allow_record', DEFAULTS['allow_record'])
+    allow_union = kwargs.get('allow_union', DEFAULTS['allow_union'])
+    allow_indexed = kwargs.get('allow_indexed', DEFAULTS['allow_indexed'])
+    allow_indexed_option = kwargs.get(
+        'allow_indexed_option', DEFAULTS['allow_indexed_option']
+    )
+    allow_categorical = kwargs.get('allow_categorical', DEFAULTS['allow_categorical'])
+    allow_byte_masked = kwargs.get('allow_byte_masked', DEFAULTS['allow_byte_masked'])
+    allow_bit_masked = kwargs.get('allow_bit_masked', DEFAULTS['allow_bit_masked'])
+    allow_unmasked = kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
+    max_leaf_size = kwargs.get('max_leaf_size', DEFAULTS['max_leaf_size'])
+    min_length = kwargs.get('min_length', DEFAULTS['min_length'])
+    max_length = kwargs.get('max_length', DEFAULTS['max_length'])
+    max_depth = kwargs.get('max_depth', DEFAULTS['max_depth'])
+    min_record_fields = kwargs.get('min_record_fields', DEFAULTS['min_record_fields'])
+    max_record_fields = kwargs.get('max_record_fields', DEFAULTS['max_record_fields'])
+
+    allow_any_nesting = any(
+        (allow_regular, allow_list_offset, allow_list, allow_record, allow_union)
+    )
+    allow_any_option = any(
+        (allow_indexed_option, allow_byte_masked, allow_bit_masked, allow_unmasked)
+    )
+    if not allow_any_nesting and not allow_any_option:
+        assert _nesting_depth(c) == 0
+
+    # Per-type gating
+    allow_by_type = {
+        'numpy': allow_numpy,
+        'empty': allow_empty,
+        'regular': allow_regular,
+        'list_offset': allow_list_offset,
+        'list': allow_list,
+        'string': allow_string,
+        'bytestring': allow_bytestring,
+        'record': allow_record,
+        'union': allow_union,
+        'indexed': allow_indexed,
+        'indexed_option': allow_indexed_option,
+        'categorical': allow_categorical,
+        'byte_masked': allow_byte_masked,
+        'bit_masked': allow_bit_masked,
+        'unmasked': allow_unmasked,
+    }
+    present = _present_types(c)
+    disallowed = {t for t, allowed in allow_by_type.items() if not allowed}
+    assert not (present & disallowed), (
+        f'disallowed types present: {sorted(present & disallowed)}'
+    )
+
+    # Dtype check via leaf arrays (works for both flat and nested layouts)
+    match dtypes:
+        case None:
+            pass
+        case RecordDraws():
+            drawn_dtype_names = {d.name for d in dtypes.drawn}
+            leaf_dtype_names = {d.name for d in _leaf_dtypes(c)}
+            assert leaf_dtype_names <= drawn_dtype_names
+
+    assert content_size(c) <= max_size
+
+    if not allow_nan:
+        assert not any_nan_nat_in_awkward_array(c)
+
+    if not allow_invalid and awkward_can_check_validity(c):
+        assert ak.validity_error(c) == ''
+
+    if max_leaf_size is not None:
+        assert leaf_size(c) <= max_leaf_size
+    assert _nesting_depth(c) <= sc(max_depth)
+    assert min_length <= len(c) <= sc(max_length)
+
+    for n in iter_contents(c):
+        if isinstance(n, ak.contents.RecordArray):
+            assert min_record_fields <= len(n.contents) <= sc(max_record_fields)
+
+
+def test_draw_max_size() -> None:
+    """Assert that content at exactly max_size can be drawn."""
+    max_size = 30
+    find(
+        st_ak.contents(max_size=max_size, max_leaf_size=max_size),
+        lambda c: content_size(c) == max_size,
+        settings=FIND,
+    )
+
+
+def test_draw_invalid() -> None:
+    """Assert that invalid content can be drawn by default."""
+    find(
+        st_ak.contents(),
+        lambda c: awkward_can_check_validity(c) and not ak.is_valid(c),
+        settings=FIND,
+    )
+
+
+def test_draw_max_leaf_size() -> None:
+    """Assert that content at exactly max_leaf_size can be drawn."""
+    max_leaf_size = 20
+    find(
+        st_ak.contents(max_size=200, max_leaf_size=max_leaf_size),
+        lambda c: leaf_size(c) == max_leaf_size,
+        settings=FIND,
+    )
+
+
+def test_draw_max_depth() -> None:
+    """Assert that content at exactly max_depth can be drawn."""
+    max_depth = 8
+    find(
+        st_ak.contents(max_size=200, max_depth=max_depth),
+        lambda c: _nesting_depth(c) == max_depth,
+        settings=FIND,
+    )
+
+
+def test_draw_deep_without_max_depth() -> None:
+    """Assert that deep content can be drawn without specifying max_depth."""
+    find(
+        st_ak.contents(max_size=200),
+        lambda c: _nesting_depth(c) >= 8,
+        settings=FIND,
+    )
+
+
+def test_draw_nested() -> None:
+    """Assert that nested content (depth >= 2) can be drawn."""
+    find(
+        st_ak.contents(max_leaf_size=20),
+        lambda c: _nesting_depth(c) >= 2,
+        settings=FIND,
+    )
+
+
+# The narrowed space filters heavily by design: the fix turned the raising
+# draws (wrapper requiring a non-empty subtree) into filtered ones.
+@settings(suppress_health_check=[HealthCheck.filter_too_much])
+@given(data=st.data())
+def test_draw_only_empty_leaf_with_wrapper(data: st.DataObject) -> None:
+    """Assert that draws succeed when only `EmptyArray` leaves are allowed.
+
+    Regression test for a `ValueError` from `leaf_contents()`: a wrapper (e.g.
+    `IndexedArray` with a non-empty index) requires a non-empty subtree, but the
+    depth budget forces a leaf and only `EmptyArray` (length 0) is allowed. Found
+    by the nightly run on 2026-07-04.
+    """
+    c = data.draw(
+        st_ak.contents(
+            allow_numpy=False,
+            allow_string=False,
+            allow_bytestring=False,
+            allow_regular=False,
+            allow_list_offset=False,
+            allow_list=False,
+            allow_record=False,
+            allow_union=False,
+            allow_indexed=True,
+            allow_indexed_option=False,
+            allow_byte_masked=False,
+            allow_bit_masked=False,
+            allow_unmasked=False,
+            max_depth=1,
+        )
+    )
+    assert len(c) == 0
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_min_length(leaf: bool, min_length: int) -> None:
+    """Assert that min_length constrains the content length."""
+    find(
+        st_ak.contents(min_length=min_length),
+        lambda c: is_leaf(c) == leaf and len(c) == min_length,
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('min_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_min_length_not_recursed(leaf: bool, min_length: int) -> None:
+    """Assert that min_length does not constrain nested content length."""
+    # Inner contents may be shorter than min_length (the bound is
+    # outer-only), mirroring the existing max_length-not-recursed test.
+    find(
+        st_ak.contents(min_length=min_length),
+        lambda c: any(
+            len(n) < min_length and is_leaf(n) == leaf
+            for n in iter_contents(c)
+            if n is not c
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('max_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_max_length(leaf: bool, max_length: int) -> None:
+    """Assert that max_length constrains the content length."""
+    find(
+        st_ak.contents(max_length=max_length),
+        lambda c: is_leaf(c) == leaf and len(c) == max_length,
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('max_length', [1, 2, 5])
+@pytest.mark.parametrize('leaf', [True, False])
+def test_draw_max_length_not_recursed(leaf: bool, max_length: int) -> None:
+    """Assert that max_length does not constrain nested content length."""
+    # TODO: Pass a reachable-only option to `iter_contents` once supported,
+    # so the predicate counts only genuinely reachable inner contents. See
+    # the matching TODO in src/hypothesis_awkward/util/awkward/iter.py.
+    find(
+        st_ak.contents(max_length=max_length),
+        lambda c: any(
+            len(n) > max_length and is_leaf(n) == leaf
+            for n in iter_contents(c)
+            if n is not c
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('min_record_fields', [0, 1, 2, 3])
+def test_draw_min_record_fields(min_record_fields: int, nested: bool) -> None:
+    """Assert a record with exactly `min_record_fields` fields at each position."""
+    find(
+        st_ak.contents(min_record_fields=min_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == min_record_fields
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('max_record_fields', [0, 1, 2, 3])
+def test_draw_max_record_fields(max_record_fields: int, nested: bool) -> None:
+    """Assert a record with exactly `max_record_fields` fields at each position."""
+    find(
+        st_ak.contents(max_record_fields=max_record_fields),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and len(n.contents) == max_record_fields
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND_RARE,
+    )
+
+
+@pytest.mark.parametrize('nested', [True, False])
+@pytest.mark.parametrize('empty', [True, False])
+@pytest.mark.parametrize('is_tuple', [True, False])
+def test_draw_zero_field_record(is_tuple: bool, empty: bool, nested: bool) -> None:
+    """Assert a zero-field record of each flavor, length, and position can be drawn."""
+    find(
+        st_ak.contents(),
+        lambda c: any(
+            isinstance(n, ak.contents.RecordArray)
+            and not n.contents
+            and n.is_tuple == is_tuple
+            and (len(n) == 0) == empty
+            and (n is not c) == nested
+            for n in iter_contents(c)
+        ),
+        settings=FIND_RARE,
+    )
+
+
+def test_draw_min_length_gt_leaf_max_size() -> None:
+    """Assert that `contents()` does not raise when `min_length > max_leaf_size`.
+
+    Regression test. When an option wrapper that forwards `min_length`
+    (e.g. byte/bit-masked or unmasked) recurses with `allow_option_root=False`
+    and `allow_union_root=False`, the inner call can have empty `candidates`
+    while `leaf_max_size < min_length`. The fallback must `assume(...)` the
+    leaf bound rather than raise `InvalidArgument`.
+    """
+    find(
+        st_ak.contents(
+            max_size=3,
+            max_leaf_size=1,
+            min_length=2,
+            allow_numpy=False,
+            allow_empty=False,
+            allow_bytestring=False,
+            allow_regular=False,
+            allow_list_offset=False,
+            allow_list=False,
+            allow_record=False,
+            allow_bit_masked=False,
+            allow_unmasked=False,
+        ),
+        lambda _: True,
+        settings=FIND_NO_SHRINK,
+    )
+
+
+def _leaf_dtypes(c: ak.contents.Content) -> set[np.dtype]:
+    """Dtypes of leaf NumPy arrays contained in `c`."""
+    return {arr.dtype for arr in iter_numpy_arrays(c)}
+
+
+def _nesting_depth(c: ak.contents.Content) -> int:
+    """Maximum structural nesting depth (deepest path through the tree)."""
+    _nesting_types = (
+        ak.contents.RegularArray,
+        ak.contents.ListOffsetArray,
+        ak.contents.ListArray,
+    )
+    _option_types = (
+        ak.contents.IndexedOptionArray,
+        ak.contents.ByteMaskedArray,
+        ak.contents.BitMaskedArray,
+        ak.contents.UnmaskedArray,
+    )
+    if isinstance(c, ak.contents.IndexedArray):
+        return _nesting_depth(c.content)
+    if isinstance(c, _option_types):
+        return _nesting_depth(c.content)
+    if isinstance(c, ak.contents.UnionArray):
+        return 1 + max(_nesting_depth(child) for child in c.contents)
+    if isinstance(c, ak.contents.RecordArray):
+        if not c.contents:
+            return 1
+        return 1 + max(_nesting_depth(child) for child in c.contents)
+    if isinstance(c, _nesting_types):
+        if c.parameter('__array__') in ('string', 'bytestring'):
+            return 0
+        return 1 + _nesting_depth(c.content)
+    return 0
+
+
+def _present_types(c: ak.contents.Content) -> set[str]:
+    """Collect the gated layout-type tags present anywhere in `c`."""
+    present = set[str]()
+    for n in iter_contents(c):
+        if n.parameter('__array__') == 'categorical':
+            present.add('categorical')
+        if is_string_leaf(n):
+            present.add('string')
+            continue
+        elif is_bytestring_leaf(n):
+            present.add('bytestring')
+            continue
+        match n:
+            case ak.contents.NumpyArray():
+                present.add('numpy')
+            case ak.contents.EmptyArray():
+                present.add('empty')
+            case ak.contents.RegularArray():
+                present.add('regular')
+            case ak.contents.ListOffsetArray():
+                present.add('list_offset')
+            case ak.contents.ListArray():
+                present.add('list')
+            case ak.contents.RecordArray():
+                present.add('record')
+            case ak.contents.UnionArray():
+                present.add('union')
+            case ak.contents.IndexedArray():
+                present.add('indexed')
+            case ak.contents.IndexedOptionArray():
+                present.add('indexed_option')
+            case ak.contents.ByteMaskedArray():
+                present.add('byte_masked')
+            case ak.contents.BitMaskedArray():
+                present.add('bit_masked')
+            case ak.contents.UnmaskedArray():
+                present.add('unmasked')
+    return present
+
+
+def test_shrink_len_zero() -> None:
+    """Assert that length-zero shrinks to `EmptyArray`."""
+    c = find(st_ak.contents(), lambda c: len(c) == 0, settings=FIND)
+    assert isinstance(c, EmptyArray)
+
+
+def test_shrink_len_positive() -> None:
+    """Assert that length-positive shrinks."""
+    c = find(st_ak.contents(), lambda c: len(c) > 0, settings=FIND)
+    assert len(c) == 1
+    assert content_size(c) <= 2

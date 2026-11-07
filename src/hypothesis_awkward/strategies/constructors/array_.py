@@ -192,7 +192,7 @@ def arrays(
     <Array ... type='...'>
     """
     layout = draw(
-        st_ak.contents.contents(
+        st_ak.contents(
             dtypes=dtypes,
             max_size=max_size,
             max_leaf_size=max_leaf_size,
