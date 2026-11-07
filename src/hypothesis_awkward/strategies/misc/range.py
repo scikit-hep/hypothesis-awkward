@@ -1,4 +1,4 @@
-from typing import Optional, Protocol, TypeVar
+from typing import Any, Optional, Protocol, TypeVar, overload
 
 from hypothesis import strategies as st
 
@@ -9,14 +9,30 @@ from .idiom import none_or
 T = TypeVar('T')
 
 
-class StMinMaxValuesFactory(Protocol[T]):  # pragma: no cover
+class _StMinMaxValuesFactory(Protocol[T]):  # pragma: no cover
     def __call__(
         self, min_value: Optional[T] = None, max_value: Optional[T] = None
     ) -> st.SearchStrategy[T]: ...
 
 
+# For the default `st_=st.integers`, which mypy rejects for generic `T`.
+@overload
 def ranges(
-    st_: StMinMaxValuesFactory[T] = st.integers,  # type: ignore
+    *,
+    min_start: Optional[int] = None,
+    max_start: Optional[int] = None,
+    min_end: Optional[int] = None,
+    max_end: Optional[int] = None,
+    allow_start_none: bool = True,
+    allow_end_none: bool = True,
+    let_end_none_if_start_none: bool = False,
+    allow_equal: bool = True,
+) -> st.SearchStrategy[tuple[Optional[int], Optional[int]]]: ...
+
+
+@overload
+def ranges(
+    st_: _StMinMaxValuesFactory[T],
     /,
     *,
     min_start: Optional[T] = None,
@@ -27,7 +43,22 @@ def ranges(
     allow_end_none: bool = True,
     let_end_none_if_start_none: bool = False,
     allow_equal: bool = True,
-) -> st.SearchStrategy[tuple[Optional[T], Optional[T]]]:
+) -> st.SearchStrategy[tuple[Optional[T], Optional[T]]]: ...
+
+
+def ranges(
+    st_: _StMinMaxValuesFactory[Any] = st.integers,
+    /,
+    *,
+    min_start: Optional[Any] = None,
+    max_start: Optional[Any] = None,
+    min_end: Optional[Any] = None,
+    max_end: Optional[Any] = None,
+    allow_start_none: bool = True,
+    allow_end_none: bool = True,
+    let_end_none_if_start_none: bool = False,
+    allow_equal: bool = True,
+) -> st.SearchStrategy[tuple[Optional[Any], Optional[Any]]]:
     """Generate two values (start, end) from a strategy, where start <= end.
 
     The minimum and maximum values can be specified by `min_start`,
@@ -61,20 +92,20 @@ def ranges(
     True
     """
 
-    def starts() -> st.SearchStrategy[Optional[T]]:
+    def starts() -> st.SearchStrategy[Optional[Any]]:
         _max_start = safe_min((max_start, max_end))
         _st = st_(min_value=min_start, max_value=_max_start)
         return none_or(_st) if allow_start_none else _st
 
-    def ends(start: T | None) -> st.SearchStrategy[Optional[T]]:
+    def ends(start: Any | None) -> st.SearchStrategy[Optional[Any]]:
         _min_end = safe_max((min_start, start, min_end))
         if min_end is not None and max_end is not None:
-            assert min_end <= max_end  # type: ignore
+            assert min_end <= max_end
         if start is None and let_end_none_if_start_none:
             return st.none()
         _st = st_(min_value=_min_end, max_value=max_end)
         if start is not None and not allow_equal:
-            _st = _st.filter(lambda x: x > start)  # type: ignore
+            _st = _st.filter(lambda x: x > start)
         return none_or(_st) if allow_end_none else _st
 
     return starts().flatmap(lambda start: st.tuples(st.just(start), ends(start=start)))
