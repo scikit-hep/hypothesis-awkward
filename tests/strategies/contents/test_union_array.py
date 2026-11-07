@@ -12,6 +12,7 @@ from awkward._do import mergeable
 from awkward.contents import (
     Content,
     EmptyArray,
+    IndexedArray,
     IndexedOptionArray,
     NumpyArray,
     UnionArray,
@@ -25,6 +26,7 @@ from tests.funcs import (
     assert_kwargs_match_signature,
     awkward_can_check_validity,
 )
+from tests.strategies.contents.test_categorical import _is_categorical
 
 
 class UnionArrayContentsKwargs(TypedDict, total=False):
@@ -256,6 +258,21 @@ def test_draw_different_content_lengths() -> None:
         st_ak.contents.union_array_contents(),
         lambda u: len({len(c) for c in u.contents}) > 1,
         settings=FIND,
+    )
+
+
+def test_draw_categorical_child() -> None:
+    """Assert a non-optional categorical child can be drawn.
+
+    A `UnionArray` accepts a categorical `IndexedArray` as a child, unlike other
+    `IndexedArray`.
+    """
+    find(
+        st_ak.contents.union_array_contents(),
+        lambda u: any(
+            isinstance(c, IndexedArray) and _is_categorical(c) for c in u.contents
+        ),
+        settings=FIND_RARE_NO_SHRINK,
     )
 
 

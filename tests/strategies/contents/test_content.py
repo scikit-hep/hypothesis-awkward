@@ -108,7 +108,12 @@ def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `contents()`'s parameters."""
     assert_kwargs_match_signature(
         func=st_ak.contents.contents,
-        exclude={'allow_union_root', 'allow_option_root', 'allow_indexed_root'},
+        exclude={
+            'allow_union_root',
+            'allow_option_root',
+            'allow_indexed_root',
+            'allow_categorical_root',
+        },
         kwargs_cls=ContentsKwargs,
         defaults=DEFAULTS,
         related_cls=RelatedKwargs,

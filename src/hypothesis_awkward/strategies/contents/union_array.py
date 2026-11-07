@@ -86,6 +86,7 @@ def union_array_contents(
                         allow_invalid=allow_invalid,
                         allow_union_root=False,
                         allow_indexed_root=False,
+                        allow_categorical_root=True,
                     ),
                     max_leaf_size=max_length if max_length is not None else 10,
                     # The clamp keeps min_len <= max_len: content_lists()
@@ -192,7 +193,10 @@ def union_array_from_contents(
     children = draw(
         st_ak.contents.content_lists(
             functools.partial(
-                content, allow_union_root=False, allow_indexed_root=False
+                content,
+                allow_union_root=False,
+                allow_indexed_root=False,
+                allow_categorical_root=True,
             ),
             max_size=max_size,
             max_leaf_size=max_leaf_size,

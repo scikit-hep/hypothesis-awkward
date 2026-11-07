@@ -19,6 +19,7 @@ from hypothesis_awkward.util import content_size, leaf_size
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature, awkward_can_check_validity
+from tests.strategies.contents.test_categorical import _is_categorical
 
 
 class UnionArrayFromContentsKwargs(TypedDict, total=False):
@@ -128,7 +129,10 @@ def test_properties(data: st.DataObject) -> None:
     assert len(children) >= 2
 
     # Assert no child is of a type that `UnionArray` does not allow as a child
-    assert not any(isinstance(c, (UnionArray, IndexedArray)) for c in children)
+    assert not any(isinstance(c, UnionArray) for c in children)
+    assert not any(
+        isinstance(c, IndexedArray) and not _is_categorical(c) for c in children
+    )
 
     # Assert the children are all option types or none is
     assert len({c.is_option for c in children}) == 1
@@ -183,6 +187,17 @@ def test_draw_all_option() -> None:
     find(
         _st_union(),
         lambda u: all(c.is_option for c in u.contents),
+        settings=FIND_RARE_NO_SHRINK,
+    )
+
+
+def test_draw_categorical_child() -> None:
+    """Assert a non-optional categorical child can be drawn."""
+    find(
+        _st_union(),
+        lambda u: any(
+            isinstance(c, IndexedArray) and _is_categorical(c) for c in u.contents
+        ),
         settings=FIND_RARE_NO_SHRINK,
     )
 
