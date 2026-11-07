@@ -1,3 +1,4 @@
+import functools
 from typing import Any, TypedDict, cast
 
 import numpy as np
@@ -17,10 +18,15 @@ from awkward.contents import (
     RecordArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import is_bytestring_leaf, is_string_leaf
+from hypothesis_awkward.util import is_bytestring_leaf, is_string_leaf, iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE
-from tests.funcs import KwargsDrawn, all_distinct, assert_kwargs_match_signature
+from tests.funcs import (
+    KwargsDrawn,
+    all_distinct,
+    assert_kwargs_match_signature,
+    awkward_can_check_unique,
+)
 
 
 class CategoricalContentsKwargs(TypedDict, total=False):
@@ -65,6 +71,19 @@ class RelatedKwargs(TypedDict, total=False):
     max_size: int | None
     allow_indexed: bool
     allow_indexed_option: bool
+
+
+_st_contents_categorical = functools.partial(
+    st_ak.contents.contents,
+    allow_regular=False,
+    allow_list_offset=False,
+    allow_list=False,
+    allow_record=False,
+    allow_union=False,
+    allow_byte_masked=False,
+    allow_bit_masked=False,
+    allow_unmasked=False,
+)
 
 
 def test_kwargs_match_signature() -> None:
@@ -178,7 +197,7 @@ def test_properties(data: st.DataObject) -> None:
     # Assert the options were effective
     allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
     if not allow_invalid:
-        if _awkward_can_check_unique(categories):
+        if awkward_can_check_unique(categories):
             # Awkward checks that the categories are unique
             assert ak.validity_error(result) == ''
         else:
@@ -306,6 +325,71 @@ def test_draw_unused_category() -> None:
     )
 
 
+def test_draw_from_contents() -> None:
+    """Assert `contents()` can generate categorical data as outermost."""
+    find(st_ak.contents.contents(), _is_categorical, settings=FIND)
+
+
+@pytest.mark.parametrize(
+    'type_, flag',
+    [
+        pytest.param(IndexedArray, 'allow_indexed_option', id='indexed'),
+        pytest.param(IndexedOptionArray, 'allow_indexed', id='indexed-option'),
+    ],
+)
+def test_draw_from_contents_one_flavor(type_: type[Content], flag: str) -> None:
+    """Assert `contents()` can generate a flavor if the other one is not allowed."""
+    kwargs = cast(dict[str, Any], {flag: False})
+    find(
+        st_ak.contents.contents(**kwargs),
+        lambda c: isinstance(c, type_) and _is_categorical(c),
+        settings=FIND,
+    )
+
+
+def test_draw_from_contents_nested() -> None:
+    """Assert `contents()` can generate categorical data below the outermost node."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: any(n is not c and _is_categorical(n) for n in iter_contents(c)),
+        settings=FIND,
+    )
+
+
+def test_draw_from_contents_duplicate_categories() -> None:
+    """Assert `contents()` can generate duplicate categories by default."""
+    find(
+        st_ak.contents.contents(),
+        lambda c: _is_categorical(c) and _has_duplicate_category(c.content),
+        settings=FIND,
+    )
+
+
+def test_draw_from_contents_not_allow_invalid() -> None:
+    """Assert `contents()` can generate categories if not `allow_invalid`."""
+    find(
+        st_ak.contents.contents(allow_invalid=False),
+        lambda c: _is_categorical(c) and len(c.content) >= 2,
+        settings=FIND,
+    )
+
+
+@given(c=_st_contents_categorical(allow_invalid=False, allow_indexed=False))
+def test_from_contents_distinct_not_allow_invalid(c: Content) -> None:
+    """Assert `contents()` passes `allow_invalid=False` on to categorical data."""
+    assert not any(
+        _has_duplicate_category(n.content)
+        for n in iter_contents(c)
+        if _is_categorical(n)
+    )
+
+
+@given(c=_st_contents_categorical(allow_indexed=False))
+def test_from_contents_not_allow_indexed(c: Content) -> None:
+    """Assert `contents()` generates no `IndexedArray` if not `allow_indexed`."""
+    assert not any(isinstance(n, IndexedArray) for n in iter_contents(c))
+
+
 def test_raise_no_flavor() -> None:
     """Assert `ValueError` if both flavors are disallowed."""
     with pytest.raises(ValueError):
@@ -388,18 +472,8 @@ def test_reject_non_unique_content_from_strategy() -> None:
         )
 
 
-def _awkward_can_check_unique(categories: Content) -> bool:
-    """Return True unless Awkward's uniqueness check fails on the dtype."""
-    if not isinstance(categories, NumpyArray):
-        return True
-    dtype = categories.data.dtype
-    # TODO: Remove when the fix of scikit-hep/awkward#4259 is released.
-    if dtype == np.float16:
-        return False
-    # TODO: Remove when scikit-hep/awkward#4509 is fixed.
-    if dtype.kind == 'c':
-        return False
-    return True
+def _is_categorical(c: Content) -> bool:
+    return c.parameter('__array__') == 'categorical'
 
 
 def _n_nat(c: Content) -> int:

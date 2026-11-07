@@ -20,7 +20,11 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward.util import iter_contents
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE_NO_SHRINK
-from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
+from tests.funcs import (
+    KwargsDrawn,
+    assert_kwargs_match_signature,
+    awkward_can_check_validity,
+)
 
 
 class UnionArrayContentsKwargs(TypedDict, total=False):
@@ -79,6 +83,7 @@ def _contents_list(draw: st.DrawFn, *, allow_invalid: bool) -> list[Content]:
             st_ak.contents.contents(
                 max_leaf_size=5,
                 max_depth=2,
+                allow_invalid=allow_invalid,
                 allow_union=False,
                 allow_option_root=False,
                 allow_indexed_root=False,
@@ -224,14 +229,15 @@ def test_properties(data: st.DataObject) -> None:
     assert min_length <= len(result) <= sc(max_length)
 
     allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
-    if not allow_invalid:
+    if not allow_invalid and awkward_can_check_validity(result):
         assert ak.validity_error(result) == ''
 
 
 @given(u=st_ak.contents.union_array_contents(allow_invalid=False))
 def test_valid_not_allow_invalid(u: UnionArray) -> None:
     """Assert the union is valid if not `allow_invalid`, with no other options."""
-    assert ak.validity_error(u) == ''
+    if awkward_can_check_validity(u):
+        assert ak.validity_error(u) == ''
 
 
 @pytest.mark.parametrize('max_contents', [2, 3, 4])

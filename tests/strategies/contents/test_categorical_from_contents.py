@@ -18,11 +18,12 @@ from hypothesis_awkward.strategies.contents.option import StOption
 from hypothesis_awkward.util import content_size, leaf_size
 from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK
-from tests.funcs import all_distinct, assert_kwargs_match_signature
-from tests.strategies.contents.test_categorical import (
-    _awkward_can_check_unique,
-    _has_duplicate_category,
+from tests.funcs import (
+    all_distinct,
+    assert_kwargs_match_signature,
+    awkward_can_check_unique,
 )
+from tests.strategies.contents.test_categorical import _has_duplicate_category
 
 
 class CategoricalFromContentsKwargs(TypedDict, total=False):
@@ -153,7 +154,7 @@ def test_properties(data: st.DataObject) -> None:
 
     allow_invalid = kwargs.get('allow_invalid', DEFAULTS['allow_invalid'])
     if not allow_invalid:
-        if _awkward_can_check_unique(categories):
+        if awkward_can_check_unique(categories):
             assert ak.validity_error(result) == ''
         else:
             assert isinstance(categories, NumpyArray)

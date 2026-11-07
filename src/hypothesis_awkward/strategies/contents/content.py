@@ -1,5 +1,6 @@
 import functools
-from typing import Protocol
+from collections.abc import Callable
+from typing import Any, Protocol
 
 import numpy as np
 from hypothesis import assume
@@ -11,6 +12,7 @@ from hypothesis_awkward.util import safe_compare as sc
 
 from .bit_masked_array import bit_masked_array_from_contents
 from .byte_masked_array import byte_masked_array_from_contents
+from .categorical import categorical_from_contents
 from .indexed_array import indexed_array_from_contents
 from .indexed_option_array import indexed_option_array_from_contents
 from .leaf import leaf_contents
@@ -42,6 +44,7 @@ def contents(
     allow_union: bool = True,
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
+    allow_categorical: bool = True,
     allow_byte_masked: bool = True,
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
@@ -73,6 +76,7 @@ def contents(
     - [`BitMaskedArray`][ak.contents.BitMaskedArray]
     - [`UnmaskedArray`][ak.contents.UnmaskedArray]
     - [`UnionArray`][ak.contents.UnionArray]
+    - Categorical data
 
     Each type can be excluded separately with the corresponding `allow_*` argument.
 
@@ -97,7 +101,8 @@ def contents(
     allow_invalid
         Layouts that [`ak.validity_error`][] and [`ak.is_valid`][] consider invalid can
         be generated if `True`: [`UnionArray`][ak.contents.UnionArray] with mergeable
-        contents. Every generated layout is valid if `False`.
+        contents and categorical data with duplicate categories. Examples can shrink
+        to such layouts. Every generated layout is valid if `False`.
     allow_numpy
         No [`NumpyArray`][ak.contents.NumpyArray] is generated if `False`.
     allow_empty
@@ -139,6 +144,11 @@ def contents(
     allow_indexed_option
         No [`IndexedOptionArray`][ak.contents.IndexedOptionArray] is generated if
         `False`.
+    allow_categorical
+        No categorical data is generated if `False`. Categorical data is an
+        [`IndexedArray`][ak.contents.IndexedArray] or an
+        [`IndexedOptionArray`][ak.contents.IndexedOptionArray], so `allow_indexed` and
+        `allow_indexed_option` also apply to it.
     allow_byte_masked
         No [`ByteMaskedArray`][ak.contents.ByteMaskedArray] is generated if `False`.
     allow_bit_masked
@@ -292,6 +302,7 @@ def contents(
         allow_union=allow_union,
         allow_indexed=allow_indexed,
         allow_indexed_option=allow_indexed_option,
+        allow_categorical=allow_categorical,
         allow_byte_masked=allow_byte_masked,
         allow_bit_masked=allow_bit_masked,
         allow_unmasked=allow_unmasked,
@@ -329,6 +340,17 @@ def contents(
         candidates.append(bit_masked_array_from_contents)
     if allow_unmasked and allow_option_root:
         candidates.append(unmasked_array_from_contents)
+    categorical_indexed = allow_indexed and allow_indexed_root
+    categorical_option = allow_indexed_option and allow_option_root
+    if allow_categorical and (categorical_indexed or categorical_option):
+        candidates.append(
+            functools.partial(
+                _categorical_from_leaves,
+                allow_invalid=allow_invalid,
+                allow_indexed=categorical_indexed,
+                allow_indexed_option=categorical_option,
+            )
+        )
 
     if not candidates:
         # No wrapper is possible at this node (e.g. a root-excluded type);
@@ -359,6 +381,14 @@ def contents(
             st_option=st_option_,
         )
     )
+
+
+def _categorical_from_leaves(
+    content: Callable[..., st.SearchStrategy[Content]], **kwargs: Any
+) -> st.SearchStrategy[Content]:
+    """Return `categorical_from_contents()` with leaves of `content` as categories."""
+    leaves = functools.partial(content, max_depth=0, allow_record=False)
+    return categorical_from_contents(leaves, **kwargs)
 
 
 class StContent(Protocol):
