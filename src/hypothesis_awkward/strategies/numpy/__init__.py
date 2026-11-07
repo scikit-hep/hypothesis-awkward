@@ -8,12 +8,10 @@ https://awkward-array.org/doc/stable/user-guide/how-to-convert-numpy.html
 """
 
 __all__ = [
-    'supported_dtype_names',
     'supported_dtypes',
     'numpy_dtypes',
     'numpy_arrays',
-    'from_numpy',
 ]
 
-from .dtype import numpy_dtypes, supported_dtype_names, supported_dtypes
-from .numpy import from_numpy, numpy_arrays
+from .dtype import numpy_dtypes, supported_dtypes
+from .numpy import numpy_arrays

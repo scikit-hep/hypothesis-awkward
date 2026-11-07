@@ -13,6 +13,7 @@ from hypothesis_awkward._util import (
     iter_contents,
     iter_numpy_arrays,
 )
+from hypothesis_awkward.strategies.numpy.numpy import from_numpy
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature
 from tests.record import RecordDraws
@@ -36,7 +37,7 @@ DEFAULTS = FromNumpyKwargs(
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `from_numpy()`."""
     assert_kwargs_match_signature(
-        func=st_ak.numpy.from_numpy, kwargs_cls=FromNumpyKwargs, defaults=DEFAULTS
+        func=from_numpy, kwargs_cls=FromNumpyKwargs, defaults=DEFAULTS
     )
 
 
@@ -70,7 +71,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs = data.draw(from_numpy_kwargs(), label='kwargs')
 
     # Call the test subject
-    a = data.draw(st_ak.numpy.from_numpy(**kwargs), label='a')
+    a = data.draw(from_numpy(**kwargs), label='a')
     assert isinstance(a, ak.Array)
 
     # Assert the options were effective
@@ -114,7 +115,7 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_structured() -> None:
     """Assert that structured arrays can be drawn by default."""
     find(
-        st_ak.numpy.from_numpy(),
+        from_numpy(),
         lambda a: isinstance(a.layout, ak.contents.RecordArray),
         settings=FIND_NO_SHRINK,
     )
@@ -124,7 +125,7 @@ def test_draw_nan() -> None:
     """Assert that arrays with NaN can be drawn when allowed."""
     floating_dtypes = st_ak.numpy.supported_dtypes().filter(lambda d: d.kind == 'f')
     find(
-        st_ak.numpy.from_numpy(dtype=floating_dtypes, allow_nan=True),
+        from_numpy(dtype=floating_dtypes, allow_nan=True),
         any_nan_in_awkward_array,
         settings=FIND_NO_SHRINK,
     )
@@ -134,7 +135,7 @@ def test_draw_nat_datetime64() -> None:
     """Assert that datetime64 arrays with NaT can be drawn when allowed."""
     datetime64_dtypes = st_ak.numpy.supported_dtypes().filter(lambda d: d.kind == 'M')
     find(
-        st_ak.numpy.from_numpy(dtype=datetime64_dtypes, allow_nan=True),
+        from_numpy(dtype=datetime64_dtypes, allow_nan=True),
         any_nat_in_awkward_array,
         settings=FIND_NO_SHRINK,
     )
@@ -144,7 +145,7 @@ def test_draw_nat_timedelta64() -> None:
     """Assert that timedelta64 arrays with NaT can be drawn when allowed."""
     timedelta64_dtypes = st_ak.numpy.supported_dtypes().filter(lambda d: d.kind == 'm')
     find(
-        st_ak.numpy.from_numpy(dtype=timedelta64_dtypes, allow_nan=True),
+        from_numpy(dtype=timedelta64_dtypes, allow_nan=True),
         any_nat_in_awkward_array,
         settings=FIND_NO_SHRINK,
     )
@@ -152,13 +153,13 @@ def test_draw_nat_timedelta64() -> None:
 
 def test_draw_empty() -> None:
     """Assert that empty arrays can be drawn by default."""
-    find(st_ak.numpy.from_numpy(), lambda a: len(a) == 0, settings=FIND_NO_SHRINK)
+    find(from_numpy(), lambda a: len(a) == 0, settings=FIND_NO_SHRINK)
 
 
 def test_draw_regulararray() -> None:
     """Assert that RegularArray layout can be drawn with regulararray=True."""
     find(
-        st_ak.numpy.from_numpy(allow_structured=False, regulararray=True),
+        from_numpy(allow_structured=False, regulararray=True),
         lambda a: isinstance(a.layout, ak.contents.RegularArray),
         settings=FIND_NO_SHRINK,
     )
@@ -167,7 +168,7 @@ def test_draw_regulararray() -> None:
 def test_draw_max_size() -> None:
     """Assert that arrays with max_size elements can be drawn by default."""
     find(
-        st_ak.numpy.from_numpy(allow_structured=False),
+        from_numpy(allow_structured=False),
         lambda a: _size(a) == DEFAULTS['max_size'],
         settings=FIND_NO_SHRINK,
     )
