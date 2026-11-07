@@ -283,8 +283,6 @@
       
         
       
-        
-      
     
     
     
@@ -627,8 +625,6 @@
       
         
           
-        
-      
         
       
         
@@ -1139,100 +1135,6 @@
 
                 
               
-                
-                  
-  
-  
-  
-  
-    
-    
-      
-        
-      
-    
-    
-    
-      
-      
-        
-          
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
-        
-          
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Util
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        
-          <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
-            <label class="md-nav__title" for="__nav_3_3">
-              <span class="md-nav__icon md-icon"></span>
-              
-  
-  Util
-
-            </label>
-            <ul class="md-nav__list" data-md-scrollfix>
-              
-                
-                  
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../util/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Util
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-                
-              
-            </ul>
-          </nav>
-        
-      
-    </li>
-  
-
-                
-              
             </ul>
           </nav>
         
@@ -1547,8 +1449,6 @@
       
         
           
-        
-      
         
       
         
@@ -2507,7 +2407,7 @@ other <a class="autorefs autorefs-external" href="https://awkward-array.org/doc/
                 <code>st_content</code>
             </td>
             <td>
-                  <code><span title="hypothesis_awkward.strategies.contents.content.StContent">StContent</span></code>
+                  <code><span title="hypothesis_awkward.strategies.contents._types.StContent">StContent</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2528,7 +2428,8 @@ for a single content.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Upper bound on total <code>content_size()</code> across all contents in the list.</p>
+                <p>Upper bound on the number of scalars summed over all contents in the list,
+counted as for <code>max_size</code> in <code>contents()</code>.</p>
               </div>
             </td>
             <td>
@@ -2544,7 +2445,8 @@ for a single content.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Maximum total number of leaf elements across all contents in the list.</p>
+                <p>Upper bound on the number of leaf elements summed over all contents in the list,
+counted as for <code>max_leaf_size</code> in <code>contents()</code>.</p>
               </div>
             </td>
             <td>
@@ -2605,7 +2507,7 @@ whether all children are option-wrapped. Requires <code>st_option</code>.</p>
                 <code>st_option</code>
             </td>
             <td>
-                  <code><span title="hypothesis_awkward.strategies.contents.option.StOption">StOption</span> | None</code>
+                  <code><span title="hypothesis_awkward.strategies.contents._types.StOption">StOption</span> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3971,8 +3873,8 @@ a concrete list, or <code>None</code> to draw random children.</p>
   <p>With at least one field, the length is derived from the children as
 <code>min(len(c) for c in contents)</code>, capped by <code>max_length</code>. A record with no fields has
 no children and stores no data, so nothing derives its length; it is drawn between
-<code>min_length</code> and <code>max_length</code> instead. When <code>max_length</code> is <code>None</code>, the ceiling is
-<code>MAX_LENGTH_NO_FIELDS</code>, raised to <code>min_length</code> if that is larger.</p>
+<code>min_length</code> and <code>max_length</code> instead. When <code>max_length</code> is <code>None</code>, the ceiling is an
+internal value, raised to <code>min_length</code> if that is larger.</p>
 </details>
 
 <p><span class="doc-section-title">Examples:</span></p>
