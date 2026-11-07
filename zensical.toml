@@ -17,11 +17,13 @@ nav = [
     ] },
     { "API Reference" = [
         { "Overview" = "reference/index.md" },
-        { "Strategies" = [
-            { "Constructors" = "reference/strategies/constructors.md" },
-            { "Contents" = "reference/strategies/contents.md" },
-            { "NumPy" = "reference/strategies/numpy.md" },
-            { "Builtins" = "reference/strategies/builtins.md" },
+        { "strategies" = [
+            "reference/strategies/index.md",
+            { "constructors" = "reference/strategies/constructors.md" },
+            { "content" = "reference/strategies/content.md" },
+            { "numpy" = "reference/strategies/numpy.md" },
+            { "builtin" = "reference/strategies/builtin.md" },
+            { "misc" = "reference/strategies/misc.md" },
         ] },
     ] },
 ]

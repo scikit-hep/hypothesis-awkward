@@ -2,16 +2,12 @@
 
 <!-- diataxis: reference -->
 
-**Modules:**
+The pages follow the import structure of `hypothesis_awkward.strategies`:
 
-| Name           | Description                                                             |
-| -------------- | ----------------------------------------------------------------------- |
-| [constructors] | The main strategy.                                                      |
-| [contents]     | Strategies for contents (layouts).                                      |
-| [numpy]        | Strategies related to NumPy in the context of Awkward Array.            |
-| [builtins]     | Strategies for built-in Python objects in the context of Awkward Array. |
-
-[constructors]: strategies/constructors.md
-[contents]: strategies/contents.md
-[numpy]: strategies/numpy.md
-[builtins]: strategies/builtins.md
+- [`hypothesis_awkward.strategies`](strategies/index.md): strategies for Awkward
+  Array classes
+  - [`constructors`](strategies/constructors.md): the main strategy
+  - [`content`](strategies/content.md): other content strategies
+  - [`numpy`](strategies/numpy.md): strategies related to NumPy
+  - [`builtin`](strategies/builtin.md): strategies for built-in Python objects
+  - [`misc`](strategies/misc.md): general helpers

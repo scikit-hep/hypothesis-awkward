@@ -17,8 +17,8 @@ their layout** — the low-level structure of an Awkward Array, a tree of
 [direct constructors](https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html)
 section of the Awkward Array documentation.
 
-The library includes [strategies](../reference/strategies/contents.md) for each
-of `EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`, `ListArray`,
+The library includes [strategies](../reference/strategies/index.md) for each of
+`EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`, `ListArray`,
 `RecordArray`, `UnionArray`, `IndexedArray`, `IndexedOptionArray`,
 `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as well as for strings,
 bytestrings, and categorical data. The main strategy `arrays()` generates nested
