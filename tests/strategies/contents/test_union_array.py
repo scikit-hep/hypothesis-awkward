@@ -18,8 +18,8 @@ from awkward.contents import (
     UnionArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import iter_contents
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import iter_contents
+from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND, FIND_NO_SHRINK, FIND_RARE_NO_SHRINK
 from tests.funcs import (
     KwargsDrawn,

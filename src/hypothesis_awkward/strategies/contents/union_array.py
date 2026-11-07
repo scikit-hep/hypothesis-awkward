@@ -1,5 +1,4 @@
 import functools
-from typing import TYPE_CHECKING
 
 import numpy as np
 from hypothesis import assume
@@ -9,13 +8,10 @@ import awkward as ak
 from awkward._do import mergeable
 from awkward.contents import Content, UnionArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import content_size
+from hypothesis_awkward._util import content_size
 
+from ._types import StContent, StOption
 from .option import option_from_contents
-
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
 
 
 @st.composite
@@ -123,14 +119,14 @@ def union_array_contents(
 @st.composite
 def union_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
     allow_invalid: bool = True,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> UnionArray:
     """Strategy for [`ak.contents.UnionArray`][] instances within a size budget.
 
@@ -148,9 +144,11 @@ def union_array_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`.
     max_length
@@ -168,7 +166,6 @@ def union_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = union_array_from_contents(
     ...     contents,
@@ -179,12 +176,6 @@ def union_array_from_contents(
     ...     st_option=option_from_contents,
     ... ).example()
     >>> isinstance(c, UnionArray)
-    True
-
-    >>> content_size(c) <= 20
-    True
-
-    >>> leaf_size(c) <= 10
     True
 
     >>> 2 <= len(c) <= 5

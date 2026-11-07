@@ -2,10 +2,10 @@ from typing import Optional, TypeVar
 
 from hypothesis import strategies as st
 
-T = TypeVar('T')
+_T = TypeVar('_T')
 
 
-def none_or(st_: st.SearchStrategy[T]) -> st.SearchStrategy[Optional[T]]:
+def none_or(st_: st.SearchStrategy[_T]) -> st.SearchStrategy[Optional[_T]]:
     """A strategy for `None` or values from another strategy.
 
     >>> v = none_or(st.integers()).example()

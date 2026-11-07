@@ -5,12 +5,12 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
 import awkward as ak
-from hypothesis_awkward.util import n_scalars_in
+from hypothesis_awkward._util import n_scalars_in
 
 from .dtype import numpy_dtypes, supported_dtypes
 
 # https://github.com/HypothesisWorks/hypothesis/blob/86d8a4d/hypothesis-python/src/hypothesis/extra/_array_helpers.py#L68
-NDIM_MAX = 32
+_NDIM_MAX = 32
 
 
 @st.composite
@@ -198,10 +198,10 @@ def _st_shape(
 
     max_side = draw(st.integers(min_value=min_max_side, max_value=max_max_side))
     if max_side == 1:
-        max_max_dims = min(NDIM_MAX, max_items)
+        max_max_dims = min(_NDIM_MAX, max_items)
     else:
         max_max_dims = min(
-            NDIM_MAX, math.floor(math.log(max_items) / math.log(max_side))
+            _NDIM_MAX, math.floor(math.log(max_items) / math.log(max_side))
         )
     if max_dims is not None:
         max_max_dims = min(max_max_dims, max_dims)

@@ -6,7 +6,7 @@ from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import (
+from hypothesis_awkward._util import (
     any_nan_in_awkward_array,
     any_nan_nat_in_awkward_array,
     any_nat_in_awkward_array,
@@ -15,6 +15,7 @@ from hypothesis_awkward.util import (
 )
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature
+from tests.record import RecordDraws
 
 
 class FromNumpyKwargs(TypedDict, total=False):
@@ -48,7 +49,7 @@ def from_numpy_kwargs(draw: st.DrawFn) -> FromNumpyKwargs:
             optional={
                 'dtype': st.one_of(
                     st.none(),
-                    st.just(st_ak.RecordDraws(st_ak.supported_dtypes())),
+                    st.just(RecordDraws(st_ak.supported_dtypes())),
                     st_ak.supported_dtypes(),
                 ),
                 'allow_structured': st.booleans(),
@@ -91,7 +92,7 @@ def test_properties(data: st.DataObject) -> None:
         case np.dtype():
             assert len(dtypes) == 1
             assert dtype in dtypes
-        case st_ak.RecordDraws():
+        case RecordDraws():
             drawn_dtypes = {d for d in dtype.drawn}
             assert dtypes <= drawn_dtypes
 

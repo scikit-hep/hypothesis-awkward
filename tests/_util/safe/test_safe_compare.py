@@ -4,7 +4,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from hypothesis_awkward.util import safe_compare
+from hypothesis_awkward._util import safe_compare
 
 st_num = st.integers() | st.floats(allow_nan=False) | st.sampled_from([0, 0.0, -0.0])
 

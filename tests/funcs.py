@@ -5,7 +5,7 @@ from collections.abc import Callable, Mapping, Sequence, Set
 from typing import Any, Generic, NamedTuple, TypeVar
 
 from awkward.contents import Content, NumpyArray
-from hypothesis_awkward.util import iter_contents
+from hypothesis_awkward._util import iter_contents
 
 K = TypeVar('K')
 D = TypeVar('D')

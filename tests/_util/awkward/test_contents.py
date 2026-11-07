@@ -18,7 +18,7 @@ from awkward.contents import (
     UnmaskedArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import (
+from hypothesis_awkward._util import (
     get_contents,
     is_bytestring_leaf,
     is_string_leaf,

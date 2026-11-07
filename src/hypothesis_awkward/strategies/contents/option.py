@@ -1,17 +1,13 @@
-from typing import TYPE_CHECKING, Protocol
-
 from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import safe_compare as sc
 
+from ._types import StContent
 from .indexed_option_array import indexed_option_array_contents
 from .masked import masked_contents
-
-if TYPE_CHECKING:
-    from .content import StContent
 
 
 def option_contents(
@@ -138,22 +134,10 @@ def _option_contents(
     return draw(st.one_of(options))
 
 
-class StOption(Protocol):
-    """Callable that wraps content drawn from a `StContent` in an option type."""
-
-    def __call__(
-        self,
-        content: 'StContent',
-        *,
-        max_size: int,
-        max_leaf_size: int | None,
-    ) -> st.SearchStrategy[Content]: ...
-
-
 @st.composite
 def option_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None,
@@ -173,9 +157,11 @@ def option_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`. Forwarded to the inner `content(...)` call
         so the inner content meets the floor, and to `option_contents` as

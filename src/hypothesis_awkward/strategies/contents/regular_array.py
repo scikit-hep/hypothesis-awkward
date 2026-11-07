@@ -1,14 +1,10 @@
-from typing import TYPE_CHECKING
-
 from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content, RegularArray
 from hypothesis_awkward import strategies as st_ak
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
 
 @st.composite
@@ -201,13 +197,13 @@ def _st_group_sizes(
 @st.composite
 def regular_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> RegularArray:
     """Strategy for inner [`ak.contents.RegularArray`][] within an outer layout.
 
@@ -221,9 +217,11 @@ def regular_array_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`.
     max_length
@@ -237,18 +235,11 @@ def regular_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = regular_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, max_length=5
     ... ).example()
     >>> isinstance(c, RegularArray)
-    True
-
-    >>> content_size(c) <= 20
-    True
-
-    >>> leaf_size(c) <= 10
     True
 
     >>> len(c) <= 5

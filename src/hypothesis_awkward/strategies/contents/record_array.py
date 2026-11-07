@@ -1,18 +1,15 @@
 import string
-from typing import TYPE_CHECKING
 
 from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content, RecordArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import content_size
+from hypothesis_awkward._util import content_size
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
-MAX_LENGTH_NO_FIELDS = 5
+_MAX_LENGTH_NO_FIELDS = 5
 
 
 @st.composite
@@ -50,8 +47,8 @@ def record_array_contents(
     With at least one field, the length is derived from the children as
     `min(len(c) for c in contents)`, capped by `max_length`. A record with no fields has
     no children and stores no data, so nothing derives its length; it is drawn between
-    `min_length` and `max_length` instead. When `max_length` is `None`, the ceiling is
-    `MAX_LENGTH_NO_FIELDS`, raised to `min_length` if that is larger.
+    `min_length` and `max_length` instead. When `max_length` is `None`, the ceiling is an
+    internal value, raised to `min_length` if that is larger.
 
     Examples
     --------
@@ -114,7 +111,7 @@ def record_array_contents(
     else:
         # A record with no fields stores no data, so nothing derives its length.
         if max_length is None:
-            max_length = max(min_length, MAX_LENGTH_NO_FIELDS)
+            max_length = max(min_length, _MAX_LENGTH_NO_FIELDS)
         assume(min_length <= max_length)
         length = draw(st.integers(min_value=min_length, max_value=max_length))
     return RecordArray(contents, fields=fields, length=length)
@@ -123,7 +120,7 @@ def record_array_contents(
 @st.composite
 def record_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
@@ -131,7 +128,7 @@ def record_array_from_contents(
     max_fields: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> RecordArray:
     """Strategy for [`ak.contents.RecordArray`][] instances within a size budget.
 
@@ -147,9 +144,11 @@ def record_array_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns a strategy
         for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_fields
         Lower bound on the number of fields, i.e., `len(result.contents)`.
     max_fields
@@ -168,18 +167,11 @@ def record_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = record_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, min_length=2, max_length=5
     ... ).example()
     >>> isinstance(c, RecordArray)
-    True
-
-    >>> content_size(c) <= 20
-    True
-
-    >>> leaf_size(c) <= 10
     True
 
     >>> 2 <= len(c) <= 5

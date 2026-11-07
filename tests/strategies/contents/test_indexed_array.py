@@ -8,8 +8,8 @@ from hypothesis import strategies as st
 import awkward as ak
 from awkward.contents import Content, IndexedArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import iter_contents
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import iter_contents
+from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND, FIND_RARE, FIND_RARE_NO_SHRINK
 from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 

@@ -68,7 +68,7 @@ inherited `VIRTUAL_ENV`.
 - **`strategies/`** — public Hypothesis strategies (imported as
   `hypothesis_awkward.strategies`). Subpackages: `numpy/`, `builtins_/`,
   `contents/`, `constructors/`, `forms/`, `types/`, `misc/`.
-- **`util/`** — internal utilities for dtype handling, safe comparisons, layout
+- **`_util/`** — internal utilities for dtype handling, safe comparisons, layout
   iteration, and array introspection.
 
 ### Strategy Design Pattern

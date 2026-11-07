@@ -112,8 +112,8 @@ def content_own_size(c: Content, /) -> int:
     index, numeric data) and metadata values (`RegularArray.size`,
     [`RecordArray`][ak.contents.RecordArray] field names, [`BitMaskedArray`][ak.contents.BitMaskedArray]/[`ByteMaskedArray`][ak.contents.ByteMaskedArray] flags).
     Does **not** recurse into sub-contents — that is handled by
-    [content_size][hypothesis_awkward.util.content_size] via
-    [get_contents][hypothesis_awkward.util.get_contents].
+    [content_size][hypothesis_awkward._util.content_size] via
+    [get_contents][hypothesis_awkward._util.get_contents].
 
     Dispatch is performed with [functools.singledispatch][] so support for a
     new [`Content`][ak.contents.Content] subclass can be added by calling

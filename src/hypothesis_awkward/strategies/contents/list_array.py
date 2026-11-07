@@ -1,17 +1,13 @@
-from typing import TYPE_CHECKING
-
 from hypothesis import assume, reject
 from hypothesis import strategies as st
 
 import awkward as ak
 from awkward.contents import Content, ListArray
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import safe_compare as sc
-from hypothesis_awkward.util import safe_min
+from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward._util import safe_min
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
 
 @st.composite
@@ -293,13 +289,13 @@ def _st_starts_stops_out_of_order(
 @st.composite
 def list_array_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
     min_length: int = 0,
     max_length: int | None = None,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> ListArray:
     """Strategy for inner [`ak.contents.ListArray`][] within an outer layout.
 
@@ -313,9 +309,11 @@ def list_array_from_contents(
         A callable that accepts `max_size` and `max_leaf_size` and returns
         a strategy for a single content.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`.
     max_length
@@ -329,18 +327,11 @@ def list_array_from_contents(
 
     Examples
     --------
-    >>> from hypothesis_awkward.util import content_size, leaf_size
     >>> contents = st_ak.contents.contents
     >>> c = list_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, max_length=5
     ... ).example()
     >>> isinstance(c, ListArray)
-    True
-
-    >>> content_size(c) <= 20
-    True
-
-    >>> leaf_size(c) <= 10
     True
 
     >>> len(c) <= 5

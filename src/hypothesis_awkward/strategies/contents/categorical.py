@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 import numpy as np
 from hypothesis import assume
 from hypothesis import strategies as st
@@ -13,13 +11,11 @@ from awkward.contents import (
     NumpyArray,
 )
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.util import content_size, is_bytestring_leaf, is_string_leaf
+from hypothesis_awkward._util import content_size, is_bytestring_leaf, is_string_leaf
 
-if TYPE_CHECKING:
-    from .content import StContent
-    from .option import StOption
+from ._types import StContent, StOption
 
-CATEGORICAL = {'__array__': 'categorical'}
+_CATEGORICAL = {'__array__': 'categorical'}
 
 
 @st.composite
@@ -129,20 +125,20 @@ def categorical_contents(
                     categories, min_size=min_size, max_size=max_size
                 )
             )
-            return IndexedArray(c.index, c.content, parameters=CATEGORICAL)
+            return IndexedArray(c.index, c.content, parameters=_CATEGORICAL)
         case _:
             o = draw(
                 st_ak.contents.indexed_option_array_contents(
                     categories, min_size=min_size, max_size=max_size
                 )
             )
-            return IndexedOptionArray(o.index, o.content, parameters=CATEGORICAL)
+            return IndexedOptionArray(o.index, o.content, parameters=_CATEGORICAL)
 
 
 @st.composite
 def categorical_from_contents(
     draw: st.DrawFn,
-    content: 'StContent',
+    content: StContent,
     *,
     max_size: int,
     max_leaf_size: int | None = None,
@@ -151,7 +147,7 @@ def categorical_from_contents(
     allow_invalid: bool = True,
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
-    st_option: 'StOption | None' = None,
+    st_option: StOption | None = None,
 ) -> IndexedArray | IndexedOptionArray:
     """Strategy for categorical data within a size budget.
 
@@ -167,9 +163,11 @@ def categorical_from_contents(
         returns a strategy for the categories. Draws that are not valid as categories
         are rejected, as in `categorical_contents()`.
     max_size
-        Upper bound on `content_size()` of the result.
+        Upper bound on the number of scalars in the result, counted as for `max_size` in
+        `contents()`.
     max_leaf_size
-        Upper bound on total leaf elements. Unbounded if `None`.
+        Upper bound on the number of leaf elements in the result, counted as for
+        `max_leaf_size` in `contents()`. Unbounded if `None`.
     min_length
         Lower bound on `len(result)`.
     max_length
@@ -198,7 +196,6 @@ def categorical_from_contents(
     Examples
     --------
     >>> import functools
-    >>> from hypothesis_awkward.util import content_size
     >>> leaves = functools.partial(
     ...     st_ak.contents.contents, max_depth=0, allow_record=False
     ... )
@@ -207,9 +204,6 @@ def categorical_from_contents(
     ... ).example()
     >>> c.parameter('__array__')
     'categorical'
-
-    >>> content_size(c) <= 20
-    True
 
     >>> 2 <= len(c) <= 5
     True

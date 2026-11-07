@@ -2,7 +2,7 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-from hypothesis_awkward.util import SUPPORTED_DTYPES
+from hypothesis_awkward._util import SUPPORTED_DTYPES
 
 
 def _inner_shapes(

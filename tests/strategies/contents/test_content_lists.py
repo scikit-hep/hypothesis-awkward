@@ -5,11 +5,11 @@ from hypothesis import strategies as st
 
 from awkward.contents import Content
 from hypothesis_awkward import strategies as st_ak
-from hypothesis_awkward.strategies import RecordCallDraws
-from hypothesis_awkward.util import content_size, leaf_size
-from hypothesis_awkward.util import safe_compare as sc
+from hypothesis_awkward._util import content_size, leaf_size
+from hypothesis_awkward._util import safe_compare as sc
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
+from tests.record import RecordCallDraws
 
 
 class ContentListsKwargs(TypedDict, total=False):

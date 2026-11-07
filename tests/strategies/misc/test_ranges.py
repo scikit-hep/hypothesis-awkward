@@ -5,9 +5,10 @@ import pytest
 from hypothesis import find, given
 from hypothesis import strategies as st
 
-from hypothesis_awkward.strategies import StMinMaxValuesFactory, none_or, ranges
-from hypothesis_awkward.util import safe_compare as sc
-from hypothesis_awkward.util import safe_max
+from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward._util import safe_max
+from hypothesis_awkward.strategies import none_or, ranges
+from hypothesis_awkward.strategies.misc.range import _StMinMaxValuesFactory
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 
@@ -15,7 +16,7 @@ T = TypeVar('T')
 
 
 def min_max_starts(
-    st_: StMinMaxValuesFactory[T],
+    st_: _StMinMaxValuesFactory[T],
 ) -> st.SearchStrategy[tuple[T | None, T | None]]:
     """Strategy for an ordered pair of optional bounds on the start."""
 
@@ -29,7 +30,7 @@ def min_max_starts(
 
 
 def min_max_ends(
-    st_: StMinMaxValuesFactory[T],
+    st_: _StMinMaxValuesFactory[T],
     min_start: T | None = None,
 ) -> st.SearchStrategy[tuple[T | None, T | None]]:
     """Strategy for an ordered pair of optional bounds on the end.
@@ -97,7 +98,7 @@ def test_kwargs_match_signature() -> None:
 
 @st.composite
 def ranges_kwargs(
-    draw: st.DrawFn, st_: StMinMaxValuesFactory[T] | None = None
+    draw: st.DrawFn, st_: _StMinMaxValuesFactory[T] | None = None
 ) -> RangesKwargs[T]:
     """Strategy for options for `ranges()` strategy.
 
@@ -106,11 +107,11 @@ def ranges_kwargs(
     (`st.integers`).
     """
     if st_ is None:
-        st_ = cast('StMinMaxValuesFactory[T]', st.integers)
+        st_ = cast('_StMinMaxValuesFactory[T]', st.integers)
 
     @st.composite
     def _st_related_kwargs(
-        draw: st.DrawFn, st_: StMinMaxValuesFactory[T]
+        draw: st.DrawFn, st_: _StMinMaxValuesFactory[T]
     ) -> RelatedKwargs[T]:
         """Strategy for the options that are drawn together."""
         min_start, max_start = draw(min_max_starts(st_=st_))  # type: ignore[arg-type]

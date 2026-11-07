@@ -4,8 +4,8 @@ from hypothesis import find, given
 from hypothesis import strategies as st
 
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward._util import safe_compare as sc
 from hypothesis_awkward.strategies.contents.regular_array import _st_group_sizes
-from hypothesis_awkward.util import safe_compare as sc
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 
