@@ -29,15 +29,30 @@ def string_contents(
         No two strings are equal if `True`. Strings are compared by code point, without
         Unicode normalization.
 
-    Returns
-    -------
-    ListOffsetArray
-
     Examples
     --------
-    >>> c = string_contents().example()
-    >>> isinstance(c, ListOffsetArray)
-    True
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Restrict the characters:
+
+    >>> @given(c=st_ak.constructors.string_contents(alphabet=st.sampled_from('abc')))
+    ... def test_alphabet(c):
+    ...     assert all(set(s) <= set('abc') for s in ak.to_list(c))
+    >>> test_alphabet()
+
+    Draw two to five distinct strings:
+
+    >>> @given(
+    ...     c=st_ak.constructors.string_contents(min_size=2, max_size=5, unique=True)
+    ... )
+    ... def test_unique(c):
+    ...     strings = ak.to_list(c)
+    ...     assert 2 <= len(strings) <= 5
+    ...     assert len(set(strings)) == len(strings)
+    >>> test_unique()
     """
     text_st = st.text() if alphabet is None else st.text(alphabet=alphabet)
     strings = draw(

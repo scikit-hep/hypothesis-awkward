@@ -35,21 +35,33 @@ def indexed_option_array_contents(
         Upper bound on the index length, i.e., `len(result)`. If `None`, twice the
         content length is used.
 
-    Returns
-    -------
-    IndexedOptionArray
-
     Examples
     --------
-    >>> c = indexed_option_array_contents().example()
-    >>> isinstance(c, IndexedOptionArray)
-    True
+    >>> import awkward as ak
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
 
     Limit the index length:
 
-    >>> c = indexed_option_array_contents(min_size=2, max_size=5).example()
-    >>> 2 <= len(c) <= 5
-    True
+    >>> @given(
+    ...     c=st_ak.constructors.indexed_option_array_contents(min_size=2, max_size=5)
+    ... )
+    ... def test_length(c):
+    ...     assert 2 <= len(c) <= 5
+    >>> test_length()
+
+    Give the content as a strategy, here for `NumpyArray`s of `int64`. The type is the
+    option type of the content's type:
+
+    >>> ints = st_ak.constructors.numpy_array_contents(
+    ...     dtypes=st.just(np.dtype('int64'))
+    ... )
+    >>> @given(c=st_ak.constructors.indexed_option_array_contents(ints))
+    ... def test_type(c):
+    ...     assert str(ak.Array(c).type.content) == '?int64'
+    >>> test_type()
     """
     # Imported here because content.py imports this module.
     from .content import contents
@@ -118,10 +130,6 @@ def indexed_option_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    IndexedOptionArray
 
     Examples
     --------

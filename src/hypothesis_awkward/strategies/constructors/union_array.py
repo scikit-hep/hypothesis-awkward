@@ -56,21 +56,18 @@ def union_array_contents(
         If `allow_invalid` is `False` and a concrete `contents` has mergeable
         child contents.
 
-    Returns
-    -------
-    UnionArray
-
     Examples
     --------
-    >>> c = union_array_contents().example()
-    >>> isinstance(c, UnionArray)
-    True
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
 
-    Limit the union length:
+    Limit the number of child contents and the union length:
 
-    >>> c = union_array_contents(min_length=2, max_length=4).example()
-    >>> 2 <= len(c) <= 4
-    True
+    >>> @given(c=st_ak.constructors.union_array_contents(max_contents=3, max_length=4))
+    ... def test_options(c):
+    ...     assert 2 <= len(c.contents) <= 3
+    ...     assert len(c) <= 4
+    >>> test_options()
     """
     # Imported here because content.py imports this module.
     from .content import content_lists
@@ -162,10 +159,6 @@ def union_array_from_contents(
     st_option
         A callable conforming to `StOption` that wraps content in an option
         type. Used for all-or-none option coordination.
-
-    Returns
-    -------
-    UnionArray
 
     Examples
     --------

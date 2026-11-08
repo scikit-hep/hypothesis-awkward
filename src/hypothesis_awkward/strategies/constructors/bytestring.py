@@ -24,15 +24,25 @@ def bytestring_contents(
     unique
         No two bytestrings are equal if `True`.
 
-    Returns
-    -------
-    ListOffsetArray
-
     Examples
     --------
-    >>> c = bytestring_contents().example()
-    >>> isinstance(c, ListOffsetArray)
-    True
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Draw two to five distinct bytestrings:
+
+    >>> @given(
+    ...     c=st_ak.constructors.bytestring_contents(
+    ...         min_size=2, max_size=5, unique=True
+    ...     )
+    ... )
+    ... def test_unique(c):
+    ...     values = ak.to_list(c)
+    ...     assert all(isinstance(v, bytes) for v in values)
+    ...     assert 2 <= len(values) <= 5
+    ...     assert len(set(values)) == len(values)
+    >>> test_unique()
     """
     bytestrings = draw(
         st.lists(st.binary(), min_size=min_size, max_size=max_size, unique=unique)

@@ -60,32 +60,13 @@ def contents(
     allow_indexed_root: bool = True,
     allow_categorical_root: bool = False,
 ) -> Content:
-    """Strategy for Awkward Array content layouts.
+    """Strategy for Awkward Array layouts.
 
-    The current implementation generates the following layouts:
-
-    - [`EmptyArray`][ak.contents.EmptyArray]
-    - [`NumpyArray`][ak.contents.NumpyArray]
-    - [`RegularArray`][ak.contents.RegularArray]
-    - [`ListArray`][ak.contents.ListArray]
-    - [`ListOffsetArray`][ak.contents.ListOffsetArray]
-    - Strings
-    - Bytestrings
-    - [`RecordArray`][ak.contents.RecordArray]
-    - [`IndexedArray`][ak.contents.IndexedArray]
-    - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
-    - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
-    - [`BitMaskedArray`][ak.contents.BitMaskedArray]
-    - [`UnmaskedArray`][ak.contents.UnmaskedArray]
-    - [`UnionArray`][ak.contents.UnionArray]
-    - Categorical data
-
-    Each type can be excluded separately with the corresponding `allow_*` argument.
-
-    The `max_size` is the main argument for constraining the array size. It counts most
-    of the scalar values in the layout, including data elements, offsets, indices, field
-    names, and parameters. The array size can also be constrained with
-    `max_leaf_size`, `max_depth`, `min_length` and `max_length`.
+    This strategy generates the layouts that
+    [`arrays()`][hypothesis_awkward.strategies.constructors.arrays] wraps in an
+    [`ak.Array`][ak.Array], and its options have the same meaning. See `arrays()` for
+    the layouts it generates and how `max_size` and the other options constrain the
+    size.
 
     Parameters
     ----------
@@ -202,15 +183,25 @@ def contents(
         [`UnionArray`][ak.contents.UnionArray], which accept categorical data but not
         other [`IndexedArray`][ak.contents.IndexedArray].
 
-    Returns
-    -------
-    Content
-
     Examples
     --------
-    >>> c = contents().example()
-    >>> isinstance(c, Content)
-    True
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Test code that takes a layout. Here, `ak.Array()` stands for the code under test:
+
+    >>> @given(c=st_ak.constructors.contents())
+    ... def test_wrap(c):
+    ...     assert len(ak.Array(c)) == len(c)
+    >>> test_wrap()
+
+    Limit the length of the outermost layout:
+
+    >>> @given(c=st_ak.constructors.contents(max_length=3))
+    ... def test_length(c):
+    ...     assert len(c) <= 3
+    >>> test_length()
     """
     # A zero-field record is a RecordArray layer: it obeys allow_record and
     # min_record_fields, and consumes one level of max_depth even as a leaf.
@@ -474,10 +465,6 @@ def content_lists(
     st_option
         A callable conforming to `StOption` that wraps content in an option type.
         Required when `all_option_or_none` is `True`.
-
-    Returns
-    -------
-    list[Content]
     """
     remaining_leaf = max_leaf_size
     remaining_total = max_size

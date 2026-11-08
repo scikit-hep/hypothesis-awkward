@@ -65,9 +65,24 @@ def numpy_arrays(
 
     Examples
     --------
-    >>> n = numpy_arrays().example()
-    >>> ak.from_numpy(n)
-    <Array ... type='...'>
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Convert the arrays with `ak.from_numpy()`:
+
+    >>> @given(n=st_ak.numpy.numpy_arrays())
+    ... def test_from_numpy(n):
+    ...     assert len(ak.from_numpy(n)) == len(n)
+    >>> test_from_numpy()
+
+    Limit the number of dimensions and exclude structured arrays:
+
+    >>> @given(n=st_ak.numpy.numpy_arrays(max_dims=2, allow_structured=False))
+    ... def test_options(n):
+    ...     assert n.ndim <= 2
+    ...     assert n.dtype.names is None
+    >>> test_options()
     """
     if unique:
         # Uniqueness is defined for simple dtypes only; drop structured dtypes and

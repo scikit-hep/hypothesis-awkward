@@ -23,7 +23,7 @@ def leaf_contents(
     allow_bytestring: bool = True,
     allow_zero_field_record: bool = True,
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]:
-    """Strategy for leaf content types.
+    """Strategy for leaf layouts.
 
     This strategy generates [`EmptyArray`][ak.contents.EmptyArray], a zero-field
     [`RecordArray`][ak.contents.RecordArray], bytestring content, string content, and
@@ -71,9 +71,28 @@ def leaf_contents(
     ValueError
         If no content types are possible with the given options.
 
-    Returns
-    -------
-    NumpyArray | EmptyArray | ListOffsetArray | RecordArray
+    Examples
+    --------
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Exclude strings and bytestrings:
+
+    >>> @given(
+    ...     c=st_ak.constructors.leaf_contents(
+    ...         allow_string=False, allow_bytestring=False
+    ...     )
+    ... )
+    ... def test_no_strings(c):
+    ...     assert c.parameter('__array__') not in ('string', 'bytestring')
+    >>> test_no_strings()
+
+    Limit the number of elements:
+
+    >>> @given(c=st_ak.constructors.leaf_contents(min_size=1, max_size=3))
+    ... def test_size(c):
+    ...     assert 1 <= len(c) <= 3
+    >>> test_size()
     """
     options = list[
         st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]

@@ -41,9 +41,9 @@ def arrays(
 ) -> ak.Array:
     """Strategy for Awkward Arrays.
 
-    This is the main strategy in this package. It is under development. The aim is to
-    generate fully general Awkward Arrays, with many options to control layout, data
-    types, missing values, masks, and other array attributes.
+    This is the main strategy of hypothesis-awkward. The aim is to generate fully
+    general Awkward Arrays, with many options to control layout, data types, missing
+    values, masks, and other array attributes.
 
     In constructing arrays, this strategy follows the Awkward Array User Guide section
     ["Direct constructors"][ak-user-guide-constructors]. It constructs _layouts_ and
@@ -68,22 +68,22 @@ def arrays(
     - Bytestrings
     - [`RecordArray`][ak.contents.RecordArray]
     - [`IndexedArray`][ak.contents.IndexedArray]
+    - Categorical data
     - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
     - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
     - [`BitMaskedArray`][ak.contents.BitMaskedArray]
     - [`UnmaskedArray`][ak.contents.UnmaskedArray]
     - [`UnionArray`][ak.contents.UnionArray]
-    - Categorical data
 
     Each type can be excluded separately with the corresponding `allow_*` argument.
 
-    The `max_size` is the main argument for constraining the array size. It counts most
-    of the scalar values in the layout, including data elements, offsets, indices, field
-    names, and parameters.  The array size can also be constrained with
-    `max_leaf_size`, `max_depth`, and `max_length`.
+    `max_size` is the main argument for constraining the array size. It counts most of
+    the scalar values in the layout, including data elements, offsets, indices, field
+    names, and parameters. The array size can also be constrained with `max_leaf_size`,
+    `max_depth`, `min_length`, and `max_length`.
 
-    The `arrays()` randomly generates virtual arrays by lazifying buffers. The
-    `allow_virtual` can be used to disable virtual arrays.
+    `arrays()` randomly generates virtual arrays by lazifying buffers.
+    `allow_virtual=False` disables virtual arrays.
 
     Parameters
     ----------
@@ -183,14 +183,26 @@ def arrays(
     allow_virtual
         No virtual arrays are generated if `False`.
 
-    Returns
-    -------
-    ak.Array
-
     Examples
     --------
-    >>> arrays().example()
-    <Array ... type='...'>
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Test code that takes an Awkward Array. Here, `ak.to_list()` stands for the code
+    under test:
+
+    >>> @given(a=st_ak.constructors.arrays())
+    ... def test_to_list(a):
+    ...     assert len(ak.to_list(a)) == len(a)
+    >>> test_to_list()
+
+    Limit the length:
+
+    >>> @given(a=st_ak.constructors.arrays(min_length=1, max_length=3))
+    ... def test_length(a):
+    ...     assert 1 <= len(a) <= 3
+    >>> test_length()
     """
     layout = draw(
         contents(

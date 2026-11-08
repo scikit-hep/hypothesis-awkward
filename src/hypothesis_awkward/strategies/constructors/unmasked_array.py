@@ -22,15 +22,19 @@ def unmasked_array_contents(
         [`Content`][ak.contents.Content] instance, or `None` to draw from
         `contents()`.
 
-    Returns
-    -------
-    UnmaskedArray
-
     Examples
     --------
-    >>> c = unmasked_array_contents().example()
-    >>> isinstance(c, UnmaskedArray)
-    True
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    An `UnmaskedArray` has an option type but no missing values:
+
+    >>> @given(c=st_ak.constructors.unmasked_array_contents())
+    ... def test_no_missing(c):
+    ...     assert c.is_option
+    ...     assert not ak.any(ak.is_none(ak.Array(c), axis=0))
+    >>> test_no_missing()
     """
     # Imported here because content.py imports this module.
     from .content import contents
@@ -85,10 +89,6 @@ def unmasked_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    UnmaskedArray
 
     Examples
     --------

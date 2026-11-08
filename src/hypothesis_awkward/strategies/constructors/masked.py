@@ -32,10 +32,6 @@ def masked_contents(
     allow_unmasked
         No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
 
-    Returns
-    -------
-    Content
-
     Examples
     --------
     >>> c = masked_contents().example()

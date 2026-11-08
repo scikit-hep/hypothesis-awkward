@@ -36,8 +36,17 @@ def supported_dtypes() -> st.SearchStrategy[np.dtype]:
 
     Examples
     --------
-    >>> supported_dtypes().example()
-    dtype(...)
+    >>> import awkward as ak
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Every drawn dtype can be the dtype of a `NumpyArray`:
+
+    >>> @given(d=st_ak.numpy.supported_dtypes())
+    ... def test_numpy_array(d):
+    ...     assert ak.contents.NumpyArray(np.zeros(3, dtype=d)).dtype == d
+    >>> test_numpy_array()
     """
     return st.sampled_from(SUPPORTED_DTYPES)
 
@@ -67,8 +76,15 @@ def numpy_dtypes(
 
     Examples
     --------
-    >>> numpy_dtypes().example()
-    dtype(...)
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Exclude structured dtypes:
+
+    >>> @given(d=st_ak.numpy.numpy_dtypes(allow_array=False))
+    ... def test_simple(d):
+    ...     assert d.names is None
+    >>> test_simple()
     """
     if dtype is None:
         dtype = supported_dtypes()

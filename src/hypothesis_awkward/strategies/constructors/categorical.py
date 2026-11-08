@@ -31,7 +31,7 @@ def categorical_contents(
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
 ) -> IndexedArray | IndexedOptionArray:
-    """Strategy for categorical data.
+    """Strategy for layouts of categorical data.
 
     Categorical data is an [`IndexedArray`][ak.contents.IndexedArray] or an
     [`IndexedOptionArray`][ak.contents.IndexedOptionArray] with the parameter
@@ -73,15 +73,29 @@ def categorical_contents(
         If both `allow_indexed` and `allow_indexed_option` are `False`, or if a
         concrete `content` is not valid as categories.
 
-    Returns
-    -------
-    IndexedArray | IndexedOptionArray
-
     Examples
     --------
-    >>> c = categorical_contents().example()
-    >>> c.parameter('__array__')
-    'categorical'
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Give the categories as a strategy, here for strings:
+
+    >>> @given(
+    ...     c=st_ak.constructors.categorical_contents(
+    ...         st_ak.constructors.string_contents(unique=True)
+    ...     )
+    ... )
+    ... def test_strings(c):
+    ...     assert c.content.parameter('__array__') == 'string'
+    >>> test_strings()
+
+    Exclude missing values:
+
+    >>> @given(c=st_ak.constructors.categorical_contents(allow_indexed_option=False))
+    ... def test_no_missing(c):
+    ...     assert not ak.any(ak.is_none(ak.Array(c), axis=0))
+    >>> test_no_missing()
     """
     if not (allow_indexed or allow_indexed_option):
         raise ValueError(
@@ -188,10 +202,6 @@ def categorical_from_contents(
     ------
     ValueError
         If both `allow_indexed` and `allow_indexed_option` are `False`.
-
-    Returns
-    -------
-    IndexedArray | IndexedOptionArray
 
     Examples
     --------

@@ -26,15 +26,24 @@ def bit_masked_array_contents(
         [`Content`][ak.contents.Content] instance, or `None` to draw from
         `contents()`.
 
-    Returns
-    -------
-    BitMaskedArray
-
     Examples
     --------
-    >>> c = bit_masked_array_contents().example()
-    >>> isinstance(c, BitMaskedArray)
-    True
+    >>> import awkward as ak
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Give the content as a strategy, here for `NumpyArray`s of `int64`. The type is the
+    option type of the content's type:
+
+    >>> ints = st_ak.constructors.numpy_array_contents(
+    ...     dtypes=st.just(np.dtype('int64'))
+    ... )
+    >>> @given(c=st_ak.constructors.bit_masked_array_contents(ints))
+    ... def test_type(c):
+    ...     assert str(ak.Array(c).type.content) == '?int64'
+    >>> test_type()
     """
     # Imported here because content.py imports this module.
     from .content import contents
@@ -97,10 +106,6 @@ def bit_masked_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    BitMaskedArray
 
     Examples
     --------

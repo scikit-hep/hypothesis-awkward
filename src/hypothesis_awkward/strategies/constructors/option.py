@@ -19,7 +19,7 @@ def option_contents(
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
 ) -> st.SearchStrategy[Content]:
-    """Strategy for option-type content.
+    """Strategy for option-type layouts.
 
     Picks among [`IndexedOptionArray`][ak.contents.IndexedOptionArray],
     [`ByteMaskedArray`][ak.contents.ByteMaskedArray],
@@ -49,15 +49,30 @@ def option_contents(
     allow_unmasked
         No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
 
-    Returns
-    -------
-    Content
-
     Examples
     --------
-    >>> c = option_contents().example()
-    >>> isinstance(c, Content)
-    True
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Every drawn layout is option-type:
+
+    >>> @given(c=st_ak.constructors.option_contents())
+    ... def test_option(c):
+    ...     assert c.is_option
+    >>> test_option()
+
+    Limit the length and exclude `UnmaskedArray`:
+
+    >>> @given(
+    ...     c=st_ak.constructors.option_contents(
+    ...         min_size=1, max_size=4, allow_unmasked=False
+    ...     )
+    ... )
+    ... def test_options(c):
+    ...     assert 1 <= len(c) <= 4
+    ...     assert not isinstance(c, ak.contents.UnmaskedArray)
+    >>> test_options()
     """
     # Non-composite wrapper: `@st.composite` defers the body to draw time,
     # which would delay this `ValueError` past the call site. The actual
@@ -177,10 +192,6 @@ def option_from_contents(
         No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if `False`.
     allow_unmasked
         No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
-
-    Returns
-    -------
-    Content
     """
     child = draw(
         content(

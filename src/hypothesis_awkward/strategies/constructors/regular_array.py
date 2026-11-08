@@ -41,33 +41,35 @@ def regular_array_contents(
         (i.e., `len(result)`). Unbounded if `None`.
 
 
-    Returns
-    -------
-    RegularArray
-
     Examples
     --------
-    >>> c = regular_array_contents().example()
-    >>> isinstance(c, RegularArray)
-    True
+    >>> import awkward as ak
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
 
-    Limit each element to at most 3 items:
+    Limit the size of each group and the number of groups:
 
-    >>> c = regular_array_contents(max_size=3).example()
-    >>> c.size <= 3
-    True
+    >>> @given(
+    ...     c=st_ak.constructors.regular_array_contents(
+    ...         max_size=3, min_length=2, max_length=5
+    ...     )
+    ... )
+    ... def test_options(c):
+    ...     assert c.size <= 3
+    ...     assert 2 <= len(c) <= 5
+    >>> test_options()
 
-    Limit the number of elements when size is zero:
+    Give the content as a strategy, here for `NumpyArray`s of `int64`:
 
-    >>> c = regular_array_contents(max_size=0, max_zeros_length=2).example()
-    >>> c.size == 0 and len(c) <= 2
-    True
-
-    Limit the number of groups:
-
-    >>> c = regular_array_contents(min_length=2, max_length=5).example()
-    >>> 2 <= len(c) <= 5
-    True
+    >>> ints = st_ak.constructors.numpy_array_contents(
+    ...     dtypes=st.just(np.dtype('int64'))
+    ... )
+    >>> @given(c=st_ak.constructors.regular_array_contents(ints))
+    ... def test_type(c):
+    ...     assert str(ak.Array(c).type.content) == f'{c.size} * int64'
+    >>> test_type()
     """
     # Imported here because content.py imports this module.
     from .content import contents
@@ -230,10 +232,6 @@ def regular_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    RegularArray
 
     Examples
     --------
