@@ -24,8 +24,7 @@ and the page backlog in
 | `guide/generating-and-shrinking-samples.md` | Hypothesis-PBT expert / Awkward core dev | on algorithm change |
 | `guide/citation.md`                         | Evaluator                                | on publication      |
 | `reference/index.md`                        | All                                      | on module added     |
-| `reference/util.md`                         | All                                      | auto (docstrings)   |
-| `reference/strategies/builtins.md`          | All                                      | auto (docstrings)   |
+| `reference/strategies/index.md`             | — (nav index)                            | on module added     |
 | `reference/strategies/constructors.md`      | All                                      | auto (docstrings)   |
-| `reference/strategies/contents.md`          | All                                      | auto (docstrings)   |
 | `reference/strategies/numpy.md`             | All                                      | auto (docstrings)   |
+| `reference/strategies/misc.md`              | All                                      | auto (docstrings)   |

@@ -4,6 +4,11 @@
 - **Status:** Implemented
 - **Author:** Claude (with developer collaboration)
 
+> **Update (2026-11-08):** `string_contents()` and `bytestring_contents()` are
+> public as `st_ak.constructors.string_contents()` and
+> `st_ak.constructors.bytestring_contents()`. See
+> [public-namespaces-API](./2026-11-08-01-Public-namespaces-API.md).
+
 ## Overview
 
 This document describes the API for `string_contents()` and
