@@ -189,8 +189,24 @@ def arrays(
 
     Examples
     --------
-    >>> arrays().example()
-    <Array ... type='...'>
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Test code that takes an Awkward Array. Here, `ak.to_list()` stands for the code
+    under test:
+
+    >>> @given(a=st_ak.constructors.arrays())
+    ... def test_to_list(a):
+    ...     assert len(ak.to_list(a)) == len(a)
+    >>> test_to_list()
+
+    Limit the length:
+
+    >>> @given(a=st_ak.constructors.arrays(min_length=1, max_length=3))
+    ... def test_length(a):
+    ...     assert 1 <= len(a) <= 3
+    >>> test_length()
     """
     layout = draw(
         contents(

@@ -74,6 +74,29 @@ def leaf_contents(
     Returns
     -------
     NumpyArray | EmptyArray | ListOffsetArray | RecordArray
+
+    Examples
+    --------
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Exclude strings and bytestrings:
+
+    >>> @given(
+    ...     c=st_ak.constructors.leaf_contents(
+    ...         allow_string=False, allow_bytestring=False
+    ...     )
+    ... )
+    ... def test_no_strings(c):
+    ...     assert c.parameter('__array__') not in ('string', 'bytestring')
+    >>> test_no_strings()
+
+    Limit the number of elements:
+
+    >>> @given(c=st_ak.constructors.leaf_contents(min_size=1, max_size=3))
+    ... def test_size(c):
+    ...     assert 1 <= len(c) <= 3
+    >>> test_size()
     """
     options = list[
         st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]

@@ -51,30 +51,40 @@ def record_array_contents(
 
     Examples
     --------
-    >>> c = record_array_contents().example()
-    >>> isinstance(c, RecordArray)
-    True
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
 
-    Limit the number of fields:
+    Limit the number of fields and the record length:
 
-    >>> c = record_array_contents(max_fields=3).example()
-    >>> len(c.contents) <= 3
-    True
+    >>> @given(
+    ...     c=st_ak.constructors.record_array_contents(
+    ...         max_fields=3, min_length=2, max_length=4
+    ...     )
+    ... )
+    ... def test_options(c):
+    ...     assert len(c.fields) <= 3
+    ...     assert 2 <= len(c) <= 4
+    >>> test_options()
 
-    Limit the record length:
+    Exclude tuples, i.e., records without field names:
 
-    >>> c = record_array_contents(min_length=2, max_length=4).example()
-    >>> 2 <= len(c) <= 4
-    True
+    >>> @given(c=st_ak.constructors.record_array_contents(allow_tuple=False))
+    ... def test_named(c):
+    ...     assert not c.is_tuple
+    >>> test_named()
 
-    A record with no fields has its length drawn, since no field content determines it:
+    A record with no fields gets its length drawn, since no field content determines
+    it:
 
-    >>> c = record_array_contents(max_fields=0, min_length=3, max_length=3).example()
-    >>> len(c)
-    3
-
-    >>> len(c.contents)
-    0
+    >>> @given(
+    ...     c=st_ak.constructors.record_array_contents(
+    ...         max_fields=0, min_length=3, max_length=3
+    ...     )
+    ... )
+    ... def test_zero_fields(c):
+    ...     assert len(c.contents) == 0
+    ...     assert len(c) == 3
+    >>> test_zero_fields()
     """
     # Imported here because content.py imports this module.
     from .content import content_lists

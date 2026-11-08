@@ -42,15 +42,28 @@ def list_array_contents(
 
     Examples
     --------
-    >>> c = list_array_contents().example()
-    >>> isinstance(c, ListArray)
-    True
+    >>> import awkward as ak
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
 
     Limit the number of lists:
 
-    >>> c = list_array_contents(min_length=2, max_length=4).example()
-    >>> 2 <= len(c) <= 4
-    True
+    >>> @given(c=st_ak.constructors.list_array_contents(min_length=2, max_length=4))
+    ... def test_length(c):
+    ...     assert 2 <= len(c) <= 4
+    >>> test_length()
+
+    Give the content as a strategy, here for `NumpyArray`s of `int64`:
+
+    >>> ints = st_ak.constructors.numpy_array_contents(
+    ...     dtypes=st.just(np.dtype('int64'))
+    ... )
+    >>> @given(c=st_ak.constructors.list_array_contents(ints))
+    ... def test_type(c):
+    ...     assert str(ak.Array(c).type.content) == 'var * int64'
+    >>> test_type()
     """
     # Imported here because content.py imports this module.
     from .content import contents

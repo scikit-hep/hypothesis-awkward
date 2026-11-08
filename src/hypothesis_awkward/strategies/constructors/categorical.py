@@ -79,9 +79,27 @@ def categorical_contents(
 
     Examples
     --------
-    >>> c = categorical_contents().example()
-    >>> c.parameter('__array__')
-    'categorical'
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Give the categories as a strategy, here for strings:
+
+    >>> @given(
+    ...     c=st_ak.constructors.categorical_contents(
+    ...         st_ak.constructors.string_contents(unique=True)
+    ...     )
+    ... )
+    ... def test_strings(c):
+    ...     assert c.content.parameter('__array__') == 'string'
+    >>> test_strings()
+
+    Exclude missing values:
+
+    >>> @given(c=st_ak.constructors.categorical_contents(allow_indexed_option=False))
+    ... def test_no_missing(c):
+    ...     assert not ak.any(ak.is_none(ak.Array(c), axis=0))
+    >>> test_no_missing()
     """
     if not (allow_indexed or allow_indexed_option):
         raise ValueError(

@@ -40,9 +40,32 @@ def numpy_array_contents(
 
     Examples
     --------
-    >>> c = numpy_array_contents().example()
-    >>> isinstance(c, NumpyArray)
-    True
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Restrict the dtypes and exclude `NaN`:
+
+    >>> floats = st.sampled_from([np.dtype('float32'), np.dtype('float64')])
+    >>> @given(
+    ...     c=st_ak.constructors.numpy_array_contents(dtypes=floats, allow_nan=False)
+    ... )
+    ... def test_floats(c):
+    ...     assert not np.isnan(c.data).any()
+    >>> test_floats()
+
+    Draw two to five distinct values:
+
+    >>> @given(
+    ...     c=st_ak.constructors.numpy_array_contents(
+    ...         dtypes=st.just(np.dtype('int64')), min_size=2, max_size=5, unique=True
+    ...     )
+    ... )
+    ... def test_unique(c):
+    ...     assert 2 <= len(c) <= 5
+    ...     assert len(set(c.data.tolist())) == len(c)
+    >>> test_unique()
     """
     return numpy_arrays(
         dtype=dtypes,

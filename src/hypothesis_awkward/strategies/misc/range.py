@@ -71,25 +71,28 @@ def ranges(
 
     If `allow_equal` is `False`, `start` and `end` cannot be equal, i.e., `start < end`.
 
-    >>> start, end = ranges(
-    ...     st.integers,
-    ...     min_start=0,
-    ...     max_end=10,
-    ...     allow_start_none=False,
-    ...     allow_end_none=False,
-    ... ).example()
+    Examples
+    --------
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
 
-    The results can be, for example, used as min_value and max_value of st.integers().
+    The pair can be passed to any strategy that takes a minimum and a maximum. Here,
+    they are `min_length` and `max_length`:
 
-    >>> i = st.integers(min_value=start, max_value=end).example()
-    >>> start <= i <= end
-    True
-
-    The results can also be used as min_size and max_size of st.lists().
-
-    >>> l = st.lists(st.integers(), min_size=start, max_size=end).example()
-    >>> start <= len(l) <= end
-    True
+    >>> @given(data=st.data())
+    ... def test_lengths(data):
+    ...     min_length, max_length = data.draw(
+    ...         st_ak.misc.ranges(min_start=0, max_end=5, allow_start_none=False)
+    ...     )
+    ...     c = data.draw(
+    ...         st_ak.constructors.list_offset_array_contents(
+    ...             min_length=min_length, max_length=max_length
+    ...         )
+    ...     )
+    ...     assert min_length <= len(c)
+    ...     assert max_length is None or len(c) <= max_length
+    >>> test_lengths()
     """
 
     def starts() -> st.SearchStrategy[Optional[Any]]:

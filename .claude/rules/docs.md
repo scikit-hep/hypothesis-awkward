@@ -37,9 +37,10 @@ revising it, invoke the `reviewed-writer:persona-review` skill directly.
   - In a runnable Markdown doctest, leave a blank line before the closing code
     fence, or the default doctest parser captures the fence line as part of the
     expected output.
-  - Prefer a deterministic example, for example
+  - In guide pages, prefer a deterministic example, for example
     `find(strategy, predicate, settings=settings(database=None))`, and avoid
     `.example()` (non-deterministic); confirm the exact repr by running it.
+    Docstring examples follow the rule under **Reference** instead.
 - **Cross-link, do not duplicate** prose across files (the README ↔
   `docs/index.md` problem): keep one source and link to it.
 - **Pages need not stand alone.** A page may assume concepts covered elsewhere,
@@ -48,5 +49,16 @@ revising it, invoke the `reviewed-writer:persona-review` skill directly.
   fundamentals everywhere.
 - **Reference** pages are generated from docstrings via `mkdocstrings` (see
   `zensical.toml`); their quality equals docstring quality.
+  - A strategy's docstring examples show it as a reader uses it: a `@given` test
+    that imports from the public path
+    (`import hypothesis_awkward.strategies as st_ak`) and asserts what the
+    example is about. One idea per example, with a sentence before it saying
+    what it shows. See `list_offset_array_contents()`.
+  - Put all imports of the examples in one block at the start of the Examples
+    section, before the first sentence, so that each example can be copied
+    together with that block alone.
+  - Do not use `find()` in docstring examples: it is a tool for testing
+    strategies, and its output depends on shrinking. Do not use `.example()`: it
+    is for interactive use, and Hypothesis warns about it under pytest.
 - **Living pages** (for example bugs-found and roadmap) are reviewed each
   release.

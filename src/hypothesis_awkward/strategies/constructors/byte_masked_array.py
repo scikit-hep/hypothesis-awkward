@@ -31,9 +31,22 @@ def byte_masked_array_contents(
 
     Examples
     --------
-    >>> c = byte_masked_array_contents().example()
-    >>> isinstance(c, ByteMaskedArray)
-    True
+    >>> import awkward as ak
+    >>> import numpy as np
+    >>> from hypothesis import given
+    >>> from hypothesis import strategies as st
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Give the content as a strategy, here for `NumpyArray`s of `int64`. The type is the
+    option type of the content's type:
+
+    >>> ints = st_ak.constructors.numpy_array_contents(
+    ...     dtypes=st.just(np.dtype('int64'))
+    ... )
+    >>> @given(c=st_ak.constructors.byte_masked_array_contents(ints))
+    ... def test_type(c):
+    ...     assert str(ak.Array(c).type.content) == '?int64'
+    >>> test_type()
     """
     # Imported here because content.py imports this module.
     from .content import contents

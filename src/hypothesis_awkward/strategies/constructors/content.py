@@ -189,9 +189,23 @@ def contents(
 
     Examples
     --------
-    >>> c = contents().example()
-    >>> isinstance(c, Content)
-    True
+    >>> import awkward as ak
+    >>> from hypothesis import given
+    >>> import hypothesis_awkward.strategies as st_ak
+
+    Test code that takes a layout. Here, `ak.Array()` stands for the code under test:
+
+    >>> @given(c=st_ak.constructors.contents())
+    ... def test_wrap(c):
+    ...     assert len(ak.Array(c)) == len(c)
+    >>> test_wrap()
+
+    Limit the length of the outermost layout:
+
+    >>> @given(c=st_ak.constructors.contents(max_length=3))
+    ... def test_length(c):
+    ...     assert len(c) <= 3
+    >>> test_length()
     """
     # A zero-field record is a RecordArray layer: it obeys allow_record and
     # min_record_fields, and consumes one level of max_depth even as a leaf.
