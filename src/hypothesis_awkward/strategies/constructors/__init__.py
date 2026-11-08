@@ -1,5 +1,12 @@
 """Strategies that build Awkward Arrays and their layouts with direct constructors.
 
+These strategies follow the Awkward Array User Guide section ["Direct
+constructors"][ak-user-guide-constructors]: they build layouts by calling the
+constructors of the `Content` subclasses directly.
+
+[ak-user-guide-constructors]:
+https://awkward-array.org/doc/main/user-guide/how-to-create-constructors.html
+
 `arrays()` is the main strategy of this package. It generates Awkward Arrays, with
 options to control the layout, data types, missing values, masks, and other array
 attributes.
