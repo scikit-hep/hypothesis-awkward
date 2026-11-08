@@ -73,10 +73,13 @@ def union_array_contents(
     >>> 2 <= len(c) <= 4
     True
     """
+    # Imported here because content.py imports this module.
+    from .content import content_lists
+
     match contents:
         case None:
             contents = draw(
-                st_ak.content.content_lists(
+                content_lists(
                     functools.partial(
                         st_ak.contents,
                         allow_invalid=allow_invalid,
@@ -181,8 +184,11 @@ def union_array_from_contents(
     >>> 2 <= len(c) <= 5
     True
     """
+    # Imported here because content.py imports this module.
+    from .content import content_lists
+
     children = draw(
-        st_ak.content.content_lists(
+        content_lists(
             functools.partial(
                 content,
                 allow_union_root=False,

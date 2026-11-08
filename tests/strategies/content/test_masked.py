@@ -11,6 +11,7 @@ from awkward.contents import (
     UnmaskedArray,
 )
 from hypothesis_awkward import strategies as st_ak
+from hypothesis_awkward.strategies.content.masked import masked_contents
 from tests.find_settings import FIND
 from tests.funcs import KwargsDrawn, assert_kwargs_match_signature
 
@@ -53,7 +54,7 @@ class RelatedKwargs(TypedDict, total=False):
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `masked_contents()`."""
     assert_kwargs_match_signature(
-        func=st_ak.content.masked_contents,
+        func=masked_contents,
         kwargs_cls=MaskedContentsKwargs,
         defaults=DEFAULTS,
         related_cls=RelatedKwargs,
@@ -109,7 +110,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_unmasked = kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
 
     # Call the test subject
-    result = data.draw(st_ak.content.masked_contents(**kwargs), label='result')
+    result = data.draw(masked_contents(**kwargs), label='result')
 
     assert isinstance(result, MASKED_TYPES)
 
@@ -129,19 +130,19 @@ def test_properties(data: st.DataObject) -> None:
 @pytest.mark.parametrize('cls', MASKED_TYPES)
 def test_draw_masked_type(cls: type[Content]) -> None:
     """Assert the given masked type can be drawn."""
-    find(st_ak.content.masked_contents(), lambda c: isinstance(c, cls), settings=FIND)
+    find(masked_contents(), lambda c: isinstance(c, cls), settings=FIND)
 
 
 def test_shrink_to_unmasked() -> None:
     """Assert `UnmaskedArray` is the simplest."""
-    c = find(st_ak.content.masked_contents(), lambda _: True, settings=FIND)
+    c = find(masked_contents(), lambda _: True, settings=FIND)
     assert isinstance(c, UnmaskedArray)
 
 
 def test_shrink_to_byte_masked() -> None:
     """Assert `ByteMaskedArray` is the next simplest."""
     c = find(
-        st_ak.content.masked_contents(allow_unmasked=False),
+        masked_contents(allow_unmasked=False),
         lambda _: True,
         settings=FIND,
     )
@@ -153,4 +154,4 @@ def test_raise_all_disallowed() -> None:
     with pytest.raises(
         ValueError, match='at least one masked content type must be allowed'
     ):
-        st_ak.content.masked_contents(**{flag: False for flag in ALLOW_FLAGS})
+        masked_contents(**{flag: False for flag in ALLOW_FLAGS})

@@ -7,6 +7,7 @@ from awkward.contents import Content
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size, leaf_size
 from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward.strategies.content.content import content_lists
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 from tests.record import RecordCallDraws
@@ -41,7 +42,7 @@ class RelatedKwargs(TypedDict, total=False):
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `content_lists()`'s parameters."""
     assert_kwargs_match_signature(
-        func=st_ak.content.content_lists,
+        func=content_lists,
         exclude={'all_option_or_none', 'st_option'},
         kwargs_cls=ContentListsKwargs,
         defaults=DEFAULTS,
@@ -97,7 +98,7 @@ def test_properties(data: st.DataObject) -> None:
 
     # Call the test subject
     result = data.draw(
-        st_ak.content.content_lists(**kwargs),
+        content_lists(**kwargs),
         label='result',
     )
 
@@ -118,7 +119,7 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_min_len() -> None:
     """Assert that a list with exactly min_len=2 elements can be drawn."""
     find(
-        st_ak.content.content_lists(st_ak.contents, max_leaf_size=50, min_len=2),
+        content_lists(st_ak.contents, max_leaf_size=50, min_len=2),
         lambda cl: len(cl) == 2,
         settings=FIND,
     )
@@ -127,7 +128,7 @@ def test_draw_min_len() -> None:
 def test_draw_max_len() -> None:
     """Assert that max_len caps the number of contents."""
     find(
-        st_ak.content.content_lists(max_leaf_size=50, max_len=3),
+        content_lists(max_leaf_size=50, max_len=3),
         lambda cl: len(cl) == 3,
         settings=FIND,
     )
@@ -136,7 +137,7 @@ def test_draw_max_len() -> None:
 def test_draw_empty_list() -> None:
     """Assert that an empty list can be drawn when min_len=0."""
     find(
-        st_ak.content.content_lists(st_ak.contents, max_leaf_size=50, min_len=0),
+        content_lists(st_ak.contents, max_leaf_size=50, min_len=0),
         lambda cl: len(cl) == 0,
         settings=FIND,
     )

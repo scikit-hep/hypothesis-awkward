@@ -4,7 +4,6 @@ from hypothesis import assume
 from hypothesis import strategies as st
 
 from awkward.contents import Content, RecordArray
-from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import content_size
 
 from ._types import StContent, StOption
@@ -77,9 +76,12 @@ def record_array_contents(
     >>> len(c.contents)
     0
     """
+    # Imported here because content.py imports this module.
+    from .content import content_lists
+
     match contents:
         case None:
-            contents = draw(st_ak.content.content_lists(max_len=max_fields))
+            contents = draw(content_lists(max_len=max_fields))
         case st.SearchStrategy():
             contents = draw(contents)
         case list():
@@ -167,7 +169,7 @@ def record_array_from_contents(
 
     Examples
     --------
-    >>> contents = st_ak.contents
+    >>> from hypothesis_awkward.strategies import contents
     >>> c = record_array_from_contents(
     ...     contents, max_size=20, max_leaf_size=10, min_length=2, max_length=5
     ... ).example()
@@ -185,8 +187,11 @@ def record_array_from_contents(
     >>> 2 <= len(c.contents) <= 3
     True
     """
+    # Imported here because content.py imports this module.
+    from .content import content_lists
+
     children = draw(
-        st_ak.content.content_lists(
+        content_lists(
             content,
             max_size=max_size,
             max_leaf_size=max_leaf_size,
