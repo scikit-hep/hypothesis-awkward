@@ -21,7 +21,7 @@ thoroughly.
 [Property-based testing](../index.md) inverts the approach: instead of choosing
 inputs, a test states a property that must hold for every valid array, and the
 inputs are generated. This package supplies the generation. Its main strategy is
-[`st_ak.constructors.arrays()`](../reference/strategies/arrays.md#hypothesis_awkward.strategies.constructors.arrays)
+[`st_ak.constructors.arrays()`](../reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays)
 (with `import hypothesis_awkward.strategies as st_ak`), which generates nearly
 fully general Awkward Arrays, including virtual arrays — arrays whose buffers
 are not yet materialized. A generated array has either all buffers virtual or

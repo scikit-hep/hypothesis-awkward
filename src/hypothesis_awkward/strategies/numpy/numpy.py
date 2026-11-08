@@ -28,6 +28,13 @@ def numpy_arrays(
 ) -> np.ndarray:
     """Strategy for NumPy arrays from which Awkward Arrays can be created.
 
+    The arrays can be converted with [`ak.from_numpy()`][ak.from_numpy]. The Awkward
+    Array User Guide section ["How to convert to/from NumPy"][ak-user-guide-numpy]
+    describes how structured and multidimensional arrays are converted.
+
+    [ak-user-guide-numpy]:
+    https://awkward-array.org/doc/stable/user-guide/how-to-convert-numpy.html
+
     Parameters
     ----------
     dtype

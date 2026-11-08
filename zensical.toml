@@ -19,9 +19,9 @@ nav = [
         "reference/index.md",
         { "Strategies" = [
             "reference/strategies/index.md",
-            { "Arrays" = "reference/strategies/arrays.md" },
-            { "Contents (Layouts)" = "reference/strategies/contents.md" },
-            { "Other strategies" = "reference/strategies/other.md" },
+            { "Constructors" = "reference/strategies/constructors.md" },
+            { "NumPy" = "reference/strategies/numpy.md" },
+            { "Miscellaneous" = "reference/strategies/misc.md" },
         ] },
     ] },
 ]

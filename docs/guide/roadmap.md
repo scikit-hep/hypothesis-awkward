@@ -9,7 +9,7 @@ items reflects priority, not a schedule.
 ## What you can generate today
 
 Today the main strategy,
-[`st_ak.constructors.arrays()`](../reference/strategies/arrays.md#hypothesis_awkward.strategies.constructors.arrays)
+[`st_ak.constructors.arrays()`](../reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays)
 (with `import hypothesis_awkward.strategies as st_ak`), generates arrays **in
 terms of their layout** — the low-level structure of an Awkward Array, a tree of
 `Content` nodes — by composing those nodes directly. It resides in the
@@ -17,9 +17,9 @@ terms of their layout** — the low-level structure of an Awkward Array, a tree 
 [direct constructors](https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html)
 section of the Awkward Array documentation.
 
-The library includes [strategies](../reference/strategies/contents.md) for each
-of `EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`, `ListArray`,
-`RecordArray`, `UnionArray`, `IndexedArray`, `IndexedOptionArray`,
+The library includes [strategies](../reference/strategies/constructors.md) for
+each of `EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`,
+`ListArray`, `RecordArray`, `UnionArray`, `IndexedArray`, `IndexedOptionArray`,
 `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as well as for strings,
 bytestrings, and categorical data. The main strategy `arrays()` generates nested
 combinations of these, and can also generate arrays backed by virtual (lazy)
@@ -27,7 +27,7 @@ buffers. Some variants of these, such as other index types and parameters, are
 not generated yet; they are tracked in
 [issue #238](https://github.com/scikit-hep/hypothesis-awkward/issues/238).
 [Getting Started](getting-started.md) shows sample outputs, and the
-[API reference](../reference/strategies/arrays.md#hypothesis_awkward.strategies.constructors.arrays)
+[API reference](../reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays)
 lists the available options.
 
 The current `arrays()` is not exported from the top-level package, so it must be
@@ -57,10 +57,10 @@ next its type, and later its form.
 ### Near-term
 
 **Generate arrays from a type.** Add strategies that generate Awkward _types_
-(building on the existing `st_ak.numpy_types()`), then strategies that generate
-arrays matching a given type. This is the planned home of the reserved
-`st_ak.arrays()`. It would let a test generate arrays of the specific type that
-the code under test expects:
+(building on an existing internal strategy for NumPy types), then strategies
+that generate arrays matching a given type. This is the planned home of the
+reserved `st_ak.arrays()`. It would let a test generate arrays of the specific
+type that the code under test expects:
 
 ```python
 # Not yet available — illustrative of the planned type-directed API.
@@ -94,10 +94,10 @@ It would pair naturally with type-directed generation.
 
 **Generate arrays from a form.** Because one type can have many forms — a list
 type, for example, can be laid out as a `ListOffsetArray` or a `ListArray` — a
-later step is to generate forms for a given type (building on the existing
-`st_ak.numpy_forms()`), and then arrays matching a given form, also under the
-reserved `st_ak.arrays()`. This helps when a test depends on the concrete
-layout, not only the type.
+later step is to generate forms for a given type (building on an existing
+internal strategy for NumPy forms), and then arrays matching a given form, also
+under the reserved `st_ak.arrays()`. This helps when a test depends on the
+concrete layout, not only the type.
 
 ## Influencing the roadmap
 

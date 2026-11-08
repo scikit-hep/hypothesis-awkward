@@ -2,8 +2,9 @@
 
 <!-- diataxis: none (navigation index) -->
 
-The strategies are in `hypothesis_awkward.strategies` and its subpackages.
+One page for each module of `hypothesis_awkward.strategies`:
 
-- [Arrays](arrays.md): `arrays()`, the main strategy
-- [Contents (Layouts)](contents.md): strategies for layouts
-- [Other strategies](other.md): NumPy dtypes and arrays, and helper strategies
+- [Constructors](constructors.md): `arrays()`, the main strategy, and strategies
+  for layouts
+- [NumPy](numpy.md): NumPy dtypes and arrays that Awkward Array supports
+- [Miscellaneous](misc.md): helper strategies for optional arguments

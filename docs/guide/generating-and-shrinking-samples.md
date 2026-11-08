@@ -20,10 +20,10 @@ with [Getting Started](getting-started.md).
 
 The main strategy, `st_ak.constructors.arrays()` (with
 `import hypothesis_awkward.strategies as st_ak`), generates a nearly fully
-general Awkward Array. Underneath, `st_ak.contents()` builds the array's layout
-from the top down: at each step it either stops at a _leaf_ or chooses a
-_wrapper_ layout and then builds that wrapper's child (or children) with the
-same strategy.
+general Awkward Array. Underneath, `st_ak.constructors.contents()` builds the
+array's layout from the top down: at each step it either stops at a _leaf_ or
+chooses a _wrapper_ layout and then builds that wrapper's child (or children)
+with the same strategy.
 
 - Leaves carry the data: an `EmptyArray` (no data, type `unknown`), a
   `NumpyArray` of one dtype, or a string or bytestring. (A string or bytestring
@@ -45,8 +45,9 @@ the total stays within `max_size`.
 These bounds are also options a caller can set: passing a `dtypes` strategy,
 setting the `allow_*` flags, or fixing `min_length` and `max_length` constrains
 the shape of what is generated. See the
-[API reference](../reference/strategies/arrays.md) for every option. For
-example, a test can bound the depth of every generated array:
+[API reference](../reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays)
+for every option. For example, a test can bound the depth of every generated
+array:
 
 ```python
 from hypothesis import given
@@ -105,7 +106,7 @@ shrink them toward zero.
 
 ### What each strategy shrinks toward
 
-Each strategy below is at the top level of `st_ak`, except `supported_dtypes()`,
+Each strategy below is in `st_ak.constructors`, except `supported_dtypes()`,
 which is in `st_ak.numpy`, and `masked_contents()`, which is internal.
 
 | Strategy                         | Shrinks toward                                                                                                                                                                 |

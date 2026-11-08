@@ -1,9 +1,15 @@
-"""Strategies that build Awkward Arrays and layouts with direct constructors.
+"""Strategies that build Awkward Arrays and their layouts with direct constructors.
 
-The function `arrays()` is the main strategy of this package. It generates Awkward
-Arrays with multiple options to control the layout, data types, missing values, masks,
-and other array attributes. The other strategies generate layouts, i.e., instances of
-[`Content`][ak.contents.Content] subclasses.
+`arrays()` is the main strategy of this package. It generates Awkward Arrays, with
+options to control the layout, data types, missing values, masks, and other array
+attributes.
+
+The other strategies generate layouts: trees of [`Content`][ak.contents.Content] nodes,
+which an [`ak.Array`][] wraps. `contents()` generates the layouts that `arrays()`
+wraps. Each `*_array_contents()` strategy generates one `Content` subclass;
+`leaf_contents()` and `option_contents()` choose among the leaf and the option-type
+classes; and `string_contents()`, `bytestring_contents()`, and `categorical_contents()`
+generate the layouts of strings, bytestrings, and categorical data.
 """
 
 __all__ = [

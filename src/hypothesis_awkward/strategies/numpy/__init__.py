@@ -1,10 +1,8 @@
-"""Strategies related to NumPy in the context of Awkward Array.
+"""Strategies for NumPy dtypes and arrays that Awkward Array supports.
 
-These strategies are related to the section of Awkward Array User Guide ["How to convert
-to/from NumPy"][ak-user-guide-numpy].
-
-[ak-user-guide-numpy]:
-https://awkward-array.org/doc/stable/user-guide/how-to-convert-numpy.html
+`supported_dtypes()` generates scalar dtypes, `numpy_dtypes()` also generates structured
+dtypes, and `numpy_arrays()` generates NumPy arrays that can be converted to Awkward
+Arrays.
 """
 
 __all__ = [
