@@ -28,13 +28,13 @@
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/builtins/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/</loc>
       </url>
       <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/constructors/</loc>
       </url>
       <url>
-        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/contents/</loc>
+        <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/misc/</loc>
       </url>
       <url>
         <loc>https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/numpy/</loc>

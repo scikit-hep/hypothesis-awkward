@@ -814,6 +814,8 @@
     
       
         
+          
+        
       
         
       
@@ -837,8 +839,9 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
-            
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/strategies/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -851,8 +854,14 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
         
           <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
@@ -864,6 +873,8 @@
 
             </label>
             <ul class="md-nav__list" data-md-scrollfix>
+              
+                
               
                 
                   
@@ -880,33 +891,6 @@
     
   
   Constructors
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-                
-              
-                
-                  
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/strategies/contents/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Contents
 
     
   </span>
@@ -953,14 +937,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/strategies/builtins/" class="md-nav__link">
+      <a href="../../reference/strategies/misc/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-  Builtins
+  Miscellaneous
 
     
   </span>
@@ -1208,7 +1192,7 @@ with <a href="../getting-started/">Getting Started</a>.</p>
 <h2 id="generating-a-sample">Generating a sample<a class="headerlink" href="#generating-a-sample" title="Permanent link">&para;</a></h2>
 <p>The main strategy, <code>st_ak.constructors.arrays()</code> (with
 <code>import hypothesis_awkward.strategies as st_ak</code>), generates a nearly fully
-general Awkward Array. Underneath, <code>st_ak.contents.contents()</code> builds the
+general Awkward Array. Underneath, <code>st_ak.constructors.contents()</code> builds the
 array's layout from the top down: at each step it either stops at a <em>leaf</em> or
 chooses a <em>wrapper</em> layout and then builds that wrapper's child (or children)
 with the same strategy.</p>
@@ -1232,8 +1216,9 @@ the total stays within <code>max_size</code>.</p>
 <p>These bounds are also options a caller can set: passing a <code>dtypes</code> strategy,
 setting the <code>allow_*</code> flags, or fixing <code>min_length</code> and <code>max_length</code> constrains
 the shape of what is generated. See the
-<a href="../../reference/strategies/contents/">Contents reference</a> for every option. For
-example, a test can bound the depth of every generated array:</p>
+<a href="../../reference/strategies/constructors/#hypothesis_awkward.strategies.constructors.arrays">API reference</a>
+for every option. For example, a test can bound the depth of every generated
+array:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">given</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">awkward</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ak</span>
@@ -1244,7 +1229,7 @@ example, a test can bound the depth of every generated array:</p>
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">def</span><span class="w"> </span><span class="nf">test_some_property</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">ak</span><span class="o">.</span><span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
 </span></code></pre></div>
 <p>The dtype of a <code>NumpyArray</code> leaf is itself drawn from a strategy,
-<code>st_ak.supported_dtypes()</code>.</p>
+<code>st_ak.numpy.supported_dtypes()</code>.</p>
 <h2 id="how-hypothesis-shrinks">How Hypothesis shrinks<a class="headerlink" href="#how-hypothesis-shrinks" title="Permanent link">&para;</a></h2>
 <p>When a test fails, Hypothesis searches for a simpler input that still fails. The
 Hypothesis guide <a href="https://github.com/HypothesisWorks/hypothesis/blob/master/guides/strategies-that-shrink.rst"><em>Strategies that shrink</em></a> describes the model:
@@ -1280,8 +1265,8 @@ wrappers toward <code>RegularArray</code> (the first wrapper offered). The scala
 inside a <code>NumpyArray</code> leaf are drawn by Hypothesis's own NumPy strategies, which
 shrink them toward zero.</p>
 <h3 id="what-each-strategy-shrinks-toward">What each strategy shrinks toward<a class="headerlink" href="#what-each-strategy-shrinks-toward" title="Permanent link">&para;</a></h3>
-<p>Each strategy below lives in <code>st_ak.contents</code>, except <code>supported_dtypes()</code>,
-which is <code>st_ak.supported_dtypes()</code>.</p>
+<p>Each strategy below is in <code>st_ak.constructors</code>, except <code>supported_dtypes()</code>,
+which is in <code>st_ak.numpy</code>, and <code>masked_contents()</code>, which is internal.</p>
 <table>
 <thead>
 <tr>
@@ -1323,7 +1308,7 @@ The tests call <code>hypothesis.find()</code> with the example database disabled
 assert the minimal value:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">hypothesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">find</span><span class="p">,</span> <span class="n">settings</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">hypothesis_awkward.strategies</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">st_ak</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">find</span><span class="p">(</span><span class="n">st_ak</span><span class="o">.</span><span class="n">supported_dtypes</span><span class="p">(),</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="o">&gt;&gt;&gt;</span> <span class="n">find</span><span class="p">(</span><span class="n">st_ak</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">supported_dtypes</span><span class="p">(),</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">(</span><span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span>
 </span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">dtype</span><span class="p">(</span><span class="s1">'bool'</span><span class="p">)</span>
 </span></code></pre></div>
 <p><code>find()</code> searches for the simplest value it can find that satisfies the

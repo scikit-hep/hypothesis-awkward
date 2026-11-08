@@ -797,6 +797,8 @@
     
       
         
+          
+        
       
         
       
@@ -820,8 +822,9 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
-            
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/strategies/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -834,8 +837,14 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
         
           <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
@@ -847,6 +856,8 @@
 
             </label>
             <ul class="md-nav__list" data-md-scrollfix>
+              
+                
               
                 
                   
@@ -863,33 +874,6 @@
     
   
   Constructors
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-                
-              
-                
-                  
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/strategies/contents/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Contents
 
     
   </span>
@@ -936,14 +920,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/strategies/builtins/" class="md-nav__link">
+      <a href="../../reference/strategies/misc/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-  Builtins
+  Miscellaneous
 
     
   </span>
@@ -1197,8 +1181,8 @@ collected across many runs — a single run of the script above prints five:</p>
 <p>The generated arrays cover numbers (including <code>nan</code> and infinities), dates and
 durations, strings, bytestrings, records, unions, missing values, and nested
 lists of regular and variable length, in a variety of Awkward layouts. The
-<a href="../../reference/strategies/constructors/">API reference</a> lists exactly which
-layouts are generated.</p>
+<a href="../../reference/strategies/constructors/#hypothesis_awkward.strategies.constructors.arrays">API reference</a>
+lists exactly which layouts are generated.</p>
 <h2 id="reading-the-output">Reading the output<a class="headerlink" href="#reading-the-output" title="Permanent link">&para;</a></h2>
 <ul>
 <li><code>None</code> is a missing value. <code>NaT</code> ("not a time") is the missing-value
@@ -1263,8 +1247,9 @@ turns off virtual arrays, so no <code>??</code> placeholders appear. Change the 
 </span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>&lt;Array [b'#h\x950#\x8cMv', b'', ..., b'\xbf\xcc\x1c\xfe\xe0'] type='9 * bytes'&gt;
 </span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>&lt;Array ['í衣䕉', ..., 'D'] type='4 * string'&gt;
 </span></code></pre></div>
-<p>The <a href="../../reference/strategies/constructors/">API reference</a> documents all
-options.</p>
+<p>The
+<a href="../../reference/strategies/constructors/#hypothesis_awkward.strategies.constructors.arrays">API reference</a>
+documents all options.</p>
 
 
 

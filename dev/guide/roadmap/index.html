@@ -803,6 +803,8 @@
     
       
         
+          
+        
       
         
       
@@ -826,8 +828,9 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
-            
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/strategies/" class="md-nav__link ">
+              
   
   
   <span class="md-ellipsis">
@@ -840,8 +843,14 @@
   
   
 
-            <span class="md-nav__icon md-icon"></span>
-          </label>
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
         
         
           <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
@@ -853,6 +862,8 @@
 
             </label>
             <ul class="md-nav__list" data-md-scrollfix>
+              
+                
               
                 
                   
@@ -869,33 +880,6 @@
     
   
   Constructors
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-                
-              
-                
-                  
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/strategies/contents/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-  Contents
 
     
   </span>
@@ -942,14 +926,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/strategies/builtins/" class="md-nav__link">
+      <a href="../../reference/strategies/misc/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-  Builtins
+  Miscellaneous
 
     
   </span>
@@ -1176,16 +1160,16 @@ heading, and is reviewed at each release. It gives no dates; the order of the
 items reflects priority, not a schedule.</p>
 <h2 id="what-you-can-generate-today">What you can generate today<a class="headerlink" href="#what-you-can-generate-today" title="Permanent link">&para;</a></h2>
 <p>Today the main strategy,
-<a href="../../reference/strategies/constructors/"><code>st_ak.constructors.arrays()</code></a> (with
-<code>import hypothesis_awkward.strategies as st_ak</code>), generates arrays <strong>in terms of
-their layout</strong> — the low-level structure of an Awkward Array, a tree of
+<a href="../../reference/strategies/constructors/#hypothesis_awkward.strategies.constructors.arrays"><code>st_ak.constructors.arrays()</code></a>
+(with <code>import hypothesis_awkward.strategies as st_ak</code>), generates arrays <strong>in
+terms of their layout</strong> — the low-level structure of an Awkward Array, a tree of
 <code>Content</code> nodes — by composing those nodes directly. It resides in the
 <code>constructors</code> subpackage because its development has followed the
 <a href="https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html">direct constructors</a>
 section of the Awkward Array documentation.</p>
-<p>The library includes <a href="../../reference/strategies/contents/">strategies</a> for each
-of <code>EmptyArray</code>, <code>NumpyArray</code>, <code>RegularArray</code>, <code>ListOffsetArray</code>, <code>ListArray</code>,
-<code>RecordArray</code>, <code>UnionArray</code>, <code>IndexedArray</code>, <code>IndexedOptionArray</code>,
+<p>The library includes <a href="../../reference/strategies/constructors/">strategies</a> for
+each of <code>EmptyArray</code>, <code>NumpyArray</code>, <code>RegularArray</code>, <code>ListOffsetArray</code>,
+<code>ListArray</code>, <code>RecordArray</code>, <code>UnionArray</code>, <code>IndexedArray</code>, <code>IndexedOptionArray</code>,
 <code>ByteMaskedArray</code>, <code>BitMaskedArray</code>, <code>UnmaskedArray</code>, as well as for strings,
 bytestrings, and categorical data. The main strategy <code>arrays()</code> generates nested
 combinations of these, and can also generate arrays backed by virtual (lazy)
@@ -1193,8 +1177,8 @@ buffers. Some variants of these, such as other index types and parameters, are
 not generated yet; they are tracked in
 <a href="https://github.com/scikit-hep/hypothesis-awkward/issues/238">issue #238</a>.
 <a href="../getting-started/">Getting Started</a> shows sample outputs, and the
-<a href="../../reference/strategies/constructors/">API reference</a> lists the available
-options.</p>
+<a href="../../reference/strategies/constructors/#hypothesis_awkward.strategies.constructors.arrays">API reference</a>
+lists the available options.</p>
 <p>The current <code>arrays()</code> is not exported from the top-level package, so it must be
 called as <code>st_ak.constructors.arrays()</code>. The bare name <code>st_ak.arrays()</code>, without
 <code>constructors</code>, is <strong>reserved</strong> for the type- and form-directed strategy
@@ -1217,10 +1201,10 @@ directions below is the level you describe it in terms of: today its layout,
 next its type, and later its form.</p>
 <h3 id="near-term">Near-term<a class="headerlink" href="#near-term" title="Permanent link">&para;</a></h3>
 <p><strong>Generate arrays from a type.</strong> Add strategies that generate Awkward <em>types</em>
-(building on the existing <code>st_ak.numpy_types()</code>), then strategies that generate
-arrays matching a given type. This is the planned home of the reserved
-<code>st_ak.arrays()</code>. It would let a test generate arrays of the specific type that
-the code under test expects:</p>
+(building on an existing internal strategy for NumPy types), then strategies
+that generate arrays matching a given type. This is the planned home of the
+reserved <code>st_ak.arrays()</code>. It would let a test generate arrays of the specific
+type that the code under test expects:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Not yet available — illustrative of the planned type-directed API.</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="c1"># st_ak.arrays() does not exist yet; today, call st_ak.constructors.arrays()</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># without type=.</span>
@@ -1248,10 +1232,10 @@ It would pair naturally with type-directed generation.</p>
 <h3 id="later">Later<a class="headerlink" href="#later" title="Permanent link">&para;</a></h3>
 <p><strong>Generate arrays from a form.</strong> Because one type can have many forms — a list
 type, for example, can be laid out as a <code>ListOffsetArray</code> or a <code>ListArray</code> — a
-later step is to generate forms for a given type (building on the existing
-<code>st_ak.numpy_forms()</code>), and then arrays matching a given form, also under the
-reserved <code>st_ak.arrays()</code>. This helps when a test depends on the concrete
-layout, not only the type.</p>
+later step is to generate forms for a given type (building on an existing
+internal strategy for NumPy forms), and then arrays matching a given form, also
+under the reserved <code>st_ak.arrays()</code>. This helps when a test depends on the
+concrete layout, not only the type.</p>
 <h2 id="influencing-the-roadmap">Influencing the roadmap<a class="headerlink" href="#influencing-the-roadmap" title="Permanent link">&para;</a></h2>
 <p>These priorities are open. If you build on Awkward and need a particular type,
 layout, or option that the library does not yet generate, please
