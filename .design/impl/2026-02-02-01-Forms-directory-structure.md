@@ -4,6 +4,10 @@
 - **Status:** Draft
 - **Related:** [forms-api.md](./../api/2026-02-02-01-Forms-API.md)
 
+> **Update (2026-11-08):** The `forms/` package is now `form/`, and
+> `numpy_forms()` is private. See
+> [public-namespaces-API](../api/2026-11-08-01-Public-namespaces-API.md).
+
 ## Overview
 
 This document proposes the directory structure for implementing the

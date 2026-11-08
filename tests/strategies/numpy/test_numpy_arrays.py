@@ -65,7 +65,7 @@ class RelatedKwargs(TypedDict, total=False):
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `numpy_arrays()`'s parameters."""
     assert_kwargs_match_signature(
-        func=st_ak.numpy_arrays,
+        func=st_ak.numpy.numpy_arrays,
         kwargs_cls=NumpyArraysKwargs,
         defaults=DEFAULTS,
         related_cls=RelatedKwargs,
@@ -79,13 +79,13 @@ def numpy_arrays_kwargs(draw: st.DrawFn) -> NumpyArraysKwargs:
     @st.composite
     def _st_related_kwargs(draw: st.DrawFn) -> RelatedKwargs:
         """Strategy for the options that are drawn together."""
-        min_dims, max_dims = draw(st_ak.ranges(min_start=1, max_end=5))
+        min_dims, max_dims = draw(st_ak.misc.ranges(min_start=1, max_end=5))
         min_size, max_size = draw(
-            st_ak.ranges(min_start=0, max_end=100, max_start=DEFAULTS['max_size'])
+            st_ak.misc.ranges(min_start=0, max_end=100, max_start=DEFAULTS['max_size'])
         )
-        unique = draw(st_ak.none_or(st.booleans()))
+        unique = draw(st_ak.misc.none_or(st.booleans()))
 
-        st_dtypes = st_ak.supported_dtypes()
+        st_dtypes = st_ak.numpy.supported_dtypes()
         if unique and not sc(min_size) <= 2:
             st_dtypes = st_dtypes.filter(lambda d: d.kind != 'b')
         registered_st_dtypes = RecordDraws(st_dtypes)
@@ -128,7 +128,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs = data.draw(numpy_arrays_kwargs(), label='kwargs')
 
     # Call the test subject
-    n = data.draw(st_ak.numpy_arrays(**kwargs), label='n')
+    n = data.draw(st_ak.numpy.numpy_arrays(**kwargs), label='n')
 
     # Assert the options were effective
     dtype = kwargs.get('dtype', DEFAULTS['dtype'])
@@ -215,7 +215,7 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_structured() -> None:
     """Assert that structured arrays can be drawn by default."""
     find(
-        st_ak.numpy_arrays(),
+        st_ak.numpy.numpy_arrays(),
         lambda a: a.dtype.names is not None,
         settings=FIND_NO_SHRINK,
     )
@@ -224,7 +224,7 @@ def test_draw_structured() -> None:
 def test_draw_nan() -> None:
     """Assert that arrays with NaN can be drawn when allowed."""
     find(
-        st_ak.numpy_arrays(dtype=st_np.floating_dtypes(), allow_nan=True),
+        st_ak.numpy.numpy_arrays(dtype=st_np.floating_dtypes(), allow_nan=True),
         lambda a: any_nan_in_numpy_array(a),
         settings=FIND_NO_SHRINK,
     )
@@ -233,7 +233,7 @@ def test_draw_nan() -> None:
 def test_draw_nat_datetime64() -> None:
     """Assert that datetime64 arrays with NaT can be drawn when allowed."""
     find(
-        st_ak.numpy_arrays(dtype=st_np.datetime64_dtypes(), allow_nan=True),
+        st_ak.numpy.numpy_arrays(dtype=st_np.datetime64_dtypes(), allow_nan=True),
         lambda a: any_nat_in_numpy_array(a),
         settings=FIND_NO_SHRINK,
     )
@@ -242,7 +242,7 @@ def test_draw_nat_datetime64() -> None:
 def test_draw_nat_timedelta64() -> None:
     """Assert that timedelta64 arrays with NaT can be drawn when allowed."""
     find(
-        st_ak.numpy_arrays(dtype=st_np.timedelta64_dtypes(), allow_nan=True),
+        st_ak.numpy.numpy_arrays(dtype=st_np.timedelta64_dtypes(), allow_nan=True),
         lambda a: any_nat_in_numpy_array(a),
         settings=FIND_NO_SHRINK,
     )
@@ -251,7 +251,9 @@ def test_draw_nat_timedelta64() -> None:
 def test_draw_empty() -> None:
     """Assert that empty arrays can be drawn by default."""
     find(
-        st_ak.numpy_arrays(), lambda a: math.prod(a.shape) == 0, settings=FIND_NO_SHRINK
+        st_ak.numpy.numpy_arrays(),
+        lambda a: math.prod(a.shape) == 0,
+        settings=FIND_NO_SHRINK,
     )
 
 
@@ -263,7 +265,7 @@ def test_draw_empty_parametrized(
 ) -> None:
     """Assert that empty arrays can be drawn when max allows at most one scalar."""
     find(
-        st_ak.numpy_arrays(
+        st_ak.numpy.numpy_arrays(
             max_dims=max_dims, max_size=max_size, allow_structured=allow_structured
         ),
         lambda a: math.prod(a.shape) == 0,
@@ -274,7 +276,7 @@ def test_draw_empty_parametrized(
 def test_draw_max_size() -> None:
     """Assert that arrays with exactly max_size scalars can be drawn."""
     find(
-        st_ak.numpy_arrays(allow_structured=False),
+        st_ak.numpy.numpy_arrays(allow_structured=False),
         lambda a: math.prod(a.shape) == DEFAULTS['max_size'],
         settings=FIND_NO_SHRINK,
     )
@@ -283,7 +285,7 @@ def test_draw_max_size() -> None:
 def test_draw_max_size_structured() -> None:
     """Assert that max_size counts scalars for structured dtypes."""
     find(
-        st_ak.numpy_arrays(),
+        st_ak.numpy.numpy_arrays(),
         lambda a: (
             math.prod(a.shape) * n_scalars_in(a.dtype) == DEFAULTS['max_size']
             and a.dtype.names is not None
@@ -295,7 +297,7 @@ def test_draw_max_size_structured() -> None:
 def test_draw_nonempty_max_size_1() -> None:
     """Assert that a non-empty array can be drawn with max_size=1."""
     find(
-        st_ak.numpy_arrays(allow_structured=False, max_size=1),
+        st_ak.numpy.numpy_arrays(allow_structured=False, max_size=1),
         lambda a: math.prod(a.shape) == 1,
         settings=FIND_NO_SHRINK,
     )
@@ -305,7 +307,7 @@ def test_draw_min_size() -> None:
     """Assert that arrays with exactly min_size scalars can be drawn."""
     min_size = 5
     find(
-        st_ak.numpy_arrays(allow_structured=False, min_size=min_size),
+        st_ak.numpy.numpy_arrays(allow_structured=False, min_size=min_size),
         lambda a: math.prod(a.shape) == min_size,
         settings=FIND_NO_SHRINK,
     )
@@ -315,7 +317,7 @@ def test_draw_min_size_structured() -> None:
     """Assert that min_size counts scalars for structured dtypes."""
     min_size = 5
     find(
-        st_ak.numpy_arrays(min_size=min_size),
+        st_ak.numpy.numpy_arrays(min_size=min_size),
         lambda a: (
             math.prod(a.shape) * n_scalars_in(a.dtype) == min_size
             and a.dtype.names is not None
@@ -327,7 +329,7 @@ def test_draw_min_size_structured() -> None:
 def test_draw_one_dim() -> None:
     """Assert that 1-D arrays can be drawn by default."""
     find(
-        st_ak.numpy_arrays(allow_structured=False),
+        st_ak.numpy.numpy_arrays(allow_structured=False),
         lambda a: len(a.shape) == 1,
         settings=FIND_NO_SHRINK,
     )
@@ -336,7 +338,7 @@ def test_draw_one_dim() -> None:
 def test_draw_min_dims() -> None:
     """Assert that arrays with at least min_dims dimensions can be drawn."""
     find(
-        st_ak.numpy_arrays(allow_structured=False, min_dims=2),
+        st_ak.numpy.numpy_arrays(allow_structured=False, min_dims=2),
         lambda a: len(a.shape) == 2,
         settings=FIND_NO_SHRINK,
     )
@@ -345,7 +347,7 @@ def test_draw_min_dims() -> None:
 def test_draw_max_dims() -> None:
     """Assert that arrays with max_dims dimensions can be drawn."""
     find(
-        st_ak.numpy_arrays(allow_structured=False, max_dims=3),
+        st_ak.numpy.numpy_arrays(allow_structured=False, max_dims=3),
         lambda a: len(a.shape) == 3,
         settings=FIND_NO_SHRINK,
     )
@@ -358,7 +360,7 @@ def test_draw_unique_bool() -> None:
     Python, so a unique int array `[0, 1]` would otherwise match.
     """
     find(
-        st_ak.numpy_arrays(unique=True),
+        st_ak.numpy.numpy_arrays(unique=True),
         lambda a: a.dtype.kind == 'b' and set(a.ravel().tolist()) == {True, False},
         settings=FIND_RARE_NO_SHRINK,
     )
@@ -373,7 +375,9 @@ def test_unique_mixed_dtypes(max_dims: int | None, data: st.DataObject) -> None:
     """
     dtypes = st.sampled_from([np.dtype(bool), np.dtype(np.int8)])
     a = data.draw(
-        st_ak.numpy_arrays(dtype=dtypes, unique=True, min_size=3, max_dims=max_dims)
+        st_ak.numpy.numpy_arrays(
+            dtype=dtypes, unique=True, min_size=3, max_dims=max_dims
+        )
     )
     assert a.dtype == np.dtype(np.int8)
     assert all_distinct(list(a.ravel()))
@@ -394,7 +398,9 @@ def test_raise_unique_dtype_too_few_values(
     """Assert `ValueError` if a single dtype cannot supply `min_size` unique values."""
     with pytest.raises(ValueError, match='distinct values'):
         find(
-            st_ak.numpy_arrays(dtype=dtype, unique=True, min_size=3, max_dims=max_dims),
+            st_ak.numpy.numpy_arrays(
+                dtype=dtype, unique=True, min_size=3, max_dims=max_dims
+            ),
             lambda _: True,
             settings=FIND_NO_SHRINK,
         )

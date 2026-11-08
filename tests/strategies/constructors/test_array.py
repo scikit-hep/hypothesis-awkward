@@ -10,8 +10,8 @@ from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import iter_contents
 from tests.find_settings import FIND_NO_SHRINK
 from tests.funcs import assert_kwargs_match_signature
-from tests.strategies.contents.test_content import DEFAULTS as CONTENTS_DEFAULTS
-from tests.strategies.contents.test_content import ContentsKwargs, contents_kwargs
+from tests.strategies.constructors.test_content import DEFAULTS as CONTENTS_DEFAULTS
+from tests.strategies.constructors.test_content import ContentsKwargs, contents_kwargs
 
 
 class ArraysKwargs(ContentsKwargs, total=False):
@@ -56,8 +56,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs = data.draw(arrays_kwargs(), label='kwargs')
 
     spy = ContentsSpy()
-    mock_st_ak = Mock(wraps=st_ak)
-    mock_st_ak.contents.contents = Mock(side_effect=spy.wrap_contents)
+    mock_contents = Mock(side_effect=spy.wrap_contents)
 
     contents_keys = ContentsKwargs.__required_keys__ | ContentsKwargs.__optional_keys__
     expected_contents_kwargs = {
@@ -65,7 +64,7 @@ def test_properties(data: st.DataObject) -> None:
     }
 
     # Call the test subject
-    with patch.object(array_module, 'st_ak', mock_st_ak):
+    with patch.object(array_module, 'contents', mock_contents):
         try:
             a = data.draw(st_ak.constructors.arrays(**kwargs), label='a')
         except Exception as e:
@@ -73,9 +72,7 @@ def test_properties(data: st.DataObject) -> None:
             assert e is spy.raised_exc
             return
         finally:
-            mock_st_ak.contents.contents.assert_called_once_with(
-                **expected_contents_kwargs
-            )
+            mock_contents.assert_called_once_with(**expected_contents_kwargs)
 
     assert isinstance(a, ak.Array)
     is_virtual = not ak.to_layout(a).is_all_materialized
@@ -111,7 +108,7 @@ class ContentsSpy:
         self.raised_exc: Exception | None = None
 
     def wrap_contents(self, *a: Any, **kw: Any) -> st.SearchStrategy[Content]:
-        strategy = st_ak.contents.contents(*a, **kw)
+        strategy = st_ak.constructors.contents(*a, **kw)
         spy = self
 
         @st.composite

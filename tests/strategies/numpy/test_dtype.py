@@ -8,23 +8,24 @@ import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import n_scalars_in, simple_dtype_kinds_in
 from hypothesis_awkward._util import safe_compare as sc
+from hypothesis_awkward.strategies.numpy.dtype import supported_dtype_names
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 
 
-@given(name=st_ak.supported_dtype_names())
+@given(name=supported_dtype_names())
 def test_supported_dtype_names(name: str) -> None:
     ak.from_numpy(np.array([], dtype=name))
 
 
-@given(dtype=st_ak.supported_dtypes())
+@given(dtype=st_ak.numpy.supported_dtypes())
 def test_supported_dtypes(dtype: np.dtype) -> None:
     ak.from_numpy(np.array([], dtype=dtype))
 
 
 def test_supported_dtypes_shrinks_to_bool() -> None:
     """Assert that supported_dtypes() shrinks to bool."""
-    result = find(st_ak.supported_dtypes(), lambda _: True, settings=FIND)
+    result = find(st_ak.numpy.supported_dtypes(), lambda _: True, settings=FIND)
     assert result == np.dtype('bool')
 
 
@@ -42,7 +43,7 @@ DEFAULTS = NumpyDtypesKwargs(dtype=None, allow_array=True, max_size=5)
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `numpy_dtypes()`."""
     assert_kwargs_match_signature(
-        func=st_ak.numpy_dtypes, kwargs_cls=NumpyDtypesKwargs, defaults=DEFAULTS
+        func=st_ak.numpy.numpy_dtypes, kwargs_cls=NumpyDtypesKwargs, defaults=DEFAULTS
     )
 
 
@@ -53,8 +54,8 @@ def numpy_dtypes_kwargs() -> st.SearchStrategy[NumpyDtypesKwargs]:
         optional={
             'dtype': st.one_of(
                 st.none(),
-                st.just(st_ak.supported_dtypes()),
-                st_ak.supported_dtypes(),
+                st.just(st_ak.numpy.supported_dtypes()),
+                st_ak.numpy.supported_dtypes(),
             ),
             'allow_array': st.booleans(),
             'max_size': st.integers(min_value=1, max_value=10),
@@ -69,7 +70,7 @@ def test_properties(data: st.DataObject) -> None:
     kwargs = data.draw(numpy_dtypes_kwargs(), label='kwargs')
 
     # Call the test subject
-    result = data.draw(st_ak.numpy_dtypes(**kwargs), label='dtype')
+    result = data.draw(st_ak.numpy.numpy_dtypes(**kwargs), label='dtype')
 
     # Assert the options were effective
     dtype = kwargs.get('dtype', DEFAULTS['dtype'])

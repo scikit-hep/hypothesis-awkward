@@ -14,7 +14,7 @@ from hypothesis_awkward._util import (
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """`content_size` equals own size plus children's sizes at every node."""
-    content = data.draw(st_ak.contents.contents(), label='content')
+    content = data.draw(st_ak.constructors.contents(), label='content')
 
     # This pins the aggregation rule of `content_size` against
     # `content_own_size` as a primitive. `content_own_size` is independently

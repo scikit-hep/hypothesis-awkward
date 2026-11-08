@@ -4,6 +4,10 @@
 - **Status:** Draft
 - **Related:** [types-api.md](./../api/2026-01-21-01-Types-API.md)
 
+> **Update (2026-11-08):** The `types/` package is now `type_/`, and
+> `numpy_types()` is private. See
+> [public-namespaces-API](../api/2026-11-08-01-Public-namespaces-API.md).
+
 ## Overview
 
 This document proposes the directory structure for implementing the `types()`

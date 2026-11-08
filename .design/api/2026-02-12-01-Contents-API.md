@@ -67,6 +67,12 @@
 >   `BitMaskedArray`, and `UnmaskedArray`. It is the length-preserving sibling
 >   of `option_contents()` (whose indexed-option branch chooses its own length).
 
+> **Update (2026-11-08):** The content strategies moved from `st_ak.contents` to
+> `st_ak.constructors` (for example `st_ak.constructors.contents()`), and their
+> modules from `strategies/contents/` to `strategies/constructors/`.
+> `content_lists()` and `masked_contents()` are now private. See
+> [public-namespaces-API](./2026-11-08-01-Public-namespaces-API.md).
+
 ## Overview
 
 This document describes the API for the strategies in the `contents/` package,

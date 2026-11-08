@@ -55,7 +55,8 @@ Strategies that generate arrays of a given type are planned; the
 [awkward-array]: https://awkward-array.org/
 [hypothesis]: https://hypothesis.readthedocs.io/
 [hyp-st]: https://hypothesis.readthedocs.io/en/latest/reference/strategies.html
-[arrays]: reference/strategies/constructors.md
+[arrays]:
+  reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays
 [api-ref]: reference/index.md
 [gen-shrink]: guide/generating-and-shrinking-samples.md
 [roadmap]: guide/roadmap.md

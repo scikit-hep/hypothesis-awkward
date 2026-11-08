@@ -7,7 +7,7 @@ from hypothesis import strategies as st
 
 from hypothesis_awkward._util import safe_compare as sc
 from hypothesis_awkward._util import safe_max
-from hypothesis_awkward.strategies import none_or, ranges
+from hypothesis_awkward.strategies.misc import none_or, ranges
 from hypothesis_awkward.strategies.misc.range import _StMinMaxValuesFactory
 from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature

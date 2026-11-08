@@ -4,7 +4,8 @@ import numpy as np
 from hypothesis import strategies as st
 
 import awkward as ak
-from hypothesis_awkward import strategies as st_ak
+
+from .content import contents
 
 
 @st.composite
@@ -192,7 +193,7 @@ def arrays(
     <Array ... type='...'>
     """
     layout = draw(
-        st_ak.contents.contents(
+        contents(
             dtypes=dtypes,
             max_size=max_size,
             max_leaf_size=max_leaf_size,

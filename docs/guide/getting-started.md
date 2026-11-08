@@ -52,8 +52,8 @@ collected across many runs — a single run of the script above prints five:
 The generated arrays cover numbers (including `nan` and infinities), dates and
 durations, strings, bytestrings, records, unions, missing values, and nested
 lists of regular and variable length, in a variety of Awkward layouts. The
-[API reference](../reference/strategies/constructors.md) lists exactly which
-layouts are generated.
+[API reference](../reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays)
+lists exactly which layouts are generated.
 
 ## Reading the output
 
@@ -136,5 +136,6 @@ A run might print, for example:
 <Array ['í衣䕉', ..., 'D'] type='4 * string'>
 ```
 
-The [API reference](../reference/strategies/constructors.md) documents all
-options.
+The
+[API reference](../reference/strategies/constructors.md#hypothesis_awkward.strategies.constructors.arrays)
+documents all options.

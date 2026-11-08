@@ -10,7 +10,7 @@ from tests.record import RecordCallDraws, RecordDraws
 @given(data=st.data())
 def test_record_draws(data: st.DataObject) -> None:
     """Test that `RecordDraws` records drawn values."""
-    recorder = RecordDraws(st_ak.supported_dtypes())
+    recorder = RecordDraws(st_ak.numpy.supported_dtypes())
     n = data.draw(st.integers(min_value=0, max_value=10), label='n')
     expected = []
     for i in range(n):

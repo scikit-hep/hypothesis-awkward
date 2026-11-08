@@ -170,7 +170,7 @@ def iter_contents(
     # outer — e.g., a list's content when no offsets/starts-stops reference
     # it, or an option's content when all mask/index entries exclude it.
     # Planned consumer: `test_draw_max_length_not_recursed` in
-    # tests/strategies/contents/test_content.py, to assert that max_length
+    # tests/strategies/constructors/test_content.py, to assert that max_length
     # does not constrain genuinely reachable inner contents.
     stack = list[Content]()
     if isinstance(a, ak.Array):

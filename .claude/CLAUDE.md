@@ -66,8 +66,10 @@ inherited `VIRTUAL_ENV`.
 ### Source Layout (`src/hypothesis_awkward/`)
 
 - **`strategies/`** — public Hypothesis strategies (imported as
-  `hypothesis_awkward.strategies`). Subpackages: `numpy/`, `builtins_/`,
-  `contents/`, `constructors/`, `forms/`, `types/`, `misc/`.
+  `hypothesis_awkward.strategies`). The top level exports only the namespaces
+  `constructors` (`arrays()` and the strategies for contents), `numpy`, and
+  `misc`. Subpackages: `constructors/`, `numpy/`, `misc/`, `builtin/`, `form/`,
+  `type_/`.
 - **`_util/`** — internal utilities for dtype handling, safe comparisons, layout
   iteration, and array introspection.
 
@@ -108,8 +110,10 @@ the title within 70 characters (see "PR Title Convention" in `CONTRIBUTING.md`).
 - Docstrings: NumPy-style, double quotes (`"""`). Other strings: single quotes.
 - Use absolute imports for parent packages (e.g.,
   `from hypothesis_awkward.strategies.numpy import numpy_arrays`, not
-  `from ..numpy import numpy_arrays`). Same-package relative imports (e.g.,
-  `from .arrays_ import arrays`) are fine.
+  `from ..numpy import numpy_arrays`). Use relative imports for the same package
+  and its subpackages (e.g., `from .array_ import arrays`), not access through
+  `st_ak`. Where a top-level import would be circular, import inside the
+  function.
 - For forward references in type annotations, prefer string quotes
   (`-> 'MyClass[Any]'`) over `from __future__ import annotations`.
 - Prefer generic constructor calls over annotated assignments for typed empty

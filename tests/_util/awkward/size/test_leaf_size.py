@@ -13,7 +13,7 @@ from hypothesis_awkward._util import (
 @given(data=st.data())
 def test_properties(data: st.DataObject) -> None:
     """`leaf_size` equals the size of the leaf data at every node."""
-    content = data.draw(st_ak.contents.contents(), label='content')
+    content = data.draw(st_ak.constructors.contents(), label='content')
     zero_field_record_as_leaf = data.draw(
         st.booleans(), label='zero_field_record_as_leaf'
     )

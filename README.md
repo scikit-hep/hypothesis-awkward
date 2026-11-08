@@ -130,7 +130,7 @@ find all options in the API reference:
 - [**API reference: `arrays()`**][api-ref-arrays]
 
 [api-ref-arrays]:
-  https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/constructors/
+  https://scikit-hep.github.io/hypothesis-awkward/dev/reference/strategies/constructors/#hypothesis_awkward.strategies.constructors.arrays
 
 ## Other strategies
 
