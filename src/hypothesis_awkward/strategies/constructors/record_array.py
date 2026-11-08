@@ -37,10 +37,6 @@ def record_array_contents(
     max_length
         Upper bound on the record length, i.e., `len(result)`.
 
-    Returns
-    -------
-    RecordArray
-
     Notes
     -----
     With at least one field, the length is derived from the children as
@@ -172,10 +168,6 @@ def record_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    RecordArray
 
     Examples
     --------

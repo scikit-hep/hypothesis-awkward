@@ -41,10 +41,6 @@ def regular_array_contents(
         (i.e., `len(result)`). Unbounded if `None`.
 
 
-    Returns
-    -------
-    RegularArray
-
     Examples
     --------
     >>> import awkward as ak
@@ -236,10 +232,6 @@ def regular_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    RegularArray
 
     Examples
     --------

@@ -71,10 +71,6 @@ def leaf_contents(
     ValueError
         If no content types are possible with the given options.
 
-    Returns
-    -------
-    NumpyArray | EmptyArray | ListOffsetArray | RecordArray
-
     Examples
     --------
     >>> from hypothesis import given

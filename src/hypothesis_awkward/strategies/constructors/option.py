@@ -49,10 +49,6 @@ def option_contents(
     allow_unmasked
         No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
 
-    Returns
-    -------
-    Content
-
     Examples
     --------
     >>> import awkward as ak
@@ -196,10 +192,6 @@ def option_from_contents(
         No [`BitMaskedArray`][ak.contents.BitMaskedArray] is generated if `False`.
     allow_unmasked
         No [`UnmaskedArray`][ak.contents.UnmaskedArray] is generated if `False`.
-
-    Returns
-    -------
-    Content
     """
     child = draw(
         content(

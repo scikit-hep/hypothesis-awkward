@@ -56,10 +56,6 @@ def union_array_contents(
         If `allow_invalid` is `False` and a concrete `contents` has mergeable
         child contents.
 
-    Returns
-    -------
-    UnionArray
-
     Examples
     --------
     >>> from hypothesis import given
@@ -163,10 +159,6 @@ def union_array_from_contents(
     st_option
         A callable conforming to `StOption` that wraps content in an option
         type. Used for all-or-none option coordination.
-
-    Returns
-    -------
-    UnionArray
 
     Examples
     --------

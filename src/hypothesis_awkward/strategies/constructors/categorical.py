@@ -73,10 +73,6 @@ def categorical_contents(
         If both `allow_indexed` and `allow_indexed_option` are `False`, or if a
         concrete `content` is not valid as categories.
 
-    Returns
-    -------
-    IndexedArray | IndexedOptionArray
-
     Examples
     --------
     >>> import awkward as ak
@@ -206,10 +202,6 @@ def categorical_from_contents(
     ------
     ValueError
         If both `allow_indexed` and `allow_indexed_option` are `False`.
-
-    Returns
-    -------
-    IndexedArray | IndexedOptionArray
 
     Examples
     --------

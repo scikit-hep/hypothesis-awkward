@@ -183,10 +183,6 @@ def contents(
         [`UnionArray`][ak.contents.UnionArray], which accept categorical data but not
         other [`IndexedArray`][ak.contents.IndexedArray].
 
-    Returns
-    -------
-    Content
-
     Examples
     --------
     >>> import awkward as ak
@@ -469,10 +465,6 @@ def content_lists(
     st_option
         A callable conforming to `StOption` that wraps content in an option type.
         Required when `all_option_or_none` is `True`.
-
-    Returns
-    -------
-    list[Content]
     """
     remaining_leaf = max_leaf_size
     remaining_total = max_size

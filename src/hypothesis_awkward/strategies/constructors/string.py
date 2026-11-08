@@ -29,10 +29,6 @@ def string_contents(
         No two strings are equal if `True`. Strings are compared by code point, without
         Unicode normalization.
 
-    Returns
-    -------
-    ListOffsetArray
-
     Examples
     --------
     >>> import awkward as ak

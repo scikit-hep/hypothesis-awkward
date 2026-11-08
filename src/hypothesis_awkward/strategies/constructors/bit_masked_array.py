@@ -26,10 +26,6 @@ def bit_masked_array_contents(
         [`Content`][ak.contents.Content] instance, or `None` to draw from
         `contents()`.
 
-    Returns
-    -------
-    BitMaskedArray
-
     Examples
     --------
     >>> import awkward as ak
@@ -110,10 +106,6 @@ def bit_masked_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    BitMaskedArray
 
     Examples
     --------

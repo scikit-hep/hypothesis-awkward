@@ -34,10 +34,6 @@ def numpy_array_contents(
         rejected, and Hypothesis raises `Unsatisfiable` if every drawn dtype is
         rejected.
 
-    Returns
-    -------
-    NumpyArray
-
     Examples
     --------
     >>> import numpy as np

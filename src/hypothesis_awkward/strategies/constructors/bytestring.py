@@ -24,10 +24,6 @@ def bytestring_contents(
     unique
         No two bytestrings are equal if `True`.
 
-    Returns
-    -------
-    ListOffsetArray
-
     Examples
     --------
     >>> import awkward as ak

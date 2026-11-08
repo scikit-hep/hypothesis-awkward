@@ -39,10 +39,6 @@ def indexed_array_contents(
         Upper bound on the index length, i.e., `len(result)`. If `None`, twice the
         content length is used.
 
-    Returns
-    -------
-    IndexedArray
-
     Examples
     --------
     >>> import awkward as ak
@@ -149,10 +145,6 @@ def indexed_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    IndexedArray
 
     Examples
     --------

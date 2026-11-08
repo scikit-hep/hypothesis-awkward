@@ -36,10 +36,6 @@ def list_array_contents(
         Upper bound on the number of lists, i.e., `len(result)`. If `None`,
         `len(content)` is used.
 
-    Returns
-    -------
-    ListArray
-
     Examples
     --------
     >>> import awkward as ak
@@ -335,10 +331,6 @@ def list_array_from_contents(
         Upper bound on `len(result)`. Unbounded if `None`.
     st_option
         Accepted for `_StFromContents` compatibility; unused in this variant.
-
-    Returns
-    -------
-    ListArray
 
     Examples
     --------
