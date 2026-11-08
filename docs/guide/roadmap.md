@@ -9,15 +9,15 @@ items reflects priority, not a schedule.
 ## What you can generate today
 
 Today the main strategy,
-[`st_ak.constructors.arrays()`](../reference/strategies/constructors.md) (with
-`import hypothesis_awkward.strategies as st_ak`), generates arrays **in terms of
-their layout** — the low-level structure of an Awkward Array, a tree of
+[`st_ak.constructors.arrays()`](../reference/strategies.md#hypothesis_awkward.strategies.constructors.arrays)
+(with `import hypothesis_awkward.strategies as st_ak`), generates arrays **in
+terms of their layout** — the low-level structure of an Awkward Array, a tree of
 `Content` nodes — by composing those nodes directly. It resides in the
 `constructors` subpackage because its development has followed the
 [direct constructors](https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html)
 section of the Awkward Array documentation.
 
-The library includes [strategies](../reference/strategies/index.md) for each of
+The library includes [strategies](../reference/strategies.md) for each of
 `EmptyArray`, `NumpyArray`, `RegularArray`, `ListOffsetArray`, `ListArray`,
 `RecordArray`, `UnionArray`, `IndexedArray`, `IndexedOptionArray`,
 `ByteMaskedArray`, `BitMaskedArray`, `UnmaskedArray`, as well as for strings,
@@ -27,8 +27,8 @@ buffers. Some variants of these, such as other index types and parameters, are
 not generated yet; they are tracked in
 [issue #238](https://github.com/scikit-hep/hypothesis-awkward/issues/238).
 [Getting Started](getting-started.md) shows sample outputs, and the
-[API reference](../reference/strategies/constructors.md) lists the available
-options.
+[API reference](../reference/strategies.md#hypothesis_awkward.strategies.constructors.arrays)
+lists the available options.
 
 The current `arrays()` is not exported from the top-level package, so it must be
 called as `st_ak.constructors.arrays()`. The bare name `st_ak.arrays()`, without

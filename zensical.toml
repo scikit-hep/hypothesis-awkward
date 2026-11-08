@@ -16,14 +16,8 @@ nav = [
         { "Citation" = "guide/citation.md" },
     ] },
     { "API Reference" = [
-        { "Overview" = "reference/index.md" },
-        { "strategies" = [
-            "reference/strategies/index.md",
-            { "constructors" = "reference/strategies/constructors.md" },
-            { "content" = "reference/strategies/content.md" },
-            { "numpy" = "reference/strategies/numpy.md" },
-            { "misc" = "reference/strategies/misc.md" },
-        ] },
+        "reference/index.md",
+        { "Strategies" = "reference/strategies.md" },
     ] },
 ]
 extra_css = ["stylesheets/extra.css"]

@@ -45,8 +45,8 @@ the total stays within `max_size`.
 These bounds are also options a caller can set: passing a `dtypes` strategy,
 setting the `allow_*` flags, or fixing `min_length` and `max_length` constrains
 the shape of what is generated. See the
-[API reference](../reference/strategies/index.md) for every option. For example,
-a test can bound the depth of every generated array:
+[API reference](../reference/strategies.md) for every option. For example, a
+test can bound the depth of every generated array:
 
 ```python
 from hypothesis import given
