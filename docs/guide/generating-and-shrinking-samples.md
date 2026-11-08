@@ -45,8 +45,8 @@ the total stays within `max_size`.
 These bounds are also options a caller can set: passing a `dtypes` strategy,
 setting the `allow_*` flags, or fixing `min_length` and `max_length` constrains
 the shape of what is generated. See the
-[API reference](../reference/strategies.md) for every option. For example, a
-test can bound the depth of every generated array:
+[API reference](../reference/strategies/arrays.md) for every option. For
+example, a test can bound the depth of every generated array:
 
 ```python
 from hypothesis import given
@@ -105,9 +105,8 @@ shrink them toward zero.
 
 ### What each strategy shrinks toward
 
-Each strategy below is at the top level of `st_ak`, except `leaf_contents()` and
-`masked_contents()`, which are in `st_ak.content`, and `supported_dtypes()`,
-which is in `st_ak.numpy`.
+Each strategy below is at the top level of `st_ak`, except `supported_dtypes()`,
+which is in `st_ak.numpy`, and `masked_contents()`, which is internal.
 
 | Strategy                         | Shrinks toward                                                                                                                                                                 |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

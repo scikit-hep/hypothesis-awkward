@@ -90,7 +90,7 @@ class RelatedKwargs(TypedDict, total=False):
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `leaf_contents()`."""
     assert_kwargs_match_signature(
-        func=st_ak.content.leaf_contents,
+        func=st_ak.leaf_contents,
         kwargs_cls=LeafContentsKwargs,
         defaults=DEFAULTS,
         related_cls=RelatedKwargs,
@@ -184,7 +184,7 @@ def test_properties(data: st.DataObject) -> None:
     )
 
     # Call the test subject
-    result = data.draw(st_ak.content.leaf_contents(**kwargs), label='result')
+    result = data.draw(st_ak.leaf_contents(**kwargs), label='result')
 
     is_numpy = isinstance(result, NumpyArray)
     is_empty = isinstance(result, EmptyArray)
@@ -231,7 +231,7 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_numpy_array() -> None:
     """Assert that NumpyArray can be drawn by default."""
     find(
-        st_ak.content.leaf_contents(),
+        st_ak.leaf_contents(),
         lambda c: isinstance(c, NumpyArray),
         settings=FIND,
     )
@@ -240,7 +240,7 @@ def test_draw_numpy_array() -> None:
 def test_draw_empty_array() -> None:
     """Assert that EmptyArray can be drawn by default."""
     find(
-        st_ak.content.leaf_contents(),
+        st_ak.leaf_contents(),
         lambda c: isinstance(c, EmptyArray),
         settings=FIND,
     )
@@ -248,19 +248,19 @@ def test_draw_empty_array() -> None:
 
 def test_draw_string() -> None:
     """Assert that string content can be drawn by default."""
-    find(st_ak.content.leaf_contents(), lambda c: is_string_leaf(c), settings=FIND)
+    find(st_ak.leaf_contents(), lambda c: is_string_leaf(c), settings=FIND)
 
 
 def test_draw_bytestring() -> None:
     """Assert that bytestring content can be drawn by default."""
-    find(st_ak.content.leaf_contents(), lambda c: is_bytestring_leaf(c), settings=FIND)
+    find(st_ak.leaf_contents(), lambda c: is_bytestring_leaf(c), settings=FIND)
 
 
 @pytest.mark.parametrize('is_tuple', [True, False])
 def test_draw_zero_field_record(is_tuple: bool) -> None:
     """Assert a zero-field record can be drawn by default."""
     find(
-        st_ak.content.leaf_contents(),
+        st_ak.leaf_contents(),
         lambda c: (
             is_zero_field_record_leaf(c) and c.is_tuple == is_tuple and len(c) != 0
         ),
@@ -272,7 +272,7 @@ def test_draw_max_size() -> None:
     """Assert that leaf content with max_size elements can be drawn."""
     max_size = 25
     find(
-        st_ak.content.leaf_contents(max_size=max_size),
+        st_ak.leaf_contents(max_size=max_size),
         lambda c: len(c) == max_size,
         settings=FIND,
     )
@@ -281,7 +281,7 @@ def test_draw_max_size() -> None:
 def test_draw_unique_zero_field_record() -> None:
     """Assert a one-element zero-field record can be drawn when unique is True."""
     find(
-        st_ak.content.leaf_contents(unique=True),
+        st_ak.leaf_contents(unique=True),
         lambda c: is_zero_field_record_leaf(c) and len(c) == 1,
         settings=FIND,
     )
@@ -289,16 +289,14 @@ def test_draw_unique_zero_field_record() -> None:
 
 def test_draw_nan() -> None:
     """Assert that leaf content with NaN can be drawn."""
-    c = find(
-        st_ak.content.leaf_contents(), any_nan_in_awkward_array, settings=FIND_RARE
-    )
+    c = find(st_ak.leaf_contents(), any_nan_in_awkward_array, settings=FIND_RARE)
     assert isinstance(c, NumpyArray)
     assert np.array_equal(c.data, np.array([np.nan]), equal_nan=True)
 
 
 def test_shrink_leaf_contents_empty() -> None:
     """Assert that leaf content can shrink to an empty array when allowed."""
-    c = find(st_ak.content.leaf_contents(), lambda c: len(c) == 0, settings=FIND)
+    c = find(st_ak.leaf_contents(), lambda c: len(c) == 0, settings=FIND)
     assert isinstance(c, EmptyArray)
 
 
@@ -313,7 +311,7 @@ def test_shrink_leaf_contents_one() -> None:
     # A zero-field record found first stays a record: the shrinker cannot
     # leave its one_of branch (EmptyArray fails len == 1), nor enter it from
     # another branch (the length draw falls back to 0). TODO: Revisit.
-    c = find(st_ak.content.leaf_contents(), lambda c: len(c) == 1, settings=FIND)
+    c = find(st_ak.leaf_contents(), lambda c: len(c) == 1, settings=FIND)
     assert c.to_list() == [b'']
 
 
@@ -340,4 +338,4 @@ def test_raise_no_possible_type(kwargs: LeafContentsKwargs) -> None:
     with pytest.raises(
         ValueError, match='no content types are possible with the given options'
     ):
-        st_ak.content.leaf_contents(**kwargs)
+        st_ak.leaf_contents(**kwargs)

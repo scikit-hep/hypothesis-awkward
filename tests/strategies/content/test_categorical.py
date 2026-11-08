@@ -114,7 +114,7 @@ def categorical_contents_kwargs(
             ret['allow_invalid'] = draw(st.booleans())
         allow_invalid = ret.get('allow_invalid', DEFAULTS['allow_invalid'])
         if draw(st.booleans()):
-            leaf = st_ak.content.leaf_contents(
+            leaf = st_ak.leaf_contents(
                 unique=not allow_invalid, allow_zero_field_record=False
             )
             if not allow_invalid:

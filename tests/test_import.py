@@ -6,7 +6,6 @@ import pytest
 
 import hypothesis_awkward.strategies
 import hypothesis_awkward.strategies.constructors
-import hypothesis_awkward.strategies.content
 import hypothesis_awkward.strategies.misc
 import hypothesis_awkward.strategies.numpy
 
@@ -16,7 +15,6 @@ import hypothesis_awkward.strategies.numpy
     [
         hypothesis_awkward.strategies,
         hypothesis_awkward.strategies.constructors,
-        hypothesis_awkward.strategies.content,
         hypothesis_awkward.strategies.misc,
         hypothesis_awkward.strategies.numpy,
     ],

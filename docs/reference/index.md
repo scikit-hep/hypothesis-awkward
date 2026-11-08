@@ -2,4 +2,4 @@
 
 <!-- diataxis: none (navigation index) -->
 
-- [Strategies](strategies.md): all public strategies, by module
+- [Strategies](strategies/index.md): Hypothesis strategies for Awkward Array

@@ -92,7 +92,7 @@ def categorical_contents(
         case None:
             # Without missing entries, a non-empty index needs a category to refer to.
             min_categories = 1 if min_size > 0 and not allow_indexed_option else 0
-            st_categories = st_ak.content.leaf_contents(
+            st_categories = st_ak.leaf_contents(
                 min_size=min_categories, unique=unique, allow_zero_field_record=False
             )
             if unique:

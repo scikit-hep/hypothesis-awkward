@@ -17,7 +17,12 @@ nav = [
     ] },
     { "API Reference" = [
         "reference/index.md",
-        { "Strategies" = "reference/strategies.md" },
+        { "Strategies" = [
+            "reference/strategies/index.md",
+            { "Arrays" = "reference/strategies/arrays.md" },
+            { "Contents (Layouts)" = "reference/strategies/contents.md" },
+            { "Other strategies" = "reference/strategies/other.md" },
+        ] },
     ] },
 ]
 extra_css = ["stylesheets/extra.css"]

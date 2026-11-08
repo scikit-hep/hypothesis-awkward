@@ -72,7 +72,7 @@ class RelatedKwargs(TypedDict, total=False):
 def test_kwargs_match_signature() -> None:
     """Assert the option declarations agree with `option_contents()`."""
     assert_kwargs_match_signature(
-        func=st_ak.content.option_contents,
+        func=st_ak.option_contents,
         kwargs_cls=OptionContentsKwargs,
         defaults=DEFAULTS,
         related_cls=RelatedKwargs,
@@ -136,7 +136,7 @@ def test_properties(data: st.DataObject) -> None:
     allow_unmasked = kwargs.get('allow_unmasked', DEFAULTS['allow_unmasked'])
 
     # Call the test subject
-    result = data.draw(st_ak.content.option_contents(**kwargs), label='result')
+    result = data.draw(st_ak.option_contents(**kwargs), label='result')
 
     assert isinstance(result, OPTION_TYPES)
 
@@ -164,7 +164,7 @@ def test_properties(data: st.DataObject) -> None:
 def test_draw_min_size(min_size: int) -> None:
     """Assert the result length can reach `min_size`."""
     find(
-        st_ak.content.option_contents(min_size=min_size),
+        st_ak.option_contents(min_size=min_size),
         lambda c: len(c) == min_size,
         settings=FIND,
     )
@@ -173,7 +173,7 @@ def test_draw_min_size(min_size: int) -> None:
 @pytest.mark.parametrize('cls', OPTION_TYPES)
 def test_draw_option_type(cls: type[Content]) -> None:
     """Assert the given option type can be drawn."""
-    find(st_ak.content.option_contents(), lambda c: isinstance(c, cls), settings=FIND)
+    find(st_ak.option_contents(), lambda c: isinstance(c, cls), settings=FIND)
 
 
 def test_raise_all_disallowed() -> None:
@@ -181,4 +181,4 @@ def test_raise_all_disallowed() -> None:
     with pytest.raises(
         ValueError, match='at least one option content type must be allowed'
     ):
-        st_ak.content.option_contents(**{flag: False for flag in ALLOW_FLAGS})
+        st_ak.option_contents(**{flag: False for flag in ALLOW_FLAGS})
