@@ -9,33 +9,35 @@ subclasses directly.
 https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
 
 `arrays()` wraps a layout in an [`ak.Array`][]; the other strategies generate layouts.
-`contents()` generates the layouts that `arrays()` wraps; `leaf_contents()` and
-`option_contents()` choose among the leaf and the option-type classes; each
-`*_array_contents()` strategy generates one `Content` subclass; and
+`contents()` generates the layouts that `arrays()` wraps. Each `*_array_contents()`
+strategy generates one `Content` subclass; `leaf_contents()` chooses among the leaf
+classes, and `option_contents()` among the option-type classes; and
 `string_contents()`, `bytestring_contents()`, and `categorical_contents()` generate the
 layouts of strings, bytestrings, and categorical data.
+
+The strategies are listed in the order of the guide section.
 """
 
 __all__ = [
     'arrays',
     'contents',
     'leaf_contents',
-    'option_contents',
     'empty_array_contents',
     'numpy_array_contents',
     'regular_array_contents',
-    'list_offset_array_contents',
     'list_array_contents',
+    'list_offset_array_contents',
+    'string_contents',
+    'bytestring_contents',
     'record_array_contents',
     'indexed_array_contents',
+    'categorical_contents',
+    'option_contents',
     'indexed_option_array_contents',
     'byte_masked_array_contents',
     'bit_masked_array_contents',
     'unmasked_array_contents',
     'union_array_contents',
-    'string_contents',
-    'bytestring_contents',
-    'categorical_contents',
 ]
 
 from .array_ import arrays

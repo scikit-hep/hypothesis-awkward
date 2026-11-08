@@ -68,12 +68,12 @@ def arrays(
     - Bytestrings
     - [`RecordArray`][ak.contents.RecordArray]
     - [`IndexedArray`][ak.contents.IndexedArray]
+    - Categorical data
     - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
     - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
     - [`BitMaskedArray`][ak.contents.BitMaskedArray]
     - [`UnmaskedArray`][ak.contents.UnmaskedArray]
     - [`UnionArray`][ak.contents.UnionArray]
-    - Categorical data
 
     Each type can be excluded separately with the corresponding `allow_*` argument.
 
