@@ -117,6 +117,7 @@ show_root_heading = false
 show_root_toc_entry = false
 separate_signature = true
 show_signature_annotations = true
+signature_crossrefs = true
 
 
 [project.plugins.mkdocstrings.handlers.python.options.docstring_options]
