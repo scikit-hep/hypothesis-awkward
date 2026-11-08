@@ -7,27 +7,27 @@ paths:
 
 Reference implementations:
 
-- `tests/strategies/content/test_unmasked_array.py` — smallest example of
+- `tests/strategies/constructors/test_unmasked_array.py` — smallest example of
   drawing a strategy-valued option in advance (`KwargsDrawn`, no
   `RelatedKwargs`)
-- `tests/strategies/content/test_indexed_array.py` — drawing in advance with
-  `RelatedKwargs`; `optional_independent` merged with `related`
-- `tests/strategies/content/test_regular_array.py` — drawing in advance when the
-  drawn option shares `optional_independent` with other options (`_st_drawn()`
-  and `_st_optional_independent(drawn)`)
-- `tests/strategies/content/test_numpy_array.py` — drawing in advance when
+- `tests/strategies/constructors/test_indexed_array.py` — drawing in advance
+  with `RelatedKwargs`; `optional_independent` merged with `related`
+- `tests/strategies/constructors/test_regular_array.py` — drawing in advance
+  when the drawn option shares `optional_independent` with other options
+  (`_st_drawn()` and `_st_optional_independent(drawn)`)
+- `tests/strategies/constructors/test_numpy_array.py` — drawing in advance when
   related options must fit the drawn value (`_st_related_kwargs(drawn)`)
 - `tests/strategies/form/test_numpy_forms.py` — mode selection, with each mode
   drawing its strategy-valued options in advance (no `RelatedKwargs`)
-- `tests/strategies/content/test_content.py` — full template with a recorder;
-  `exclude` for internal recursion params
+- `tests/strategies/constructors/test_content.py` — full template with a
+  recorder; `exclude` for internal recursion params
 - `tests/strategies/constructors/test_array.py` — kwargs inheritance; `DEFAULTS`
   derived from the parent module's; the kwargs strategy draws the parent's and
   extends them
 - `tests/strategies/numpy/test_numpy_arrays.py` — min/max pairs with `ranges()`;
   the dtype pool depends on other drawn options
-- `tests/strategies/content/test_content_lists.py` — callable-valued kwargs with
-  `RecordCallDraws`
+- `tests/strategies/constructors/test_content_lists.py` — callable-valued kwargs
+  with `RecordCallDraws`
 - `tests/strategies/misc/test_ranges.py` — plain-dict kwargs without recorders
   (closest to the original template in awkward's
   `tests/properties/operations/test_flatten.py`)
