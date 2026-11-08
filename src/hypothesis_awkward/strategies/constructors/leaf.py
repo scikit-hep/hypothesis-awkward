@@ -23,7 +23,7 @@ def leaf_contents(
     allow_bytestring: bool = True,
     allow_zero_field_record: bool = True,
 ) -> st.SearchStrategy[NumpyArray | EmptyArray | ListOffsetArray | RecordArray]:
-    """Strategy for leaf content types.
+    """Strategy for leaf layouts.
 
     This strategy generates [`EmptyArray`][ak.contents.EmptyArray], a zero-field
     [`RecordArray`][ak.contents.RecordArray], bytestring content, string content, and

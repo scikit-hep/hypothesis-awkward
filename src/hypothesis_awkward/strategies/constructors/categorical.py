@@ -31,7 +31,7 @@ def categorical_contents(
     allow_indexed: bool = True,
     allow_indexed_option: bool = True,
 ) -> IndexedArray | IndexedOptionArray:
-    """Strategy for categorical data.
+    """Strategy for layouts of categorical data.
 
     Categorical data is an [`IndexedArray`][ak.contents.IndexedArray] or an
     [`IndexedOptionArray`][ak.contents.IndexedOptionArray] with the parameter

@@ -1,27 +1,26 @@
 """Strategies that build Awkward Arrays and their layouts with direct constructors.
 
 These strategies follow the Awkward Array User Guide section ["Direct
-constructors"][ak-user-guide-constructors]: they build layouts by calling the
-constructors of the `Content` subclasses directly.
+constructors"][ak-user-guide-constructors]: they build layouts, i.e., trees of
+[`Content`][ak.contents.Content] nodes, by calling the constructors of the `Content`
+subclasses directly.
 
 [ak-user-guide-constructors]:
-https://awkward-array.org/doc/main/user-guide/how-to-create-constructors.html
+https://awkward-array.org/doc/stable/user-guide/how-to-create-constructors.html
 
-`arrays()` is the main strategy of this package. It generates Awkward Arrays, with
-options to control the layout, data types, missing values, masks, and other array
-attributes.
-
-The other strategies generate layouts: trees of [`Content`][ak.contents.Content] nodes,
-which an [`ak.Array`][] wraps. `contents()` generates the layouts that `arrays()`
-wraps. Each `*_array_contents()` strategy generates one `Content` subclass;
-`leaf_contents()` and `option_contents()` choose among the leaf and the option-type
-classes; and `string_contents()`, `bytestring_contents()`, and `categorical_contents()`
-generate the layouts of strings, bytestrings, and categorical data.
+`arrays()` wraps a layout in an [`ak.Array`][]; the other strategies generate layouts.
+`contents()` generates the layouts that `arrays()` wraps; `leaf_contents()` and
+`option_contents()` choose among the leaf and the option-type classes; each
+`*_array_contents()` strategy generates one `Content` subclass; and
+`string_contents()`, `bytestring_contents()`, and `categorical_contents()` generate the
+layouts of strings, bytestrings, and categorical data.
 """
 
 __all__ = [
     'arrays',
     'contents',
+    'leaf_contents',
+    'option_contents',
     'empty_array_contents',
     'numpy_array_contents',
     'regular_array_contents',
@@ -37,8 +36,6 @@ __all__ = [
     'string_contents',
     'bytestring_contents',
     'categorical_contents',
-    'leaf_contents',
-    'option_contents',
 ]
 
 from .array_ import arrays

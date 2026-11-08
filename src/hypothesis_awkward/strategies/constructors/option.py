@@ -19,7 +19,7 @@ def option_contents(
     allow_bit_masked: bool = True,
     allow_unmasked: bool = True,
 ) -> st.SearchStrategy[Content]:
-    """Strategy for option-type content.
+    """Strategy for option-type layouts.
 
     Picks among [`IndexedOptionArray`][ak.contents.IndexedOptionArray],
     [`ByteMaskedArray`][ak.contents.ByteMaskedArray],

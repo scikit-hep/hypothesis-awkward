@@ -60,32 +60,13 @@ def contents(
     allow_indexed_root: bool = True,
     allow_categorical_root: bool = False,
 ) -> Content:
-    """Strategy for Awkward Array content layouts.
+    """Strategy for Awkward Array layouts.
 
-    The current implementation generates the following layouts:
-
-    - [`EmptyArray`][ak.contents.EmptyArray]
-    - [`NumpyArray`][ak.contents.NumpyArray]
-    - [`RegularArray`][ak.contents.RegularArray]
-    - [`ListArray`][ak.contents.ListArray]
-    - [`ListOffsetArray`][ak.contents.ListOffsetArray]
-    - Strings
-    - Bytestrings
-    - [`RecordArray`][ak.contents.RecordArray]
-    - [`IndexedArray`][ak.contents.IndexedArray]
-    - [`IndexedOptionArray`][ak.contents.IndexedOptionArray]
-    - [`ByteMaskedArray`][ak.contents.ByteMaskedArray]
-    - [`BitMaskedArray`][ak.contents.BitMaskedArray]
-    - [`UnmaskedArray`][ak.contents.UnmaskedArray]
-    - [`UnionArray`][ak.contents.UnionArray]
-    - Categorical data
-
-    Each type can be excluded separately with the corresponding `allow_*` argument.
-
-    The `max_size` is the main argument for constraining the array size. It counts most
-    of the scalar values in the layout, including data elements, offsets, indices, field
-    names, and parameters. The array size can also be constrained with
-    `max_leaf_size`, `max_depth`, `min_length` and `max_length`.
+    This strategy generates the layouts that
+    [`arrays()`][hypothesis_awkward.strategies.constructors.arrays] wraps in an
+    [`ak.Array`][ak.Array], and its options have the same meaning. See `arrays()` for
+    the layouts it generates and how `max_size` and the other options constrain the
+    size.
 
     Parameters
     ----------
