@@ -1,11 +1,11 @@
 import math
 from collections.abc import Iterable
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar('T')
 
 
-def safe_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
+def safe_min(vals: Iterable[T], default: T | None = None) -> T | None:
     """The smallest item in `vals` that is not `None`.
 
     Parameters
@@ -44,7 +44,7 @@ def safe_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
     return _signed_min((v for v in vals if v is not None), default=default)
 
 
-def safe_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
+def safe_max(vals: Iterable[T], default: T | None = None) -> T | None:
     """The largest item in `vals` that is not `None`.
 
     Parameters
@@ -220,7 +220,7 @@ def safe_compare(value: T | None) -> T | GreaterAndLessThanAny | SignAwareZero:
     return value
 
 
-def _signed_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
+def _signed_min(vals: Iterable[T], default: T | None = None) -> T | None:
     """Like `min()`, but orders `-0.0` before `0.0`.
 
     `min()` treats `-0.0` and `0.0` as equal and returns whichever comes first.
@@ -238,7 +238,7 @@ def _signed_min(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
     return min(vals, key=_sign_aware_key, default=default)
 
 
-def _signed_max(vals: Iterable[T], default: Optional[T] = None) -> Optional[T]:
+def _signed_max(vals: Iterable[T], default: T | None = None) -> T | None:
     """Like `max()`, but orders `-0.0` before `0.0`.
 
     Examples
