@@ -2,16 +2,14 @@
 
 <!-- diataxis: reference -->
 
-## `hypothesis_awkward.strategies.numpy`
-
 <!-- prettier-ignore -->
 ::: hypothesis_awkward.strategies.numpy
     options:
-      heading_level: 3
-
-## `hypothesis_awkward.strategies.misc`
+      show_root_heading: true
+      heading_level: 2
 
 <!-- prettier-ignore -->
 ::: hypothesis_awkward.strategies.misc
     options:
-      heading_level: 3
+      show_root_heading: true
+      heading_level: 2

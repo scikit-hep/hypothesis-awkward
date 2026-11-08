@@ -3,12 +3,12 @@
 <!-- diataxis: reference -->
 
 These strategies generate layouts: trees of [`Content`][ak.contents.Content]
-nodes, which an [`ak.Array`][] wraps. Import them from
-`hypothesis_awkward.strategies`.
+nodes, which an [`ak.Array`][] wraps.
 
 <!-- prettier-ignore -->
 ::: hypothesis_awkward.strategies
     options:
+      show_root_heading: true
       heading_level: 2
       members:
         - contents
