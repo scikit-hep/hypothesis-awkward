@@ -3,6 +3,67 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.22.0] - 2026-11-09
+
+### Features
+
+- Drop `OptsChain` ([#223](https://github.com/scikit-hep/hypothesis-awkward/pull/223)) **BREAKING**
+- Add `unique` option to leaf content strategies ([#225](https://github.com/scikit-hep/hypothesis-awkward/pull/225))
+- Add `categorical_contents` strategy ([#227](https://github.com/scikit-hep/hypothesis-awkward/pull/227))
+- Rename `unique` to `allow_invalid` in `categorical_contents` ([#228](https://github.com/scikit-hep/hypothesis-awkward/pull/228))
+- Add `allow_invalid` to `union_array_contents` ([#229](https://github.com/scikit-hep/hypothesis-awkward/pull/229))
+- Add `allow_invalid` to `contents` and `arrays` ([#230](https://github.com/scikit-hep/hypothesis-awkward/pull/230))
+- Add `allow_categorical` to `contents` and `arrays` ([#234](https://github.com/scikit-hep/hypothesis-awkward/pull/234))
+- Generate non-optional categorical children of unions ([#235](https://github.com/scikit-hep/hypothesis-awkward/pull/235))
+- Make `util` and other non-strategy objects private ([#240](https://github.com/scikit-hep/hypothesis-awkward/pull/240)) **BREAKING**
+- Export strategies only from `constructors`, `numpy`, and `misc` ([#241](https://github.com/scikit-hep/hypothesis-awkward/pull/241)) **BREAKING**
+
+### Bug Fixes
+
+- Reject dtypes with too few values for `unique` in `numpy_arrays` ([#226](https://github.com/scikit-hep/hypothesis-awkward/pull/226))
+- Shrink `categorical_contents` to valid categories ([#231](https://github.com/scikit-hep/hypothesis-awkward/pull/231))
+
+### Performance
+
+- Draw unique categories in `contents` if not `allow_invalid` ([#237](https://github.com/scikit-hep/hypothesis-awkward/pull/237))
+
+### Documentation
+
+- Update the docs for categorical data ([#236](https://github.com/scikit-hep/hypothesis-awkward/pull/236))
+- Link the roadmap to the issue of variants not generated yet ([#239](https://github.com/scikit-hep/hypothesis-awkward/pull/239))
+- Rewrite the strategy examples and revise the API reference ([#242](https://github.com/scikit-hep/hypothesis-awkward/pull/242))
+- Show composite strategies' signatures as they are called ([#243](https://github.com/scikit-hep/hypothesis-awkward/pull/243))
+
+### Refactoring
+
+- Add `categorical_from_contents` ([#233](https://github.com/scikit-hep/hypothesis-awkward/pull/233))
+- Replace `Optional[X]` with `X | None` in annotations ([#244](https://github.com/scikit-hep/hypothesis-awkward/pull/244))
+
+### Testing
+
+- Use `FIND_RARE` for `test_draw_permutation` ([#212](https://github.com/scikit-hep/hypothesis-awkward/pull/212))
+- Move list-type content tests onto the kwargs template ([#217](https://github.com/scikit-hep/hypothesis-awkward/pull/217))
+- Move option-type content tests onto the kwargs template ([#218](https://github.com/scikit-hep/hypothesis-awkward/pull/218))
+- Move selector content tests onto the kwargs template ([#219](https://github.com/scikit-hep/hypothesis-awkward/pull/219))
+- Move leaf content tests onto the kwargs template ([#220](https://github.com/scikit-hep/hypothesis-awkward/pull/220))
+- Move index helper tests onto the kwargs template ([#221](https://github.com/scikit-hep/hypothesis-awkward/pull/221))
+- Move remaining kwargs tests onto the template ([#222](https://github.com/scikit-hep/hypothesis-awkward/pull/222))
+- Remove stale `xfail` from `list_offset_array` shrink test ([#224](https://github.com/scikit-hep/hypothesis-awkward/pull/224))
+
+### Build & CI
+
+- Bump astral-sh/setup-uv from 10.3.2 to 10.3.3 ([#215](https://github.com/scikit-hep/hypothesis-awkward/pull/215))
+- Bump hypothesis from 6.170.9 to 6.170.14 in /.github-deps/latest ([#216](https://github.com/scikit-hep/hypothesis-awkward/pull/216))
+
+### Reverted
+
+- Shrink `categorical_contents` to valid categories ([#232](https://github.com/scikit-hep/hypothesis-awkward/pull/232))
+
+### Meta
+
+- Document drawing related options after a drawn value
+
+
 ## [0.21.0] - 2026-10-27
 
 ### Bug Fixes
