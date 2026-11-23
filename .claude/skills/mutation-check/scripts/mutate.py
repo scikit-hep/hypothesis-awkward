@@ -14,6 +14,11 @@ Any PYTEST_ARG, such as a test module, is passed to both runs of pytest, which
 otherwise run the whole suite. The tests run with the Python that runs this
 script, so run it with the project's virtual environment.
 
+Before changing FILE, the script saves the working tree, untracked files
+included, as a git tree, without changing the branch, HEAD, or the index, and
+prints its ID. After restoring FILE, it checks FILE against the tree. If a run is
+killed before it restores FILE, restore it with the printed command.
+
 Bytecode is neither written nor reused: a mutant with the same length as the
 original, restored within the same second, would otherwise leave a cached
 .pyc that Python still considers valid.
@@ -24,9 +29,35 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import tempfile
 
 _CACHE_ROOTS = ('src', 'tests')
 _TESTS_FAILED = 1  # pytest's exit status when some tests failed
+
+
+def _snapshot() -> str:
+    """Save the working tree as a git tree and return its ID."""
+    with tempfile.TemporaryDirectory() as tmp:
+        env = dict(os.environ, GIT_INDEX_FILE=os.path.join(tmp, 'index'))
+
+        def git(*args: str) -> str:
+            return subprocess.run(
+                ['git', *args], env=env, capture_output=True, text=True, check=True
+            ).stdout.strip()
+
+        git('read-tree', 'HEAD')
+        git('add', '-A')
+        return git('write-tree')
+
+
+def _snapshot_text(snapshot: str, path: pathlib.Path) -> str:
+    """Return the content of `path` in the tree `snapshot`."""
+    return subprocess.run(
+        ['git', 'show', f'{snapshot}:{path.as_posix()}'],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
 
 
 def _clear_pycache() -> None:
@@ -83,7 +114,19 @@ def main(argv: list[str]) -> int:
         print(f'OLD must occur exactly once in {path}')
         return 2
 
+    snapshot = _snapshot()
+    print(f'--- snapshot: {snapshot}')
+    # Flush, so that the command is printed even if the run is killed.
+    print(
+        f'    if killed, restore with: git restore --source={snapshot} -- {path}',
+        flush=True,
+    )
+
     status = _run_mutant(path, original, original.replace(old, new), args)
+
+    if path.read_text() != _snapshot_text(snapshot, path):
+        print(f'FILE NOT RESTORED: {path} differs from the snapshot')
+        return 1
 
     restored = _run_pytest(args)
     print('--- restored:')
