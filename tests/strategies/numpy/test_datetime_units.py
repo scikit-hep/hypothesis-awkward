@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pytest
 from hypothesis import find, given
@@ -16,16 +18,17 @@ def test_properties(data: st.DataObject) -> None:
     # Call the test subject
     result = data.draw(datetime_units(), label='result')
 
-    assert isinstance(result, str)
+    # Assert the unit has no multiplier.
+    assert re.fullmatch(r'[A-Za-z]+', result)
 
     # Assert that NumPy and Awkward Array accept the unit for both kinds.
     for kind in ('datetime64', 'timedelta64'):
         dtype = np.dtype(f'{kind}[{result}]')
         ak.from_numpy(np.array([], dtype=dtype))
 
-        # Assert the multiplier is at least 1. NumPy also accepts 0.
+        # Assert the multiplier is 1.
         _, count = np.datetime_data(dtype)
-        assert count >= 1
+        assert count == 1
 
 
 @pytest.mark.parametrize('unit', ALL_BASE_UNITS)
