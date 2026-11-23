@@ -20,10 +20,9 @@ easy change. How to write the tests themselves is in `testing-patterns.md`.
 2. **Green.** Write the minimum code that makes the test pass, and run the whole
    suite, including the doctests in docstrings and Markdown files.
 3. **Refactor**, then run `mypy src tests` and `ruff check src tests`.
-4. **Mutation check.** Run `python -I scripts/mutate.py FILE OLD NEW`, which
-   must exit 0: the change must make some test fail, and the restored code must
-   pass. A mutation that survives gets a stronger test in this step, not in a
-   refactor.
+4. **Mutation check.** Run the `mutation-check` skill, whose script must exit 0:
+   the change must make some test fail, and the restored code must pass. A
+   mutation that survives gets a stronger test in this step, not in a refactor.
 5. **Commit**, only while the suite passes, one commit per behavior. When to
    stage and commit follows the git rules: only when the user asks.
 
