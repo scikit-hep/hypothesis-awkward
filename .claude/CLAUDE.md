@@ -45,11 +45,12 @@ pytest tests/strategies/numpy/test_from_numpy.py::test_from_numpy -vv
 mypy src tests
 ruff check src tests
 ruff format src tests
-python -I scripts/mutate.py FILE OLD NEW
+python -I scripts/mutate.py FILE OLD NEW [PYTEST_ARG ...]
 ```
 
 `mutate.py` checks that the tests catch a deliberate change to the code; see
-`.claude/rules/development-cycle.md`.
+`.claude/rules/development-cycle.md`. Pass a test module as `PYTEST_ARG` to run
+only that module instead of the whole suite.
 
 ### Bootstrapping a new linked worktree
 
