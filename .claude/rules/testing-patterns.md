@@ -369,3 +369,17 @@ Full example (pinned to v0.19.0 so the line numbers stay accurate):
   above.
 - Unlike the `xfail` pattern, there is no automatic signal when the bug is fixed
   — revisit the predicate (and its branch) when the linked issue closes.
+
+## 7. Example tests and oracles
+
+- Add example tests for known traps alongside the property tests. A general
+  strategy can miss a narrow class of inputs: for example, NumPy normalizes
+  `datetime64[1m]` to `datetime64[m]`, and `datetime64[1000ms]` compares equal
+  to `datetime64[s]` while keeping its own name. When a property test should
+  cover such a class, draw it from a targeted strategy, and confirm with a
+  mutation (`development-cycle.md`, step 4) that the test catches a change that
+  breaks it.
+- Compute expected values with an independent oracle, never with the logic of
+  the code under test. Use NumPy or Awkward Array to parse or convert a value
+  (`np.dtype()`, `np.datetime_data()`, `dtype_to_primitive()`), not a copy of
+  the strategy's own string building.

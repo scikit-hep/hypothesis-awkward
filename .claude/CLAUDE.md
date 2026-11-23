@@ -45,7 +45,11 @@ pytest tests/strategies/numpy/test_from_numpy.py::test_from_numpy -vv
 mypy src tests
 ruff check src tests
 ruff format src tests
+python -I scripts/mutate.py FILE OLD NEW
 ```
+
+`mutate.py` checks that the tests catch a deliberate change to the code; see
+`.claude/rules/development-cycle.md`.
 
 ### Bootstrapping a new linked worktree
 
