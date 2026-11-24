@@ -5,7 +5,9 @@ from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
 
-def numpy_array_elements(dtype: np.dtype, *, allow_nan: bool) -> st.SearchStrategy[Any]:
+def numpy_array_elements(
+    dtype: np.dtype, *, allow_nan: bool = True
+) -> st.SearchStrategy[Any]:
     """Strategy for elements of NumPy arrays of `dtype`, one field at a time.
 
     Like `st_np.from_dtype()`, but every drawn scalar is hashable.
