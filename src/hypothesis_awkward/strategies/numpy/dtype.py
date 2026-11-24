@@ -2,37 +2,45 @@ import numpy as np
 from hypothesis import strategies as st
 from hypothesis.extra import numpy as st_np
 
-from hypothesis_awkward._util import (
-    SUPPORTED_DTYPE_NAMES,
-    SUPPORTED_DTYPES,
-    n_scalars_in,
-)
+from hypothesis_awkward._util import n_scalars_in
 
-# TODO: Draw datetime and timedelta units with multipliers, e.g., `datetime64[10m]`, in
-# `supported_dtype_names()` and `supported_dtypes()`, and update their docstrings.
+from .datetime_unit import datetime_units
+
+# Within each kind, the dtype with a corresponding Python built-in type comes first.
+SUPPORTED_INT_DTYPE_NAMES = ('int64', 'int8', 'int16', 'int32')
+SUPPORTED_UINT_DTYPE_NAMES = ('uint8', 'uint16', 'uint32', 'uint64')
+SUPPORTED_FLOAT_DTYPE_NAMES = ('float64', 'float16', 'float32')
+SUPPORTED_COMPLEX_DTYPE_NAMES = ('complex128', 'complex64')
 
 
 def supported_dtype_names() -> st.SearchStrategy[str]:
     """Strategy for names of NumPy dtypes supported by Awkward Array.
 
-    Datetime and timedelta dtypes are drawn with single units only, e.g.,
-    `datetime64[m]`, not with multiples such as `datetime64[10m]`, which Awkward Array
-    also supports.
+    Datetime and timedelta dtypes are drawn with units, e.g., `datetime64[m]`, and
+    multiples of units, e.g., `datetime64[10m]`.
 
     Examples
     --------
     >>> supported_dtype_names().example()
     '...'
     """
-    return st.sampled_from(SUPPORTED_DTYPE_NAMES)
+    units = datetime_units()
+    return st.one_of(
+        st.just('bool'),
+        st.sampled_from(SUPPORTED_INT_DTYPE_NAMES),
+        st.sampled_from(SUPPORTED_UINT_DTYPE_NAMES),
+        st.sampled_from(SUPPORTED_FLOAT_DTYPE_NAMES),
+        st.sampled_from(SUPPORTED_COMPLEX_DTYPE_NAMES),
+        units.map(lambda u: f'datetime64[{u}]'),
+        units.map(lambda u: f'timedelta64[{u}]'),
+    )
 
 
 def supported_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for NumPy dtypes supported by Awkward Array.
 
-    Datetime and timedelta dtypes are drawn with single units only, e.g.,
-    `datetime64[m]`, not with multiples such as `datetime64[10m]`, which Awkward Array
-    also supports.
+    Datetime and timedelta dtypes are drawn with units, e.g., `datetime64[m]`, and
+    multiples of units, e.g., `datetime64[10m]`.
 
     Examples
     --------
@@ -48,7 +56,7 @@ def supported_dtypes() -> st.SearchStrategy[np.dtype]:
     ...     assert ak.contents.NumpyArray(np.zeros(3, dtype=d)).dtype == d
     >>> test_numpy_array()
     """
-    return st.sampled_from(SUPPORTED_DTYPES)
+    return supported_dtype_names().map(np.dtype)
 
 
 def numpy_dtypes(

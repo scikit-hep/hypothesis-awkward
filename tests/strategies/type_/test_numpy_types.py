@@ -61,7 +61,8 @@ def test_properties(data: st.DataObject) -> None:
 
     match dtypes:
         case None:
-            assert result.primitive in st_ak.numpy.dtype.SUPPORTED_DTYPE_NAMES
+            dtype = np.dtype(result.primitive)
+            ak.from_numpy(np.array([], dtype=dtype))
             if not allow_datetime:
                 assert not result.primitive.startswith('datetime64')
                 assert not result.primitive.startswith('timedelta64')
