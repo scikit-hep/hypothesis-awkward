@@ -100,6 +100,18 @@ def numpy_dtypes(
         dtype = st.just(dtype)
     if not allow_array:
         return dtype
-    return st_np.array_dtypes(
+    array_dtypes = st_np.array_dtypes(
         subtype_strategy=dtype, max_size=max_size, allow_subarrays=True
     ).filter(lambda d: n_scalars_in(d) <= max_size)
+
+    @st.composite
+    def _dtypes(draw: st.DrawFn) -> np.dtype:
+        # Draw a boolean to choose between simple and array dtypes. With
+        # `st.one_of(dtype, array_dtypes)`, array dtypes would be drawn rarely:
+        # `st.one_of()` flattens the branches of `supported_dtypes()`, one per kind,
+        # and array dtypes would be one branch among them.
+        if draw(st.booleans()):
+            return draw(array_dtypes)
+        return draw(dtype)
+
+    return _dtypes()
