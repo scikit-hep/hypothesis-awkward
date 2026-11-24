@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from hypothesis import find, given
 
 import awkward as ak
@@ -16,3 +17,13 @@ def test_shrink_to_bool() -> None:
     """Assert that `supported_dtypes()` shrinks to `bool`."""
     result = find(st_ak.numpy.supported_dtypes(), lambda _: True, settings=FIND)
     assert result == np.dtype('bool')
+
+
+@pytest.mark.parametrize('kind', ['M', 'm'])
+def test_draw_multiples(kind: str) -> None:
+    """Assert that multiples of units, e.g., `datetime64[10m]`, can be drawn."""
+    find(
+        st_ak.numpy.supported_dtypes(),
+        lambda d: d.kind == kind and np.datetime_data(d)[1] > 1,
+        settings=FIND,
+    )

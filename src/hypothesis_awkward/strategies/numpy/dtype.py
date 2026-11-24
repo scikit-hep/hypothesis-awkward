@@ -12,23 +12,19 @@ SUPPORTED_UINT_DTYPE_NAMES = ('uint8', 'uint16', 'uint32', 'uint64')
 SUPPORTED_FLOAT_DTYPE_NAMES = ('float64', 'float16', 'float32')
 SUPPORTED_COMPLEX_DTYPE_NAMES = ('complex128', 'complex64')
 
-# TODO: Draw datetime and timedelta units with multipliers, e.g., `datetime64[10m]`, in
-# `supported_dtype_names()` and `supported_dtypes()`, and update their docstrings.
-
 
 def supported_dtype_names() -> st.SearchStrategy[str]:
     """Strategy for names of NumPy dtypes supported by Awkward Array.
 
-    Datetime and timedelta dtypes are drawn with single units only, e.g.,
-    `datetime64[m]`, not with multiples such as `datetime64[10m]`, which Awkward Array
-    also supports.
+    Datetime and timedelta dtypes are drawn with units, e.g., `datetime64[m]`, and
+    multiples of units, e.g., `datetime64[10m]`.
 
     Examples
     --------
     >>> supported_dtype_names().example()
     '...'
     """
-    units = datetime_units(allow_multiples=False)
+    units = datetime_units()
     return st.one_of(
         st.just('bool'),
         st.sampled_from(SUPPORTED_INT_DTYPE_NAMES),
@@ -43,9 +39,8 @@ def supported_dtype_names() -> st.SearchStrategy[str]:
 def supported_dtypes() -> st.SearchStrategy[np.dtype]:
     """Strategy for NumPy dtypes supported by Awkward Array.
 
-    Datetime and timedelta dtypes are drawn with single units only, e.g.,
-    `datetime64[m]`, not with multiples such as `datetime64[10m]`, which Awkward Array
-    also supports.
+    Datetime and timedelta dtypes are drawn with units, e.g., `datetime64[m]`, and
+    multiples of units, e.g., `datetime64[10m]`.
 
     Examples
     --------
