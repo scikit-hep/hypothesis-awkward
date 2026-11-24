@@ -44,8 +44,7 @@ def numpy_array_elements_kwargs(draw: st.DrawFn) -> NumpyArrayElementsKwargs:
 def test_properties(data: st.DataObject) -> None:
     """Assert the results of `numpy_array_elements()`."""
     # Draw the arguments
-    allow_array = data.draw(st.booleans(), label='allow_array')
-    dtype = data.draw(st_ak.numpy.numpy_dtypes(allow_array=allow_array), label='dtype')
+    dtype = data.draw(st_ak.numpy.numpy_dtypes(), label='dtype')
     kwargs = data.draw(numpy_array_elements_kwargs(), label='kwargs')
 
     # Call the test subject
