@@ -40,7 +40,7 @@ def numpy_array_elements(
         d = dtypes[i]
         if d.fields is not None:  # structured: one value per field
             strategies[i] = st.tuples(*(strategies[j] for j in nested[i]))
-        elif d.subdtype is not None:  # subarray field, e.g., ('<M8[10m]', (2,))
+        elif d.subdtype is not None:  # sub-array field, e.g., ('<M8[10m]', (2,))
             sub, shape = d.subdtype
             strategies[i] = st_np.arrays(sub, shape, elements=strategies[nested[i][0]])
         else:
@@ -49,7 +49,7 @@ def numpy_array_elements(
 
 
 def _nested_dtypes(dtype: np.dtype) -> list[np.dtype]:
-    """The dtypes of the fields of `dtype`, or the base dtype of a subarray `dtype`."""
+    """The dtypes of the fields of `dtype`, or the base dtype of a sub-array `dtype`."""
     if dtype.fields is not None:
         fields = dtype.fields
         names = dtype.names or ()
