@@ -167,6 +167,10 @@ def test_properties(data: st.DataObject) -> None:
     if unique:
         assert all_distinct(list(n.ravel()))
 
+    # Assert every scalar can be hashed, e.g., to be put in a set.
+    for x in _scalars(n):
+        hash(x)
+
     # Assert an Awkward Array can be created.
     a = ak.from_numpy(n)
     assert isinstance(a, ak.Array)
@@ -404,3 +408,13 @@ def test_raise_unique_dtype_too_few_values(
             lambda _: True,
             settings=FIND_NO_SHRINK,
         )
+
+
+def _scalars(n: np.ndarray) -> list[Any]:
+    """Return the scalars of `n`, field by field for a structured array.
+
+    A structured element (`np.void`) cannot be hashed, but its fields can.
+    """
+    if n.dtype.names is None:
+        return list(n.ravel())
+    return [x for name in n.dtype.names for x in _scalars(n[name])]

@@ -1,4 +1,5 @@
 import math
+from typing import Any
 
 import numpy as np
 from hypothesis import strategies as st
@@ -131,7 +132,7 @@ def numpy_arrays(
             st.builds(
                 lambda v: np.array(v, dtype=dtype),
                 st.lists(
-                    st_np.from_dtype(dtype=dtype, allow_nan=allow_nan),
+                    _st_elements(dtype, allow_nan=allow_nan),
                     min_size=min_size,
                     max_size=max_size,
                     unique=unique,
@@ -154,10 +155,37 @@ def numpy_arrays(
         st_np.arrays(
             dtype=dtype,
             shape=shape,
-            elements={'allow_nan': allow_nan},
+            elements=_st_elements(dtype, allow_nan=allow_nan),
             unique=unique,
         )
     )
+
+
+def _st_elements(dtype: np.dtype, *, allow_nan: bool) -> st.SearchStrategy[Any]:
+    """Strategy for elements of arrays of `dtype`, one field at a time.
+
+    Like `st_np.from_dtype()`, but a `datetime64` value with a multiple of a unit, e.g.,
+    `datetime64[10m]`, is bounded so that the value times the multiple fits in
+    `int64`. NumPy 2.5 raises `OverflowError` on `hash()` and `repr()` otherwise.
+    """
+    if dtype.fields is not None:  # structured: one value per field
+        fields = dtype.fields
+        names = dtype.names or ()
+        return st.tuples(
+            *(_st_elements(fields[n][0], allow_nan=allow_nan) for n in names)
+        )
+    if dtype.subdtype is not None:  # subarray field, e.g., ('<M8[10m]', (2,))
+        sub, shape = dtype.subdtype
+        return st_np.arrays(sub, shape, elements=_st_elements(sub, allow_nan=allow_nan))
+    if dtype.kind == 'M':
+        _, num = np.datetime_data(dtype)
+        if num > 1:
+            limit = (2**63 - 1) // num
+            values: st.SearchStrategy[int | str] = st.integers(-limit, limit)
+            if allow_nan:
+                values = values | st.just('NaT')
+            return values.map(lambda v: np.array(v, dtype=dtype)[()])
+    return st_np.from_dtype(dtype, allow_nan=allow_nan)
 
 
 def _n_distinct_values(d: np.dtype) -> float:
