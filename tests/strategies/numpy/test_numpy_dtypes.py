@@ -1,13 +1,14 @@
 from typing import TypedDict, cast
 
 import numpy as np
-from hypothesis import given
+from hypothesis import find, given
 from hypothesis import strategies as st
 
 import awkward as ak
 from hypothesis_awkward import strategies as st_ak
 from hypothesis_awkward._util import n_scalars_in, simple_dtype_kinds_in
 from hypothesis_awkward._util import safe_compare as sc
+from tests.find_settings import FIND
 from tests.funcs import assert_kwargs_match_signature
 
 
@@ -69,3 +70,19 @@ def test_properties(data: st.DataObject) -> None:
 
     # Assert an Awkward Array can be created.
     ak.from_numpy(np.array([], dtype=result))
+
+
+def test_draw_simple() -> None:
+    """Assert that simple dtypes can be drawn by default."""
+    find(st_ak.numpy.numpy_dtypes(), lambda d: d.names is None, settings=FIND)
+
+
+def test_draw_array() -> None:
+    """Assert that array dtypes can be drawn by default."""
+    find(st_ak.numpy.numpy_dtypes(), lambda d: d.names is not None, settings=FIND)
+
+
+def test_shrink_to_bool() -> None:
+    """Assert that `numpy_dtypes()` shrinks to the simple dtype `bool`."""
+    result = find(st_ak.numpy.numpy_dtypes(), lambda _: True, settings=FIND)
+    assert result == np.dtype('bool')

@@ -38,7 +38,11 @@ that cycle's red.
    the change must make some test fail, and the restored code must pass. A
    mutation that survives gets a stronger test in this step, not in a refactor.
    A module-level `assert` is part of the code, not a test. A mutation it
-   catches is invalid; choose one the tests must catch.
+   catches is invalid; choose one the tests must catch. Do not choose a mutation
+   for its effect on shrinking; such a mutation is often equivalent, i.e., it
+   does not change what a failure shrinks to. A shrink test is checked by its
+   red step; one that protects existing behavior, with no red step, is checked
+   by reading it against the code.
 5. **Commit**, only while the suite passes, one commit per behavior. Starting a
    cycle authorizes its commits on a development branch; on a production branch
    (`main`), the git rules apply: show the message and wait.
