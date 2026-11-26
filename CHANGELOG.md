@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.23.0] - 2026-11-26
+
+### Features
+
+- Draw multiples of datetime units in `supported_dtypes()` ([#253](https://github.com/scikit-hep/hypothesis-awkward/pull/253))
+
+### Bug Fixes
+
+- Draw simple dtypes by default in `numpy_dtypes()` ([#255](https://github.com/scikit-hep/hypothesis-awkward/pull/255))
+- Cap datetime unit multipliers at 999 in `supported_dtypes()` ([#256](https://github.com/scikit-hep/hypothesis-awkward/pull/256))
+
+### Refactoring
+
+- Add private `datetime_units()` strategy ([#252](https://github.com/scikit-hep/hypothesis-awkward/pull/252))
+
+### Testing
+
+- Split dtype strategy tests into one module per strategy ([#250](https://github.com/scikit-hep/hypothesis-awkward/pull/250))
+
+### Build & CI
+
+- Bump awkward from 2.14.0 to 2.15.0 in /.github-deps/latest ([#246](https://github.com/scikit-hep/hypothesis-awkward/pull/246))
+- Bump awkward from 2.15.0 to 2.15.1 in /.github-deps/latest ([#248](https://github.com/scikit-hep/hypothesis-awkward/pull/248))
+- Bump astral-sh/setup-uv from 10.3.3 to 10.4.0 ([#247](https://github.com/scikit-hep/hypothesis-awkward/pull/247))
+- Account for the start delay in the nightly test schedule ([#254](https://github.com/scikit-hep/hypothesis-awkward/pull/254))
+
+### Meta
+
+- Add a development-cycle rule
+- Add a mutation-check skill
+- Update the development cycle and snapshot files in mutate.py
+
+
 ## [0.22.0] - 2026-11-09
 
 ### Features
