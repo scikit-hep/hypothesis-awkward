@@ -20,7 +20,12 @@ def datetime_units(*, allow_multiples: bool = True) -> st.SearchStrategy[str]:
     base_units = st.sampled_from(SORTED_BASE_UNITS)
     if not allow_multiples:
         return base_units
-    multipliers = st.integers(min_value=1, max_value=2**31 - 1)
+    # TODO: Restore `max_value=2**31 - 1` when Awkward Array fixes the cache.
+    # Up to 999, no two units make equal dtypes with different names, e.g.,
+    # `1000ps` and `ns`. Such dtypes share or corrupt the entries of the cache of
+    # Awkward Array's `dtype_to_primitive()`.
+    # https://github.com/scikit-hep/awkward/issues/4581
+    multipliers = st.integers(min_value=1, max_value=999)
     multiples = st.builds(lambda n, u: f'{n}{u}', multipliers, base_units)
     return st.one_of(base_units, multiples)
 

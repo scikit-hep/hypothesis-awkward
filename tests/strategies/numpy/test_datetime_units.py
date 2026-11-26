@@ -81,7 +81,10 @@ def test_draw_multiples() -> None:
     find(datetime_units(), lambda u: _multiplier(u) > 1, settings=FIND)
 
 
-def test_draw_max_multiplier() -> None:
+# TODO: Unskip when the cap in `datetime_units()` is removed.
+# https://github.com/scikit-hep/awkward/issues/4581
+@pytest.mark.skip(reason='multipliers are capped at 999 until awkward#4581 is fixed')
+def test_draw_max_multiplier() -> None:  # pragma: no cover
     """Assert that the largest multiplier NumPy accepts can be drawn."""
     find(datetime_units(), lambda u: _multiplier(u) == 2**31 - 1, settings=FIND)
 
